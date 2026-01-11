@@ -47,17 +47,17 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 2 – Layout en React
+## ✅ Fase 2 – Layout en React
 
 ### Tareas
 
-- Pasar el HTML a JSX
-- Crear componentes visuales:
-  - Header
-  - Panel de entrada
-  - Panel de salida
-  - Toolbar
-  - JSONPath input
+- ✅ Pasar el HTML a JSX
+- ✅ Crear componentes visuales:
+  - ✅ Header
+  - ✅ Panel de entrada
+  - ✅ Panel de salida
+  - ✅ Toolbar
+  - ✅ JSONPath input
 
 ### Reglas
 
@@ -220,7 +220,7 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 ## ✅ Estado del roadmap
 
 - [x] Fase 1 – Bootstrap
-- [ ] Fase 2 – Layout
+- [x] Fase 2 – Layout
 - [ ] Fase 3 – Monaco
 - [ ] Fase 4 – Validación
 - [ ] Fase 5 – Formatear / Minificar
