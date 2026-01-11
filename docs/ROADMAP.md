@@ -16,7 +16,7 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 0 – Base y referencia
+## ✅ Fase 0 – Base y referencia
 
 **Estado actual**
 
@@ -31,19 +31,19 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 1 – Bootstrap del proyecto
+## ✅ Fase 1 – Bootstrap del proyecto
 
 ### Tareas
 
-- Crear proyecto con Vite + React + TypeScript
-- Configurar Tailwind CSS
-- Configurar estructura base de carpetas
+- ✅ Crear proyecto con Vite + React + TypeScript
+- ✅ Configurar Tailwind CSS
+- ✅ Configurar estructura base de carpetas
 
 ### Resultado
 
-- App levanta en local
-- Tailwind funcionando
-- Sin lógica todavía
+- ✅ App levanta en local
+- ✅ Tailwind funcionando
+- ✅ Sin lógica todavía
 
 ---
 
@@ -219,7 +219,7 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ## ✅ Estado del roadmap
 
-- [ ] Fase 1 – Bootstrap
+- [x] Fase 1 – Bootstrap
 - [ ] Fase 2 – Layout
 - [ ] Fase 3 – Monaco
 - [ ] Fase 4 – Validación
