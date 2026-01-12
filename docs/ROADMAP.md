@@ -142,21 +142,23 @@ Los botones de copiar y limpiar existen pero no tienen funcionalidad aún.
 
 ---
 
-## ⚠️ Fase 8 – Manejo de errores y UX
+## ✅ Fase 8 – Manejo de errores y UX
 
 ### Tareas
 
-- ⚠️ Centralizar errores (parcial - usando Result type)
+- ✅ Centralizar errores usando Result type
 - ✅ Mensajes claros:
-  - ✅ JSON inválido (implementado)
-  - ✅ Filtro inválido (implementado)
-  - ⚠️ Resultado vacío (falta)
-- ⚠️ Estados vacíos (parcialmente implementado)
+  - ✅ JSON inválido
+  - ✅ Filtro inválido
+  - ✅ Resultado vacío
+  - ✅ Operaciones sin input
+- ✅ Estados vacíos con feedback apropiado
 
-### Estado
+### Resultado
 
-La mayoría de errores están manejados con el patrón Result.
-Falta mejorar mensajes de estados vacíos y centralizar mejor los errores.
+Todos los handlers validan entrada y muestran mensajes claros.
+Los errores se muestran en el footer del panel de resultado.
+Estados vacíos tienen placeholders descriptivos.
 
 ---
 

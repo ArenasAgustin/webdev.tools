@@ -13,6 +13,7 @@ function App() {
   const [inputJson, setInputJson] = useState("");
   const [outputJson, setOutputJson] = useState("");
   const [jsonPathExpression, setJsonPathExpression] = useState("");
+  const [outputError, setOutputError] = useState<string | null>(null);
 
   // Derive validation state from input - no effects needed
   const validation = useMemo(() => {
@@ -30,16 +31,36 @@ function App() {
 
   // Handler functions
   const handleFormat = () => {
+    if (!inputJson.trim()) {
+      setOutputError("No hay JSON para formatear");
+      setOutputJson("");
+      return;
+    }
+
     const result = formatJson(inputJson);
     if (result.ok) {
       setOutputJson(result.value);
+      setOutputError(null);
+    } else {
+      setOutputError(result.error.message);
+      setOutputJson("");
     }
   };
 
   const handleMinify = () => {
+    if (!inputJson.trim()) {
+      setOutputError("No hay JSON para minificar");
+      setOutputJson("");
+      return;
+    }
+
     const result = minifyJson(inputJson);
     if (result.ok) {
       setOutputJson(result.value);
+      setOutputError(null);
+    } else {
+      setOutputError(result.error.message);
+      setOutputJson("");
     }
   };
 
@@ -49,12 +70,34 @@ function App() {
   };
 
   const handleFilter = () => {
+    if (!inputJson.trim()) {
+      setOutputError("No hay JSON para filtrar");
+      setOutputJson("");
+      return;
+    }
+
+    if (!jsonPathExpression.trim()) {
+      setOutputError("Ingresa una expresión JSONPath");
+      setOutputJson("");
+      return;
+    }
+
     const result = applyJsonPath(inputJson, jsonPathExpression);
     if (result.ok) {
-      setOutputJson(result.value);
+      if (
+        !result.value.trim() ||
+        result.value === "[]" ||
+        result.value === "{}"
+      ) {
+        setOutputError("El filtro no devolvió resultados");
+        setOutputJson(result.value);
+      } else {
+        setOutputJson(result.value);
+        setOutputError(null);
+      }
     } else {
-      // Show error in output
-      setOutputJson(`Error: ${result.error.message}`);
+      setOutputError(result.error.message);
+      setOutputJson("");
     }
   };
 
@@ -124,9 +167,19 @@ function App() {
               </>
             }
             footer={
-              <div className="text-gray-400">
-                Líneas: {outputJson.split("\n").length} | Caracteres:{" "}
-                {outputJson.length}
+              <div className="text-xs h-4">
+                {outputError ? (
+                  <span className="text-red-400 flex items-center gap-1">
+                    <i className="fas fa-exclamation-circle"></i> {outputError}
+                  </span>
+                ) : outputJson.trim() === "" ? (
+                  <span className="text-gray-400">Esperando operación...</span>
+                ) : (
+                  <span className="text-gray-400">
+                    Líneas: {outputJson.split("\n").length} | Caracteres:{" "}
+                    {outputJson.length}
+                  </span>
+                )}
               </div>
             }
           >
