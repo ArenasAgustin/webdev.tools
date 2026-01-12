@@ -82,20 +82,20 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 4 – Validación de JSON
+## ✅ Fase 4 – Validación de JSON
 
 ### Tareas
 
-- Parsear JSON con `JSON.parse`
-- Manejar estado:
-  - JSON válido
-  - Error de parseo
-- Mostrar feedback visual
+- ✅ Parsear JSON con `JSON.parse`
+- ✅ Manejar estado:
+  - ✅ JSON válido
+  - ✅ Error de parseo
+- ✅ Mostrar feedback visual
 
 ### Resultado
 
-- Validación en tiempo real
-- UX clara de error / ok
+- ✅ Validación en tiempo real
+- ✅ UX clara de error / ok
 
 ---
 
@@ -222,7 +222,7 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 - [x] Fase 1 – Bootstrap
 - [x] Fase 2 – Layout
 - [x] Fase 3 – Monaco
-- [ ] Fase 4 – Validación
+- [x] Fase 4 – Validación
 - [ ] Fase 5 – Formatear / Minificar
 - [ ] Fase 6 – Output Editor
 - [ ] Fase 7 – JSONPath

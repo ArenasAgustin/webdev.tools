@@ -1,13 +1,29 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/layout/Header";
 import { Panel } from "@/components/layout/Panel";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { Button } from "@/components/common/Button";
 import { CodeEditor } from "@/components/editor/CodeEditor";
+import { parseJson } from "@/services/json/parse";
+import { type JsonError } from "@/types/common";
 
 function App() {
   const [inputJson, setInputJson] = useState("");
   const [outputJson] = useState("");
+
+  // Derive validation state from input - no effects needed
+  const validation = useMemo(() => {
+    if (!inputJson.trim()) {
+      return { isValid: false, error: null };
+    }
+
+    const result = parseJson(inputJson);
+    if (result.ok) {
+      return { isValid: true, error: null };
+    } else {
+      return { isValid: false, error: result.error };
+    }
+  }, [inputJson]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-sm">
@@ -34,7 +50,22 @@ function App() {
                 </Button>
               </>
             }
-            footer={<div className="text-gray-400">Estado: Listo</div>}
+            footer={
+              <div className="text-xs h-4">
+                {inputJson.trim() === "" ? (
+                  <span className="text-gray-400">Esperando JSON...</span>
+                ) : validation.isValid ? (
+                  <span className="text-green-400 flex items-center gap-1">
+                    <i className="fas fa-check-circle"></i> JSON válido
+                  </span>
+                ) : (
+                  <span className="text-red-400 flex items-center gap-1">
+                    <i className="fas fa-exclamation-circle"></i>{" "}
+                    {validation.error?.message || "JSON inválido"}
+                  </span>
+                )}
+              </div>
+            }
           >
             <CodeEditor
               value={inputJson}
