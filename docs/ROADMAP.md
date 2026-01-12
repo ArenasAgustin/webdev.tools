@@ -67,18 +67,18 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 3 – Integración de Monaco Editor
+## ✅ Fase 3 – Integración de Monaco Editor
 
 ### Tareas
 
-- Reemplazar `<textarea>` por Monaco Editor
-- Crear componente `CodeEditor`
-- Manejar estado de input JSON
+- ✅ Reemplazar `<textarea>` por Monaco Editor
+- ✅ Crear componente `CodeEditor`
+- ✅ Manejar estado de input JSON
 
 ### Resultado
 
-- Editor JSON con syntax highlight
-- Estado controlado desde React
+- ✅ Editor JSON con syntax highlight
+- ✅ Estado controlado desde React
 
 ---
 
@@ -221,7 +221,7 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 - [x] Fase 1 – Bootstrap
 - [x] Fase 2 – Layout
-- [ ] Fase 3 – Monaco
+- [x] Fase 3 – Monaco
 - [ ] Fase 4 – Validación
 - [ ] Fase 5 – Formatear / Minificar
 - [ ] Fase 6 – Output Editor

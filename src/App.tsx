@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Panel } from "@/components/layout/Panel";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { Button } from "@/components/common/Button";
+import { CodeEditor } from "@/components/editor/CodeEditor";
 
 function App() {
+  const [inputJson, setInputJson] = useState("");
+  const [outputJson] = useState("");
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-sm">
       <div className="container mx-auto px-4 py-4 max-w-7xl">
@@ -18,7 +23,7 @@ function App() {
             iconColor="blue-400"
             actions={
               <>
-                <Button variant="danger">
+                <Button variant="danger" onClick={() => setInputJson("")}>
                   <i className="fas fa-trash"></i> Limpiar
                 </Button>
                 <Button variant="success">
@@ -31,8 +36,10 @@ function App() {
             }
             footer={<div className="text-gray-400">Estado: Listo</div>}
           >
-            <textarea
-              className="w-full h-64 p-3 bg-black/40 text-white rounded-lg resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-inner border border-white/10 text-xs font-mono"
+            <CodeEditor
+              value={inputJson}
+              language="json"
+              onChange={setInputJson}
               placeholder="Pega tu JSON aquí..."
             />
           </Panel>
@@ -53,12 +60,18 @@ function App() {
               </>
             }
             footer={
-              <div className="text-gray-400">Líneas: 0 | Caracteres: 0</div>
+              <div className="text-gray-400">
+                Líneas: {outputJson.split("\n").length} | Caracteres:{" "}
+                {outputJson.length}
+              </div>
             }
           >
-            <div className="w-full h-64 p-3 bg-black/40 text-white rounded-lg overflow-y-auto shadow-inner border border-white/10 text-xs font-mono whitespace-pre-wrap">
-              {/* Output will be displayed here */}
-            </div>
+            <CodeEditor
+              value={outputJson}
+              language="json"
+              readOnly={true}
+              placeholder="El resultado se mostrará aquí..."
+            />
           </Panel>
         </main>
 
