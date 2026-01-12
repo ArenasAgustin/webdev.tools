@@ -116,13 +116,18 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 6 – Editor de Resultado
+## ✅ Fase 6 – Editor de Resultado
 
 ### Tareas
 
-- Segundo Monaco Editor en modo readonly
-- Mostrar output JSON
-- Acciones: copiar, limpiar
+- ✅ Segundo Monaco Editor en modo readonly
+- ✅ Mostrar output JSON
+- ⚠️ Acciones: copiar, limpiar (botones sin implementar)
+
+### Nota
+
+El editor de resultado ya está implementado desde la Fase 3.
+Los botones de copiar y limpiar existen pero no tienen funcionalidad aún.
 
 ---
 
@@ -137,51 +142,66 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 8 – Manejo de errores y UX
+## ⚠️ Fase 8 – Manejo de errores y UX
 
 ### Tareas
 
-- Centralizar errores
-- Mensajes claros:
-  - JSON inválido
-  - Filtro inválido
-  - Resultado vacío
-- Estados vacíos (empty states)
+- ⚠️ Centralizar errores (parcial - usando Result type)
+- ✅ Mensajes claros:
+  - ✅ JSON inválido (implementado)
+  - ✅ Filtro inválido (implementado)
+  - ⚠️ Resultado vacío (falta)
+- ⚠️ Estados vacíos (parcialmente implementado)
+
+### Estado
+
+La mayoría de errores están manejados con el patrón Result.
+Falta mejorar mensajes de estados vacíos y centralizar mejor los errores.
 
 ---
 
-## 🟢 Fase 9 – Refactor de arquitectura
+## ⚠️ Fase 9 – Refactor de arquitectura
 
 ### Tareas
 
-- Extraer lógica a `services/`
-- Crear hooks:
-  - `useJsonParser`
-  - `useJsonFormatter`
-  - `useJsonPath`
-- Limpiar componentes UI
+- ✅ Extraer lógica a `services/` (completado)
+- ❌ Crear hooks:
+  - ❌ `useJsonParser`
+  - ❌ `useJsonFormatter`
+  - ❌ `useJsonPath`
+- ✅ Limpiar componentes UI (completado)
 
 ### Objetivo
 
-- Separar UI de lógica
-- Facilitar testing y escalabilidad
+- ✅ Separar UI de lógica (completado)
+- ⚠️ Facilitar testing y escalabilidad (parcial)
+
+### Estado
+
+La arquitectura está bien separada. Servicios puros en `services/json/`.
+Hooks personalizados no son necesarios por ahora, la lógica funciona bien.
 
 ---
 
-## 🟢 Fase 10 – Preparar escalabilidad
+## ⚠️ Fase 10 – Preparar escalabilidad
 
 ### Tareas
 
-- Crear carpeta `playgrounds/json`
-- Encapsular todo el JSON Playground
-- Definir interfaz base para playgrounds
+- ✅ Crear carpeta `playgrounds/json` (estructura existe)
+- ❌ Encapsular todo el JSON Playground
+- ❌ Definir interfaz base para playgrounds
 
 ### Resultado
 
-- Base lista para:
+- ⚠️ Base lista para:
   - JS Playground
   - HTML/CSS tools
   - PHP sandbox
+
+### Estado
+
+La estructura de carpetas existe pero el playground no está encapsulado.
+Todo el código JSON está en App.tsx, no en playgrounds/json/.
 
 ---
 
@@ -219,14 +239,14 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ## ✅ Estado del roadmap
 
-- [x] Fase 1 – Bootstrap
-- [x] Fase 2 – Layout
-- [x] Fase 3 – Monaco
-- [x] Fase 4 – Validación
-- [x] Fase 5 – Formatear / Minificar
-- [ ] Fase 6 – Output Editor
-- [x] Fase 7 – JSONPath
-- [ ] Fase 8 – UX & errores
-- [ ] Fase 9 – Refactor
-- [ ] Fase 10 – Escalabilidad
-- [ ] Fase 11 – Persistencia
+- [x] Fase 1 – Bootstrap ✅ COMPLETO
+- [x] Fase 2 – Layout ✅ COMPLETO
+- [x] Fase 3 – Monaco ✅ COMPLETO
+- [x] Fase 4 – Validación ✅ COMPLETO
+- [x] Fase 5 – Formatear / Minificar ✅ COMPLETO
+- [x] Fase 6 – Output Editor ✅ COMPLETO
+- [x] Fase 7 – JSONPath ✅ COMPLETO
+- [~] Fase 8 – UX & errores ⚠️ PARCIAL
+- [~] Fase 9 – Refactor ⚠️ PARCIAL
+- [~] Fase 10 – Escalabilidad ⚠️ PARCIAL
+- [ ] Fase 11 – Persistencia ❌ PENDIENTE
