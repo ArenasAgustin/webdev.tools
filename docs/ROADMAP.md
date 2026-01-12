@@ -99,20 +99,20 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 5 – Formatear y Minificar
+## ✅ Fase 5 – Formatear y Minificar
 
 ### Tareas
 
-- Implementar servicios:
-  - `formatJson`
-  - `minifyJson`
-- Conectar botones de toolbar
-- Mostrar resultado en editor readonly
+- ✅ Implementar servicios:
+  - ✅ `formatJson`
+  - ✅ `minifyJson`
+- ✅ Conectar botones de toolbar
+- ✅ Mostrar resultado en editor readonly
 
 ### Reglas
 
-- El input nunca se modifica
-- El output siempre es derivado
+- ✅ El input nunca se modifica
+- ✅ El output siempre es derivado
 
 ---
 
@@ -223,7 +223,7 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 - [x] Fase 2 – Layout
 - [x] Fase 3 – Monaco
 - [x] Fase 4 – Validación
-- [ ] Fase 5 – Formatear / Minificar
+- [x] Fase 5 – Formatear / Minificar
 - [ ] Fase 6 – Output Editor
 - [ ] Fase 7 – JSONPath
 - [ ] Fase 8 – UX & errores

@@ -5,11 +5,12 @@ import { Toolbar } from "@/components/layout/Toolbar";
 import { Button } from "@/components/common/Button";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { parseJson } from "@/services/json/parse";
-import { type JsonError } from "@/types/common";
+import { formatJson } from "@/services/json/format";
+import { minifyJson } from "@/services/json/minify";
 
 function App() {
   const [inputJson, setInputJson] = useState("");
-  const [outputJson] = useState("");
+  const [outputJson, setOutputJson] = useState("");
 
   // Derive validation state from input - no effects needed
   const validation = useMemo(() => {
@@ -24,6 +25,31 @@ function App() {
       return { isValid: false, error: result.error };
     }
   }, [inputJson]);
+
+  // Handler functions
+  const handleFormat = () => {
+    const result = formatJson(inputJson);
+    if (result.ok) {
+      setOutputJson(result.value);
+    }
+  };
+
+  const handleMinify = () => {
+    const result = minifyJson(inputJson);
+    if (result.ok) {
+      setOutputJson(result.value);
+    }
+  };
+
+  const handleClean = () => {
+    // TODO: Implement in future phase
+    console.log("Limpiar vacíos - próximamente");
+  };
+
+  const handleFilter = () => {
+    // TODO: Implement in phase 7
+    console.log("Filtro JSONPath - próximamente");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-sm">
@@ -106,7 +132,12 @@ function App() {
           </Panel>
         </main>
 
-        <Toolbar />
+        <Toolbar
+          onFormat={handleFormat}
+          onMinify={handleMinify}
+          onClean={handleClean}
+          onFilter={handleFilter}
+        />
       </div>
     </div>
   );

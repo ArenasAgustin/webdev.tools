@@ -1,6 +1,18 @@
 import { Button } from "@/components/common/Button";
 
-    export function Toolbar() {
+interface ToolbarProps {
+  onFormat: () => void;
+  onMinify: () => void;
+  onClean: () => void;
+  onFilter: () => void;
+}
+
+export function Toolbar({
+  onFormat,
+  onMinify,
+  onClean,
+  onFilter,
+}: ToolbarProps) {
   return (
     <section className="mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/5">
       <div className="grid md:grid-cols-2 gap-6">
@@ -10,13 +22,13 @@ import { Button } from "@/components/common/Button";
             <i className="fas fa-tools text-yellow-400"></i> Herramientas
           </h3>
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="primary" size="md">
+            <Button variant="primary" size="md" onClick={onFormat}>
               <i className="fas fa-indent mr-1"></i> Formatear
             </Button>
-            <Button variant="purple" size="md">
+            <Button variant="purple" size="md" onClick={onMinify}>
               <i className="fas fa-compress mr-1"></i> Minificar
             </Button>
-            <Button variant="orange" size="md">
+            <Button variant="orange" size="md" onClick={onClean}>
               <i className="fas fa-broom mr-1"></i> Limpiar vacíos
             </Button>
           </div>
@@ -33,7 +45,7 @@ import { Button } from "@/components/common/Button";
               className="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
               placeholder="Ej: $.users[0].name"
             />
-            <Button variant="cyan" size="md">
+            <Button variant="cyan" size="md" onClick={onFilter}>
               <i className="fas fa-search"></i>
             </Button>
           </div>
