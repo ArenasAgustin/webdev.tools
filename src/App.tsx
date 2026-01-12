@@ -7,10 +7,12 @@ import { CodeEditor } from "@/components/editor/CodeEditor";
 import { parseJson } from "@/services/json/parse";
 import { formatJson } from "@/services/json/format";
 import { minifyJson } from "@/services/json/minify";
+import { applyJsonPath } from "@/services/json/jsonPath";
 
 function App() {
   const [inputJson, setInputJson] = useState("");
   const [outputJson, setOutputJson] = useState("");
+  const [jsonPathExpression, setJsonPathExpression] = useState("");
 
   // Derive validation state from input - no effects needed
   const validation = useMemo(() => {
@@ -47,8 +49,13 @@ function App() {
   };
 
   const handleFilter = () => {
-    // TODO: Implement in phase 7
-    console.log("Filtro JSONPath - próximamente");
+    const result = applyJsonPath(inputJson, jsonPathExpression);
+    if (result.ok) {
+      setOutputJson(result.value);
+    } else {
+      // Show error in output
+      setOutputJson(`Error: ${result.error.message}`);
+    }
   };
 
   return (
@@ -137,6 +144,8 @@ function App() {
           onMinify={handleMinify}
           onClean={handleClean}
           onFilter={handleFilter}
+          jsonPathValue={jsonPathExpression}
+          onJsonPathChange={setJsonPathExpression}
         />
       </div>
     </div>

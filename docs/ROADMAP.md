@@ -126,14 +126,14 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 
 ---
 
-## 🟢 Fase 7 – JSONPath (filtros)
+## ✅ Fase 7 – JSONPath (filtros)
 
 ### Tareas
 
-- Input para expresión JSONPath
-- Integrar `jsonpath-plus`
-- Mostrar resultado del filtro
-- Manejo de errores de expresión
+- ✅ Input para expresión JSONPath
+- ✅ Integrar `jsonpath-plus`
+- ✅ Mostrar resultado del filtro
+- ✅ Manejo de errores de expresión
 
 ---
 
@@ -225,7 +225,7 @@ y **JSONPath**, con una arquitectura escalable para futuros playgrounds.
 - [x] Fase 4 – Validación
 - [x] Fase 5 – Formatear / Minificar
 - [ ] Fase 6 – Output Editor
-- [ ] Fase 7 – JSONPath
+- [x] Fase 7 – JSONPath
 - [ ] Fase 8 – UX & errores
 - [ ] Fase 9 – Refactor
 - [ ] Fase 10 – Escalabilidad

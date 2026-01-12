@@ -5,6 +5,8 @@ interface ToolbarProps {
   onMinify: () => void;
   onClean: () => void;
   onFilter: () => void;
+  jsonPathValue: string;
+  onJsonPathChange: (value: string) => void;
 }
 
 export function Toolbar({
@@ -12,6 +14,8 @@ export function Toolbar({
   onMinify,
   onClean,
   onFilter,
+  jsonPathValue,
+  onJsonPathChange,
 }: ToolbarProps) {
   return (
     <section className="mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/5">
@@ -42,6 +46,8 @@ export function Toolbar({
           <div className="flex gap-2">
             <input
               type="text"
+              value={jsonPathValue}
+              onChange={(e) => onJsonPathChange(e.target.value)}
               className="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
               placeholder="Ej: $.users[0].name"
             />
