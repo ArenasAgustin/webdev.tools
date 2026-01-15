@@ -162,26 +162,29 @@ Estados vacíos tienen placeholders descriptivos.
 
 ---
 
-## ⚠️ Fase 9 – Refactor de arquitectura
+## ✅ Fase 9 – Refactor de arquitectura
 
 ### Tareas
 
 - ✅ Extraer lógica a `services/` (completado)
-- ❌ Crear hooks:
-  - ❌ `useJsonParser`
-  - ❌ `useJsonFormatter`
-  - ❌ `useJsonPath`
+- ✅ Crear hooks:
+  - ✅ `useJsonParser`
+  - ✅ `useJsonFormatter`
+  - ✅ `useJsonPath`
 - ✅ Limpiar componentes UI (completado)
 
 ### Objetivo
 
 - ✅ Separar UI de lógica (completado)
-- ⚠️ Facilitar testing y escalabilidad (parcial)
+- ✅ Facilitar testing y escalabilidad (completado)
 
-### Estado
+### Resultado
 
-La arquitectura está bien separada. Servicios puros en `services/json/`.
-Hooks personalizados no son necesarios por ahora, la lógica funciona bien.
+La arquitectura está completamente refactorizada:
+- Servicios puros en `services/json/` sin dependencias de React
+- Hooks personalizados en `hooks/` que encapsulan lógica de estado
+- Componente `App.tsx` limpio y enfocado solo en UI
+- Código altamente testeable y reutilizable
 
 ---
 

@@ -1,105 +1,24 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Panel } from "@/components/layout/Panel";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { Button } from "@/components/common/Button";
 import { CodeEditor } from "@/components/editor/CodeEditor";
-import { parseJson } from "@/services/json/parse";
-import { formatJson } from "@/services/json/format";
-import { minifyJson } from "@/services/json/minify";
-import { applyJsonPath } from "@/services/json/jsonPath";
+import { useJsonParser } from "@/hooks/useJsonParser";
+import { useJsonFormatter } from "@/hooks/useJsonFormatter";
+import { useJsonPath } from "@/hooks/useJsonPath";
 
 function App() {
   const [inputJson, setInputJson] = useState("");
-  const [outputJson, setOutputJson] = useState("");
-  const [jsonPathExpression, setJsonPathExpression] = useState("");
-  const [outputError, setOutputError] = useState<string | null>(null);
 
-  // Derive validation state from input - no effects needed
-  const validation = useMemo(() => {
-    if (!inputJson.trim()) {
-      return { isValid: false, error: null };
-    }
+  // Use custom hooks for logic encapsulation
+  const validation = useJsonParser(inputJson);
+  const formatter = useJsonFormatter();
+  const jsonPath = useJsonPath();
 
-    const result = parseJson(inputJson);
-    if (result.ok) {
-      return { isValid: true, error: null };
-    } else {
-      return { isValid: false, error: result.error };
-    }
-  }, [inputJson]);
-
-  // Handler functions
-  const handleFormat = () => {
-    if (!inputJson.trim()) {
-      setOutputError("No hay JSON para formatear");
-      setOutputJson("");
-      return;
-    }
-
-    const result = formatJson(inputJson);
-    if (result.ok) {
-      setOutputJson(result.value);
-      setOutputError(null);
-    } else {
-      setOutputError(result.error.message);
-      setOutputJson("");
-    }
-  };
-
-  const handleMinify = () => {
-    if (!inputJson.trim()) {
-      setOutputError("No hay JSON para minificar");
-      setOutputJson("");
-      return;
-    }
-
-    const result = minifyJson(inputJson);
-    if (result.ok) {
-      setOutputJson(result.value);
-      setOutputError(null);
-    } else {
-      setOutputError(result.error.message);
-      setOutputJson("");
-    }
-  };
-
-  const handleClean = () => {
-    // TODO: Implement in future phase
-    console.log("Limpiar vacíos - próximamente");
-  };
-
-  const handleFilter = () => {
-    if (!inputJson.trim()) {
-      setOutputError("No hay JSON para filtrar");
-      setOutputJson("");
-      return;
-    }
-
-    if (!jsonPathExpression.trim()) {
-      setOutputError("Ingresa una expresión JSONPath");
-      setOutputJson("");
-      return;
-    }
-
-    const result = applyJsonPath(inputJson, jsonPathExpression);
-    if (result.ok) {
-      if (
-        !result.value.trim() ||
-        result.value === "[]" ||
-        result.value === "{}"
-      ) {
-        setOutputError("El filtro no devolvió resultados");
-        setOutputJson(result.value);
-      } else {
-        setOutputJson(result.value);
-        setOutputError(null);
-      }
-    } else {
-      setOutputError(result.error.message);
-      setOutputJson("");
-    }
-  };
+  // Determine which output to show (formatter or jsonPath)
+  const outputJson = jsonPath.output || formatter.output;
+  const outputError = jsonPath.error || formatter.error;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-sm">
@@ -193,12 +112,12 @@ function App() {
         </main>
 
         <Toolbar
-          onFormat={handleFormat}
-          onMinify={handleMinify}
-          onClean={handleClean}
-          onFilter={handleFilter}
-          jsonPathValue={jsonPathExpression}
-          onJsonPathChange={setJsonPathExpression}
+          onFormat={() => formatter.format(inputJson)}
+          onMinify={() => formatter.minify(inputJson)}
+          onClean={() => formatter.clean(inputJson)}
+          onFilter={() => jsonPath.filter(inputJson)}
+          jsonPathValue={jsonPath.expression}
+          onJsonPathChange={jsonPath.setExpression}
         />
       </div>
     </div>
