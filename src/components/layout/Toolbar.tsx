@@ -18,7 +18,7 @@ export function Toolbar({
   onJsonPathChange,
 }: ToolbarProps) {
   return (
-    <section className="mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/5">
+    <section className="mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/5 col-start-1 row-start-5">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Action Buttons */}
         <div>

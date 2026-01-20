@@ -11,8 +11,9 @@ interface ButtonProps {
 const variantStyles = {
   primary:
     "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30",
-  danger: "bg-red-500/20 hover:bg-red-500/30 text-red-300",
-  success: "bg-green-500/20 hover:bg-green-500/30 text-green-300",
+  danger: "bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/30",
+  success:
+    "bg-green-500/20 hover:bg-green-500/30 text-green-300 border-green-500/30",
   purple:
     "bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/30",
   cyan: "bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/30",

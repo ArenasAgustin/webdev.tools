@@ -9,12 +9,12 @@
 
 ## Fase 2
 
-- Agregar modal para configurar herramientas
+- Corregir estilos
 
 ## Fase 3
 
-- Agregar modal con ejemplos para filtros de JSONPath
+- Agregar modal para configurar herramientas
 
 ## Fase 4
 
-- Corregir estilos
+- Agregar modal con ejemplos para filtros de JSONPath

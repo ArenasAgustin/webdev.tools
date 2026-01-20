@@ -30,7 +30,7 @@ export function Panel({
     iconColors[iconColor as keyof typeof iconColors] || iconColors["blue-400"];
 
   return (
-    <section className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5 flex flex-col">
+    <section className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5 flex flex-col min-w-0">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-white flex items-center gap-2">
           <i className={`fas fa-${icon} ${iconColorClass}`}></i>
