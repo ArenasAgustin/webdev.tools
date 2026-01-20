@@ -40,6 +40,13 @@ export function JsonPlayground() {
     jsonPath.clearOutput();
   };
 
+  const handleCopyOutput = () => {
+    const textToCopy = outputJson;
+    navigator.clipboard.writeText(textToCopy).catch((err) => {
+      console.error("Error al copiar al portapapeles: ", err);
+    });
+  };
+
   return (
     <>
       <JsonEditors
@@ -50,6 +57,7 @@ export function JsonPlayground() {
         onInputChange={setInputJson}
         onClearInput={handleClearInput}
         onLoadExample={handleLoadExample}
+        onCopyOutput={handleCopyOutput}
       />
 
       <Toolbar

@@ -2,8 +2,8 @@
 
 ## Fase 1
 
-- Agregar funcionalidad al botón de Ejemplo
-- Agregar funcionalidad al botón de Copiar
+- Agregar funcionalidad al botón de Ejemplo ✅
+- Agregar funcionalidad al botón de Copiar ✅
 - Agregar funcionalidad al botón de Limpiar vacios
 - Agregar funcionalidad al botón de Agrandar
 

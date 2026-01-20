@@ -11,6 +11,7 @@ interface JsonEditorsProps {
   onInputChange: (value: string) => void;
   onClearInput: () => void;
   onLoadExample: () => void;
+  onCopyOutput: () => void;
 }
 
 export function JsonEditors({
@@ -21,6 +22,7 @@ export function JsonEditors({
   onInputChange,
   onClearInput,
   onLoadExample,
+    onCopyOutput,
 }: JsonEditorsProps) {
   return (
     <main className="grid lg:grid-cols-2 gap-4">
@@ -74,7 +76,7 @@ export function JsonEditors({
         iconColor="green-400"
         actions={
           <>
-            <Button variant="primary">
+            <Button variant="primary" onClick={onCopyOutput}>
               <i className="fas fa-copy"></i> Copiar
             </Button>
             <Button variant="purple">
