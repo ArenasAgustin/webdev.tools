@@ -9,6 +9,7 @@ export interface PlaygroundConfig {
   icon: string;
   description: string;
   language: string;
+  example: string;
 }
 
 export interface PlaygroundFeature {

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsonEditors } from "./JsonEditors";
+import { jsonPlaygroundConfig } from "./json.config";
+import { formatJson } from "@/services/json/format";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonFormatter } from "@/hooks/useJsonFormatter";
 import { useJsonPath } from "@/hooks/useJsonPath";
@@ -27,6 +29,17 @@ export function JsonPlayground() {
     jsonPath.clearOutput();
   };
 
+  const handleLoadExample = () => {
+    const result = formatJson(jsonPlaygroundConfig.example);
+    if (result.ok) {
+      setInputJson(result.value);
+    } else {
+      setInputJson(jsonPlaygroundConfig.example);
+    }
+    formatter.clearOutput();
+    jsonPath.clearOutput();
+  };
+
   return (
     <>
       <JsonEditors
@@ -36,6 +49,7 @@ export function JsonPlayground() {
         outputError={outputError}
         onInputChange={setInputJson}
         onClearInput={handleClearInput}
+        onLoadExample={handleLoadExample}
       />
 
       <Toolbar

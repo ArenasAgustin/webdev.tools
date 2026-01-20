@@ -10,6 +10,7 @@ interface JsonEditorsProps {
   outputError: string | null;
   onInputChange: (value: string) => void;
   onClearInput: () => void;
+  onLoadExample: () => void;
 }
 
 export function JsonEditors({
@@ -19,6 +20,7 @@ export function JsonEditors({
   outputError,
   onInputChange,
   onClearInput,
+  onLoadExample,
 }: JsonEditorsProps) {
   return (
     <main className="grid lg:grid-cols-2 gap-4">
@@ -32,7 +34,7 @@ export function JsonEditors({
             <Button variant="danger" onClick={onClearInput}>
               <i className="fas fa-trash"></i> Limpiar
             </Button>
-            <Button variant="success">
+            <Button variant="success" onClick={onLoadExample}>
               <i className="fas fa-file-import"></i> Ejemplo
             </Button>
             <Button variant="purple">
