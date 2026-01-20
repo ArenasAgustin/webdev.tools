@@ -4,8 +4,8 @@
 
 - Agregar funcionalidad al botón de Ejemplo ✅
 - Agregar funcionalidad al botón de Copiar ✅
-- Agregar funcionalidad al botón de Limpiar vacios
-- Agregar funcionalidad al botón de Agrandar
+- Agregar funcionalidad al botón de Limpiar vacios ✅
+- Agregar funcionalidad al botón de Agrandar ✅
 
 ## Fase 2
 
@@ -14,3 +14,7 @@
 ## Fase 3
 
 - Agregar modal con ejemplos para filtros de JSONPath
+
+## Fase 4
+
+- Corregir estilos

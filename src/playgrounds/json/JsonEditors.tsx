@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { Button } from "@/components/common/Button";
 import { CodeEditor } from "@/components/editor/CodeEditor";
+import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
 import type { JsonValidationState } from "./json.types";
 
 interface JsonEditorsProps {
@@ -22,10 +24,34 @@ export function JsonEditors({
   onInputChange,
   onClearInput,
   onLoadExample,
-    onCopyOutput,
+  onCopyOutput,
 }: JsonEditorsProps) {
+  const [expandedEditor, setExpandedEditor] = useState<"input" | "output" | null>(
+    null
+  );
   return (
-    <main className="grid lg:grid-cols-2 gap-4">
+    <>
+      {expandedEditor === "input" && (
+        <ExpandedEditorModal
+          title="Editor de Entrada"
+          value={inputValue}
+          language="json"
+          onChange={onInputChange}
+          onClose={() => setExpandedEditor(null)}
+        />
+      )}
+
+      {expandedEditor === "output" && (
+        <ExpandedEditorModal
+          title="Editor de Resultado"
+          value={outputValue}
+          language="json"
+          readOnly={true}
+          onClose={() => setExpandedEditor(null)}
+        />
+      )}
+
+      <main className="grid lg:grid-cols-2 gap-4">
       {/* Input Panel */}
       <Panel
         title="Entrada"
@@ -39,7 +65,7 @@ export function JsonEditors({
             <Button variant="success" onClick={onLoadExample}>
               <i className="fas fa-file-import"></i> Ejemplo
             </Button>
-            <Button variant="purple">
+            <Button variant="purple" onClick={() => setExpandedEditor("input")}>
               <i className="fas fa-expand"></i>
             </Button>
           </>
@@ -79,7 +105,7 @@ export function JsonEditors({
             <Button variant="primary" onClick={onCopyOutput}>
               <i className="fas fa-copy"></i> Copiar
             </Button>
-            <Button variant="purple">
+            <Button variant="purple" onClick={() => setExpandedEditor("output")}>
               <i className="fas fa-expand"></i>
             </Button>
           </>
@@ -109,5 +135,6 @@ export function JsonEditors({
         />
       </Panel>
     </main>
+    </>
   );
 }
