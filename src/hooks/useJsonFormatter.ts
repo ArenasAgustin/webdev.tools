@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { formatJson } from "@/services/json/format";
 import { minifyJson } from "@/services/json/minify";
+import { cleanJson } from "@/services/json/clean";
 
 interface FormatterResult {
   output: string;
@@ -55,9 +56,21 @@ export function useJsonFormatter(): FormatterHook {
   }, []);
 
   const clean = useCallback((input: string) => {
-    // TODO: Implement clean empty values in future phase
-    console.log("Limpiar vacíos - próximamente", input);
-    setResult({ output: "", error: null });
+    if (!input.trim()) {
+      setResult({ output: "", error: "No hay JSON para limpiar" });
+      return;
+    }
+
+    const cleanResult = cleanJson(input);
+    if (cleanResult.ok) {
+      if (!cleanResult.value.trim()) {
+        setResult({ output: "", error: "El JSON estaba completamente vacío" });
+      } else {
+        setResult({ output: cleanResult.value, error: null });
+      }
+    } else {
+      setResult({ output: "", error: cleanResult.error.message });
+    }
   }, []);
 
   const clearOutput = useCallback(() => {
