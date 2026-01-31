@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsonEditors } from "./JsonEditors";
 import { jsonPlaygroundConfig } from "./json.config";
+import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
 import { formatJson } from "@/services/json/format";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonFormatter } from "@/hooks/useJsonFormatter";
@@ -67,6 +68,10 @@ export function JsonPlayground() {
         onFilter={() => jsonPath.filter(inputJson)}
         jsonPathValue={jsonPath.expression}
         onJsonPathChange={jsonPath.setExpression}
+        tipsConfig={{
+          tips: jsonPathTips,
+          quickExamples: jsonPathQuickExamples,
+        }}
       />
     </>
   );
