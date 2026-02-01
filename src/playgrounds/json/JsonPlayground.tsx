@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsonEditors } from "./JsonEditors";
 import { jsonPlaygroundConfig } from "./json.config";
@@ -21,6 +21,12 @@ const loadSavedConfig = () => {
   return null;
 };
 
+// Load last JSON from localStorage
+const loadLastJson = () => {
+  const savedJson = localStorage.getItem("lastJson");
+  return savedJson || "";
+};
+
 const savedConfig = loadSavedConfig();
 
 /**
@@ -28,7 +34,7 @@ const savedConfig = loadSavedConfig();
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
-  const [inputJson, setInputJson] = useState("");
+  const [inputJson, setInputJson] = useState(loadLastJson);
   const [formatConfig, setFormatConfig] = useState(
     savedConfig?.format || {
       indent: 2 as number | "\t",
@@ -54,6 +60,11 @@ export function JsonPlayground() {
       autoCopy: false,
     },
   );
+
+  // Auto-save last JSON to localStorage
+  useEffect(() => {
+    localStorage.setItem("lastJson", inputJson);
+  }, [inputJson]);
 
   // Use custom hooks for logic encapsulation
   const validation = useJsonParser(inputJson);
