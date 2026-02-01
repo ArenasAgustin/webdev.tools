@@ -26,10 +26,8 @@
 ## 5
 
 - Mejorar Expanded Editor Modal, tendria que estar en layout y no en editor
-- Fullscreen real por editor (mobile y desktop) con barra de acciones mínima
 - Mejorar layout responsive (stack en mobile/tablet, contenedores `min-w-0`, toolbars adhesivas)
 - Lazy load de Monaco y split de bundle por playground
-- Añadir theme claro/oscuro con toggle y chequeo de contraste accesible
 - Tests unitarios para servicios (`parse`, `format`, `minify`, `clean`, `jsonPath`) y hooks clave
 
 ## 6
