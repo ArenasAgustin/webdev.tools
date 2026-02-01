@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { formatJson } from "@/services/json/format";
 import { minifyJson } from "@/services/json/minify";
-import { cleanJson } from "@/services/json/clean";
+import { cleanJson, type CleanOptions } from "@/services/json/clean";
 
 interface FormatterResult {
   output: string;
@@ -11,10 +11,22 @@ interface FormatterResult {
 interface FormatterHook {
   output: string;
   error: string | null;
-  format: (input: string) => void;
-  minify: (input: string) => void;
-  clean: (input: string) => void;
+  format: (input: string, options?: FormatOptions) => void;
+  minify: (input: string, options?: MinifyOptions) => void;
+  clean: (input: string, options?: CleanOptions) => void;
   clearOutput: () => void;
+}
+
+export interface FormatOptions {
+  indent?: number | string;
+  sortKeys?: boolean;
+  autoCopy?: boolean;
+}
+
+export interface MinifyOptions {
+  removeSpaces?: boolean;
+  sortKeys?: boolean;
+  autoCopy?: boolean;
 }
 
 /**
@@ -27,46 +39,74 @@ export function useJsonFormatter(): FormatterHook {
     error: null,
   });
 
-  const format = useCallback((input: string) => {
+  const format = useCallback((input: string, options?: FormatOptions) => {
     if (!input.trim()) {
       setResult({ output: "", error: "No hay JSON para formatear" });
       return;
     }
 
-    const formatResult = formatJson(input);
+    const formatResult = formatJson(input, {
+      indent: options?.indent,
+      sortKeys: options?.sortKeys,
+    });
     if (formatResult.ok) {
       setResult({ output: formatResult.value, error: null });
+      if (options?.autoCopy) {
+        navigator.clipboard
+          .writeText(formatResult.value)
+          .catch(() => undefined);
+      }
     } else {
       setResult({ output: "", error: formatResult.error.message });
     }
   }, []);
 
-  const minify = useCallback((input: string) => {
+  const minify = useCallback((input: string, options?: MinifyOptions) => {
     if (!input.trim()) {
       setResult({ output: "", error: "No hay JSON para minificar" });
       return;
     }
 
-    const minifyResult = minifyJson(input);
+    const minifyResult = minifyJson(input, {
+      removeSpaces: options?.removeSpaces,
+      sortKeys: options?.sortKeys,
+    });
     if (minifyResult.ok) {
       setResult({ output: minifyResult.value, error: null });
+      if (options?.autoCopy) {
+        navigator.clipboard
+          .writeText(minifyResult.value)
+          .catch(() => undefined);
+      }
     } else {
       setResult({ output: "", error: minifyResult.error.message });
     }
   }, []);
 
-  const clean = useCallback((input: string) => {
+  const clean = useCallback((input: string, options?: CleanOptions) => {
     if (!input.trim()) {
       setResult({ output: "", error: "No hay JSON para limpiar" });
       return;
     }
 
-    const cleanResult = cleanJson(input);
+    const cleanResult = cleanJson(input, {
+      removeNull: options?.removeNull,
+      removeUndefined: options?.removeUndefined,
+      removeEmptyString: options?.removeEmptyString,
+      removeEmptyArray: options?.removeEmptyArray,
+      removeEmptyObject: options?.removeEmptyObject,
+      outputFormat: options?.outputFormat,
+    });
     if (cleanResult.ok) {
       if (!cleanResult.value.trim()) {
         setResult({ output: "", error: "El JSON estaba completamente vacío" });
       } else {
         setResult({ output: cleanResult.value, error: null });
+        if (options?.autoCopy) {
+          navigator.clipboard
+            .writeText(cleanResult.value)
+            .catch(() => undefined);
+        }
       }
     } else {
       setResult({ output: "", error: cleanResult.error.message });

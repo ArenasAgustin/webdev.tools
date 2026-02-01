@@ -8,12 +8,52 @@ import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonFormatter } from "@/hooks/useJsonFormatter";
 import { useJsonPath } from "@/hooks/useJsonPath";
 
+// Load config from localStorage
+const loadSavedConfig = () => {
+  const savedConfig = localStorage.getItem("toolsConfig");
+  if (savedConfig) {
+    try {
+      return JSON.parse(savedConfig);
+    } catch (error) {
+      console.error("Error loading config from localStorage:", error);
+    }
+  }
+  return null;
+};
+
+const savedConfig = loadSavedConfig();
+
 /**
  * JSON Playground - Encapsulated JSON tools
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
   const [inputJson, setInputJson] = useState("");
+  const [formatConfig, setFormatConfig] = useState(
+    savedConfig?.format || {
+      indent: 2 as number | "\t",
+      sortKeys: false,
+      autoCopy: false,
+    },
+  );
+  const [minifyConfig, setMinifyConfig] = useState(
+    savedConfig?.minify || {
+      removeSpaces: true,
+      sortKeys: false,
+      autoCopy: false,
+    },
+  );
+  const [cleanConfig, setCleanConfig] = useState(
+    savedConfig?.clean || {
+      removeNull: true,
+      removeUndefined: true,
+      removeEmptyString: true,
+      removeEmptyArray: false,
+      removeEmptyObject: false,
+      outputFormat: "format" as "format" | "minify",
+      autoCopy: false,
+    },
+  );
 
   // Use custom hooks for logic encapsulation
   const validation = useJsonParser(inputJson);
@@ -62,12 +102,18 @@ export function JsonPlayground() {
       />
 
       <Toolbar
-        onFormat={() => formatter.format(inputJson)}
-        onMinify={() => formatter.minify(inputJson)}
-        onClean={() => formatter.clean(inputJson)}
+        onFormat={() => formatter.format(inputJson, formatConfig)}
+        onMinify={() => formatter.minify(inputJson, minifyConfig)}
+        onClean={() => formatter.clean(inputJson, cleanConfig)}
         onFilter={() => jsonPath.filter(inputJson)}
         jsonPathValue={jsonPath.expression}
         onJsonPathChange={jsonPath.setExpression}
+        formatConfig={formatConfig}
+        onFormatConfigChange={setFormatConfig}
+        minifyConfig={minifyConfig}
+        onMinifyConfigChange={setMinifyConfig}
+        cleanConfig={cleanConfig}
+        onCleanConfigChange={setCleanConfig}
         tipsConfig={{
           tips: jsonPathTips,
           quickExamples: jsonPathQuickExamples,

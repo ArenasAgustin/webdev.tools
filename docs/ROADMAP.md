@@ -13,8 +13,8 @@
 
 ## 3
 
-- Agregar modal con ejemplos para filtros de JSONPath
-- Agregar modal para configurar herramientas
+- Agregar modal con ejemplos para filtros de JSONPath ✅
+- Agregar modal para configurar herramientas ✅
 - Persistir preferencias y último JSON en localStorage (y preparar IndexedDB para historial)
 - Agregar atajos de teclado básicos (formatear, copiar, limpiar)
 - Añadir validación en vivo con contador de líneas/caracteres en el output

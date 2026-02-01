@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/common/Button";
+import { ConfigModal } from "@/components/common/ConfigModal";
 import { TipsModal } from "@/components/common/TipsModal";
 
 interface ToolbarProps {
@@ -9,6 +10,44 @@ interface ToolbarProps {
   onFilter: () => void;
   jsonPathValue: string;
   onJsonPathChange: (value: string) => void;
+  formatConfig: {
+    indent: number | "\t";
+    sortKeys: boolean;
+    autoCopy: boolean;
+  };
+  onFormatConfigChange: (config: {
+    indent: number | "\t";
+    sortKeys: boolean;
+    autoCopy: boolean;
+  }) => void;
+  minifyConfig: {
+    removeSpaces: boolean;
+    sortKeys: boolean;
+    autoCopy: boolean;
+  };
+  onMinifyConfigChange: (config: {
+    removeSpaces: boolean;
+    sortKeys: boolean;
+    autoCopy: boolean;
+  }) => void;
+  cleanConfig: {
+    removeNull: boolean;
+    removeUndefined: boolean;
+    removeEmptyString: boolean;
+    removeEmptyArray: boolean;
+    removeEmptyObject: boolean;
+    outputFormat: "format" | "minify";
+    autoCopy: boolean;
+  };
+  onCleanConfigChange: (config: {
+    removeNull: boolean;
+    removeUndefined: boolean;
+    removeEmptyString: boolean;
+    removeEmptyArray: boolean;
+    removeEmptyObject: boolean;
+    outputFormat: "format" | "minify";
+    autoCopy: boolean;
+  }) => void;
   onShowTips?: () => void;
   tipsConfig?: {
     tips: Array<{
@@ -29,10 +68,17 @@ export function Toolbar({
   onFilter,
   jsonPathValue,
   onJsonPathChange,
+  formatConfig,
+  onFormatConfigChange,
+  minifyConfig,
+  onMinifyConfigChange,
+  cleanConfig,
+  onCleanConfigChange,
   onShowTips,
   tipsConfig,
 }: ToolbarProps) {
   const [showTips, setShowTips] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
 
   const handleShowTips = () => {
     setShowTips(true);
@@ -47,6 +93,13 @@ export function Toolbar({
           <div>
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <i className="fas fa-tools text-yellow-400"></i> Herramientas
+              <button
+                onClick={() => setShowConfig(true)}
+                className="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
+                title="Configurar herramientas"
+              >
+                <i className="fas fa-cog"></i>
+              </button>
             </h3>
             <div className="grid grid-cols-3 gap-2">
               <Button variant="primary" size="md" onClick={onFormat}>
@@ -105,6 +158,18 @@ export function Toolbar({
           }}
         />
       )}
+
+      {/* Config Modal */}
+      <ConfigModal
+        isOpen={showConfig}
+        onClose={() => setShowConfig(false)}
+        formatConfig={formatConfig}
+        onFormatConfigChange={onFormatConfigChange}
+        minifyConfig={minifyConfig}
+        onMinifyConfigChange={onMinifyConfigChange}
+        cleanConfig={cleanConfig}
+        onCleanConfigChange={onCleanConfigChange}
+      />
     </>
   );
 }

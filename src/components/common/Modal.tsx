@@ -38,9 +38,13 @@ export function Modal({
   const iconHexColor = colorMap[iconColor] || colorMap["blue-400"];
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={onClose}
+    >
       <div
         className={`bg-gray-900 border border-white/10 rounded-2xl shadow-2xl ${maxWidth} w-full mx-4 max-h-[80vh] overflow-hidden fade-in`}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
