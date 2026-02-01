@@ -3,6 +3,9 @@ import { Panel } from "@/components/layout/Panel";
 import { Button } from "@/components/common/Button";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
+import { TextStats } from "@/components/common/TextStats";
+import { OutputStats } from "@/components/common/OutputStats";
+import { useTextStats } from "@/hooks/useTextStats";
 import type { JsonValidationState } from "./json.types";
 
 interface JsonEditorsProps {
@@ -29,6 +32,10 @@ export function JsonEditors({
   const [expandedEditor, setExpandedEditor] = useState<
     "input" | "output" | null
   >(null);
+
+  const inputStats = useTextStats(inputValue);
+  const outputStats = useTextStats(outputValue);
+
   return (
     <>
       {expandedEditor === "input" && (
@@ -131,13 +138,20 @@ export function JsonEditors({
             </>
           }
           footer={
-            <div className="text-xs h-4">
+            <div className="text-xs h-4 flex items-center gap-1">
               {inputValue.trim() === "" ? (
                 <span className="text-gray-400">Esperando JSON...</span>
               ) : validationState.isValid ? (
-                <span className="text-green-400 flex items-center gap-1">
-                  <i className="fas fa-check-circle"></i> JSON válido
-                </span>
+                <>
+                  <span className="text-green-400 flex items-center gap-1">
+                    <i className="fas fa-check-circle"></i> JSON válido
+                  </span>
+                  <TextStats
+                    lines={inputStats.lines}
+                    characters={inputStats.characters}
+                    bytes={inputStats.bytes}
+                  />
+                </>
               ) : (
                 <span className="text-red-400 flex items-center gap-1">
                   <i className="fas fa-exclamation-circle"></i>{" "}
@@ -174,7 +188,7 @@ export function JsonEditors({
             </>
           }
           footer={
-            <div className="text-xs h-4">
+            <div className="text-xs h-4 flex items-center gap-1">
               {outputError ? (
                 <span className="text-red-400 flex items-center gap-1">
                   <i className="fas fa-exclamation-circle"></i> {outputError}
@@ -182,10 +196,17 @@ export function JsonEditors({
               ) : outputValue.trim() === "" ? (
                 <span className="text-gray-400">Esperando operación...</span>
               ) : (
-                <span className="text-gray-400">
-                  Líneas: {outputValue.split("\n").length} | Caracteres:{" "}
-                  {outputValue.length}
-                </span>
+                <>
+                  <span className="text-green-400 flex items-center gap-1">
+                    <i className="fas fa-check-circle"></i> JSON válido
+                  </span>
+                  <OutputStats
+                    lines={outputStats.lines}
+                    characters={outputStats.characters}
+                    outputBytes={outputStats.bytes}
+                    inputBytes={inputStats.bytes}
+                  />
+                </>
               )}
             </div>
           }
