@@ -7,6 +7,7 @@ import { formatJson } from "@/services/json/format";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonFormatter } from "@/hooks/useJsonFormatter";
 import { useJsonPath } from "@/hooks/useJsonPath";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 // Load config from localStorage
 const loadSavedConfig = () => {
@@ -99,6 +100,18 @@ export function JsonPlayground() {
     });
   };
 
+  // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
+  const [showConfig, setShowConfig] = useState(false);
+
+  useKeyboardShortcuts({
+    onFormat: () => formatter.format(inputJson, formatConfig),
+    onMinify: () => formatter.minify(inputJson, minifyConfig),
+    onClean: () => formatter.clean(inputJson, cleanConfig),
+    onCopyOutput: handleCopyOutput,
+    onClearInput: handleClearInput,
+    onOpenConfig: () => setShowConfig(true),
+  });
+
   return (
     <>
       <JsonEditors
@@ -125,6 +138,8 @@ export function JsonPlayground() {
         onMinifyConfigChange={setMinifyConfig}
         cleanConfig={cleanConfig}
         onCleanConfigChange={setCleanConfig}
+        configIsOpen={showConfig}
+        onConfigOpen={setShowConfig}
         tipsConfig={{
           tips: jsonPathTips,
           quickExamples: jsonPathQuickExamples,

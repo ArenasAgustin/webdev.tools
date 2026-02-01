@@ -48,6 +48,8 @@ interface ToolbarProps {
     outputFormat: "format" | "minify";
     autoCopy: boolean;
   }) => void;
+  configIsOpen?: boolean;
+  onConfigOpen?: (isOpen: boolean) => void;
   onShowTips?: () => void;
   tipsConfig?: {
     tips: Array<{
@@ -74,11 +76,17 @@ export function Toolbar({
   onMinifyConfigChange,
   cleanConfig,
   onCleanConfigChange,
+  configIsOpen,
+  onConfigOpen,
   onShowTips,
   tipsConfig,
 }: ToolbarProps) {
   const [showTips, setShowTips] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
+  const [localShowConfig, setLocalShowConfig] = useState(configIsOpen || false);
+
+  // Use external state if provided, otherwise use local state
+  const showConfig = configIsOpen ?? localShowConfig;
+  const setShowConfigState = onConfigOpen ?? setLocalShowConfig;
 
   const handleShowTips = () => {
     setShowTips(true);
@@ -94,9 +102,9 @@ export function Toolbar({
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <i className="fas fa-tools text-yellow-400"></i> Herramientas
               <button
-                onClick={() => setShowConfig(true)}
+                onClick={() => setShowConfigState(true)}
                 className="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
-                title="Configurar herramientas"
+                title="Configurar herramientas (Ctrl+,)"
               >
                 <i className="fas fa-cog"></i>
               </button>
@@ -162,7 +170,7 @@ export function Toolbar({
       {/* Config Modal */}
       <ConfigModal
         isOpen={showConfig}
-        onClose={() => setShowConfig(false)}
+        onClose={() => setShowConfigState(false)}
         formatConfig={formatConfig}
         onFormatConfigChange={onFormatConfigChange}
         minifyConfig={minifyConfig}
