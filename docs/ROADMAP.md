@@ -1,13 +1,13 @@
 # ROADMAP
 
-## 1
+## 1 ✅
 
 - Agregar funcionalidad al botón de Ejemplo ✅
 - Agregar funcionalidad al botón de Copiar ✅
 - Agregar funcionalidad al botón de Limpiar vacios ✅
 - Agregar funcionalidad al botón de Agrandar ✅
 
-## 2
+## 2 ✅
 
 - Corregir estilos ✅
 
@@ -16,7 +16,7 @@
 - Agregar modal con ejemplos para filtros de JSONPath ✅
 - Agregar modal para configurar herramientas ✅
 - Persistir preferencias y último JSON en localStorage (y preparar IndexedDB para historial) ✅
-- Agregar atajos de teclado básicos (formatear, copiar, limpiar)
+- Agregar atajos de teclado básicos (formatear, copiar, limpiar) ✅
 - Añadir validación en vivo con contador de líneas/caracteres en el output
 
 ## 4
