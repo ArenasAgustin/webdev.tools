@@ -19,9 +19,9 @@
 - Agregar atajos de teclado básicos (formatear, copiar, limpiar) ✅
 - Añadir validación en vivo con contador de líneas/caracteres en el output ✅
 
-## 4
+## 4 ✅
 
-- Historial de filtros JSONPath con acciones rápidas de reutilizar/borrar
+- Historial de filtros JSONPath con acciones rápidas de reutilizar/borrar ✅
 
 ## 5
 
