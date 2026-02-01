@@ -7,6 +7,7 @@ import { formatJson } from "@/services/json/format";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonFormatter } from "@/hooks/useJsonFormatter";
 import { useJsonPath } from "@/hooks/useJsonPath";
+import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 // Load config from localStorage
@@ -71,6 +72,7 @@ export function JsonPlayground() {
   const validation = useJsonParser(inputJson);
   const formatter = useJsonFormatter();
   const jsonPath = useJsonPath();
+  const jsonPathHistory = useJsonPathHistory();
 
   // Determine which output to show (formatter or jsonPath)
   const outputJson = jsonPath.output || formatter.output;
@@ -98,6 +100,21 @@ export function JsonPlayground() {
     navigator.clipboard.writeText(textToCopy).catch((err) => {
       console.error("Error al copiar al portapapeles: ", err);
     });
+  };
+
+  const handleApplyJsonPath = () => {
+    const result = jsonPath.filter(inputJson);
+    if (result.ok) {
+      jsonPathHistory.addToHistory(jsonPath.expression);
+    }
+  };
+
+  const handleReuseFromHistory = (expression: string) => {
+    jsonPath.setExpression(expression);
+    const result = jsonPath.filter(inputJson, expression);
+    if (result.ok) {
+      jsonPathHistory.addToHistory(expression);
+    }
   };
 
   // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
@@ -129,7 +146,7 @@ export function JsonPlayground() {
         onFormat={() => formatter.format(inputJson, formatConfig)}
         onMinify={() => formatter.minify(inputJson, minifyConfig)}
         onClean={() => formatter.clean(inputJson, cleanConfig)}
-        onFilter={() => jsonPath.filter(inputJson)}
+        onFilter={handleApplyJsonPath}
         jsonPathValue={jsonPath.expression}
         onJsonPathChange={jsonPath.setExpression}
         formatConfig={formatConfig}
@@ -140,6 +157,10 @@ export function JsonPlayground() {
         onCleanConfigChange={setCleanConfig}
         configIsOpen={showConfig}
         onConfigOpen={setShowConfig}
+        jsonPathHistory={jsonPathHistory.history}
+        onHistoryReuse={handleReuseFromHistory}
+        onHistoryDelete={jsonPathHistory.removeFromHistory}
+        onHistoryClear={jsonPathHistory.clearHistory}
         tipsConfig={{
           tips: jsonPathTips,
           quickExamples: jsonPathQuickExamples,

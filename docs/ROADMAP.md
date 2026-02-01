@@ -21,8 +21,7 @@
 
 ## 4
 
-- Historial de filtros JSONPath con acciones rápidas de reutilizar
-- Añadir “tips”/cheatsheet en el modal (botones de “probar ejemplo”)
+- Historial de filtros JSONPath con acciones rápidas de reutilizar/borrar
 
 ## 5
 

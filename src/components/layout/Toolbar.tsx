@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { ConfigModal } from "@/components/common/ConfigModal";
 import { TipsModal } from "@/components/common/TipsModal";
+import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
+import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 
 interface ToolbarProps {
   onFormat: () => void;
@@ -10,6 +12,10 @@ interface ToolbarProps {
   onFilter: () => void;
   jsonPathValue: string;
   onJsonPathChange: (value: string) => void;
+  jsonPathHistory?: JsonPathHistoryItem[];
+  onHistoryReuse?: (expression: string) => void | Promise<void>;
+  onHistoryDelete?: (id: string) => void | Promise<void>;
+  onHistoryClear?: () => void | Promise<void>;
   formatConfig: {
     indent: number | "\t";
     sortKeys: boolean;
@@ -70,6 +76,10 @@ export function Toolbar({
   onFilter,
   jsonPathValue,
   onJsonPathChange,
+  jsonPathHistory,
+  onHistoryReuse,
+  onHistoryDelete,
+  onHistoryClear,
   formatConfig,
   onFormatConfigChange,
   minifyConfig,
@@ -82,6 +92,7 @@ export function Toolbar({
   tipsConfig,
 }: ToolbarProps) {
   const [showTips, setShowTips] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [localShowConfig, setLocalShowConfig] = useState(configIsOpen || false);
 
   // Use external state if provided, otherwise use local state
@@ -91,6 +102,10 @@ export function Toolbar({
   const handleShowTips = () => {
     setShowTips(true);
     onShowTips?.();
+  };
+
+  const handleShowHistory = () => {
+    setShowHistory(true);
   };
 
   return (
@@ -126,13 +141,22 @@ export function Toolbar({
           <div>
             <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <i className="fas fa-filter text-cyan-400"></i> Filtro JSONPath
-              <button
-                onClick={handleShowTips}
-                className="ml-auto text-gray-400 hover:text-cyan-300 transition-colors"
-                title="Ver tips de filtros"
-              >
-                <i className="fas fa-question-circle"></i>
-              </button>
+              <div className="ml-auto flex gap-2">
+                <button
+                  onClick={handleShowHistory}
+                  className="text-gray-400 hover:text-cyan-300 transition-colors"
+                  title="Historial de filtros"
+                >
+                  <i className="fas fa-history"></i>
+                </button>
+                <button
+                  onClick={handleShowTips}
+                  className="text-gray-400 hover:text-cyan-300 transition-colors"
+                  title="Ver tips de filtros"
+                >
+                  <i className="fas fa-question-circle"></i>
+                </button>
+              </div>
             </h4>
             <div className="flex gap-2">
               <input
@@ -166,6 +190,24 @@ export function Toolbar({
           }}
         />
       )}
+
+      {/* History Modal */}
+      {jsonPathHistory &&
+        onHistoryReuse &&
+        onHistoryDelete &&
+        onHistoryClear && (
+          <JsonPathHistoryModal
+            isOpen={showHistory}
+            history={jsonPathHistory}
+            onClose={() => setShowHistory(false)}
+            onReuse={(expression) => {
+              onHistoryReuse(expression);
+              setShowHistory(false);
+            }}
+            onDelete={onHistoryDelete}
+            onClearAll={onHistoryClear}
+          />
+        )}
 
       {/* Config Modal */}
       <ConfigModal

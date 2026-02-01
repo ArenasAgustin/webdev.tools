@@ -11,7 +11,13 @@ interface JsonPathHook {
   output: string;
   error: string | null;
   setExpression: (expr: string) => void;
-  filter: (input: string) => void;
+  filter: (
+    input: string,
+    overrideExpression?: string,
+  ) => {
+    ok: boolean;
+    error?: string;
+  };
   clearOutput: () => void;
 }
 
@@ -27,18 +33,22 @@ export function useJsonPath(): JsonPathHook {
   });
 
   const filter = useCallback(
-    (input: string) => {
+    (input: string, overrideExpression?: string) => {
+      const expr = overrideExpression ?? expression;
+
       if (!input.trim()) {
-        setResult({ output: "", error: "No hay JSON para filtrar" });
-        return;
+        const error = "No hay JSON para filtrar";
+        setResult({ output: "", error });
+        return { ok: false, error };
       }
 
-      if (!expression.trim()) {
-        setResult({ output: "", error: "Ingresa una expresión JSONPath" });
-        return;
+      if (!expr.trim()) {
+        const error = "Ingresa una expresión JSONPath";
+        setResult({ output: "", error });
+        return { ok: false, error };
       }
 
-      const filterResult = applyJsonPath(input, expression);
+      const filterResult = applyJsonPath(input, expr);
       if (filterResult.ok) {
         const value = filterResult.value;
         // Check if result is empty
@@ -50,11 +60,13 @@ export function useJsonPath(): JsonPathHook {
         } else {
           setResult({ output: value, error: null });
         }
-      } else {
-        setResult({ output: "", error: filterResult.error.message });
+        return { ok: true };
       }
+
+      setResult({ output: "", error: filterResult.error.message });
+      return { ok: false, error: filterResult.error.message };
     },
-    [expression]
+    [expression],
   );
 
   const clearOutput = useCallback(() => {
