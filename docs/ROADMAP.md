@@ -11,19 +11,18 @@
 
 - Corregir estilos ✅
 
-## 3
+## 3 ✅
 
 - Agregar modal con ejemplos para filtros de JSONPath ✅
 - Agregar modal para configurar herramientas ✅
 - Persistir preferencias y último JSON en localStorage (y preparar IndexedDB para historial) ✅
 - Agregar atajos de teclado básicos (formatear, copiar, limpiar) ✅
-- Añadir validación en vivo con contador de líneas/caracteres en el output
+- Añadir validación en vivo con contador de líneas/caracteres en el output ✅
 
 ## 4
 
 - Historial de filtros JSONPath con acciones rápidas de reutilizar
 - Añadir “tips”/cheatsheet en el modal (botones de “probar ejemplo”)
-- Exportar/compartir resultado por URL o archivo descargable
 
 ## 5
 
