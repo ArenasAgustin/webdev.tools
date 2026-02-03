@@ -2,6 +2,7 @@ import { Modal } from "./Modal";
 import { Card } from "./Card";
 import { Button } from "./Button";
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
+import { Checkbox } from "./Checkbox";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -91,39 +92,27 @@ export function ConfigModal({
               <label className="block text-gray-300 mb-1">
                 Ordenar claves alfabéticamente
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500 focus:ring-blue-500"
-                  checked={formatConfig.sortKeys}
-                  onChange={(event) =>
-                    onFormatConfigChange({
-                      ...formatConfig,
-                      sortKeys: event.target.checked,
-                    })
-                  }
-                />
-                <span className="text-gray-400">Habilitar ordenamiento</span>
-              </label>
+              <Checkbox
+                checked={formatConfig.sortKeys}
+                onChange={(checked) =>
+                  onFormatConfigChange({ ...formatConfig, sortKeys: checked })
+                }
+                label="Habilitar ordenamiento"
+                color="blue"
+              />
             </div>
             <div>
               <label className="block text-gray-300 mb-1">
                 Copiar automáticamente al formatear
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500 focus:ring-blue-500"
-                  checked={formatConfig.autoCopy}
-                  onChange={(event) =>
-                    onFormatConfigChange({
-                      ...formatConfig,
-                      autoCopy: event.target.checked,
-                    })
-                  }
-                />
-                <span className="text-gray-400">Habilitar auto-copia</span>
-              </label>
+              <Checkbox
+                checked={formatConfig.autoCopy}
+                onChange={(checked) =>
+                  onFormatConfigChange({ ...formatConfig, autoCopy: checked })
+                }
+                label="Habilitar auto-copia"
+                color="blue"
+              />
             </div>
           </div>
         </Card>
@@ -141,58 +130,39 @@ export function ConfigModal({
                 Opciones de minificación
               </label>
               <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500"
-                    checked={minifyConfig.removeSpaces}
-                    onChange={(event) =>
-                      onMinifyConfigChange({
-                        ...minifyConfig,
-                        removeSpaces: event.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">
-                    Eliminar todos los espacios
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500"
-                    checked={minifyConfig.sortKeys}
-                    onChange={(event) =>
-                      onMinifyConfigChange({
-                        ...minifyConfig,
-                        sortKeys: event.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">
-                    Ordenar claves alfabéticamente
-                  </span>
-                </label>
+                <Checkbox
+                  checked={minifyConfig.removeSpaces}
+                  onChange={(checked) =>
+                    onMinifyConfigChange({
+                      ...minifyConfig,
+                      removeSpaces: checked,
+                    })
+                  }
+                  label="Eliminar todos los espacios"
+                  color="purple"
+                />
+                <Checkbox
+                  checked={minifyConfig.sortKeys}
+                  onChange={(checked) =>
+                    onMinifyConfigChange({ ...minifyConfig, sortKeys: checked })
+                  }
+                  label="Ordenar claves alfabéticamente"
+                  color="purple"
+                />
               </div>
             </div>
             <div>
               <label className="block text-gray-300 mb-1">
                 Copiar automáticamente
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500"
-                  checked={minifyConfig.autoCopy}
-                  onChange={(event) =>
-                    onMinifyConfigChange({
-                      ...minifyConfig,
-                      autoCopy: event.target.checked,
-                    })
-                  }
-                />
-                <span className="text-gray-400">Habilitar auto-copia</span>
-              </label>
+              <Checkbox
+                checked={minifyConfig.autoCopy}
+                onChange={(checked) =>
+                  onMinifyConfigChange({ ...minifyConfig, autoCopy: checked })
+                }
+                label="Habilitar auto-copia"
+                color="purple"
+              />
             </div>
           </div>
         </Card>
@@ -210,76 +180,63 @@ export function ConfigModal({
                 Valores a eliminar
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <label className="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
-                    checked={cleanConfig.removeNull}
-                    onChange={(event) =>
-                      onCleanConfigChange({
-                        ...cleanConfig,
-                        removeNull: event.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">null</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
-                    checked={cleanConfig.removeUndefined}
-                    onChange={(event) =>
-                      onCleanConfigChange({
-                        ...cleanConfig,
-                        removeUndefined: event.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">undefined</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
-                    checked={cleanConfig.removeEmptyString}
-                    onChange={(event) =>
-                      onCleanConfigChange({
-                        ...cleanConfig,
-                        removeEmptyString: event.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">"" (vacío)</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
-                    checked={cleanConfig.removeEmptyArray}
-                    onChange={(event) =>
-                      onCleanConfigChange({
-                        ...cleanConfig,
-                        removeEmptyArray: event.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">[] (array vacío)</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
-                    checked={cleanConfig.removeEmptyObject}
-                    onChange={(event) =>
-                      onCleanConfigChange({
-                        ...cleanConfig,
-                        removeEmptyObject: event.target.checked,
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">{} (objeto vacío)</span>
-                </label>
+                <Checkbox
+                  checked={cleanConfig.removeNull}
+                  onChange={(checked) =>
+                    onCleanConfigChange({ ...cleanConfig, removeNull: checked })
+                  }
+                  label="null"
+                  color="orange"
+                  containerClassName="p-2 bg-white/5 rounded"
+                />
+                <Checkbox
+                  checked={cleanConfig.removeUndefined}
+                  onChange={(checked) =>
+                    onCleanConfigChange({
+                      ...cleanConfig,
+                      removeUndefined: checked,
+                    })
+                  }
+                  label="undefined"
+                  color="orange"
+                  containerClassName="p-2 bg-white/5 rounded"
+                />
+                <Checkbox
+                  checked={cleanConfig.removeEmptyString}
+                  onChange={(checked) =>
+                    onCleanConfigChange({
+                      ...cleanConfig,
+                      removeEmptyString: checked,
+                    })
+                  }
+                  label='"" (vacío)'
+                  color="orange"
+                  containerClassName="p-2 bg-white/5 rounded"
+                />
+                <Checkbox
+                  checked={cleanConfig.removeEmptyArray}
+                  onChange={(checked) =>
+                    onCleanConfigChange({
+                      ...cleanConfig,
+                      removeEmptyArray: checked,
+                    })
+                  }
+                  label="[] (array vacío)"
+                  color="orange"
+                  containerClassName="p-2 bg-white/5 rounded"
+                />
+                <Checkbox
+                  checked={cleanConfig.removeEmptyObject}
+                  onChange={(checked) =>
+                    onCleanConfigChange({
+                      ...cleanConfig,
+                      removeEmptyObject: checked,
+                    })
+                  }
+                  label="{} (objeto vacío)"
+                  color="orange"
+                  containerClassName="p-2 bg-white/5 rounded"
+                />
               </div>
             </div>
             <div>
@@ -323,20 +280,14 @@ export function ConfigModal({
               <label className="block text-gray-300 mb-1">
                 Copiar automáticamente
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
-                  checked={cleanConfig.autoCopy}
-                  onChange={(event) =>
-                    onCleanConfigChange({
-                      ...cleanConfig,
-                      autoCopy: event.target.checked,
-                    })
-                  }
-                />
-                <span className="text-gray-400">Habilitar auto-copia</span>
-              </label>
+              <Checkbox
+                checked={cleanConfig.autoCopy}
+                onChange={(checked) =>
+                  onCleanConfigChange({ ...cleanConfig, autoCopy: checked })
+                }
+                label="Habilitar auto-copia"
+                color="orange"
+              />
             </div>
           </div>
         </Card>
