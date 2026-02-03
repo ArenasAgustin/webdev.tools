@@ -9,6 +9,12 @@ import { useJsonFormatter } from "@/hooks/useJsonFormatter";
 import { useJsonPath } from "@/hooks/useJsonPath";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import {
+  DEFAULT_FORMAT_CONFIG,
+  DEFAULT_MINIFY_CONFIG,
+  DEFAULT_CLEAN_CONFIG,
+} from "@/types/json";
 
 // Load config from localStorage
 const loadSavedConfig = () => {
@@ -37,30 +43,14 @@ const savedConfig = loadSavedConfig();
  */
 export function JsonPlayground() {
   const [inputJson, setInputJson] = useState(loadLastJson);
-  const [formatConfig, setFormatConfig] = useState(
-    savedConfig?.format || {
-      indent: 2 as number | "\t",
-      sortKeys: false,
-      autoCopy: false,
-    },
+  const [formatConfig, setFormatConfig] = useState<FormatConfig>(
+    savedConfig?.format || DEFAULT_FORMAT_CONFIG,
   );
-  const [minifyConfig, setMinifyConfig] = useState(
-    savedConfig?.minify || {
-      removeSpaces: true,
-      sortKeys: false,
-      autoCopy: false,
-    },
+  const [minifyConfig, setMinifyConfig] = useState<MinifyConfig>(
+    savedConfig?.minify || DEFAULT_MINIFY_CONFIG,
   );
-  const [cleanConfig, setCleanConfig] = useState(
-    savedConfig?.clean || {
-      removeNull: true,
-      removeUndefined: true,
-      removeEmptyString: true,
-      removeEmptyArray: false,
-      removeEmptyObject: false,
-      outputFormat: "format" as "format" | "minify",
-      autoCopy: false,
-    },
+  const [cleanConfig, setCleanConfig] = useState<CleanConfig>(
+    savedConfig?.clean || DEFAULT_CLEAN_CONFIG,
   );
 
   // Auto-save last JSON to localStorage

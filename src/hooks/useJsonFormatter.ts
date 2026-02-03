@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
 import { formatJson } from "@/services/json/format";
 import { minifyJson } from "@/services/json/minify";
-import { cleanJson, type CleanOptions } from "@/services/json/clean";
+import { cleanJson } from "@/services/json/clean";
+import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 
 interface FormatterResult {
   output: string;
@@ -11,22 +12,10 @@ interface FormatterResult {
 interface FormatterHook {
   output: string;
   error: string | null;
-  format: (input: string, options?: FormatOptions) => void;
-  minify: (input: string, options?: MinifyOptions) => void;
-  clean: (input: string, options?: CleanOptions) => void;
+  format: (input: string, options?: Partial<FormatConfig>) => void;
+  minify: (input: string, options?: Partial<MinifyConfig>) => void;
+  clean: (input: string, options?: Partial<CleanConfig>) => void;
   clearOutput: () => void;
-}
-
-export interface FormatOptions {
-  indent?: number | string;
-  sortKeys?: boolean;
-  autoCopy?: boolean;
-}
-
-export interface MinifyOptions {
-  removeSpaces?: boolean;
-  sortKeys?: boolean;
-  autoCopy?: boolean;
 }
 
 /**
@@ -39,51 +28,57 @@ export function useJsonFormatter(): FormatterHook {
     error: null,
   });
 
-  const format = useCallback((input: string, options?: FormatOptions) => {
-    if (!input.trim()) {
-      setResult({ output: "", error: "No hay JSON para formatear" });
-      return;
-    }
-
-    const formatResult = formatJson(input, {
-      indent: options?.indent,
-      sortKeys: options?.sortKeys,
-    });
-    if (formatResult.ok) {
-      setResult({ output: formatResult.value, error: null });
-      if (options?.autoCopy) {
-        navigator.clipboard
-          .writeText(formatResult.value)
-          .catch(() => undefined);
+  const format = useCallback(
+    (input: string, options?: Partial<FormatConfig>) => {
+      if (!input.trim()) {
+        setResult({ output: "", error: "No hay JSON para formatear" });
+        return;
       }
-    } else {
-      setResult({ output: "", error: formatResult.error.message });
-    }
-  }, []);
 
-  const minify = useCallback((input: string, options?: MinifyOptions) => {
-    if (!input.trim()) {
-      setResult({ output: "", error: "No hay JSON para minificar" });
-      return;
-    }
-
-    const minifyResult = minifyJson(input, {
-      removeSpaces: options?.removeSpaces,
-      sortKeys: options?.sortKeys,
-    });
-    if (minifyResult.ok) {
-      setResult({ output: minifyResult.value, error: null });
-      if (options?.autoCopy) {
-        navigator.clipboard
-          .writeText(minifyResult.value)
-          .catch(() => undefined);
+      const formatResult = formatJson(input, {
+        indent: options?.indent,
+        sortKeys: options?.sortKeys,
+      });
+      if (formatResult.ok) {
+        setResult({ output: formatResult.value, error: null });
+        if (options?.autoCopy) {
+          navigator.clipboard
+            .writeText(formatResult.value)
+            .catch(() => undefined);
+        }
+      } else {
+        setResult({ output: "", error: formatResult.error.message });
       }
-    } else {
-      setResult({ output: "", error: minifyResult.error.message });
-    }
-  }, []);
+    },
+    [],
+  );
 
-  const clean = useCallback((input: string, options?: CleanOptions) => {
+  const minify = useCallback(
+    (input: string, options?: Partial<MinifyConfig>) => {
+      if (!input.trim()) {
+        setResult({ output: "", error: "No hay JSON para minificar" });
+        return;
+      }
+
+      const minifyResult = minifyJson(input, {
+        removeSpaces: options?.removeSpaces,
+        sortKeys: options?.sortKeys,
+      });
+      if (minifyResult.ok) {
+        setResult({ output: minifyResult.value, error: null });
+        if (options?.autoCopy) {
+          navigator.clipboard
+            .writeText(minifyResult.value)
+            .catch(() => undefined);
+        }
+      } else {
+        setResult({ output: "", error: minifyResult.error.message });
+      }
+    },
+    [],
+  );
+
+  const clean = useCallback((input: string, options?: Partial<CleanConfig>) => {
     if (!input.trim()) {
       setResult({ output: "", error: "No hay JSON para limpiar" });
       return;

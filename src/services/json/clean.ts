@@ -2,16 +2,11 @@ import { parseJson } from "./parse";
 import { formatJson } from "./format";
 import { minifyJson } from "./minify";
 import type { JsonValue, Result, JsonError } from "@/types/common";
+import type { CleanConfig } from "@/types/json";
 
-export interface CleanOptions {
-  removeNull?: boolean;
-  removeUndefined?: boolean;
-  removeEmptyString?: boolean;
-  removeEmptyArray?: boolean;
-  removeEmptyObject?: boolean;
-  outputFormat?: "format" | "minify";
-  autoCopy?: boolean;
-}
+// Export for backward compatibility
+export type { CleanConfig };
+export type CleanOptions = Partial<CleanConfig>;
 
 /**
  * Remove empty values from JSON based on options
@@ -22,11 +17,11 @@ function removeEmpty(
 ): JsonValue | undefined {
   // Ensure options has default values
   const opts = {
-    removeNull: options?.removeNull !== false,
-    removeUndefined: options?.removeUndefined !== false,
-    removeEmptyString: options?.removeEmptyString !== false,
-    removeEmptyArray: options?.removeEmptyArray !== false,
-    removeEmptyObject: options?.removeEmptyObject !== false,
+    removeNull: options?.removeNull ?? true,
+    removeUndefined: options?.removeUndefined ?? true,
+    removeEmptyString: options?.removeEmptyString ?? true,
+    removeEmptyArray: options?.removeEmptyArray ?? false,
+    removeEmptyObject: options?.removeEmptyObject ?? false,
   };
 
   // Handle primitive types

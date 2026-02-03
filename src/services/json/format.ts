@@ -1,9 +1,8 @@
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
+import type { FormatConfig } from "@/types/json";
 
-interface FormatOptions {
-  indent?: number | string;
-  sortKeys?: boolean;
-}
+// Export for backward compatibility
+export type FormatOptions = Partial<Pick<FormatConfig, "indent" | "sortKeys">>;
 
 function sortJsonKeys(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {

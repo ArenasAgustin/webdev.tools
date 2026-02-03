@@ -1,9 +1,10 @@
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
+import type { MinifyConfig } from "@/types/json";
 
-interface MinifyOptions {
-  removeSpaces?: boolean;
-  sortKeys?: boolean;
-}
+// Export for backward compatibility
+export type MinifyOptions = Partial<
+  Pick<MinifyConfig, "removeSpaces" | "sortKeys">
+>;
 
 function sortJsonKeys(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {

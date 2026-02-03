@@ -4,6 +4,7 @@ import { ConfigModal } from "@/components/common/ConfigModal";
 import { TipsModal } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
+import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 
 interface ToolbarProps {
   onFormat: () => void;
@@ -16,44 +17,12 @@ interface ToolbarProps {
   onHistoryReuse?: (expression: string) => void | Promise<void>;
   onHistoryDelete?: (id: string) => void | Promise<void>;
   onHistoryClear?: () => void | Promise<void>;
-  formatConfig: {
-    indent: number | "\t";
-    sortKeys: boolean;
-    autoCopy: boolean;
-  };
-  onFormatConfigChange: (config: {
-    indent: number | "\t";
-    sortKeys: boolean;
-    autoCopy: boolean;
-  }) => void;
-  minifyConfig: {
-    removeSpaces: boolean;
-    sortKeys: boolean;
-    autoCopy: boolean;
-  };
-  onMinifyConfigChange: (config: {
-    removeSpaces: boolean;
-    sortKeys: boolean;
-    autoCopy: boolean;
-  }) => void;
-  cleanConfig: {
-    removeNull: boolean;
-    removeUndefined: boolean;
-    removeEmptyString: boolean;
-    removeEmptyArray: boolean;
-    removeEmptyObject: boolean;
-    outputFormat: "format" | "minify";
-    autoCopy: boolean;
-  };
-  onCleanConfigChange: (config: {
-    removeNull: boolean;
-    removeUndefined: boolean;
-    removeEmptyString: boolean;
-    removeEmptyArray: boolean;
-    removeEmptyObject: boolean;
-    outputFormat: "format" | "minify";
-    autoCopy: boolean;
-  }) => void;
+  formatConfig: FormatConfig;
+  onFormatConfigChange: (config: FormatConfig) => void;
+  minifyConfig: MinifyConfig;
+  onMinifyConfigChange: (config: MinifyConfig) => void;
+  cleanConfig: CleanConfig;
+  onCleanConfigChange: (config: CleanConfig) => void;
   configIsOpen?: boolean;
   onConfigOpen?: (isOpen: boolean) => void;
   onShowTips?: () => void;
