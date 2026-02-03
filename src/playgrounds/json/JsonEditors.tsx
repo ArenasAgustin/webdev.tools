@@ -52,12 +52,11 @@ export function JsonEditors({
             />
           }
           footer={
-            <div className="text-xs h-4">
-              <ValidationStatus
-                inputValue={inputValue}
-                validationState={validationState}
-              />
-            </div>
+            <ValidationStatus
+              inputValue={inputValue}
+              validationState={validationState}
+              withWrapper
+            />
           }
           value={inputValue}
           language="json"
@@ -77,19 +76,18 @@ export function JsonEditors({
             />
           }
           footer={
-            <div className="text-xs h-4">
-              <OutputStatus
-                outputValue={outputValue}
-                outputError={outputError}
-                showValidLabel={false}
-                validExtra={
-                  <span className="text-gray-400">
-                    Líneas: {outputValue.split("\n").length} | Caracteres:{" "}
-                    {outputValue.length}
-                  </span>
-                }
-              />
-            </div>
+            <OutputStatus
+              outputValue={outputValue}
+              outputError={outputError}
+              showValidLabel={false}
+              withWrapper
+              validExtra={
+                <span className="text-gray-400">
+                  Líneas: {outputValue.split("\n").length} | Caracteres:{" "}
+                  {outputValue.length}
+                </span>
+              }
+            />
           }
           value={outputValue}
           language="json"
@@ -111,19 +109,19 @@ export function JsonEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 flex items-center gap-1">
-              <ValidationStatus
-                inputValue={inputValue}
-                validationState={validationState}
-                validExtra={
-                  <TextStats
-                    lines={inputStats.lines}
-                    characters={inputStats.characters}
-                    bytes={inputStats.bytes}
-                  />
-                }
-              />
-            </div>
+            <ValidationStatus
+              inputValue={inputValue}
+              validationState={validationState}
+              withWrapper
+              withFlex
+              validExtra={
+                <TextStats
+                  lines={inputStats.lines}
+                  characters={inputStats.characters}
+                  bytes={inputStats.bytes}
+                />
+              }
+            />
           }
         >
           <CodeEditor
@@ -146,20 +144,20 @@ export function JsonEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 flex items-center gap-1">
-              <OutputStatus
-                outputValue={outputValue}
-                outputError={outputError}
-                validExtra={
-                  <OutputStats
-                    lines={outputStats.lines}
-                    characters={outputStats.characters}
-                    outputBytes={outputStats.bytes}
-                    inputBytes={inputStats.bytes}
-                  />
-                }
-              />
-            </div>
+            <OutputStatus
+              outputValue={outputValue}
+              outputError={outputError}
+              withWrapper
+              withFlex
+              validExtra={
+                <OutputStats
+                  lines={outputStats.lines}
+                  characters={outputStats.characters}
+                  outputBytes={outputStats.bytes}
+                  inputBytes={inputStats.bytes}
+                />
+              }
+            />
           }
         >
           <CodeEditor

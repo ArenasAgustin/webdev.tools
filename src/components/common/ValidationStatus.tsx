@@ -6,6 +6,8 @@ interface ValidationStatusProps {
   validationState: JsonValidationState;
   validExtra?: ReactNode;
   className?: string;
+  withWrapper?: boolean;
+  withFlex?: boolean;
 }
 
 /**
@@ -16,26 +18,40 @@ export function ValidationStatus({
   validationState,
   validExtra,
   className = "",
+  withWrapper = false,
+  withFlex = false,
 }: ValidationStatusProps) {
-  if (inputValue.trim() === "") {
-    return (
-      <span className={`text-gray-400 ${className}`}>Esperando JSON...</span>
-    );
-  }
+  const wrapperClass = withWrapper
+    ? `text-xs h-4 ${withFlex ? "flex items-center gap-1" : ""}`
+    : "";
 
-  if (validationState.isValid) {
+  const content = (() => {
+    if (inputValue.trim() === "") {
+      return (
+        <span className={`text-gray-400 ${className}`}>Esperando JSON...</span>
+      );
+    }
+
+    if (validationState.isValid) {
+      return (
+        <span className={`text-green-400 flex items-center gap-1 ${className}`}>
+          <i className="fas fa-check-circle"></i> JSON válido
+          {validExtra}
+        </span>
+      );
+    }
+
     return (
-      <span className={`text-green-400 flex items-center gap-1 ${className}`}>
-        <i className="fas fa-check-circle"></i> JSON válido
-        {validExtra}
+      <span className={`text-red-400 flex items-center gap-1 ${className}`}>
+        <i className="fas fa-exclamation-circle"></i>{" "}
+        {validationState.error?.message || "JSON inválido"}
       </span>
     );
+  })();
+
+  if (withWrapper) {
+    return <div className={wrapperClass}>{content}</div>;
   }
 
-  return (
-    <span className={`text-red-400 flex items-center gap-1 ${className}`}>
-      <i className="fas fa-exclamation-circle"></i>{" "}
-      {validationState.error?.message || "JSON inválido"}
-    </span>
-  );
+  return content;
 }

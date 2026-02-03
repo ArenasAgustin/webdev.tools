@@ -6,6 +6,8 @@ interface OutputStatusProps {
   validExtra?: ReactNode;
   showValidLabel?: boolean;
   className?: string;
+  withWrapper?: boolean;
+  withFlex?: boolean;
 }
 
 /**
@@ -17,31 +19,47 @@ export function OutputStatus({
   validExtra,
   showValidLabel = true,
   className = "",
+  withWrapper = false,
+  withFlex = false,
 }: OutputStatusProps) {
-  if (outputError) {
-    return (
-      <span className={`text-red-400 flex items-center gap-1 ${className}`}>
-        <i className="fas fa-exclamation-circle"></i> {outputError}
-      </span>
-    );
-  }
+  const wrapperClass = withWrapper
+    ? `text-xs h-4 ${withFlex ? "flex items-center gap-1" : ""}`
+    : "";
 
-  if (outputValue.trim() === "") {
-    return (
-      <span className={`text-gray-400 ${className}`}>
-        Esperando operación...
-      </span>
-    );
-  }
-
-  return (
-    <>
-      {showValidLabel && (
-        <span className={`text-green-400 flex items-center gap-1 ${className}`}>
-          <i className="fas fa-check-circle"></i> JSON válido
+  const content = (() => {
+    if (outputError) {
+      return (
+        <span className={`text-red-400 flex items-center gap-1 ${className}`}>
+          <i className="fas fa-exclamation-circle"></i> {outputError}
         </span>
-      )}
-      {validExtra}
-    </>
-  );
+      );
+    }
+
+    if (outputValue.trim() === "") {
+      return (
+        <span className={`text-gray-400 ${className}`}>
+          Esperando operación...
+        </span>
+      );
+    }
+
+    return (
+      <>
+        {showValidLabel && (
+          <span
+            className={`text-green-400 flex items-center gap-1 ${className}`}
+          >
+            <i className="fas fa-check-circle"></i> JSON válido
+          </span>
+        )}
+        {validExtra}
+      </>
+    );
+  })();
+
+  if (withWrapper) {
+    return <div className={wrapperClass}>{content}</div>;
+  }
+
+  return content;
 }
