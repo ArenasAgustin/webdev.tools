@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsonEditors } from "./JsonEditors";
-import { jsonPlaygroundConfig } from "./json.config";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
-import { formatJson } from "@/services/json/format";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonFormatter } from "@/hooks/useJsonFormatter";
 import { useJsonPath } from "@/hooks/useJsonPath";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -54,52 +53,34 @@ export function JsonPlayground() {
   const outputJson = jsonPath.output || formatter.output;
   const outputError = jsonPath.error || formatter.error;
 
-  const handleClearInput = () => {
-    setInputJson("");
-    formatter.clearOutput();
-    jsonPath.clearOutput();
-  };
-
-  const handleLoadExample = () => {
-    const result = formatJson(jsonPlaygroundConfig.example);
-    if (result.ok) {
-      setInputJson(result.value);
-    } else {
-      setInputJson(jsonPlaygroundConfig.example);
-    }
-    formatter.clearOutput();
-    jsonPath.clearOutput();
-  };
-
-  const handleCopyOutput = () => {
-    const textToCopy = outputJson;
-    navigator.clipboard.writeText(textToCopy).catch((err) => {
-      console.error("Error al copiar al portapapeles: ", err);
-    });
-  };
-
-  const handleApplyJsonPath = () => {
-    const result = jsonPath.filter(inputJson);
-    if (result.ok) {
-      jsonPathHistory.addToHistory(jsonPath.expression);
-    }
-  };
-
-  const handleReuseFromHistory = (expression: string) => {
-    jsonPath.setExpression(expression);
-    const result = jsonPath.filter(inputJson, expression);
-    if (result.ok) {
-      jsonPathHistory.addToHistory(expression);
-    }
-  };
+  // Encapsulate all handlers
+  const {
+    handleClearInput,
+    handleLoadExample,
+    handleCopyOutput,
+    handleFormat,
+    handleMinify,
+    handleClean,
+    handleApplyJsonPath,
+    handleReuseFromHistory,
+  } = useJsonPlaygroundActions({
+    inputJson,
+    setInputJson,
+    formatter,
+    jsonPath,
+    jsonPathHistory,
+    formatConfig,
+    minifyConfig,
+    cleanConfig,
+  });
 
   // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
   const [showConfig, setShowConfig] = useState(false);
 
   useKeyboardShortcuts({
-    onFormat: () => formatter.format(inputJson, formatConfig),
-    onMinify: () => formatter.minify(inputJson, minifyConfig),
-    onClean: () => formatter.clean(inputJson, cleanConfig),
+    onFormat: handleFormat,
+    onMinify: handleMinify,
+    onClean: handleClean,
     onCopyOutput: handleCopyOutput,
     onClearInput: handleClearInput,
     onOpenConfig: () => setShowConfig(true),
@@ -120,9 +101,9 @@ export function JsonPlayground() {
 
       <Toolbar
         actions={{
-          onFormat: () => formatter.format(inputJson, formatConfig),
-          onMinify: () => formatter.minify(inputJson, minifyConfig),
-          onClean: () => formatter.clean(inputJson, cleanConfig),
+          onFormat: handleFormat,
+          onMinify: handleMinify,
+          onClean: handleClean,
           onFilter: handleApplyJsonPath,
         }}
         jsonPath={{
