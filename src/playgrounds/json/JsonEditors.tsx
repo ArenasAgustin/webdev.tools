@@ -3,8 +3,7 @@ import { CodeEditor } from "@/components/editor/CodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
 import { JsonInputActions } from "@/components/editor/JsonInputActions";
 import { JsonOutputActions } from "@/components/editor/JsonOutputActions";
-import { TextStats } from "@/components/common/TextStats";
-import { OutputStats } from "@/components/common/OutputStats";
+import { Stats } from "@/components/common/Stats";
 import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
 import { useTextStats } from "@/hooks/useTextStats";
@@ -115,7 +114,7 @@ export function JsonEditors({
               withWrapper
               withFlex
               validExtra={
-                <TextStats
+                <Stats
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
@@ -150,11 +149,11 @@ export function JsonEditors({
               withWrapper
               withFlex
               validExtra={
-                <OutputStats
+                <Stats
                   lines={outputStats.lines}
                   characters={outputStats.characters}
-                  outputBytes={outputStats.bytes}
-                  inputBytes={inputStats.bytes}
+                  bytes={outputStats.bytes}
+                  comparisonBytes={inputStats.bytes}
                 />
               }
             />

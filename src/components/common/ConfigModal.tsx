@@ -3,6 +3,7 @@ import { Card } from "./Card";
 import { Button } from "./Button";
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
 import { Checkbox } from "./Checkbox";
+import { RadioGroup } from "./RadioGroup";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -243,38 +244,18 @@ export function ConfigModal({
               <label className="block text-gray-300 mb-2">
                 Formato de salida
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="cleanOutputMode"
-                    className="w-4 h-4 text-orange-500 focus:ring-orange-500 bg-gray-800 border-gray-600"
-                    checked={cleanConfig.outputFormat === "format"}
-                    onChange={() =>
-                      onCleanConfigChange({
-                        ...cleanConfig,
-                        outputFormat: "format",
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">Formatear</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="cleanOutputMode"
-                    className="w-4 h-4 text-orange-500 focus:ring-orange-500 bg-gray-800 border-gray-600"
-                    checked={cleanConfig.outputFormat === "minify"}
-                    onChange={() =>
-                      onCleanConfigChange({
-                        ...cleanConfig,
-                        outputFormat: "minify",
-                      })
-                    }
-                  />
-                  <span className="text-gray-400">Minificar</span>
-                </label>
-              </div>
+              <RadioGroup
+                name="cleanOutputMode"
+                value={cleanConfig.outputFormat}
+                options={[
+                  { value: "format", label: "Formatear" },
+                  { value: "minify", label: "Minificar" },
+                ]}
+                onChange={(value) =>
+                  onCleanConfigChange({ ...cleanConfig, outputFormat: value })
+                }
+                color="orange"
+              />
             </div>
             <div>
               <label className="block text-gray-300 mb-1">

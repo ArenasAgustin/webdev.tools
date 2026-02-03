@@ -23,7 +23,7 @@
 
 - Historial de filtros JSONPath con acciones rápidas de reutilizar/borrar ✅
 
-### 4.1 - Refactorizaciones Pendientes
+### 4.1 - Refactorizaciones Pendientes ✅
 
 #### 🔴 Alta Prioridad
 
@@ -46,7 +46,7 @@
 - [x] **Abstracción de editor expandido**: Crear hook `useExpandedEditor()` para manejo de estado de expansión ✅
 - [x] **Carpeta store/ vacía**: Eliminada - no se necesita Zustand para este proyecto ✅
 
-### 4.2 - Refactorizaciones Adicionales
+### 4.2 - Refactorizaciones Adicionales ✅
 
 #### 🔴 Alta Prioridad (Adicional)
 
@@ -61,8 +61,8 @@
 
 #### 🟡 Baja Prioridad (Adicional)
 
-- [ ] **Stats components similares**: Evaluar unificación de `TextStats` y `OutputStats`
-- [ ] **Radio buttons en ConfigModal**: Crear componente `RadioGroup` reutilizable
+- [x] **Stats components similares**: Evaluar unificación de `TextStats` y `OutputStats` ✅
+- [x] **Radio buttons en ConfigModal**: Crear componente `RadioGroup` reutilizable ✅
 
 ## 5
 
