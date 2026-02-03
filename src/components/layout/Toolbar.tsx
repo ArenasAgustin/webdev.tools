@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { ConfigModal } from "@/components/common/ConfigModal";
 import { TipsModal } from "@/components/common/TipsModal";
+import type { TipItem, QuickExample } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
@@ -27,14 +28,8 @@ interface ToolbarProps {
   onConfigOpen?: (isOpen: boolean) => void;
   onShowTips?: () => void;
   tipsConfig?: {
-    tips: Array<{
-      id: string;
-      category: string;
-      categoryIcon?: string;
-      categoryColor?: string;
-      items: Array<{ code: string; description: string }>;
-    }>;
-    quickExamples?: Array<{ code: string; label: string; description: string }>;
+    tips: TipItem[];
+    quickExamples?: QuickExample[];
   };
 }
 

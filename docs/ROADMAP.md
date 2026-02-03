@@ -35,11 +35,12 @@
 
 - [x] **Panel y ExpandedEditorModal similares**: Crear componente base `Container` o refactorizar para reutilizar lógica compartida ✅
 - [x] **Validación de estado duplicada**: Crear componente `ValidationStatus` o hook `useValidationMessage` para estados del JSON ✅
-- [ ] **Manejo de colores inconsistente**: Centralizar paleta de colores (hex vs Tailwind) en archivo de constantes
+- [x] **Manejo de colores inconsistente**: Centralizar paleta de colores (hex vs Tailwind) en archivo de constantes ✅
 - [ ] **Props excesivas en Toolbar**: Agrupar 21 props en objetos (`toolbarActions`, `toolbarConfig`)
 
 #### 🟡 Baja Prioridad
 
+- [ ] **Componente de card para configuraciones/tips**: Crear componente `Card` reutilizable para modales
 - [ ] **Estado modal unificado**: Usar `type ModalType = 'tips' | 'history' | 'config' | null` en lugar de 3 `useState` separados
 - [ ] **Handlers inline**: Crear hook `useJsonPlaygroundActions()` para encapsular handlers del playground
 - [ ] **Abstracción de editor expandido**: Crear hook `useExpandedEditor()` para manejo de estado de expansión
