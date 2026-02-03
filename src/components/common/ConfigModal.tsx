@@ -1,6 +1,7 @@
 import { Modal } from "./Modal";
 import { Card } from "./Card";
 import { Button } from "./Button";
+import { ToggleButtonGroup } from "./ToggleButtonGroup";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -30,11 +31,6 @@ export function ConfigModal({
   cleanConfig,
   onCleanConfigChange,
 }: ConfigModalProps) {
-  const spacingButtonClass = (isActive: boolean) =>
-    isActive
-      ? "flex-1 p-2 bg-blue-500/30 border border-blue-500/50 rounded text-white transition-colors"
-      : "flex-1 p-2 bg-white/10 border border-white/20 rounded text-gray-400 hover:text-white transition-colors";
-
   const handleReset = () => {
     onFormatConfigChange(DEFAULT_FORMAT_CONFIG);
     onMinifyConfigChange(DEFAULT_MINIFY_CONFIG);
@@ -79,41 +75,17 @@ export function ConfigModal({
           <div className="space-y-3">
             <div>
               <label className="block text-gray-300 mb-1">Espaciado</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    onFormatConfigChange({
-                      ...formatConfig,
-                      indent: 2,
-                    })
-                  }
-                  className={spacingButtonClass(formatConfig.indent === 2)}
-                >
-                  2 espacios
-                </button>
-                <button
-                  onClick={() =>
-                    onFormatConfigChange({
-                      ...formatConfig,
-                      indent: 4,
-                    })
-                  }
-                  className={spacingButtonClass(formatConfig.indent === 4)}
-                >
-                  4 espacios
-                </button>
-                <button
-                  onClick={() =>
-                    onFormatConfigChange({
-                      ...formatConfig,
-                      indent: "\t",
-                    })
-                  }
-                  className={spacingButtonClass(formatConfig.indent === "\t")}
-                >
-                  Tab
-                </button>
-              </div>
+              <ToggleButtonGroup
+                options={[
+                  { value: 2, label: "2 espacios" },
+                  { value: 4, label: "4 espacios" },
+                  { value: "\t", label: "Tab" },
+                ]}
+                value={formatConfig.indent}
+                onChange={(indent) =>
+                  onFormatConfigChange({ ...formatConfig, indent })
+                }
+              />
             </div>
             <div>
               <label className="block text-gray-300 mb-1">

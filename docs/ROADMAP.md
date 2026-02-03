@@ -55,7 +55,7 @@
 
 #### 🟠 Media Prioridad (Adicional)
 
-- [ ] **Botones de toggle duplicados**: Crear componente `ToggleButtonGroup` para botones de espaciado en ConfigModal
+- [x] **Botones de toggle duplicados**: Crear componente `ToggleButtonGroup` para botones de espaciado en ConfigModal ✅
 - [ ] **Checkboxes con estilos duplicados**: Crear componente `Checkbox` reutilizable (~15 checkboxes en ConfigModal)
 - [ ] **Wrapper footer repetido**: Unificar `<div className="text-xs h-4">` en JsonEditors (repetido 4 veces)
 
