@@ -1,5 +1,6 @@
 import { Modal } from "./Modal";
 import { Card } from "./Card";
+import { Button } from "./Button";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -61,12 +62,9 @@ export function ConfigModal({
       onClose={handleClose}
       footer={
         <div className="flex justify-end gap-2">
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
-          >
-            <i className="fas fa-undo mr-1"></i> Restablecer
-          </button>
+          <Button onClick={handleReset}>
+            <i className="fas fa-undo"></i> Restablecer
+          </Button>
         </div>
       }
     >
