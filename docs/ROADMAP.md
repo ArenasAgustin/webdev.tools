@@ -44,7 +44,7 @@
 - [x] **Estado modal unificado**: Usar `type ModalType = 'tips' | 'history' | 'config' | null` en lugar de 3 `useState` separados ✅
 - [x] **Handlers inline**: Crear hook `useJsonPlaygroundActions()` para encapsular handlers del playground ✅
 - [x] **Abstracción de editor expandido**: Crear hook `useExpandedEditor()` para manejo de estado de expansión ✅
-- [ ] **Carpeta store/ vacía**: Implementar store global con Zustand o eliminar carpeta si no se necesita
+- [x] **Carpeta store/ vacía**: Eliminada - no se necesita Zustand para este proyecto ✅
 
 ## 5
 
