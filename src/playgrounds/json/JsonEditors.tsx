@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Panel } from "@/components/layout/Panel";
-import { Button } from "@/components/common/Button";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
+import { JsonInputActions } from "@/components/editor/JsonInputActions";
+import { JsonOutputActions } from "@/components/editor/JsonOutputActions";
 import { TextStats } from "@/components/common/TextStats";
 import { OutputStats } from "@/components/common/OutputStats";
 import { ValidationStatus } from "@/components/common/ValidationStatus";
@@ -46,17 +47,11 @@ export function JsonEditors({
           icon="edit"
           iconColor="blue-400"
           actions={
-            <>
-              <Button variant="danger" onClick={onClearInput}>
-                <i className="fas fa-trash"></i> Limpiar
-              </Button>
-              <Button variant="success" onClick={onLoadExample}>
-                <i className="fas fa-file-import"></i> Ejemplo
-              </Button>
-              <Button variant="purple" onClick={() => setExpandedEditor(null)}>
-                <i className="fas fa-expand"></i>
-              </Button>
-            </>
+            <JsonInputActions
+              onClearInput={onClearInput}
+              onLoadExample={onLoadExample}
+              onExpand={() => setExpandedEditor(null)}
+            />
           }
           footer={
             <div className="text-xs h-4">
@@ -78,14 +73,10 @@ export function JsonEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <>
-              <Button variant="primary" onClick={onCopyOutput}>
-                <i className="fas fa-copy"></i> Copiar
-              </Button>
-              <Button variant="purple" onClick={() => setExpandedEditor(null)}>
-                <i className="fas fa-expand"></i>
-              </Button>
-            </>
+            <JsonOutputActions
+              onCopyOutput={onCopyOutput}
+              onExpand={() => setExpandedEditor(null)}
+            />
           }
           footer={
             <div className="text-xs h-4">
@@ -115,20 +106,11 @@ export function JsonEditors({
           icon="edit"
           iconColor="blue-400"
           actions={
-            <>
-              <Button variant="danger" onClick={onClearInput}>
-                <i className="fas fa-trash"></i> Limpiar
-              </Button>
-              <Button variant="success" onClick={onLoadExample}>
-                <i className="fas fa-file-import"></i> Ejemplo
-              </Button>
-              <Button
-                variant="purple"
-                onClick={() => setExpandedEditor("input")}
-              >
-                <i className="fas fa-expand"></i>
-              </Button>
-            </>
+            <JsonInputActions
+              onClearInput={onClearInput}
+              onLoadExample={onLoadExample}
+              onExpand={() => setExpandedEditor("input")}
+            />
           }
           footer={
             <div className="text-xs h-4 flex items-center gap-1">
@@ -160,17 +142,10 @@ export function JsonEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <>
-              <Button variant="primary" onClick={onCopyOutput}>
-                <i className="fas fa-copy"></i> Copiar
-              </Button>
-              <Button
-                variant="purple"
-                onClick={() => setExpandedEditor("output")}
-              >
-                <i className="fas fa-expand"></i>
-              </Button>
-            </>
+            <JsonOutputActions
+              onCopyOutput={onCopyOutput}
+              onExpand={() => setExpandedEditor("output")}
+            />
           }
           footer={
             <div className="text-xs h-4 flex items-center gap-1">
