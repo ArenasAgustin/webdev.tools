@@ -5,6 +5,8 @@ import { CodeEditor } from "@/components/editor/CodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
 import { TextStats } from "@/components/common/TextStats";
 import { OutputStats } from "@/components/common/OutputStats";
+import { ValidationStatus } from "@/components/common/ValidationStatus";
+import { OutputStatus } from "@/components/common/OutputStatus";
 import { useTextStats } from "@/hooks/useTextStats";
 import type { JsonValidationState } from "./json.types";
 
@@ -58,18 +60,10 @@ export function JsonEditors({
           }
           footer={
             <div className="text-xs h-4">
-              {inputValue.trim() === "" ? (
-                <span className="text-gray-400">Esperando JSON...</span>
-              ) : validationState.isValid ? (
-                <span className="text-green-400 flex items-center gap-1">
-                  <i className="fas fa-check-circle"></i> JSON válido
-                </span>
-              ) : (
-                <span className="text-red-400 flex items-center gap-1">
-                  <i className="fas fa-exclamation-circle"></i>{" "}
-                  {validationState.error?.message || "JSON inválido"}
-                </span>
-              )}
+              <ValidationStatus
+                inputValue={inputValue}
+                validationState={validationState}
+              />
             </div>
           }
           value={inputValue}
@@ -95,18 +89,17 @@ export function JsonEditors({
           }
           footer={
             <div className="text-xs h-4">
-              {outputError ? (
-                <span className="text-red-400 flex items-center gap-1">
-                  <i className="fas fa-exclamation-circle"></i> {outputError}
-                </span>
-              ) : outputValue.trim() === "" ? (
-                <span className="text-gray-400">Esperando operación...</span>
-              ) : (
-                <span className="text-gray-400">
-                  Líneas: {outputValue.split("\n").length} | Caracteres:{" "}
-                  {outputValue.length}
-                </span>
-              )}
+              <OutputStatus
+                outputValue={outputValue}
+                outputError={outputError}
+                showValidLabel={false}
+                validExtra={
+                  <span className="text-gray-400">
+                    Líneas: {outputValue.split("\n").length} | Caracteres:{" "}
+                    {outputValue.length}
+                  </span>
+                }
+              />
             </div>
           }
           value={outputValue}
@@ -139,25 +132,17 @@ export function JsonEditors({
           }
           footer={
             <div className="text-xs h-4 flex items-center gap-1">
-              {inputValue.trim() === "" ? (
-                <span className="text-gray-400">Esperando JSON...</span>
-              ) : validationState.isValid ? (
-                <>
-                  <span className="text-green-400 flex items-center gap-1">
-                    <i className="fas fa-check-circle"></i> JSON válido
-                  </span>
+              <ValidationStatus
+                inputValue={inputValue}
+                validationState={validationState}
+                validExtra={
                   <TextStats
                     lines={inputStats.lines}
                     characters={inputStats.characters}
                     bytes={inputStats.bytes}
                   />
-                </>
-              ) : (
-                <span className="text-red-400 flex items-center gap-1">
-                  <i className="fas fa-exclamation-circle"></i>{" "}
-                  {validationState.error?.message || "JSON inválido"}
-                </span>
-              )}
+                }
+              />
             </div>
           }
         >
@@ -189,25 +174,18 @@ export function JsonEditors({
           }
           footer={
             <div className="text-xs h-4 flex items-center gap-1">
-              {outputError ? (
-                <span className="text-red-400 flex items-center gap-1">
-                  <i className="fas fa-exclamation-circle"></i> {outputError}
-                </span>
-              ) : outputValue.trim() === "" ? (
-                <span className="text-gray-400">Esperando operación...</span>
-              ) : (
-                <>
-                  <span className="text-green-400 flex items-center gap-1">
-                    <i className="fas fa-check-circle"></i> JSON válido
-                  </span>
+              <OutputStatus
+                outputValue={outputValue}
+                outputError={outputError}
+                validExtra={
                   <OutputStats
                     lines={outputStats.lines}
                     characters={outputStats.characters}
                     outputBytes={outputStats.bytes}
                     inputBytes={inputStats.bytes}
                   />
-                </>
-              )}
+                }
+              />
             </div>
           }
         >
