@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
@@ -9,6 +8,7 @@ import { OutputStats } from "@/components/common/OutputStats";
 import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
 import { useTextStats } from "@/hooks/useTextStats";
+import { useExpandedEditor } from "@/hooks/useExpandedEditor";
 import type { JsonValidationState } from "./json.types";
 
 interface JsonEditorsProps {
@@ -32,16 +32,14 @@ export function JsonEditors({
   onLoadExample,
   onCopyOutput,
 }: JsonEditorsProps) {
-  const [expandedEditor, setExpandedEditor] = useState<
-    "input" | "output" | null
-  >(null);
+  const editor = useExpandedEditor();
 
   const inputStats = useTextStats(inputValue);
   const outputStats = useTextStats(outputValue);
 
   return (
     <>
-      {expandedEditor === "input" && (
+      {editor.isExpanded("input") && (
         <ExpandedEditorModal
           title="Entrada"
           icon="edit"
@@ -50,7 +48,7 @@ export function JsonEditors({
             <JsonInputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
-              onExpand={() => setExpandedEditor(null)}
+              onExpand={editor.collapse}
             />
           }
           footer={
@@ -67,7 +65,7 @@ export function JsonEditors({
         />
       )}
 
-      {expandedEditor === "output" && (
+      {editor.isExpanded("output") && (
         <ExpandedEditorModal
           title="Resultado"
           icon="terminal"
@@ -75,7 +73,7 @@ export function JsonEditors({
           actions={
             <JsonOutputActions
               onCopyOutput={onCopyOutput}
-              onExpand={() => setExpandedEditor(null)}
+              onExpand={editor.collapse}
             />
           }
           footer={
@@ -109,7 +107,7 @@ export function JsonEditors({
             <JsonInputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
-              onExpand={() => setExpandedEditor("input")}
+              onExpand={() => editor.expand("input")}
             />
           }
           footer={
@@ -144,7 +142,7 @@ export function JsonEditors({
           actions={
             <JsonOutputActions
               onCopyOutput={onCopyOutput}
-              onExpand={() => setExpandedEditor("output")}
+              onExpand={() => editor.expand("output")}
             />
           }
           footer={
