@@ -1,4 +1,5 @@
 import { Modal } from "./Modal";
+import { Card } from "./Card";
 import type { IconColorKey } from "@/utils/constants/colors";
 
 export interface TipItem {
@@ -85,18 +86,13 @@ export function TipsModal({
             colorMap[tip.categoryColor || "blue-400"] || colorMap["blue-400"];
 
           return (
-            <div
+            <Card
               key={tip.id}
-              className={`border rounded-lg p-3 ${color.container}`}
+              title={tip.category}
+              icon={tip.categoryIcon}
+              className={color.container}
+              headerClassName={color.text}
             >
-              <h4
-                className={`font-semibold mb-2 flex items-center gap-2 ${color.text}`}
-              >
-                {tip.categoryIcon && (
-                  <i className={`fas fa-${tip.categoryIcon}`}></i>
-                )}
-                {tip.category}
-              </h4>
               <ul className="space-y-1 text-gray-300">
                 {tip.items.map((item, idx) => (
                   <li key={idx}>
@@ -107,16 +103,18 @@ export function TipsModal({
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           );
         })}
 
         {/* Quick examples */}
         {quickExamples.length > 0 && (
-          <div className="border rounded-lg p-3 bg-pink-500/10 border-pink-500/20">
-            <h4 className="font-semibold mb-2 flex items-center gap-2 text-pink-400">
-              <i className="fas fa-magic"></i> Ejemplos Rápidos
-            </h4>
+          <Card
+            title="Ejemplos Rápidos"
+            icon="magic"
+            className="bg-pink-500/10 border-pink-500/20"
+            headerClassName="text-pink-400"
+          >
             <div className="grid grid-cols-2 gap-2">
               {quickExamples.map((example) => (
                 <button
@@ -131,7 +129,7 @@ export function TipsModal({
                 </button>
               ))}
             </div>
-          </div>
+          </Card>
         )}
       </div>
     </Modal>

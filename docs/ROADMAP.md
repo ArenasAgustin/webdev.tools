@@ -40,7 +40,7 @@
 
 #### 🟡 Baja Prioridad
 
-- [ ] **Componente de card para configuraciones/tips**: Crear componente `Card` reutilizable para modales
+- [x] **Componente de card para configuraciones/tips**: Crear componente `Card` reutilizable para modales ✅
 - [ ] **Estado modal unificado**: Usar `type ModalType = 'tips' | 'history' | 'config' | null` en lugar de 3 `useState` separados
 - [ ] **Handlers inline**: Crear hook `useJsonPlaygroundActions()` para encapsular handlers del playground
 - [ ] **Abstracción de editor expandido**: Crear hook `useExpandedEditor()` para manejo de estado de expansión

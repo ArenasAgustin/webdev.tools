@@ -1,4 +1,5 @@
 import { Modal } from "./Modal";
+import { Card } from "./Card";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -71,10 +72,12 @@ export function ConfigModal({
     >
       <div className="space-y-6 text-xs">
         {/* Formatear */}
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
-            <i className="fas fa-indent"></i> Formatear JSON
-          </h4>
+        <Card
+          title="Formatear JSON"
+          icon="indent"
+          className="bg-blue-500/10 border-blue-500/20"
+          headerClassName="text-blue-400"
+        >
           <div className="space-y-3">
             <div>
               <label className="block text-gray-300 mb-1">Espaciado</label>
@@ -153,13 +156,15 @@ export function ConfigModal({
               </label>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Minificar */}
-        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-          <h4 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">
-            <i className="fas fa-compress"></i> Minificar JSON
-          </h4>
+        <Card
+          title="Minificar JSON"
+          icon="compress"
+          className="bg-purple-500/10 border-purple-500/20"
+          headerClassName="text-purple-400"
+        >
           <div className="space-y-3">
             <div>
               <label className="block text-gray-300 mb-1">
@@ -220,13 +225,15 @@ export function ConfigModal({
               </label>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Limpiar vacíos */}
-        <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-          <h4 className="font-semibold text-orange-400 mb-3 flex items-center gap-2">
-            <i className="fas fa-broom"></i> Limpiar Valores Vacíos
-          </h4>
+        <Card
+          title="Limpiar Valores Vacíos"
+          icon="broom"
+          className="bg-orange-500/10 border-orange-500/20"
+          headerClassName="text-orange-400"
+        >
           <div className="space-y-3">
             <div>
               <label className="block text-gray-300 mb-2">
@@ -362,7 +369,7 @@ export function ConfigModal({
               </label>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </Modal>
   );
