@@ -41,7 +41,7 @@
 #### 🟡 Baja Prioridad
 
 - [x] **Componente de card para configuraciones/tips**: Crear componente `Card` reutilizable para modales ✅
-- [ ] **Estado modal unificado**: Usar `type ModalType = 'tips' | 'history' | 'config' | null` en lugar de 3 `useState` separados
+- [x] **Estado modal unificado**: Usar `type ModalType = 'tips' | 'history' | 'config' | null` en lugar de 3 `useState` separados ✅
 - [ ] **Handlers inline**: Crear hook `useJsonPlaygroundActions()` para encapsular handlers del playground
 - [ ] **Abstracción de editor expandido**: Crear hook `useExpandedEditor()` para manejo de estado de expansión
 - [ ] **Carpeta store/ vacía**: Implementar store global con Zustand o eliminar carpeta si no se necesita

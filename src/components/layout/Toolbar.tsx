@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { ConfigModal } from "@/components/common/ConfigModal";
 import { TipsModal } from "@/components/common/TipsModal";
@@ -6,6 +6,8 @@ import type { TipItem, QuickExample } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+
+type ModalType = "tips" | "history" | "config" | null;
 
 interface ToolbarProps {
   actions: {
@@ -50,23 +52,36 @@ export function Toolbar({
   config,
   tips,
 }: ToolbarProps) {
-  const [showTips, setShowTips] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [localShowConfig, setLocalShowConfig] = useState(
-    config.isOpen || false,
-  );
+  const [openModal, setOpenModal] = useState<ModalType>(null);
+
+  // Sync controlled config modal state when provided
+  useEffect(() => {
+    if (config.isOpen === true) {
+      setOpenModal("config");
+    } else if (config.isOpen === false && openModal === "config") {
+      setOpenModal(null);
+    }
+  }, [config.isOpen, openModal]);
 
   // Use external state if provided, otherwise use local state
-  const showConfig = config.isOpen ?? localShowConfig;
-  const setShowConfigState = config.onOpenChange ?? setLocalShowConfig;
+  const showConfig = config.isOpen ?? openModal === "config";
+  const setShowConfigState = (isOpen: boolean) => {
+    if (config.onOpenChange) {
+      config.onOpenChange(isOpen);
+    } else {
+      setOpenModal(isOpen ? "config" : null);
+    }
+  };
 
   const handleShowTips = () => {
-    setShowTips(true);
-    tips?.onShow?.();
+    if (!tips?.config) return;
+    setOpenModal("tips");
+    tips.onShow?.();
   };
 
   const handleShowHistory = () => {
-    setShowHistory(true);
+    if (!history) return;
+    setOpenModal("history");
   };
 
   return (
@@ -138,16 +153,16 @@ export function Toolbar({
       {/* Tips Modal */}
       {tips?.config && (
         <TipsModal
-          isOpen={showTips}
+          isOpen={openModal === "tips"}
           title="Tips para Filtros JSONPath"
           icon="lightbulb"
           iconColor="yellow-400"
           tips={tips.config.tips}
           quickExamples={tips.config.quickExamples}
-          onClose={() => setShowTips(false)}
+          onClose={() => setOpenModal(null)}
           onTryExample={(code) => {
             jsonPath.onChange(code);
-            setShowTips(false);
+            setOpenModal(null);
           }}
         />
       )}
@@ -155,12 +170,12 @@ export function Toolbar({
       {/* History Modal */}
       {history && (
         <JsonPathHistoryModal
-          isOpen={showHistory}
+          isOpen={openModal === "history"}
           history={history.items}
-          onClose={() => setShowHistory(false)}
+          onClose={() => setOpenModal(null)}
           onReuse={(expression) => {
             history.onReuse(expression);
-            setShowHistory(false);
+            setOpenModal(null);
           }}
           onDelete={history.onDelete}
           onClearAll={history.onClear}
