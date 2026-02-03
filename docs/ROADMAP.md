@@ -46,6 +46,24 @@
 - [x] **Abstracción de editor expandido**: Crear hook `useExpandedEditor()` para manejo de estado de expansión ✅
 - [x] **Carpeta store/ vacía**: Eliminada - no se necesita Zustand para este proyecto ✅
 
+### 4.2 - Refactorizaciones Adicionales
+
+#### 🔴 Alta Prioridad (Adicional)
+
+- [x] **colorMap duplicado en TipsModal**: Mover objeto `colorMap` fuera del componente/map para evitar recreación en cada render ✅
+- [x] **App.css sin usar**: Eliminado - estilos no utilizados del boilerplate de Vite ✅
+
+#### 🟠 Media Prioridad (Adicional)
+
+- [ ] **Botones de toggle duplicados**: Crear componente `ToggleButtonGroup` para botones de espaciado en ConfigModal
+- [ ] **Checkboxes con estilos duplicados**: Crear componente `Checkbox` reutilizable (~15 checkboxes en ConfigModal)
+- [ ] **Wrapper footer repetido**: Unificar `<div className="text-xs h-4">` en JsonEditors (repetido 4 veces)
+
+#### 🟡 Baja Prioridad (Adicional)
+
+- [ ] **Stats components similares**: Evaluar unificación de `TextStats` y `OutputStats`
+- [ ] **Radio buttons en ConfigModal**: Crear componente `RadioGroup` reutilizable
+
 ## 5
 
 - Mejorar layout responsive (stack en mobile/tablet, contenedores `min-w-0`, toolbars adhesivas)

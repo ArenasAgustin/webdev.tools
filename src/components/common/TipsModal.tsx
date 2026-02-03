@@ -30,6 +30,37 @@ interface TipsModalProps {
   onTryExample: (code: string) => void;
 }
 
+const TIP_COLOR_MAP: Record<
+  string,
+  { container: string; text: string; code: string }
+> = {
+  "blue-400": {
+    container: "bg-blue-500/10 border-blue-500/20",
+    text: "text-blue-400",
+    code: "text-blue-300",
+  },
+  "purple-400": {
+    container: "bg-purple-500/10 border-purple-500/20",
+    text: "text-purple-400",
+    code: "text-purple-300",
+  },
+  "green-400": {
+    container: "bg-green-500/10 border-green-500/20",
+    text: "text-green-400",
+    code: "text-green-300",
+  },
+  "orange-400": {
+    container: "bg-orange-500/10 border-orange-500/20",
+    text: "text-orange-400",
+    code: "text-orange-300",
+  },
+  "pink-400": {
+    container: "bg-pink-500/10 border-pink-500/20",
+    text: "text-pink-400",
+    code: "text-pink-300",
+  },
+};
+
 export function TipsModal({
   isOpen,
   title,
@@ -51,39 +82,9 @@ export function TipsModal({
       <div className="space-y-4 text-xs max-h-[60vh] overflow-y-auto pr-2">
         {/* Tips by category */}
         {tips.map((tip) => {
-          const colorMap: Record<
-            string,
-            { container: string; text: string; code: string }
-          > = {
-            "blue-400": {
-              container: "bg-blue-500/10 border-blue-500/20",
-              text: "text-blue-400",
-              code: "text-blue-300",
-            },
-            "purple-400": {
-              container: "bg-purple-500/10 border-purple-500/20",
-              text: "text-purple-400",
-              code: "text-purple-300",
-            },
-            "green-400": {
-              container: "bg-green-500/10 border-green-500/20",
-              text: "text-green-400",
-              code: "text-green-300",
-            },
-            "orange-400": {
-              container: "bg-orange-500/10 border-orange-500/20",
-              text: "text-orange-400",
-              code: "text-orange-300",
-            },
-            "pink-400": {
-              container: "bg-pink-500/10 border-pink-500/20",
-              text: "text-pink-400",
-              code: "text-pink-300",
-            },
-          };
-
           const color =
-            colorMap[tip.categoryColor || "blue-400"] || colorMap["blue-400"];
+            TIP_COLOR_MAP[tip.categoryColor || "blue-400"] ||
+            TIP_COLOR_MAP["blue-400"];
 
           return (
             <Card
