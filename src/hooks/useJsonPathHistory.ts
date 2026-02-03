@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { STORAGE_KEYS, getItem, removeItem } from "@/services/storage";
 
 export interface JsonPathHistoryItem {
   id: string;
@@ -14,7 +15,7 @@ interface JsonPathHistoryHook {
   clearHistory: () => Promise<void>;
 }
 
-const HISTORY_KEY = "jsonPathHistory";
+const HISTORY_KEY = STORAGE_KEYS.JSONPATH_HISTORY;
 const MAX_ITEMS = 20;
 const DB_NAME = "webdev.tools";
 const DB_VERSION = 2;
@@ -96,20 +97,19 @@ const pruneHistory = async () => {
 };
 
 const migrateLocalStorage = async () => {
-  const saved = localStorage.getItem(HISTORY_KEY);
+  const saved = getItem<JsonPathHistoryItem[]>(HISTORY_KEY);
   if (!saved) return;
 
   try {
-    const items = JSON.parse(saved) as JsonPathHistoryItem[];
-    if (!Array.isArray(items) || items.length === 0) {
-      localStorage.removeItem(HISTORY_KEY);
+    if (!Array.isArray(saved) || saved.length === 0) {
+      removeItem(HISTORY_KEY);
       return;
     }
 
     const db = await openDb();
     const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
-    items.forEach((item) => store.put(item));
+    saved.forEach((item) => store.put(item));
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
@@ -117,7 +117,7 @@ const migrateLocalStorage = async () => {
       transaction.onabort = () => reject(transaction.error);
     });
 
-    localStorage.removeItem(HISTORY_KEY);
+    removeItem(HISTORY_KEY);
   } catch (error) {
     console.error("Error migrating JSONPath history:", error);
   }

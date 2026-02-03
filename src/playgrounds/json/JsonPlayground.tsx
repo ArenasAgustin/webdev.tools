@@ -15,34 +15,20 @@ import {
   DEFAULT_MINIFY_CONFIG,
   DEFAULT_CLEAN_CONFIG,
 } from "@/types/json";
+import {
+  loadToolsConfig,
+  loadLastJson,
+  saveLastJson,
+} from "@/services/storage";
 
-// Load config from localStorage
-const loadSavedConfig = () => {
-  const savedConfig = localStorage.getItem("toolsConfig");
-  if (savedConfig) {
-    try {
-      return JSON.parse(savedConfig);
-    } catch (error) {
-      console.error("Error loading config from localStorage:", error);
-    }
-  }
-  return null;
-};
-
-// Load last JSON from localStorage
-const loadLastJson = () => {
-  const savedJson = localStorage.getItem("lastJson");
-  return savedJson || "";
-};
-
-const savedConfig = loadSavedConfig();
+const savedConfig = loadToolsConfig();
 
 /**
  * JSON Playground - Encapsulated JSON tools
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
-  const [inputJson, setInputJson] = useState(loadLastJson);
+  const [inputJson, setInputJson] = useState<string>(() => loadLastJson());
   const [formatConfig, setFormatConfig] = useState<FormatConfig>(
     savedConfig?.format || DEFAULT_FORMAT_CONFIG,
   );
@@ -55,7 +41,7 @@ export function JsonPlayground() {
 
   // Auto-save last JSON to localStorage
   useEffect(() => {
-    localStorage.setItem("lastJson", inputJson);
+    saveLastJson(inputJson);
   }, [inputJson]);
 
   // Use custom hooks for logic encapsulation

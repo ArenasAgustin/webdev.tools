@@ -1,68 +1,21 @@
 import { Modal } from "./Modal";
-
-const DEFAULT_FORMAT_CONFIG = {
-  indent: 2 as number | "\t",
-  sortKeys: false,
-  autoCopy: false,
-};
-
-const DEFAULT_MINIFY_CONFIG = {
-  removeSpaces: true,
-  sortKeys: false,
-  autoCopy: false,
-};
-
-const DEFAULT_CLEAN_CONFIG = {
-  removeNull: true,
-  removeUndefined: true,
-  removeEmptyString: true,
-  removeEmptyArray: false,
-  removeEmptyObject: false,
-  outputFormat: "format" as "format" | "minify",
-  autoCopy: false,
-};
+import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import {
+  DEFAULT_FORMAT_CONFIG,
+  DEFAULT_MINIFY_CONFIG,
+  DEFAULT_CLEAN_CONFIG,
+} from "@/types/json";
+import { saveToolsConfig, removeToolsConfig } from "@/services/storage";
 
 interface ConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
-  formatConfig: {
-    indent: number | "\t";
-    sortKeys: boolean;
-    autoCopy: boolean;
-  };
-  onFormatConfigChange: (config: {
-    indent: number | "\t";
-    sortKeys: boolean;
-    autoCopy: boolean;
-  }) => void;
-  minifyConfig: {
-    removeSpaces: boolean;
-    sortKeys: boolean;
-    autoCopy: boolean;
-  };
-  onMinifyConfigChange: (config: {
-    removeSpaces: boolean;
-    sortKeys: boolean;
-    autoCopy: boolean;
-  }) => void;
-  cleanConfig: {
-    removeNull: boolean;
-    removeUndefined: boolean;
-    removeEmptyString: boolean;
-    removeEmptyArray: boolean;
-    removeEmptyObject: boolean;
-    outputFormat: "format" | "minify";
-    autoCopy: boolean;
-  };
-  onCleanConfigChange: (config: {
-    removeNull: boolean;
-    removeUndefined: boolean;
-    removeEmptyString: boolean;
-    removeEmptyArray: boolean;
-    removeEmptyObject: boolean;
-    outputFormat: "format" | "minify";
-    autoCopy: boolean;
-  }) => void;
+  formatConfig: FormatConfig;
+  onFormatConfigChange: (config: FormatConfig) => void;
+  minifyConfig: MinifyConfig;
+  onMinifyConfigChange: (config: MinifyConfig) => void;
+  cleanConfig: CleanConfig;
+  onCleanConfigChange: (config: CleanConfig) => void;
 }
 
 export function ConfigModal({
@@ -84,7 +37,7 @@ export function ConfigModal({
     onFormatConfigChange(DEFAULT_FORMAT_CONFIG);
     onMinifyConfigChange(DEFAULT_MINIFY_CONFIG);
     onCleanConfigChange(DEFAULT_CLEAN_CONFIG);
-    localStorage.removeItem("toolsConfig");
+    removeToolsConfig();
   };
 
   const handleClose = () => {
@@ -93,7 +46,7 @@ export function ConfigModal({
       minify: minifyConfig,
       clean: cleanConfig,
     };
-    localStorage.setItem("toolsConfig", JSON.stringify(allConfig));
+    saveToolsConfig(allConfig);
     onClose();
   };
 
