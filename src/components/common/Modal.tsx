@@ -1,27 +1,16 @@
 import { type ReactNode, useEffect } from "react";
+import { getIconColorClass, type IconColorKey } from "@/utils/constants/colors";
 
 interface ModalProps {
   isOpen: boolean;
   title: string;
   icon: string;
-  iconColor?: string;
+  iconColor?: IconColorKey;
   children: ReactNode;
   footer?: ReactNode;
   onClose: () => void;
   maxWidth?: string;
 }
-
-const colorMap: Record<string, string> = {
-  "blue-400": "#60a5fa",
-  "blue-300": "#93c5fd",
-  "purple-400": "#c084fa",
-  "green-400": "#4ade80",
-  "red-400": "#f87171",
-  "yellow-400": "#facc15",
-  "orange-400": "#fb923c",
-  "cyan-400": "#06b6d4",
-  "pink-400": "#f472b6",
-};
 
 export function Modal({
   isOpen,
@@ -33,9 +22,7 @@ export function Modal({
   onClose,
   maxWidth = "max-w-2xl",
 }: ModalProps) {
-  if (!isOpen) return null;
-
-  const iconHexColor = colorMap[iconColor] || colorMap["blue-400"];
+  const iconColorClass = getIconColorClass(iconColor);
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -52,6 +39,8 @@ export function Modal({
     }
   }, [isOpen, onClose]);
 
+  if (!isOpen) return null;
+
   return (
     <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
@@ -64,7 +53,7 @@ export function Modal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <i className={`fas fa-${icon}`} style={{ color: iconHexColor }}></i>
+            <i className={`fas fa-${icon} ${iconColorClass}`}></i>
             {title}
           </h3>
           <button

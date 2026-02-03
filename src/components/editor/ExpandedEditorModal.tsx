@@ -1,10 +1,11 @@
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { type ReactNode } from "react";
+import { getIconColorClass, type IconColorKey } from "@/utils/constants/colors";
 
 interface ExpandedEditorModalProps {
   title: string;
   icon: string;
-  iconColor?: string;
+  iconColor?: IconColorKey;
   actions?: ReactNode;
   footer?: ReactNode;
   value: string;
@@ -12,15 +13,6 @@ interface ExpandedEditorModalProps {
   readOnly?: boolean;
   onChange?: (value: string) => void;
 }
-
-const iconColors = {
-  "blue-400": "text-blue-400",
-  "green-400": "text-green-400",
-  "red-400": "text-red-400",
-  "yellow-400": "text-yellow-400",
-  "purple-400": "text-purple-400",
-  "cyan-400": "text-cyan-400",
-};
 
 export function ExpandedEditorModal({
   title,
@@ -33,8 +25,7 @@ export function ExpandedEditorModal({
   readOnly = false,
   onChange,
 }: ExpandedEditorModalProps) {
-  const iconColorClass =
-    iconColors[iconColor as keyof typeof iconColors] || iconColors["blue-400"];
+  const iconColorClass = getIconColorClass(iconColor);
 
   return (
     <section className="bg-black/50 rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5 fixed inset-0 m-4 flex flex-col z-[9999] backdrop-blur-md">

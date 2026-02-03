@@ -23,9 +23,30 @@
 
 - Historial de filtros JSONPath con acciones rápidas de reutilizar/borrar ✅
 
+### 4.1 - Refactorizaciones Pendientes
+
+#### 🔴 Alta Prioridad
+
+- [x] **Duplicación de iconColors**: Crear constante compartida en `utils/constants/` para `iconColors` usado en `Panel.tsx` y `ExpandedEditorModal.tsx` ✅
+- [ ] **Tipos de configuración dispersos**: Centralizar interfaces de configuración (`formatConfig`, `minifyConfig`, `cleanConfig`) en `types/json.ts`
+- [ ] **Servicios de localStorage**: Crear `services/storage.ts` con funciones genéricas de persistencia (`loadSavedConfig`, `loadLastJson`, etc.)
+
+#### 🟠 Media Prioridad
+
+- [ ] **Panel y ExpandedEditorModal similares**: Crear componente base `Container` o refactorizar para reutilizar lógica compartida
+- [ ] **Validación de estado duplicada**: Crear componente `ValidationStatus` o hook `useValidationMessage` para estados del JSON
+- [ ] **Manejo de colores inconsistente**: Centralizar paleta de colores (hex vs Tailwind) en archivo de constantes
+- [ ] **Props excesivas en Toolbar**: Agrupar 21 props en objetos (`toolbarActions`, `toolbarConfig`)
+
+#### 🟡 Baja Prioridad
+
+- [ ] **Estado modal unificado**: Usar `type ModalType = 'tips' | 'history' | 'config' | null` en lugar de 3 `useState` separados
+- [ ] **Handlers inline**: Crear hook `useJsonPlaygroundActions()` para encapsular handlers del playground
+- [ ] **Abstracción de editor expandido**: Crear hook `useExpandedEditor()` para manejo de estado de expansión
+- [ ] **Carpeta store/ vacía**: Implementar store global con Zustand o eliminar carpeta si no se necesita
+
 ## 5
 
-- Mejorar Expanded Editor Modal, tendria que estar en layout y no en editor
 - Mejorar layout responsive (stack en mobile/tablet, contenedores `min-w-0`, toolbars adhesivas)
 - Lazy load de Monaco y split de bundle por playground
 - Tests unitarios para servicios (`parse`, `format`, `minify`, `clean`, `jsonPath`) y hooks clave
