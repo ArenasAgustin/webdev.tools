@@ -119,27 +119,37 @@ export function JsonPlayground() {
       />
 
       <Toolbar
-        onFormat={() => formatter.format(inputJson, formatConfig)}
-        onMinify={() => formatter.minify(inputJson, minifyConfig)}
-        onClean={() => formatter.clean(inputJson, cleanConfig)}
-        onFilter={handleApplyJsonPath}
-        jsonPathValue={jsonPath.expression}
-        onJsonPathChange={jsonPath.setExpression}
-        formatConfig={formatConfig}
-        onFormatConfigChange={setFormatConfig}
-        minifyConfig={minifyConfig}
-        onMinifyConfigChange={setMinifyConfig}
-        cleanConfig={cleanConfig}
-        onCleanConfigChange={setCleanConfig}
-        configIsOpen={showConfig}
-        onConfigOpen={setShowConfig}
-        jsonPathHistory={jsonPathHistory.history}
-        onHistoryReuse={handleReuseFromHistory}
-        onHistoryDelete={jsonPathHistory.removeFromHistory}
-        onHistoryClear={jsonPathHistory.clearHistory}
-        tipsConfig={{
-          tips: jsonPathTips,
-          quickExamples: jsonPathQuickExamples,
+        actions={{
+          onFormat: () => formatter.format(inputJson, formatConfig),
+          onMinify: () => formatter.minify(inputJson, minifyConfig),
+          onClean: () => formatter.clean(inputJson, cleanConfig),
+          onFilter: handleApplyJsonPath,
+        }}
+        jsonPath={{
+          value: jsonPath.expression,
+          onChange: jsonPath.setExpression,
+        }}
+        history={{
+          items: jsonPathHistory.history,
+          onReuse: handleReuseFromHistory,
+          onDelete: jsonPathHistory.removeFromHistory,
+          onClear: jsonPathHistory.clearHistory,
+        }}
+        config={{
+          format: formatConfig,
+          onFormatChange: setFormatConfig,
+          minify: minifyConfig,
+          onMinifyChange: setMinifyConfig,
+          clean: cleanConfig,
+          onCleanChange: setCleanConfig,
+          isOpen: showConfig,
+          onOpenChange: setShowConfig,
+        }}
+        tips={{
+          config: {
+            tips: jsonPathTips,
+            quickExamples: jsonPathQuickExamples,
+          },
         }}
       />
     </>
