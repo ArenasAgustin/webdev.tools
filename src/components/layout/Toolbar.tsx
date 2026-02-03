@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { ConfigModal } from "@/components/common/ConfigModal";
 import { TipsModal } from "@/components/common/TipsModal";
@@ -53,15 +53,6 @@ export function Toolbar({
   tips,
 }: ToolbarProps) {
   const [openModal, setOpenModal] = useState<ModalType>(null);
-
-  // Sync controlled config modal state when provided
-  useEffect(() => {
-    if (config.isOpen === true) {
-      setOpenModal("config");
-    } else if (config.isOpen === false && openModal === "config") {
-      setOpenModal(null);
-    }
-  }, [config.isOpen, openModal]);
 
   // Use external state if provided, otherwise use local state
   const showConfig = config.isOpen ?? openModal === "config";
