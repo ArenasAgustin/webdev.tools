@@ -29,10 +29,10 @@ export function Container({
   const iconColorClass = getIconColorClass(iconColor);
 
   const baseClasses =
-    "rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5 flex flex-col";
+    "rounded-xl p-3 sm:p-4 shadow-2xl transition-all duration-300 border border-white/5 flex flex-col min-w-0";
 
   const variantClasses = {
-    panel: "bg-white/10 backdrop-blur-md min-w-0",
+    panel: "bg-white/10 backdrop-blur-md min-h-0",
     modal: "bg-black/50 backdrop-blur-md fixed inset-0 m-4 z-[9999]",
   };
 

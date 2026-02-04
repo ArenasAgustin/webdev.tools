@@ -77,8 +77,8 @@ export function Toolbar({
 
   return (
     <>
-      <section className="mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/5 col-start-1 row-start-5">
-        <div className="grid md:grid-cols-2 gap-6">
+      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 col-start-1 row-start-5 sticky bottom-0 z-10 shrink-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Action Buttons */}
           <div>
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
@@ -91,7 +91,7 @@ export function Toolbar({
                 <i className="fas fa-cog"></i>
               </button>
             </h3>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <Button variant="primary" size="md" onClick={actions.onFormat}>
                 <i className="fas fa-indent mr-1"></i> Formatear
               </Button>

@@ -66,7 +66,7 @@
 
 ## 5
 
-- Mejorar layout responsive (stack en mobile/tablet, contenedores `min-w-0`, toolbars adhesivas)
+- Mejorar layout responsive (stack en mobile/tablet, contenedores `min-w-0`, toolbars adhesivas) ✅
 - Lazy load de Monaco y split de bundle por playground
 - Tests unitarios para servicios (`parse`, `format`, `minify`, `clean`, `jsonPath`) y hooks clave
 
