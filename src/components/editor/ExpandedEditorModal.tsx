@@ -1,4 +1,4 @@
-import { CodeEditor } from "@/components/editor/CodeEditor";
+import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { type ReactNode } from "react";
 import { Container } from "@/components/common/Container";
 import type { IconColorKey } from "@/utils/constants/colors";
@@ -35,7 +35,7 @@ export function ExpandedEditorModal({
       footer={footer}
       variant="modal"
     >
-      <CodeEditor
+      <LazyCodeEditor
         value={value}
         language={language}
         readOnly={readOnly}

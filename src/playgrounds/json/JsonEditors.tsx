@@ -1,5 +1,5 @@
 import { Panel } from "@/components/layout/Panel";
-import { CodeEditor } from "@/components/editor/CodeEditor";
+import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
 import { JsonInputActions } from "@/components/editor/JsonInputActions";
 import { JsonOutputActions } from "@/components/editor/JsonOutputActions";
@@ -123,7 +123,7 @@ export function JsonEditors({
             />
           }
         >
-          <CodeEditor
+          <LazyCodeEditor
             value={inputValue}
             language="json"
             onChange={onInputChange}
@@ -159,7 +159,7 @@ export function JsonEditors({
             />
           }
         >
-          <CodeEditor
+          <LazyCodeEditor
             value={outputValue}
             language="json"
             readOnly={true}
