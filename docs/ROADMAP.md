@@ -64,11 +64,11 @@
 - [x] **Stats components similares**: Evaluar unificación de `TextStats` y `OutputStats` ✅
 - [x] **Radio buttons en ConfigModal**: Crear componente `RadioGroup` reutilizable ✅
 
-## 5
+## 5 ✅
 
 - Mejorar layout responsive (stack en mobile/tablet, contenedores `min-w-0`, toolbars adhesivas) ✅
 - Lazy load de Monaco y split de bundle por playground ✅
-- Tests unitarios para servicios (`parse`, `format`, `minify`, `clean`, `jsonPath`) y hooks clave
+- Tests unitarios para servicios (`parse`, `format`, `minify`, `clean`, `jsonPath`) y hooks clave ✅
 
 ## 6
 
