@@ -66,9 +66,21 @@ export function JsonPlayground() {
   } = useJsonPlaygroundActions({
     inputJson,
     setInputJson,
-    formatter,
-    jsonPath,
-    jsonPathHistory,
+    // Formatter functions
+    formatterOutput: formatter.output,
+    clearFormatterOutput: formatter.clearOutput,
+    formatFn: formatter.format,
+    minifyFn: formatter.minify,
+    cleanFn: formatter.clean,
+    // JsonPath functions
+    jsonPathOutput: jsonPath.output,
+    jsonPathExpression: jsonPath.expression,
+    setJsonPathExpression: jsonPath.setExpression,
+    clearJsonPathOutput: jsonPath.clearOutput,
+    filterJsonPath: jsonPath.filter,
+    // JsonPathHistory function
+    addToHistory: jsonPathHistory.addToHistory,
+    // Configs
     formatConfig,
     minifyConfig,
     cleanConfig,

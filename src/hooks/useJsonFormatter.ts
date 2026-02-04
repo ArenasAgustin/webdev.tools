@@ -108,9 +108,9 @@ export function useJsonFormatter(): FormatterHook {
     }
   }, []);
 
-  const clearOutput = useCallback(() => {
+  const clearOutput = () => {
     setResult({ output: "", error: null });
-  }, []);
+  };
 
   return {
     output: result.output,

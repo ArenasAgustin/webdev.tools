@@ -69,9 +69,9 @@ export function useJsonPath(): JsonPathHook {
     [expression],
   );
 
-  const clearOutput = useCallback(() => {
+  const clearOutput = () => {
     setResult({ output: "", error: null });
-  }, []);
+  };
 
   return {
     expression,

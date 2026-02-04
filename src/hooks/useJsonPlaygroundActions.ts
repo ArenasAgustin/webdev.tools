@@ -6,29 +6,27 @@ import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 interface UseJsonPlaygroundActionsProps {
   inputJson: string;
   setInputJson: (value: string) => void;
-  formatter: {
-    output: string;
-    clearOutput: () => void;
-    format: (input: string, options?: Partial<FormatConfig>) => void;
-    minify: (input: string, options?: Partial<MinifyConfig>) => void;
-    clean: (input: string, options?: Partial<CleanConfig>) => void;
+  // Formatter functions (instead of the whole object)
+  formatterOutput: string;
+  clearFormatterOutput: () => void;
+  formatFn: (input: string, options?: Partial<FormatConfig>) => void;
+  minifyFn: (input: string, options?: Partial<MinifyConfig>) => void;
+  cleanFn: (input: string, options?: Partial<CleanConfig>) => void;
+  // JsonPath functions (instead of the whole object)
+  jsonPathOutput: string;
+  jsonPathExpression: string;
+  setJsonPathExpression: (expr: string) => void;
+  clearJsonPathOutput: () => void;
+  filterJsonPath: (
+    input: string,
+    overrideExpression?: string,
+  ) => {
+    ok: boolean;
+    error?: string;
   };
-  jsonPath: {
-    output: string;
-    expression: string;
-    setExpression: (expr: string) => void;
-    clearOutput: () => void;
-    filter: (
-      input: string,
-      overrideExpression?: string,
-    ) => {
-      ok: boolean;
-      error?: string;
-    };
-  };
-  jsonPathHistory: {
-    addToHistory: (expression: string) => Promise<void> | void;
-  };
+  // JsonPathHistory function
+  addToHistory: (expression: string) => Promise<void> | void;
+  // Configs
   formatConfig: FormatConfig;
   minifyConfig: MinifyConfig;
   cleanConfig: CleanConfig;
@@ -37,18 +35,26 @@ interface UseJsonPlaygroundActionsProps {
 export function useJsonPlaygroundActions({
   inputJson,
   setInputJson,
-  formatter,
-  jsonPath,
-  jsonPathHistory,
+  formatterOutput,
+  clearFormatterOutput,
+  formatFn,
+  minifyFn,
+  cleanFn,
+  jsonPathOutput,
+  jsonPathExpression,
+  setJsonPathExpression,
+  clearJsonPathOutput,
+  filterJsonPath,
+  addToHistory,
   formatConfig,
   minifyConfig,
   cleanConfig,
 }: UseJsonPlaygroundActionsProps) {
   const handleClearInput = useCallback(() => {
     setInputJson("");
-    formatter.clearOutput();
-    jsonPath.clearOutput();
-  }, [setInputJson, formatter, jsonPath]);
+    clearFormatterOutput();
+    clearJsonPathOutput();
+  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput]);
 
   const handleLoadExample = useCallback(() => {
     const result = formatJson(jsonPlaygroundConfig.example);
@@ -57,45 +63,45 @@ export function useJsonPlaygroundActions({
     } else {
       setInputJson(jsonPlaygroundConfig.example);
     }
-    formatter.clearOutput();
-    jsonPath.clearOutput();
-  }, [setInputJson, formatter, jsonPath]);
+    clearFormatterOutput();
+    clearJsonPathOutput();
+  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput]);
 
   const handleCopyOutput = useCallback(() => {
-    const textToCopy = jsonPath.output || formatter.output;
+    const textToCopy = jsonPathOutput || formatterOutput;
     navigator.clipboard.writeText(textToCopy).catch((err) => {
       console.error("Error al copiar al portapapeles: ", err);
     });
-  }, [formatter.output, jsonPath.output]);
+  }, [formatterOutput, jsonPathOutput]);
 
   const handleFormat = useCallback(() => {
-    formatter.format(inputJson, formatConfig);
-  }, [inputJson, formatter, formatConfig]);
+    formatFn(inputJson, formatConfig);
+  }, [inputJson, formatFn, formatConfig]);
 
   const handleMinify = useCallback(() => {
-    formatter.minify(inputJson, minifyConfig);
-  }, [inputJson, formatter, minifyConfig]);
+    minifyFn(inputJson, minifyConfig);
+  }, [inputJson, minifyFn, minifyConfig]);
 
   const handleClean = useCallback(() => {
-    formatter.clean(inputJson, cleanConfig);
-  }, [inputJson, formatter, cleanConfig]);
+    cleanFn(inputJson, cleanConfig);
+  }, [inputJson, cleanFn, cleanConfig]);
 
   const handleApplyJsonPath = useCallback(() => {
-    const result = jsonPath.filter(inputJson);
+    const result = filterJsonPath(inputJson);
     if (result.ok) {
-      jsonPathHistory.addToHistory(jsonPath.expression);
+      addToHistory(jsonPathExpression);
     }
-  }, [inputJson, jsonPath, jsonPathHistory]);
+  }, [inputJson, filterJsonPath, addToHistory, jsonPathExpression]);
 
   const handleReuseFromHistory = useCallback(
     (expression: string) => {
-      jsonPath.setExpression(expression);
-      const result = jsonPath.filter(inputJson, expression);
+      setJsonPathExpression(expression);
+      const result = filterJsonPath(inputJson, expression);
       if (result.ok) {
-        jsonPathHistory.addToHistory(expression);
+        addToHistory(expression);
       }
     },
-    [inputJson, jsonPath, jsonPathHistory],
+    [inputJson, setJsonPathExpression, filterJsonPath, addToHistory],
   );
 
   return {
