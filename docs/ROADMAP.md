@@ -74,7 +74,7 @@
 
 - Generalizar playground ✅
 - Tests para playground de js ✅
-- Modal de configuracion para playground de js
+- Modal de configuracion para playground de js ✅
 - boton de copiar para js
 - Hacer que el toolbar de js use el componente de toolbar generalizado
 - Agregar boton para descargar JSON y js

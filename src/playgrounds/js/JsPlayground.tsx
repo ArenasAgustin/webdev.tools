@@ -1,9 +1,12 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/common/Button";
+import { JsConfigModal } from "@/components/common/JsConfigModal";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
 import { minifyJs } from "@/services/js/minify";
 import { formatJs } from "@/services/js/format";
+import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
+import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 
 // Disable React Compiler optimization for this component due to dynamic code execution
 /** @react-compiler-skip */
@@ -17,6 +20,13 @@ export function JsPlayground() {
   );
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [formatConfig, setFormatConfig] = useState<JsFormatConfig>(
+    DEFAULT_JS_FORMAT_CONFIG,
+  );
+  const [minifyConfig, setMinifyConfig] = useState<JsMinifyConfig>(
+    DEFAULT_JS_MINIFY_CONFIG,
+  );
+  const [showConfig, setShowConfig] = useState(false);
 
   // Execute the JavaScript code
   const executeCode = useCallback(() => {
@@ -97,27 +107,40 @@ export function JsPlayground() {
 
   // Minify JavaScript code
   const handleMinify = useCallback(() => {
-    const result = minifyJs(inputCode);
+    const result = minifyJs(inputCode, {
+      removeComments: minifyConfig.removeComments,
+      removeSpaces: minifyConfig.removeSpaces,
+    });
     if (result.ok) {
       setInputCode(result.value);
       setError(null);
       setOutput("");
+      if (minifyConfig.autoCopy && result.value) {
+        navigator.clipboard.writeText(result.value).catch((err) => {
+          console.error("Error al copiar al portapapeles: ", err);
+        });
+      }
     } else {
       setError(result.error);
     }
-  }, [inputCode]);
+  }, [inputCode, minifyConfig]);
 
   // Format JavaScript code
   const handleFormat = useCallback(() => {
-    const result = formatJs(inputCode);
+    const result = formatJs(inputCode, formatConfig.indentSize);
     if (result.ok) {
       setInputCode(result.value);
       setError(null);
       setOutput("");
+      if (formatConfig.autoCopy && result.value) {
+        navigator.clipboard.writeText(result.value).catch((err) => {
+          console.error("Error al copiar al portapapeles: ", err);
+        });
+      }
     } else {
       setError(result.error);
     }
-  }, [inputCode]);
+  }, [inputCode, formatConfig]);
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4">
@@ -137,6 +160,13 @@ export function JsPlayground() {
           <div>
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <i className="fas fa-tools text-yellow-400"></i> Herramientas
+              <button
+                onClick={() => setShowConfig(true)}
+                className="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
+                title="Configurar herramientas"
+              >
+                <i className="fas fa-cog"></i>
+              </button>
             </h3>
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
               <Button variant="orange" size="md" onClick={executeCode}>
@@ -158,6 +188,15 @@ export function JsPlayground() {
           </div>
         </div>
       </section>
+
+      <JsConfigModal
+        isOpen={showConfig}
+        onClose={() => setShowConfig(false)}
+        formatConfig={formatConfig}
+        onFormatConfigChange={setFormatConfig}
+        minifyConfig={minifyConfig}
+        onMinifyConfigChange={setMinifyConfig}
+      />
     </div>
   );
 }
