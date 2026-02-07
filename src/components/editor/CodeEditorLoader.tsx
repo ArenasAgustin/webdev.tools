@@ -4,7 +4,7 @@
  */
 export function CodeEditorLoader() {
   return (
-    <div className="w-full h-full min-w-0 rounded-lg overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center">
+    <div className="w-full h-full min-h-[240px] sm:min-h-[280px] lg:min-h-[320px] min-w-0 rounded-lg overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center">
       <div className="text-center space-y-3">
         <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         <div className="text-gray-400 text-sm">Cargando editor...</div>

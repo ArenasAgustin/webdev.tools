@@ -99,7 +99,7 @@ export function JsonPlayground() {
   });
 
   return (
-    <>
+    <div className="flex flex-1 min-h-0 flex-col gap-4">
       <JsonEditors
         inputValue={inputJson}
         outputValue={outputJson}
@@ -145,6 +145,6 @@ export function JsonPlayground() {
           },
         }}
       />
-    </>
+    </div>
   );
 }

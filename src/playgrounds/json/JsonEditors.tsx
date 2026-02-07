@@ -94,7 +94,7 @@ export function JsonEditors({
         />
       )}
 
-      <main className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 col-start-1 row-start-2 min-w-0 min-h-0">
+      <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
         {/* Input Panel */}
         <Panel
           title="Entrada"
