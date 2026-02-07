@@ -9,7 +9,23 @@ import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 
 type ModalType = "tips" | "history" | "config" | null;
 
-interface ToolbarProps {
+type ToolbarButtonVariant =
+  | "primary"
+  | "danger"
+  | "success"
+  | "purple"
+  | "cyan"
+  | "orange";
+
+interface ToolbarAction {
+  label: string;
+  icon: string;
+  variant: ToolbarButtonVariant;
+  onClick: () => void;
+}
+
+interface JsonToolbarProps {
+  variant: "json";
   actions: {
     onFormat: () => void;
     onMinify: () => void;
@@ -45,14 +61,65 @@ interface ToolbarProps {
   };
 }
 
-export function Toolbar({
-  actions,
-  jsonPath,
-  history,
-  config,
-  tips,
-}: ToolbarProps) {
+interface GenericToolbarProps {
+  variant: "generic";
+  tools: {
+    title?: string;
+    actions: ToolbarAction[];
+    onOpenConfig?: () => void;
+    configButtonTitle?: string;
+    gridClassName?: string;
+  };
+}
+
+type ToolbarProps = JsonToolbarProps | GenericToolbarProps;
+
+export function Toolbar(props: ToolbarProps) {
   const [openModal, setOpenModal] = useState<ModalType>(null);
+
+  if (props.variant === "generic") {
+    const toolsTitle = props.tools.title ?? "Herramientas";
+    const toolsGridClass =
+      props.tools.gridClassName ?? "grid grid-cols-2 sm:grid-cols-3 gap-2";
+
+    return (
+      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 sticky bottom-0 z-10 shrink-0">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
+          <div>
+            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <i className="fas fa-tools text-yellow-400"></i> {toolsTitle}
+              {props.tools.onOpenConfig && (
+                <button
+                  onClick={props.tools.onOpenConfig}
+                  className="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
+                  title={
+                    props.tools.configButtonTitle || "Configurar herramientas"
+                  }
+                >
+                  <i className="fas fa-cog"></i>
+                </button>
+              )}
+            </h3>
+            <div className={toolsGridClass}>
+              {props.tools.actions.map((action) => (
+                <Button
+                  key={action.label}
+                  variant={action.variant}
+                  size="md"
+                  onClick={action.onClick}
+                >
+                  <i className={`fas fa-${action.icon} mr-1`}></i>{" "}
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const { actions, jsonPath, history, config, tips } = props;
 
   // Use external state if provided, otherwise use local state
   const showConfig = config.isOpen ?? openModal === "config";

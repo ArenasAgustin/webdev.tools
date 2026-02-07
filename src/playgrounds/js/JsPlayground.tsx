@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { Button } from "@/components/common/Button";
 import { JsConfigModal } from "@/components/common/JsConfigModal";
+import { Toolbar } from "@/components/layout/Toolbar";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
 import { minifyJs } from "@/services/js/minify";
@@ -169,41 +169,46 @@ export function JsPlayground() {
         onCopyOutput={handleCopyOutput}
       />
 
-      {/* Toolbar */}
-      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 sticky bottom-0 z-10 shrink-0">
-        <div className="grid grid-cols-1 gap-4 sm:gap-6">
-          {/* Action Buttons */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <i className="fas fa-tools text-yellow-400"></i> Herramientas
-              <button
-                onClick={() => setShowConfig(true)}
-                className="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
-                title="Configurar herramientas"
-              >
-                <i className="fas fa-cog"></i>
-              </button>
-            </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
-              <Button variant="orange" size="md" onClick={executeCode}>
-                <i className="fas fa-play mr-1"></i> Ejecutar
-              </Button>
-              <Button variant="primary" size="md" onClick={handleFormat}>
-                <i className="fas fa-indent mr-1"></i> Formatear
-              </Button>
-              <Button variant="purple" size="md" onClick={handleMinify}>
-                <i className="fas fa-compress mr-1"></i> Minificar
-              </Button>
-              <Button variant="danger" size="md" onClick={handleClearInput}>
-                <i className="fas fa-trash mr-1"></i> Limpiar
-              </Button>
-              <Button variant="success" size="md" onClick={handleLoadExample}>
-                <i className="fas fa-file-import mr-1"></i> Ejemplo
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Toolbar
+        variant="generic"
+        tools={{
+          actions: [
+            {
+              label: "Ejecutar",
+              icon: "play",
+              variant: "orange",
+              onClick: executeCode,
+            },
+            {
+              label: "Formatear",
+              icon: "indent",
+              variant: "primary",
+              onClick: handleFormat,
+            },
+            {
+              label: "Minificar",
+              icon: "compress",
+              variant: "purple",
+              onClick: handleMinify,
+            },
+            {
+              label: "Limpiar",
+              icon: "trash",
+              variant: "danger",
+              onClick: handleClearInput,
+            },
+            {
+              label: "Ejemplo",
+              icon: "file-import",
+              variant: "success",
+              onClick: handleLoadExample,
+            },
+          ],
+          onOpenConfig: () => setShowConfig(true),
+          configButtonTitle: "Configurar herramientas",
+          gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
+        }}
+      />
 
       <JsConfigModal
         isOpen={showConfig}

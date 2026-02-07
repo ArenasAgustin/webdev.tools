@@ -112,6 +112,7 @@ export function JsonPlayground() {
       />
 
       <Toolbar
+        variant="json"
         actions={{
           onFormat: handleFormat,
           onMinify: handleMinify,
