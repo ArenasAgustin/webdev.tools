@@ -4,13 +4,16 @@
  */
 
 import type { ToolsConfig } from "@/types/json";
+import type { JsToolsConfig } from "@/types/js";
 
 /**
  * Storage keys constants
  */
 export const STORAGE_KEYS = {
   TOOLS_CONFIG: "toolsConfig",
+  JS_TOOLS_CONFIG: "jsToolsConfig",
   LAST_JSON: "lastJson",
+  LAST_JS: "lastJs",
   JSONPATH_HISTORY: "jsonPathHistory",
 } as const;
 
@@ -139,4 +142,62 @@ export function saveLastJson(json: string): boolean {
  */
 export function removeLastJson(): boolean {
   return removeItem(STORAGE_KEYS.LAST_JSON);
+}
+
+// ============================================
+// Specific storage functions for JS Tools
+// ============================================
+
+/**
+ * Load last JS input from localStorage
+ */
+export function loadLastJs(): string {
+  try {
+    const item = localStorage.getItem(STORAGE_KEYS.LAST_JS);
+    return item || "";
+  } catch (error) {
+    console.error("Error loading last JS:", error);
+    return "";
+  }
+}
+
+/**
+ * Save last JS input to localStorage
+ */
+export function saveLastJs(code: string): boolean {
+  try {
+    localStorage.setItem(STORAGE_KEYS.LAST_JS, code);
+    return true;
+  } catch (error) {
+    console.error("Error saving last JS:", error);
+    return false;
+  }
+}
+
+/**
+ * Remove last JS from localStorage
+ */
+export function removeLastJs(): boolean {
+  return removeItem(STORAGE_KEYS.LAST_JS);
+}
+
+/**
+ * Load JS tools configuration from localStorage
+ */
+export function loadJsToolsConfig(): Partial<JsToolsConfig> | null {
+  return getItem<Partial<JsToolsConfig>>(STORAGE_KEYS.JS_TOOLS_CONFIG);
+}
+
+/**
+ * Save JS tools configuration to localStorage
+ */
+export function saveJsToolsConfig(config: Partial<JsToolsConfig>): boolean {
+  return setItem(STORAGE_KEYS.JS_TOOLS_CONFIG, config);
+}
+
+/**
+ * Remove JS tools configuration from localStorage
+ */
+export function removeJsToolsConfig(): boolean {
+  return removeItem(STORAGE_KEYS.JS_TOOLS_CONFIG);
 }

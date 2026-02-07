@@ -1,12 +1,20 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/common/Button";
 import { JsConfigModal } from "@/components/common/JsConfigModal";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
 import { minifyJs } from "@/services/js/minify";
 import { formatJs } from "@/services/js/format";
+import {
+  loadLastJs,
+  saveLastJs,
+  loadJsToolsConfig,
+  saveJsToolsConfig,
+} from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
+
+const savedConfig = loadJsToolsConfig();
 
 // Disable React Compiler optimization for this component due to dynamic code execution
 /** @react-compiler-skip */
@@ -16,17 +24,25 @@ import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
  */
 export function JsPlayground() {
   const [inputCode, setInputCode] = useState<string>(
-    jsPlaygroundConfig.example,
+    () => loadLastJs() || jsPlaygroundConfig.example,
   );
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [formatConfig, setFormatConfig] = useState<JsFormatConfig>(
-    DEFAULT_JS_FORMAT_CONFIG,
+    savedConfig?.format || DEFAULT_JS_FORMAT_CONFIG,
   );
   const [minifyConfig, setMinifyConfig] = useState<JsMinifyConfig>(
-    DEFAULT_JS_MINIFY_CONFIG,
+    savedConfig?.minify || DEFAULT_JS_MINIFY_CONFIG,
   );
   const [showConfig, setShowConfig] = useState(false);
+
+  useEffect(() => {
+    saveLastJs(inputCode);
+  }, [inputCode]);
+
+  useEffect(() => {
+    saveJsToolsConfig({ format: formatConfig, minify: minifyConfig });
+  }, [formatConfig, minifyConfig]);
 
   // Execute the JavaScript code
   const executeCode = useCallback(() => {
