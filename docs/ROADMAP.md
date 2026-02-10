@@ -70,13 +70,13 @@
 - Lazy load de Monaco y split de bundle por playground ✅
 - Tests unitarios para servicios (`parse`, `format`, `minify`, `clean`, `jsonPath`) y hooks clave ✅
 
-## 6
+## 6 ✅
 
 - Generalizar playground ✅
 - Tests para playground de js ✅
 - Modal de configuracion para playground de js ✅
 - Hacer que el toolbar de js use el componente de toolbar generalizado ✅
-- Agregar boton para descargar JSON y js
+- Agregar boton para descargar JSON y js ✅
 
 ## 7
 

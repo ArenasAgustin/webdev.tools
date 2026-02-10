@@ -5,6 +5,7 @@ import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
 import { minifyJs } from "@/services/js/minify";
 import { formatJs } from "@/services/js/format";
+import { downloadFile } from "@/utils/download";
 import {
   loadLastJs,
   saveLastJs,
@@ -121,6 +122,11 @@ export function JsPlayground() {
     }
   }, [output]);
 
+  // Download input code
+  const handleDownloadInput = useCallback(() => {
+    downloadFile(inputCode, "code.js", "application/javascript");
+  }, [inputCode]);
+
   // Minify JavaScript code
   const handleMinify = useCallback(() => {
     const result = minifyJs(inputCode, {
@@ -167,6 +173,7 @@ export function JsPlayground() {
         onInputChange={setInputCode}
         onCopyInput={handleCopyInput}
         onCopyOutput={handleCopyOutput}
+        onDownloadInput={handleDownloadInput}
       />
 
       <Toolbar

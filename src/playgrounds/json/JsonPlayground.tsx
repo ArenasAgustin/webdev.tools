@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsonEditors } from "./JsonEditors";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
@@ -8,6 +8,7 @@ import { useJsonPath } from "@/hooks/useJsonPath";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
+import { downloadFile } from "@/utils/download";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -89,6 +90,14 @@ export function JsonPlayground() {
   // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
   const [showConfig, setShowConfig] = useState(false);
 
+  const handleDownloadInput = useCallback(() => {
+    downloadFile(inputJson, "data.json", "application/json");
+  }, [inputJson]);
+
+  const handleDownloadOutput = useCallback(() => {
+    downloadFile(outputJson, "result.json", "application/json");
+  }, [outputJson]);
+
   useKeyboardShortcuts({
     onFormat: handleFormat,
     onMinify: handleMinify,
@@ -109,6 +118,8 @@ export function JsonPlayground() {
         onClearInput={handleClearInput}
         onLoadExample={handleLoadExample}
         onCopyOutput={handleCopyOutput}
+        onDownloadInput={handleDownloadInput}
+        onDownloadOutput={handleDownloadOutput}
       />
 
       <Toolbar

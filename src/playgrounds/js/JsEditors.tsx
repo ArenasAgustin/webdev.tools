@@ -15,6 +15,7 @@ interface JsEditorsProps {
   onInputChange: (code: string) => void;
   onCopyInput: () => void;
   onCopyOutput: () => void;
+  onDownloadInput: () => void;
 }
 
 export function JsEditors({
@@ -24,6 +25,7 @@ export function JsEditors({
   onInputChange,
   onCopyInput,
   onCopyOutput,
+  onDownloadInput,
 }: JsEditorsProps) {
   const editor = useExpandedEditor();
 
@@ -39,6 +41,7 @@ export function JsEditors({
           actions={
             <JsInputActions
               onCopyInput={onCopyInput}
+              onDownloadInput={onDownloadInput}
               onExpand={editor.collapse}
             />
           }
@@ -95,6 +98,7 @@ export function JsEditors({
           actions={
             <JsInputActions
               onCopyInput={onCopyInput}
+              onDownloadInput={onDownloadInput}
               onExpand={() => editor.expand("input")}
             />
           }

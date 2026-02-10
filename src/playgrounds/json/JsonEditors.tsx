@@ -19,6 +19,8 @@ interface JsonEditorsProps {
   onClearInput: () => void;
   onLoadExample: () => void;
   onCopyOutput: () => void;
+  onDownloadInput: () => void;
+  onDownloadOutput: () => void;
 }
 
 export function JsonEditors({
@@ -30,6 +32,8 @@ export function JsonEditors({
   onClearInput,
   onLoadExample,
   onCopyOutput,
+  onDownloadInput,
+  onDownloadOutput,
 }: JsonEditorsProps) {
   const editor = useExpandedEditor();
 
@@ -47,6 +51,7 @@ export function JsonEditors({
             <JsonInputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
+              onDownloadInput={onDownloadInput}
               onExpand={editor.collapse}
             />
           }
@@ -71,6 +76,7 @@ export function JsonEditors({
           actions={
             <JsonOutputActions
               onCopyOutput={onCopyOutput}
+              onDownloadOutput={onDownloadOutput}
               onExpand={editor.collapse}
             />
           }
@@ -104,6 +110,7 @@ export function JsonEditors({
             <JsonInputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
+              onDownloadInput={onDownloadInput}
               onExpand={() => editor.expand("input")}
             />
           }
@@ -139,6 +146,7 @@ export function JsonEditors({
           actions={
             <JsonOutputActions
               onCopyOutput={onCopyOutput}
+              onDownloadOutput={onDownloadOutput}
               onExpand={() => editor.expand("output")}
             />
           }
