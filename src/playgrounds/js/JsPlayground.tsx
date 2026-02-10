@@ -6,6 +6,7 @@ import { jsPlaygroundConfig } from "./js.config";
 import { minifyJs } from "@/services/js/minify";
 import { formatJs } from "@/services/js/format";
 import { downloadFile } from "@/utils/download";
+import { useToast } from "@/hooks/useToast";
 import {
   loadLastJs,
   saveLastJs,
@@ -44,6 +45,8 @@ export function JsPlayground() {
   useEffect(() => {
     saveJsToolsConfig({ format: formatConfig, minify: minifyConfig });
   }, [formatConfig, minifyConfig]);
+
+  const toast = useToast();
 
   // Execute the JavaScript code
   const executeCode = useCallback(() => {
@@ -88,44 +91,81 @@ export function JsPlayground() {
       } else {
         setOutput(outputText);
       }
+      toast.success("Código ejecutado correctamente");
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       setError(errorMsg);
+      toast.error(`Error: ${errorMsg}`);
     }
-  }, [inputCode]);
+  }, [inputCode, toast]);
 
   // Clear input code
   const handleClearInput = useCallback(() => {
     setInputCode("");
     setOutput("");
     setError(null);
-  }, []);
+    toast.success("Código limpiado");
+  }, [toast]);
 
   // Load example code
   const handleLoadExample = useCallback(() => {
     setInputCode(jsPlaygroundConfig.example);
     setOutput("");
     setError(null);
-  }, []);
+    toast.success("Ejemplo cargado");
+  }, [toast]);
 
   // Copy input to clipboard
   const handleCopyInput = useCallback(() => {
-    if (inputCode) {
-      navigator.clipboard.writeText(inputCode);
+    if (!inputCode) {
+      toast.error("No hay código para copiar");
+      return;
     }
-  }, [inputCode]);
+    navigator.clipboard
+      .writeText(inputCode)
+      .then(() => {
+        toast.success("Código copiado al portapapeles");
+      })
+      .catch(() => {
+        toast.error("Error al copiar al portapapeles");
+      });
+  }, [inputCode, toast]);
 
   // Copy output to clipboard
   const handleCopyOutput = useCallback(() => {
-    if (output) {
-      navigator.clipboard.writeText(output);
+    if (!output) {
+      toast.error("No hay resultado para copiar");
+      return;
     }
-  }, [output]);
+    navigator.clipboard
+      .writeText(output)
+      .then(() => {
+        toast.success("Resultado copiado al portapapeles");
+      })
+      .catch(() => {
+        toast.error("Error al copiar al portapapeles");
+      });
+  }, [output, toast]);
 
   // Download input code
   const handleDownloadInput = useCallback(() => {
+    if (!inputCode) {
+      toast.error("No hay código para descargar");
+      return;
+    }
     downloadFile(inputCode, "code.js", "application/javascript");
-  }, [inputCode]);
+    toast.success("Descargado como code.js");
+  }, [inputCode, toast]);
+
+  // Download output
+  const handleDownloadOutput = useCallback(() => {
+    if (!output) {
+      toast.error("No hay resultado para descargar");
+      return;
+    }
+    downloadFile(output, "output.txt", "text/plain");
+    toast.success("Descargado como output.txt");
+  }, [output, toast]);
 
   // Minify JavaScript code
   const handleMinify = useCallback(() => {
@@ -142,10 +182,12 @@ export function JsPlayground() {
           console.error("Error al copiar al portapapeles: ", err);
         });
       }
+      toast.success("Código minificado correctamente");
     } else {
       setError(result.error);
+      toast.error(result.error || "Error al minificar código");
     }
-  }, [inputCode, minifyConfig]);
+  }, [inputCode, minifyConfig, toast]);
 
   // Format JavaScript code
   const handleFormat = useCallback(() => {
@@ -159,10 +201,12 @@ export function JsPlayground() {
           console.error("Error al copiar al portapapeles: ", err);
         });
       }
+      toast.success("Código formateado correctamente");
     } else {
       setError(result.error);
+      toast.error(result.error || "Error al formatear código");
     }
-  }, [inputCode, formatConfig]);
+  }, [inputCode, formatConfig, toast]);
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4">
@@ -174,6 +218,7 @@ export function JsPlayground() {
         onCopyInput={handleCopyInput}
         onCopyOutput={handleCopyOutput}
         onDownloadInput={handleDownloadInput}
+        onDownloadOutput={handleDownloadOutput}
       />
 
       <Toolbar

@@ -80,7 +80,7 @@
 
 ## 7
 
-- Mejoras UX/UI: toolbars flotantes dentro del editor, toasts/snackbar para copiar/errores
+- Mejoras UX/UI: toolbars flotantes dentro del editor ✅
 - Indicadores de estado en Monaco (loading, error) y placeholders más claros
 - Tips inline para JSONPath y microcopys en inputs
 - Ajustes mobile/tablet: alturas consistentes, scroll suave y barras adhesivas

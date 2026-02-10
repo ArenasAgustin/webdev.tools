@@ -3,15 +3,29 @@ import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { formatJson } from "@/services/json/format";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 
+interface ToastApi {
+  success: (message: string) => void;
+  error: (message: string) => void;
+}
+
 interface UseJsonPlaygroundActionsProps {
   inputJson: string;
   setInputJson: (value: string) => void;
   // Formatter functions (instead of the whole object)
   formatterOutput: string;
   clearFormatterOutput: () => void;
-  formatFn: (input: string, options?: Partial<FormatConfig>) => void;
-  minifyFn: (input: string, options?: Partial<MinifyConfig>) => void;
-  cleanFn: (input: string, options?: Partial<CleanConfig>) => void;
+  formatFn: (
+    input: string,
+    options?: Partial<FormatConfig>,
+  ) => { ok: boolean; error?: string };
+  minifyFn: (
+    input: string,
+    options?: Partial<MinifyConfig>,
+  ) => { ok: boolean; error?: string };
+  cleanFn: (
+    input: string,
+    options?: Partial<CleanConfig>,
+  ) => { ok: boolean; error?: string };
   // JsonPath functions (instead of the whole object)
   jsonPathOutput: string;
   jsonPathExpression: string;
@@ -30,6 +44,8 @@ interface UseJsonPlaygroundActionsProps {
   formatConfig: FormatConfig;
   minifyConfig: MinifyConfig;
   cleanConfig: CleanConfig;
+  // Toast API
+  toast?: ToastApi;
 }
 
 export function useJsonPlaygroundActions({
@@ -49,12 +65,16 @@ export function useJsonPlaygroundActions({
   formatConfig,
   minifyConfig,
   cleanConfig,
+  toast,
 }: UseJsonPlaygroundActionsProps) {
   const handleClearInput = useCallback(() => {
     setInputJson("");
     clearFormatterOutput();
     clearJsonPathOutput();
-  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput]);
+    if (toast) {
+      toast.success("Entrada limpiada");
+    }
+  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput, toast]);
 
   const handleLoadExample = useCallback(() => {
     const result = formatJson(jsonPlaygroundConfig.example);
@@ -65,7 +85,10 @@ export function useJsonPlaygroundActions({
     }
     clearFormatterOutput();
     clearJsonPathOutput();
-  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput]);
+    if (toast) {
+      toast.success("Ejemplo cargado");
+    }
+  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput, toast]);
 
   const handleCopyOutput = useCallback(() => {
     const textToCopy = jsonPathOutput || formatterOutput;
@@ -75,16 +98,31 @@ export function useJsonPlaygroundActions({
   }, [formatterOutput, jsonPathOutput]);
 
   const handleFormat = useCallback(() => {
-    formatFn(inputJson, formatConfig);
-  }, [inputJson, formatFn, formatConfig]);
+    const result = formatFn(inputJson, formatConfig);
+    if (!result.ok && toast) {
+      toast.error(result.error || "Error al formatear JSON");
+    } else if (result.ok && toast) {
+      toast.success("JSON formateado correctamente");
+    }
+  }, [inputJson, formatFn, formatConfig, toast]);
 
   const handleMinify = useCallback(() => {
-    minifyFn(inputJson, minifyConfig);
-  }, [inputJson, minifyFn, minifyConfig]);
+    const result = minifyFn(inputJson, minifyConfig);
+    if (!result.ok && toast) {
+      toast.error(result.error || "Error al minificar JSON");
+    } else if (result.ok && toast) {
+      toast.success("JSON minificado correctamente");
+    }
+  }, [inputJson, minifyFn, minifyConfig, toast]);
 
   const handleClean = useCallback(() => {
-    cleanFn(inputJson, cleanConfig);
-  }, [inputJson, cleanFn, cleanConfig]);
+    const result = cleanFn(inputJson, cleanConfig);
+    if (!result.ok && toast) {
+      toast.error(result.error || "Error al limpiar JSON");
+    } else if (result.ok && toast) {
+      toast.success("JSON limpiado correctamente");
+    }
+  }, [inputJson, cleanFn, cleanConfig, toast]);
 
   const handleApplyJsonPath = useCallback(() => {
     const result = filterJsonPath(inputJson);

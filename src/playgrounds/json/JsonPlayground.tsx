@@ -8,6 +8,7 @@ import { useJsonPath } from "@/hooks/useJsonPath";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
+import { useToast } from "@/hooks/useToast";
 import { downloadFile } from "@/utils/download";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
@@ -54,11 +55,14 @@ export function JsonPlayground() {
   const outputJson = jsonPath.output || formatter.output;
   const outputError = jsonPath.error || formatter.error;
 
+  // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
+  const [showConfig, setShowConfig] = useState(false);
+  const toast = useToast();
+
   // Encapsulate all handlers
   const {
     handleClearInput,
     handleLoadExample,
-    handleCopyOutput,
     handleFormat,
     handleMinify,
     handleClean,
@@ -85,24 +89,50 @@ export function JsonPlayground() {
     formatConfig,
     minifyConfig,
     cleanConfig,
+    // Toast
+    toast,
   });
 
-  // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
-  const [showConfig, setShowConfig] = useState(false);
+  // Wrapper para handleCopyOutput con toast
+  const handleCopyOutputWithToast = useCallback(() => {
+    const textToCopy = outputJson;
+    if (!textToCopy) {
+      toast.error("No hay contenido para copiar");
+      return;
+    }
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        toast.success("Copiado al portapapeles");
+      })
+      .catch(() => {
+        toast.error("Error al copiar al portapapeles");
+      });
+  }, [outputJson, toast]);
 
   const handleDownloadInput = useCallback(() => {
+    if (!inputJson) {
+      toast.error("No hay contenido para descargar");
+      return;
+    }
     downloadFile(inputJson, "data.json", "application/json");
-  }, [inputJson]);
+    toast.success("Descargado como data.json");
+  }, [inputJson, toast]);
 
   const handleDownloadOutput = useCallback(() => {
+    if (!outputJson) {
+      toast.error("No hay resultado para descargar");
+      return;
+    }
     downloadFile(outputJson, "result.json", "application/json");
-  }, [outputJson]);
+    toast.success("Descargado como result.json");
+  }, [outputJson, toast]);
 
   useKeyboardShortcuts({
     onFormat: handleFormat,
     onMinify: handleMinify,
     onClean: handleClean,
-    onCopyOutput: handleCopyOutput,
+    onCopyOutput: handleCopyOutputWithToast,
     onClearInput: handleClearInput,
     onOpenConfig: () => setShowConfig(true),
   });
@@ -117,7 +147,7 @@ export function JsonPlayground() {
         onInputChange={setInputJson}
         onClearInput={handleClearInput}
         onLoadExample={handleLoadExample}
-        onCopyOutput={handleCopyOutput}
+        onCopyOutput={handleCopyOutputWithToast}
         onDownloadInput={handleDownloadInput}
         onDownloadOutput={handleDownloadOutput}
       />

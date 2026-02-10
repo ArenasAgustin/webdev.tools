@@ -12,9 +12,18 @@ interface FormatterResult {
 interface FormatterHook {
   output: string;
   error: string | null;
-  format: (input: string, options?: Partial<FormatConfig>) => void;
-  minify: (input: string, options?: Partial<MinifyConfig>) => void;
-  clean: (input: string, options?: Partial<CleanConfig>) => void;
+  format: (
+    input: string,
+    options?: Partial<FormatConfig>,
+  ) => { ok: boolean; error?: string };
+  minify: (
+    input: string,
+    options?: Partial<MinifyConfig>,
+  ) => { ok: boolean; error?: string };
+  clean: (
+    input: string,
+    options?: Partial<CleanConfig>,
+  ) => { ok: boolean; error?: string };
   clearOutput: () => void;
 }
 
@@ -31,8 +40,9 @@ export function useJsonFormatter(): FormatterHook {
   const format = useCallback(
     (input: string, options?: Partial<FormatConfig>) => {
       if (!input.trim()) {
-        setResult({ output: "", error: "No hay JSON para formatear" });
-        return;
+        const errorMsg = "No hay JSON para formatear";
+        setResult({ output: "", error: errorMsg });
+        return { ok: false, error: errorMsg };
       }
 
       const formatResult = formatJson(input, {
@@ -46,8 +56,11 @@ export function useJsonFormatter(): FormatterHook {
             .writeText(formatResult.value)
             .catch(() => undefined);
         }
+        return { ok: true };
       } else {
-        setResult({ output: "", error: formatResult.error.message });
+        const errorMsg = formatResult.error.message;
+        setResult({ output: "", error: errorMsg });
+        return { ok: false, error: errorMsg };
       }
     },
     [],
@@ -56,8 +69,9 @@ export function useJsonFormatter(): FormatterHook {
   const minify = useCallback(
     (input: string, options?: Partial<MinifyConfig>) => {
       if (!input.trim()) {
-        setResult({ output: "", error: "No hay JSON para minificar" });
-        return;
+        const errorMsg = "No hay JSON para minificar";
+        setResult({ output: "", error: errorMsg });
+        return { ok: false, error: errorMsg };
       }
 
       const minifyResult = minifyJson(input, {
@@ -71,8 +85,11 @@ export function useJsonFormatter(): FormatterHook {
             .writeText(minifyResult.value)
             .catch(() => undefined);
         }
+        return { ok: true };
       } else {
-        setResult({ output: "", error: minifyResult.error.message });
+        const errorMsg = minifyResult.error.message;
+        setResult({ output: "", error: errorMsg });
+        return { ok: false, error: errorMsg };
       }
     },
     [],
@@ -80,8 +97,9 @@ export function useJsonFormatter(): FormatterHook {
 
   const clean = useCallback((input: string, options?: Partial<CleanConfig>) => {
     if (!input.trim()) {
-      setResult({ output: "", error: "No hay JSON para limpiar" });
-      return;
+      const errorMsg = "No hay JSON para limpiar";
+      setResult({ output: "", error: errorMsg });
+      return { ok: false, error: errorMsg };
     }
 
     const cleanResult = cleanJson(input, {
@@ -94,7 +112,9 @@ export function useJsonFormatter(): FormatterHook {
     });
     if (cleanResult.ok) {
       if (!cleanResult.value.trim()) {
-        setResult({ output: "", error: "El JSON estaba completamente vacío" });
+        const errorMsg = "El JSON estaba completamente vacío";
+        setResult({ output: "", error: errorMsg });
+        return { ok: false, error: errorMsg };
       } else {
         setResult({ output: cleanResult.value, error: null });
         if (options?.autoCopy) {
@@ -102,9 +122,12 @@ export function useJsonFormatter(): FormatterHook {
             .writeText(cleanResult.value)
             .catch(() => undefined);
         }
+        return { ok: true };
       }
     } else {
-      setResult({ output: "", error: cleanResult.error.message });
+      const errorMsg = cleanResult.error.message;
+      setResult({ output: "", error: errorMsg });
+      return { ok: false, error: errorMsg };
     }
   }, []);
 
