@@ -12,6 +12,7 @@ interface JsEditorsProps {
   inputCode: string;
   output: string;
   error: string | null;
+  inputWarning?: string | null;
   onInputChange: (code: string) => void;
   onCopyInput: () => void;
   onCopyOutput: () => void;
@@ -23,6 +24,7 @@ export function JsEditors({
   inputCode,
   output,
   error,
+  inputWarning,
   onInputChange,
   onCopyInput,
   onCopyOutput,
@@ -48,11 +50,16 @@ export function JsEditors({
             />
           }
           footer={
-            <Stats
-              lines={inputStats.lines}
-              characters={inputStats.characters}
-              bytes={inputStats.bytes}
-            />
+            <div className="flex items-center gap-2 text-xs">
+              <Stats
+                lines={inputStats.lines}
+                characters={inputStats.characters}
+                bytes={inputStats.bytes}
+              />
+              {inputWarning && (
+                <span className="text-amber-400 truncate">{inputWarning}</span>
+              )}
+            </div>
           }
           value={inputCode}
           language="javascript"
@@ -106,11 +113,16 @@ export function JsEditors({
             />
           }
           footer={
-            <Stats
-              lines={inputStats.lines}
-              characters={inputStats.characters}
-              bytes={inputStats.bytes}
-            />
+            <div className="flex items-center gap-2 text-xs">
+              <Stats
+                lines={inputStats.lines}
+                characters={inputStats.characters}
+                bytes={inputStats.bytes}
+              />
+              {inputWarning && (
+                <span className="text-amber-400 truncate">{inputWarning}</span>
+              )}
+            </div>
           }
         >
           <LazyCodeEditor

@@ -11,6 +11,8 @@ interface ToastApi {
 interface UseJsonPlaygroundActionsProps {
   inputJson: string;
   setInputJson: (value: string) => void;
+  inputTooLarge?: boolean;
+  inputTooLargeMessage?: string;
   // Formatter functions (instead of the whole object)
   formatterOutput: string;
   clearFormatterOutput: () => void;
@@ -51,6 +53,8 @@ interface UseJsonPlaygroundActionsProps {
 export function useJsonPlaygroundActions({
   inputJson,
   setInputJson,
+  inputTooLarge,
+  inputTooLargeMessage,
   formatterOutput,
   clearFormatterOutput,
   formatFn,
@@ -67,6 +71,20 @@ export function useJsonPlaygroundActions({
   cleanConfig,
   toast,
 }: UseJsonPlaygroundActionsProps) {
+  const guardInputSize = useCallback(() => {
+    if (!inputTooLarge) {
+      return false;
+    }
+
+    if (toast) {
+      toast.error(
+        inputTooLargeMessage ||
+          "El contenido es demasiado grande para procesarlo.",
+      );
+    }
+
+    return true;
+  }, [inputTooLarge, inputTooLargeMessage, toast]);
   const handleClearInput = useCallback(() => {
     setInputJson("");
     clearFormatterOutput();
@@ -98,48 +116,80 @@ export function useJsonPlaygroundActions({
   }, [formatterOutput, jsonPathOutput]);
 
   const handleFormat = useCallback(() => {
+    if (guardInputSize()) {
+      return;
+    }
+
     const result = formatFn(inputJson, formatConfig);
     if (!result.ok && toast) {
       toast.error(result.error || "Error al formatear JSON");
     } else if (result.ok && toast) {
       toast.success("JSON formateado correctamente");
     }
-  }, [inputJson, formatFn, formatConfig, toast]);
+  }, [inputJson, formatFn, formatConfig, toast, guardInputSize]);
 
   const handleMinify = useCallback(() => {
+    if (guardInputSize()) {
+      return;
+    }
+
     const result = minifyFn(inputJson, minifyConfig);
     if (!result.ok && toast) {
       toast.error(result.error || "Error al minificar JSON");
     } else if (result.ok && toast) {
       toast.success("JSON minificado correctamente");
     }
-  }, [inputJson, minifyFn, minifyConfig, toast]);
+  }, [inputJson, minifyFn, minifyConfig, toast, guardInputSize]);
 
   const handleClean = useCallback(() => {
+    if (guardInputSize()) {
+      return;
+    }
+
     const result = cleanFn(inputJson, cleanConfig);
     if (!result.ok && toast) {
       toast.error(result.error || "Error al limpiar JSON");
     } else if (result.ok && toast) {
       toast.success("JSON limpiado correctamente");
     }
-  }, [inputJson, cleanFn, cleanConfig, toast]);
+  }, [inputJson, cleanFn, cleanConfig, toast, guardInputSize]);
 
   const handleApplyJsonPath = useCallback(() => {
+    if (guardInputSize()) {
+      return;
+    }
+
     const result = filterJsonPath(inputJson);
     if (result.ok) {
       addToHistory(jsonPathExpression);
     }
-  }, [inputJson, filterJsonPath, addToHistory, jsonPathExpression]);
+  }, [
+    inputJson,
+    filterJsonPath,
+    addToHistory,
+    jsonPathExpression,
+    guardInputSize,
+  ]);
 
   const handleReuseFromHistory = useCallback(
     (expression: string) => {
+      if (guardInputSize()) {
+        return;
+      }
+
       setJsonPathExpression(expression);
       const result = filterJsonPath(inputJson, expression);
       if (result.ok) {
         addToHistory(expression);
       }
     },
-    [inputJson, setJsonPathExpression, filterJsonPath, addToHistory],
+    [
+      inputJson,
+      setJsonPathExpression,
+      filterJsonPath,
+      addToHistory,
+      guardInputSize,
+    ],
   );
 
   return {

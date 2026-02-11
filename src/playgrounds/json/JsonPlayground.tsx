@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsonEditors } from "./JsonEditors";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
@@ -8,8 +8,11 @@ import { useJsonPath } from "@/hooks/useJsonPath";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useTextStats } from "@/hooks/useTextStats";
 import { useToast } from "@/hooks/useToast";
 import { downloadFile } from "@/utils/download";
+import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import {
   DEFAULT_FORMAT_CONFIG,
@@ -41,12 +44,20 @@ export function JsonPlayground() {
   );
 
   // Auto-save last JSON to localStorage
+  const debouncedInputJson = useDebouncedValue(inputJson, 300);
+  const inputStats = useTextStats(inputJson);
+  const inputTooLarge = inputStats.bytes > MAX_INPUT_BYTES;
+  const inputWarning = inputTooLarge
+    ? "Entrada grande: algunas operaciones pueden ser lentas"
+    : null;
+  const sizeWarningShown = useRef(false);
+
   useEffect(() => {
-    saveLastJson(inputJson);
-  }, [inputJson]);
+    saveLastJson(debouncedInputJson);
+  }, [debouncedInputJson]);
 
   // Use custom hooks for logic encapsulation
-  const validation = useJsonParser(inputJson);
+  const validation = useJsonParser(debouncedInputJson);
   const formatter = useJsonFormatter();
   const jsonPath = useJsonPath();
   const jsonPathHistory = useJsonPathHistory();
@@ -58,6 +69,19 @@ export function JsonPlayground() {
   // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
   const [showConfig, setShowConfig] = useState(false);
   const toast = useToast();
+
+  useEffect(() => {
+    if (inputTooLarge && !sizeWarningShown.current) {
+      toast.info(
+        `El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`,
+      );
+      sizeWarningShown.current = true;
+    }
+
+    if (!inputTooLarge) {
+      sizeWarningShown.current = false;
+    }
+  }, [inputTooLarge, toast]);
 
   // Encapsulate all handlers
   const {
@@ -91,6 +115,8 @@ export function JsonPlayground() {
     cleanConfig,
     // Toast
     toast,
+    inputTooLarge,
+    inputTooLargeMessage: `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`,
   });
 
   // Wrapper para handleCopyOutput con toast
@@ -144,6 +170,7 @@ export function JsonPlayground() {
         outputValue={outputJson}
         validationState={validation}
         outputError={outputError}
+        inputWarning={inputWarning}
         onInputChange={setInputJson}
         onClearInput={handleClearInput}
         onLoadExample={handleLoadExample}

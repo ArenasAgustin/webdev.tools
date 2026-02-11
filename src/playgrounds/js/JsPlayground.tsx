@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { JsConfigModal } from "@/components/common/JsConfigModal";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsEditors } from "./JsEditors";
@@ -7,6 +7,9 @@ import { minifyJs } from "@/services/js/minify";
 import { formatJs } from "@/services/js/format";
 import { downloadFile } from "@/utils/download";
 import { useToast } from "@/hooks/useToast";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useTextStats } from "@/hooks/useTextStats";
+import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import {
   loadLastJs,
   saveLastJs,
@@ -38,9 +41,17 @@ export function JsPlayground() {
   );
   const [showConfig, setShowConfig] = useState(false);
 
+  const debouncedInputCode = useDebouncedValue(inputCode, 300);
+  const inputStats = useTextStats(inputCode);
+  const inputTooLarge = inputStats.bytes > MAX_INPUT_BYTES;
+  const inputWarning = inputTooLarge
+    ? "Entrada grande: algunas operaciones pueden ser lentas"
+    : null;
+  const sizeWarningShown = useRef(false);
+
   useEffect(() => {
-    saveLastJs(inputCode);
-  }, [inputCode]);
+    saveLastJs(debouncedInputCode);
+  }, [debouncedInputCode]);
 
   useEffect(() => {
     saveJsToolsConfig({ format: formatConfig, minify: minifyConfig });
@@ -48,8 +59,36 @@ export function JsPlayground() {
 
   const toast = useToast();
 
+  useEffect(() => {
+    if (inputTooLarge && !sizeWarningShown.current) {
+      toast.info(
+        `El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`,
+      );
+      sizeWarningShown.current = true;
+    }
+
+    if (!inputTooLarge) {
+      sizeWarningShown.current = false;
+    }
+  }, [inputTooLarge, toast]);
+
+  const guardInputSize = useCallback(() => {
+    if (!inputTooLarge) {
+      return false;
+    }
+
+    toast.error(
+      `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`,
+    );
+    return true;
+  }, [inputTooLarge, toast]);
+
   // Execute the JavaScript code
   const executeCode = useCallback(() => {
+    if (guardInputSize()) {
+      return;
+    }
+
     setError(null);
     setOutput("");
 
@@ -97,7 +136,7 @@ export function JsPlayground() {
       setError(errorMsg);
       toast.error(`Error: ${errorMsg}`);
     }
-  }, [inputCode, toast]);
+  }, [inputCode, toast, guardInputSize]);
 
   // Clear input code
   const handleClearInput = useCallback(() => {
@@ -169,6 +208,10 @@ export function JsPlayground() {
 
   // Minify JavaScript code
   const handleMinify = useCallback(() => {
+    if (guardInputSize()) {
+      return;
+    }
+
     const result = minifyJs(inputCode, {
       removeComments: minifyConfig.removeComments,
       removeSpaces: minifyConfig.removeSpaces,
@@ -187,10 +230,14 @@ export function JsPlayground() {
       setError(result.error);
       toast.error(result.error || "Error al minificar código");
     }
-  }, [inputCode, minifyConfig, toast]);
+  }, [inputCode, minifyConfig, toast, guardInputSize]);
 
   // Format JavaScript code
   const handleFormat = useCallback(() => {
+    if (guardInputSize()) {
+      return;
+    }
+
     const result = formatJs(inputCode, formatConfig.indentSize);
     if (result.ok) {
       setInputCode(result.value);
@@ -206,7 +253,7 @@ export function JsPlayground() {
       setError(result.error);
       toast.error(result.error || "Error al formatear código");
     }
-  }, [inputCode, formatConfig, toast]);
+  }, [inputCode, formatConfig, toast, guardInputSize]);
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4">
@@ -214,6 +261,7 @@ export function JsPlayground() {
         inputCode={inputCode}
         output={output}
         error={error}
+        inputWarning={inputWarning}
         onInputChange={setInputCode}
         onCopyInput={handleCopyInput}
         onCopyOutput={handleCopyOutput}

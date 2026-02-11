@@ -5,6 +5,7 @@ interface ValidationStatusProps {
   inputValue: string;
   validationState: JsonValidationState;
   validExtra?: ReactNode;
+  warning?: ReactNode;
   className?: string;
   withWrapper?: boolean;
   withFlex?: boolean;
@@ -17,6 +18,7 @@ export function ValidationStatus({
   inputValue,
   validationState,
   validExtra,
+  warning,
   className = "",
   withWrapper = false,
   withFlex = false,
@@ -25,10 +27,17 @@ export function ValidationStatus({
     ? `text-xs h-4 ${withFlex ? "flex items-center gap-1" : ""}`
     : "";
 
+  const warningNode = warning ? (
+    <span className="text-amber-400 ml-2 truncate">{warning}</span>
+  ) : null;
+
   const content = (() => {
     if (inputValue.trim() === "") {
       return (
-        <span className={`text-gray-400 ${className}`}>Esperando JSON...</span>
+        <span className={`text-gray-400 ${className}`}>
+          Esperando JSON...
+          {warningNode}
+        </span>
       );
     }
 
@@ -37,6 +46,7 @@ export function ValidationStatus({
         <span className={`text-green-400 flex items-center gap-1 ${className}`}>
           <i className="fas fa-check-circle"></i> JSON válido
           {validExtra}
+          {warningNode}
         </span>
       );
     }
@@ -45,6 +55,7 @@ export function ValidationStatus({
       <span className={`text-red-400 flex items-center gap-1 ${className}`}>
         <i className="fas fa-exclamation-circle"></i>{" "}
         {validationState.error?.message || "JSON inválido"}
+        {warningNode}
       </span>
     );
   })();

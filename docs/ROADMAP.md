@@ -83,12 +83,11 @@
 - Mejoras UX/UI: toolbars flotantes dentro del editor ✅
 - Ajustes mobile/tablet: alturas consistentes, scroll suave y barras adhesivas ✅
 
-## 8
+## 8 ✅
 
-- Rendimiento: debounce en validaciones/operaciones, límite de tamaño de entrada con avisos
+- Rendimiento: debounce en validaciones/operaciones, límite de tamaño de entrada con avisos ✅
 - Mover parseo pesado a Web Worker (cuando aplique)
 - Memoización de resultados y virtualización en vistas grandes
-- Telemetría opcional (opt‑in) para entender uso de herramientas
 
 ## 9
 

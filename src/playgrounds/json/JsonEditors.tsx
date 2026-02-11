@@ -15,6 +15,7 @@ interface JsonEditorsProps {
   outputValue: string;
   validationState: JsonValidationState;
   outputError: string | null;
+  inputWarning?: string | null;
   onInputChange: (value: string) => void;
   onClearInput: () => void;
   onLoadExample: () => void;
@@ -28,6 +29,7 @@ export function JsonEditors({
   outputValue,
   validationState,
   outputError,
+  inputWarning,
   onInputChange,
   onClearInput,
   onLoadExample,
@@ -59,6 +61,7 @@ export function JsonEditors({
             <ValidationStatus
               inputValue={inputValue}
               validationState={validationState}
+              warning={inputWarning}
               withWrapper
             />
           }
@@ -118,6 +121,7 @@ export function JsonEditors({
             <ValidationStatus
               inputValue={inputValue}
               validationState={validationState}
+              warning={inputWarning}
               withWrapper
               withFlex
               validExtra={
