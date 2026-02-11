@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { applyJsonPath } from "@/services/json/jsonPath";
+import { applyJsonPathAsync } from "@/services/json/worker";
 
 interface JsonPathResult {
   output: string;
@@ -14,10 +14,10 @@ interface JsonPathHook {
   filter: (
     input: string,
     overrideExpression?: string,
-  ) => {
+  ) => Promise<{
     ok: boolean;
     error?: string;
-  };
+  }>;
   clearOutput: () => void;
 }
 
@@ -33,7 +33,7 @@ export function useJsonPath(): JsonPathHook {
   });
 
   const filter = useCallback(
-    (input: string, overrideExpression?: string) => {
+    async (input: string, overrideExpression?: string) => {
       const expr = overrideExpression ?? expression;
 
       if (!input.trim()) {
@@ -48,7 +48,7 @@ export function useJsonPath(): JsonPathHook {
         return { ok: false, error };
       }
 
-      const filterResult = applyJsonPath(input, expr);
+      const filterResult = await applyJsonPathAsync(input, expr);
       if (filterResult.ok) {
         const value = filterResult.value;
         // Check if result is empty

@@ -19,15 +19,15 @@ interface UseJsonPlaygroundActionsProps {
   formatFn: (
     input: string,
     options?: Partial<FormatConfig>,
-  ) => { ok: boolean; error?: string };
+  ) => Promise<{ ok: boolean; error?: string }>;
   minifyFn: (
     input: string,
     options?: Partial<MinifyConfig>,
-  ) => { ok: boolean; error?: string };
+  ) => Promise<{ ok: boolean; error?: string }>;
   cleanFn: (
     input: string,
     options?: Partial<CleanConfig>,
-  ) => { ok: boolean; error?: string };
+  ) => Promise<{ ok: boolean; error?: string }>;
   // JsonPath functions (instead of the whole object)
   jsonPathOutput: string;
   jsonPathExpression: string;
@@ -36,10 +36,10 @@ interface UseJsonPlaygroundActionsProps {
   filterJsonPath: (
     input: string,
     overrideExpression?: string,
-  ) => {
+  ) => Promise<{
     ok: boolean;
     error?: string;
-  };
+  }>;
   // JsonPathHistory function
   addToHistory: (expression: string) => Promise<void> | void;
   // Configs
@@ -115,12 +115,12 @@ export function useJsonPlaygroundActions({
     });
   }, [formatterOutput, jsonPathOutput]);
 
-  const handleFormat = useCallback(() => {
+  const handleFormat = useCallback(async () => {
     if (guardInputSize()) {
       return;
     }
 
-    const result = formatFn(inputJson, formatConfig);
+    const result = await formatFn(inputJson, formatConfig);
     if (!result.ok && toast) {
       toast.error(result.error || "Error al formatear JSON");
     } else if (result.ok && toast) {
@@ -128,12 +128,12 @@ export function useJsonPlaygroundActions({
     }
   }, [inputJson, formatFn, formatConfig, toast, guardInputSize]);
 
-  const handleMinify = useCallback(() => {
+  const handleMinify = useCallback(async () => {
     if (guardInputSize()) {
       return;
     }
 
-    const result = minifyFn(inputJson, minifyConfig);
+    const result = await minifyFn(inputJson, minifyConfig);
     if (!result.ok && toast) {
       toast.error(result.error || "Error al minificar JSON");
     } else if (result.ok && toast) {
@@ -141,12 +141,12 @@ export function useJsonPlaygroundActions({
     }
   }, [inputJson, minifyFn, minifyConfig, toast, guardInputSize]);
 
-  const handleClean = useCallback(() => {
+  const handleClean = useCallback(async () => {
     if (guardInputSize()) {
       return;
     }
 
-    const result = cleanFn(inputJson, cleanConfig);
+    const result = await cleanFn(inputJson, cleanConfig);
     if (!result.ok && toast) {
       toast.error(result.error || "Error al limpiar JSON");
     } else if (result.ok && toast) {
@@ -154,14 +154,14 @@ export function useJsonPlaygroundActions({
     }
   }, [inputJson, cleanFn, cleanConfig, toast, guardInputSize]);
 
-  const handleApplyJsonPath = useCallback(() => {
+  const handleApplyJsonPath = useCallback(async () => {
     if (guardInputSize()) {
       return;
     }
 
-    const result = filterJsonPath(inputJson);
+    const result = await filterJsonPath(inputJson);
     if (result.ok) {
-      addToHistory(jsonPathExpression);
+      await addToHistory(jsonPathExpression);
     }
   }, [
     inputJson,
@@ -172,15 +172,15 @@ export function useJsonPlaygroundActions({
   ]);
 
   const handleReuseFromHistory = useCallback(
-    (expression: string) => {
+    async (expression: string) => {
       if (guardInputSize()) {
         return;
       }
 
       setJsonPathExpression(expression);
-      const result = filterJsonPath(inputJson, expression);
+      const result = await filterJsonPath(inputJson, expression);
       if (result.ok) {
-        addToHistory(expression);
+        await addToHistory(expression);
       }
     },
     [

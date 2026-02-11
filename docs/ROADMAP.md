@@ -86,7 +86,7 @@
 ## 8 ✅
 
 - Rendimiento: debounce en validaciones/operaciones, límite de tamaño de entrada con avisos ✅
-- Mover parseo pesado a Web Worker (cuando aplique)
+- Mover parseo pesado a Web Worker (cuando aplique) ✅
 - Memoización de resultados y virtualización en vistas grandes
 
 ## 9

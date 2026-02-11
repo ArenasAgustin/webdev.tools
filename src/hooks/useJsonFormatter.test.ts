@@ -16,46 +16,52 @@ beforeEach(() => {
 
 describe("useJsonFormatter", () => {
   describe("format", () => {
-    it("should format valid JSON", () => {
+    it("should format valid JSON", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.format('{"name":"John"}');
+      await act(async () => {
+        await result.current.format('{"name":"John"}');
       });
 
-      expect(result.current.output).toContain('"name"');
-      expect(result.current.output).toContain("John");
-      expect(result.current.error).toBeNull();
+      await vi.waitFor(() => {
+        expect(result.current.output).toContain('"name"');
+        expect(result.current.output).toContain("John");
+        expect(result.current.error).toBeNull();
+      });
     });
 
-    it("should handle empty input", () => {
+    it("should handle empty input", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.format("");
+      await act(async () => {
+        await result.current.format("");
       });
 
-      expect(result.current.output).toBe("");
-      expect(result.current.error).toBe("No hay JSON para formatear");
+      await vi.waitFor(() => {
+        expect(result.current.output).toBe("");
+        expect(result.current.error).toBe("No hay JSON para formatear");
+      });
     });
 
-    it("should handle invalid JSON", () => {
+    it("should handle invalid JSON", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.format("{invalid}");
+      await act(async () => {
+        await result.current.format("{invalid}");
       });
 
-      expect(result.current.output).toBe("");
-      expect(result.current.error).not.toBeNull();
+      await vi.waitFor(() => {
+        expect(result.current.output).toBe("");
+        expect(result.current.error).not.toBeNull();
+      });
     });
 
     it("should copy to clipboard when autoCopy is true", async () => {
       const { result } = renderHook(() => useJsonFormatter());
       const writeTextSpy = vi.spyOn(navigator.clipboard, "writeText");
 
-      act(() => {
-        result.current.format('{"name":"John"}', { autoCopy: true });
+      await act(async () => {
+        await result.current.format('{"name":"John"}', { autoCopy: true });
       });
 
       await vi.waitFor(() => {
@@ -63,70 +69,80 @@ describe("useJsonFormatter", () => {
       });
     });
 
-    it("should apply custom indent", () => {
+    it("should apply custom indent", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.format('{"name":"John"}', { indent: 4 });
+      await act(async () => {
+        await result.current.format('{"name":"John"}', { indent: 4 });
       });
 
-      expect(result.current.output).toContain("    ");
-      expect(result.current.error).toBeNull();
+      await vi.waitFor(() => {
+        expect(result.current.output).toContain("    ");
+        expect(result.current.error).toBeNull();
+      });
     });
 
-    it("should sort keys when requested", () => {
+    it("should sort keys when requested", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.format('{"z":1,"a":2}', { sortKeys: true });
+      await act(async () => {
+        await result.current.format('{"z":1,"a":2}', { sortKeys: true });
       });
 
-      const aIndex = result.current.output.indexOf('"a"');
-      const zIndex = result.current.output.indexOf('"z"');
-      expect(aIndex).toBeLessThan(zIndex);
+      await vi.waitFor(() => {
+        const aIndex = result.current.output.indexOf('"a"');
+        const zIndex = result.current.output.indexOf('"z"');
+        expect(aIndex).toBeLessThan(zIndex);
+      });
     });
   });
 
   describe("minify", () => {
-    it("should minify valid JSON", () => {
+    it("should minify valid JSON", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.minify('{\n  "name": "John"\n}');
+      await act(async () => {
+        await result.current.minify('{\n  "name": "John"\n}');
       });
 
-      expect(result.current.output).toBe('{"name":"John"}');
-      expect(result.current.error).toBeNull();
+      await vi.waitFor(() => {
+        expect(result.current.output).toBe('{"name":"John"}');
+        expect(result.current.error).toBeNull();
+      });
     });
 
-    it("should handle empty input", () => {
+    it("should handle empty input", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.minify("");
+      await act(async () => {
+        await result.current.minify("");
       });
 
-      expect(result.current.output).toBe("");
-      expect(result.current.error).toBe("No hay JSON para minificar");
+      await vi.waitFor(() => {
+        expect(result.current.output).toBe("");
+        expect(result.current.error).toBe("No hay JSON para minificar");
+      });
     });
 
-    it("should handle invalid JSON", () => {
+    it("should handle invalid JSON", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.minify("{invalid}");
+      await act(async () => {
+        await result.current.minify("{invalid}");
       });
 
-      expect(result.current.output).toBe("");
-      expect(result.current.error).not.toBeNull();
+      await vi.waitFor(() => {
+        expect(result.current.output).toBe("");
+        expect(result.current.error).not.toBeNull();
+      });
     });
 
     it("should copy to clipboard when autoCopy is true", async () => {
       const { result } = renderHook(() => useJsonFormatter());
       const writeTextSpy = vi.spyOn(navigator.clipboard, "writeText");
 
-      act(() => {
-        result.current.minify('{"name":"John"}', { autoCopy: true });
+      await act(async () => {
+        await result.current.minify('{"name":"John"}', { autoCopy: true });
       });
 
       await vi.waitFor(() => {
@@ -136,50 +152,58 @@ describe("useJsonFormatter", () => {
   });
 
   describe("clean", () => {
-    it("should clean JSON removing null values", () => {
+    it("should clean JSON removing null values", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.clean('{"a":1,"b":null}');
+      await act(async () => {
+        await result.current.clean('{"a":1,"b":null}');
       });
 
-      const parsed = JSON.parse(result.current.output);
-      expect(parsed).toEqual({ a: 1 });
-      expect(result.current.error).toBeNull();
+      await vi.waitFor(() => {
+        const parsed = JSON.parse(result.current.output);
+        expect(parsed).toEqual({ a: 1 });
+        expect(result.current.error).toBeNull();
+      });
     });
 
-    it("should handle empty input", () => {
+    it("should handle empty input", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.clean("");
+      await act(async () => {
+        await result.current.clean("");
       });
 
-      expect(result.current.output).toBe("");
-      expect(result.current.error).toBe("No hay JSON para limpiar");
+      await vi.waitFor(() => {
+        expect(result.current.output).toBe("");
+        expect(result.current.error).toBe("No hay JSON para limpiar");
+      });
     });
 
-    it("should handle invalid JSON", () => {
+    it("should handle invalid JSON", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.clean("{invalid}");
+      await act(async () => {
+        await result.current.clean("{invalid}");
       });
 
-      expect(result.current.output).toBe("");
-      expect(result.current.error).not.toBeNull();
+      await vi.waitFor(() => {
+        expect(result.current.output).toBe("");
+        expect(result.current.error).not.toBeNull();
+      });
     });
   });
 
   describe("clearOutput", () => {
-    it("should clear output and error", () => {
+    it("should clear output and error", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.format('{"name":"John"}');
+      await act(async () => {
+        await result.current.format('{"name":"John"}');
       });
 
-      expect(result.current.output).not.toBe("");
+      await vi.waitFor(() => {
+        expect(result.current.output).not.toBe("");
+      });
 
       act(() => {
         result.current.clearOutput();
@@ -191,21 +215,23 @@ describe("useJsonFormatter", () => {
   });
 
   describe("state persistence", () => {
-    it("should maintain state between operations", () => {
+    it("should maintain state between operations", async () => {
       const { result } = renderHook(() => useJsonFormatter());
 
-      act(() => {
-        result.current.format('{"name":"John"}');
+      await act(async () => {
+        await result.current.format('{"name":"John"}');
       });
 
       const firstOutput = result.current.output;
 
-      act(() => {
-        result.current.minify('{"age":30}');
+      await act(async () => {
+        await result.current.minify('{"age":30}');
       });
 
-      expect(result.current.output).not.toBe(firstOutput);
-      expect(result.current.output).toBe('{"age":30}');
+      await vi.waitFor(() => {
+        expect(result.current.output).not.toBe(firstOutput);
+        expect(result.current.output).toBe('{"age":30}');
+      });
     });
   });
 });
