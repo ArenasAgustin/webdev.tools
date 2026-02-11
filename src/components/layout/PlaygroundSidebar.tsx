@@ -14,8 +14,8 @@ export function PlaygroundSidebar({
 }: PlaygroundSidebarProps) {
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur-xl transition duration-300 lg:rounded-r-2xl ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
+      className={`fixed inset-y-0 right-0 z-40 w-64 transform border-l border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur-xl transition duration-300 lg:rounded-l-2xl ${
+        isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
       <div className="flex h-full flex-col">

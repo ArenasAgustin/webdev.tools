@@ -22,7 +22,7 @@ export function CodeEditor({
   };
 
   return (
-    <div className="w-full h-full min-h-[240px] sm:min-h-[280px] lg:min-h-[320px] min-w-0 rounded-lg overflow-hidden border border-white/10">
+    <div className="w-full h-full max-h-[240px] lg:max-h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
       <Editor
         className="h-full"
         defaultLanguage={language}

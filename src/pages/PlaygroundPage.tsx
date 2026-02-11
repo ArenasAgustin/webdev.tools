@@ -34,7 +34,7 @@ export function PlaygroundPage() {
 
       <button
         type="button"
-        className="fixed left-4 top-4 z-30 rounded-lg border border-white/10 bg-white/10 px-4 py-3 text-white/90 backdrop-blur-lg transition hover:bg-white/20"
+        className="fixed right-4 top-4 z-30 rounded-lg border border-white/10 bg-white/10 px-4 py-3 text-white/90 backdrop-blur-lg transition hover:bg-white/20"
         onClick={() => setSidebarOpen(true)}
         aria-label="Open sidebar"
       >

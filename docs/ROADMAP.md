@@ -78,12 +78,10 @@
 - Hacer que el toolbar de js use el componente de toolbar generalizado ✅
 - Agregar boton para descargar JSON y js ✅
 
-## 7
+## 7 ✅
 
 - Mejoras UX/UI: toolbars flotantes dentro del editor ✅
-- Indicadores de estado en Monaco (loading, error) y placeholders más claros
-- Tips inline para JSONPath y microcopys en inputs
-- Ajustes mobile/tablet: alturas consistentes, scroll suave y barras adhesivas
+- Ajustes mobile/tablet: alturas consistentes, scroll suave y barras adhesivas ✅
 
 ## 8
 
