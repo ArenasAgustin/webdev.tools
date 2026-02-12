@@ -24,8 +24,13 @@ export function JsonInputActions({
       <Button variant="cyan" onClick={onDownloadInput}>
         <i className="fas fa-download"></i> Descargar
       </Button>
-      <Button variant="purple" onClick={onExpand}>
-        <i className="fas fa-expand"></i>
+      <Button
+        variant="purple"
+        onClick={onExpand}
+        aria-label="Expandir editor"
+        title="Expandir editor"
+      >
+        <i className="fas fa-expand" aria-hidden="true"></i>
       </Button>
     </>
   );

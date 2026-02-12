@@ -6,7 +6,11 @@ interface JsInputActionsProps {
   onExpand: () => void;
 }
 
-export function JsInputActions({ onCopyInput, onDownloadInput, onExpand }: JsInputActionsProps) {
+export function JsInputActions({
+  onCopyInput,
+  onDownloadInput,
+  onExpand,
+}: JsInputActionsProps) {
   return (
     <>
       <Button variant="primary" onClick={onCopyInput}>
@@ -15,8 +19,13 @@ export function JsInputActions({ onCopyInput, onDownloadInput, onExpand }: JsInp
       <Button variant="cyan" onClick={onDownloadInput}>
         <i className="fas fa-download"></i> Descargar
       </Button>
-      <Button variant="purple" onClick={onExpand}>
-        <i className="fas fa-expand"></i>
+      <Button
+        variant="purple"
+        onClick={onExpand}
+        aria-label="Expandir editor"
+        title="Expandir editor"
+      >
+        <i className="fas fa-expand" aria-hidden="true"></i>
       </Button>
     </>
   );

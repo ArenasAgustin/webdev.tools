@@ -34,7 +34,11 @@ export function RadioGroup<T extends string>({
   const colorClasses = colorMap[color];
 
   return (
-    <div className={`flex gap-4 ${className}`}>
+    <div
+      className={`flex gap-4 ${className}`}
+      role="radiogroup"
+      aria-label={name}
+    >
       {options.map((option) => (
         <label
           key={option.value}

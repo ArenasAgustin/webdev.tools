@@ -8,6 +8,33 @@
   :root {
     font-family: "Space Grotesk", "Segoe UI", sans-serif;
   }
+
+  /* Estilos de foco visible para accesibilidad (navegación por teclado) */
+  *:focus {
+    outline: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Foco para botones e inputs interactivos */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+  }
+
+  /* Foco para elementos dentro de modales (color cyan para mejor contraste) */
+  [role="dialog"] button:focus-visible {
+    outline-color: #22d3ee;
+  }
 }
 @layer components {
   .fade-in {

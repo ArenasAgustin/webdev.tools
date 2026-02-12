@@ -90,13 +90,17 @@ export function Toolbar(props: ToolbarProps) {
               <i className="fas fa-tools text-yellow-400"></i> {toolsTitle}
               {props.tools.onOpenConfig && (
                 <button
+                  type="button"
                   onClick={props.tools.onOpenConfig}
-                  className="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
+                  className="ml-auto text-gray-300 hover:text-yellow-300 transition-colors"
                   title={
                     props.tools.configButtonTitle || "Configurar herramientas"
                   }
+                  aria-label={
+                    props.tools.configButtonTitle || "Configurar herramientas"
+                  }
                 >
-                  <i className="fas fa-cog"></i>
+                  <i className="fas fa-cog" aria-hidden="true"></i>
                 </button>
               )}
             </h3>
@@ -151,11 +155,13 @@ export function Toolbar(props: ToolbarProps) {
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <i className="fas fa-tools text-yellow-400"></i> Herramientas
               <button
+                type="button"
                 onClick={() => setShowConfigState(true)}
-                className="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
+                className="ml-auto text-gray-300 hover:text-yellow-300 transition-colors"
                 title="Configurar herramientas (Ctrl+,)"
+                aria-label="Configurar herramientas"
               >
-                <i className="fas fa-cog"></i>
+                <i className="fas fa-cog" aria-hidden="true"></i>
               </button>
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -177,18 +183,22 @@ export function Toolbar(props: ToolbarProps) {
               <i className="fas fa-filter text-cyan-400"></i> Filtro JSONPath
               <div className="ml-auto flex gap-2">
                 <button
+                  type="button"
                   onClick={handleShowHistory}
-                  className="text-gray-400 hover:text-cyan-300 transition-colors"
+                  className="text-gray-300 hover:text-cyan-300 transition-colors"
                   title="Historial de filtros"
+                  aria-label="Historial de filtros"
                 >
-                  <i className="fas fa-history"></i>
+                  <i className="fas fa-history" aria-hidden="true"></i>
                 </button>
                 <button
+                  type="button"
                   onClick={handleShowTips}
-                  className="text-gray-400 hover:text-cyan-300 transition-colors"
+                  className="text-gray-300 hover:text-cyan-300 transition-colors"
                   title="Ver tips de filtros"
+                  aria-label="Ver tips de filtros"
                 >
-                  <i className="fas fa-question-circle"></i>
+                  <i className="fas fa-question-circle" aria-hidden="true"></i>
                 </button>
               </div>
             </h4>
@@ -197,11 +207,18 @@ export function Toolbar(props: ToolbarProps) {
                 type="text"
                 value={jsonPath.value}
                 onChange={(e) => jsonPath.onChange(e.target.value)}
+                aria-label="Expresion JSONPath"
                 className="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
                 placeholder="Ej: $.users[0].name"
               />
-              <Button variant="cyan" size="md" onClick={actions.onFilter}>
-                <i className="fas fa-search"></i>
+              <Button
+                variant="cyan"
+                size="md"
+                onClick={actions.onFilter}
+                aria-label="Aplicar filtro JSONPath"
+                title="Aplicar filtro JSONPath"
+              >
+                <i className="fas fa-search" aria-hidden="true"></i>
               </Button>
             </div>
           </div>

@@ -52,16 +52,18 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
                 onClick={() => onReuse(item.expression)}
                 className="text-gray-600 group-hover:text-cyan-400 transition-colors text-xs"
                 title="Reutilizar"
+                aria-label="Reutilizar filtro"
               >
-                <i className="fas fa-chevron-right"></i>
+                <i className="fas fa-chevron-right" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
                 onClick={() => onDelete(item.id)}
                 className="text-gray-600 hover:text-red-400 transition-colors text-xs"
                 title="Borrar"
+                aria-label="Borrar filtro"
               >
-                <i className="fas fa-trash"></i>
+                <i className="fas fa-trash" aria-hidden="true"></i>
               </button>
             </div>
           </div>

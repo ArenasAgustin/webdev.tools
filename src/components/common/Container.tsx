@@ -39,11 +39,18 @@ export function Container({
   const containerClass = `${baseClasses} ${variantClasses[variant]} ${className}`;
 
   return (
-    <section className={containerClass}>
+    <section
+      className={containerClass}
+      role={variant === "modal" ? "dialog" : undefined}
+      aria-modal={variant === "modal" ? "true" : undefined}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-          <i className={`fas fa-${icon} ${iconColorClass}`}></i>
+          <i
+            className={`fas fa-${icon} ${iconColorClass}`}
+            aria-hidden="true"
+          ></i>
           {title}
         </h2>
         {actions && <div className="flex gap-2">{actions}</div>}

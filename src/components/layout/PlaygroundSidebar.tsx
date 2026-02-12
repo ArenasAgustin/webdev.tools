@@ -41,7 +41,7 @@ export function PlaygroundSidebar({
             onClick={onClose}
             aria-label="Close sidebar"
           >
-            <i className="fas fa-xmark"></i>
+            <i className="fas fa-xmark" aria-hidden="true"></i>
           </button>
         </div>
 

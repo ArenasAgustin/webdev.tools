@@ -68,14 +68,14 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
           ${config.bg} ${config.text}
         `}
       >
-        <i className={`fas ${config.icon}`} />
+        <i className={`fas ${config.icon}`} aria-hidden="true" />
         <span className="text-sm font-medium flex-1">{message}</span>
         <button
           onClick={handleClose}
           className="ml-2 hover:opacity-75 transition-opacity flex-shrink-0"
           aria-label="Close notification"
         >
-          <i className="fas fa-times" />
+          <i className="fas fa-times" aria-hidden="true" />
         </button>
       </div>
     </div>

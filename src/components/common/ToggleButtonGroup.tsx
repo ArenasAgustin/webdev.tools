@@ -19,14 +19,16 @@ export function ToggleButtonGroup<T>({
   inactiveClassName = "flex-1 p-2 bg-white/10 border border-white/20 rounded text-gray-400 hover:text-white transition-colors",
 }: ToggleButtonGroupProps<T>) {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2" role="group">
       {options.map((option) => (
         <button
           key={String(option.value)}
+          type="button"
           onClick={() => onChange(option.value)}
           className={
             value === option.value ? activeClassName : inactiveClassName
           }
+          aria-pressed={value === option.value}
         >
           {option.label}
         </button>

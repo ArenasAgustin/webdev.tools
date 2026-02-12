@@ -52,7 +52,7 @@ export function PlaygroundPage() {
         onClick={() => setSidebarOpen(true)}
         aria-label="Open sidebar"
       >
-        <i className="fas fa-bars"></i>
+        <i className="fas fa-bars" aria-hidden="true"></i>
       </button>
 
       <div>

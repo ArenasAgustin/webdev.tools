@@ -6,6 +6,10 @@ interface ButtonProps {
   onClick?: () => void;
   children: ReactNode;
   className?: string;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  "aria-label"?: string;
+  title?: string;
 }
 
 const variantStyles = {
@@ -32,11 +36,19 @@ export const Button = memo(function Button({
   onClick,
   children,
   className = "",
+  type = "button",
+  disabled = false,
+  "aria-label": ariaLabel,
+  title,
 }: ButtonProps) {
   return (
     <button
+      type={type}
       onClick={onClick}
-      className={`${variantStyles[variant]} ${sizeStyles[size]} rounded transition-all border ${className}`}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      title={title}
+      className={`${variantStyles[variant]} ${sizeStyles[size]} rounded transition-all border ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
     >
       {children}
     </button>
