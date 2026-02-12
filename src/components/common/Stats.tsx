@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 interface StatsProps {
   lines: number;
   characters: number;
@@ -7,8 +9,9 @@ interface StatsProps {
 
 /**
  * Text statistics display with optional size comparison
+ * Memoized to prevent unnecessary re-renders
  */
-export function Stats({
+export const Stats = memo(function Stats({
   lines,
   characters,
   bytes,
@@ -42,4 +45,4 @@ export function Stats({
       )}
     </span>
   );
-}
+});

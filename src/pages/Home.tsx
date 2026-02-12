@@ -1,8 +1,18 @@
 import { Link } from "react-router-dom";
 import { PlaygroundCard } from "@/components/layout/PlaygroundCard";
 import { playgroundRegistry } from "@/playgrounds/registry";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export function Home() {
+  useDocumentMeta({
+    title: "webdev.tools",
+    description:
+      "Suite de herramientas online para desarrolladores: formatear, minificar y filtrar JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador.",
+    keywords:
+      "JSON formatter, JSON minifier, JSONPath, JavaScript playground, herramientas desarrollo web, formatear JSON online",
+    ogUrl: "https://webdev.tools/",
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white">
       <div className="relative overflow-hidden min-h-screen">

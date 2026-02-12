@@ -3,11 +3,25 @@ import { Navigate, useParams } from "react-router-dom";
 import { PlaygroundLoader } from "@/components/common/PlaygroundLoader";
 import { PlaygroundSidebar } from "@/components/layout/PlaygroundSidebar";
 import { getPlaygroundById } from "@/playgrounds/registry";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export function PlaygroundPage() {
   const { playgroundId } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const playground = getPlaygroundById(playgroundId ?? "");
+
+  useDocumentMeta({
+    title: playground?.name || "Playground",
+    description: playground
+      ? `${playground.description}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.`
+      : "Herramientas de desarrollo web online",
+    keywords: playground
+      ? `${playground.name}, ${playground.description}, herramientas desarrollo web online`
+      : "herramientas desarrollo web",
+    ogUrl: playground
+      ? `https://webdev.tools/playground/${playground.id}`
+      : "https://webdev.tools/",
+  });
 
   if (!playground) {
     return <Navigate to="/" replace />;

@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, memo } from "react";
 
 interface ButtonProps {
   variant?: "primary" | "danger" | "success" | "purple" | "cyan" | "orange";
@@ -26,7 +26,7 @@ const sizeStyles = {
   md: "px-2 py-2 text-xs",
 };
 
-export function Button({
+export const Button = memo(function Button({
   variant = "primary",
   size = "sm",
   onClick,
@@ -41,4 +41,4 @@ export function Button({
       {children}
     </button>
   );
-}
+});

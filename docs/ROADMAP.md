@@ -87,11 +87,11 @@
 
 - Rendimiento: debounce en validaciones/operaciones, límite de tamaño de entrada con avisos ✅
 - Mover parseo pesado a Web Worker (cuando aplique) ✅
-- Memoización de resultados y virtualización en vistas grandes
+- Memoización de resultados y virtualización en vistas grandes ✅
 
 ## 9
 
-- SEO/Accesibilidad: meta tags, OpenGraph/Twitter cards, títulos únicos por vista
+- SEO/Accesibilidad: meta tags, OpenGraph/Twitter cards, títulos únicos por vista ✅
 - Atributos `lang`/`dir`, roles ARIA, foco visible y traps en modales
 - Verificación de contraste y navegación por teclado completa
 - i18n básico (ES/EN) para mejorar alcance
@@ -106,4 +106,3 @@
 ## 11
 
 - Funcionalidades avanzadas: validación con JSON Schema
-- Historial robusto con IndexedDB (buscar, etiquetar, borrar)

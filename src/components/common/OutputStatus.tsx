@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, memo, useMemo } from "react";
 
 interface OutputStatusProps {
   outputValue: string;
@@ -12,8 +12,9 @@ interface OutputStatusProps {
 
 /**
  * Output status display for result JSON
+ * Memoized to prevent unnecessary re-renders
  */
-export function OutputStatus({
+export const OutputStatus = memo(function OutputStatus({
   outputValue,
   outputError,
   validExtra,
@@ -26,7 +27,7 @@ export function OutputStatus({
     ? `text-xs h-4 ${withFlex ? "flex items-center gap-1" : ""}`
     : "";
 
-  const content = (() => {
+  const content = useMemo(() => {
     if (outputError) {
       return (
         <span className={`text-red-400 flex items-center gap-1 ${className}`}>
@@ -55,11 +56,11 @@ export function OutputStatus({
         {validExtra}
       </>
     );
-  })();
+  }, [outputError, outputValue, showValidLabel, validExtra, className]);
 
   if (withWrapper) {
     return <div className={wrapperClass}>{content}</div>;
   }
 
   return content;
-}
+});

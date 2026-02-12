@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, memo, useMemo } from "react";
 import type { JsonValidationState } from "@/playgrounds/json/json.types";
 
 interface ValidationStatusProps {
@@ -13,8 +13,9 @@ interface ValidationStatusProps {
 
 /**
  * Validation status display for JSON input
+ * Memoized to prevent unnecessary re-renders
  */
-export function ValidationStatus({
+export const ValidationStatus = memo(function ValidationStatus({
   inputValue,
   validationState,
   validExtra,
@@ -27,11 +28,15 @@ export function ValidationStatus({
     ? `text-xs h-4 ${withFlex ? "flex items-center gap-1" : ""}`
     : "";
 
-  const warningNode = warning ? (
-    <span className="text-amber-400 ml-2 truncate">{warning}</span>
-  ) : null;
+  const warningNode = useMemo(
+    () =>
+      warning ? (
+        <span className="text-amber-400 ml-2 truncate">{warning}</span>
+      ) : null,
+    [warning],
+  );
 
-  const content = (() => {
+  const content = useMemo(() => {
     if (inputValue.trim() === "") {
       return (
         <span className={`text-gray-400 ${className}`}>
@@ -58,11 +63,11 @@ export function ValidationStatus({
         {warningNode}
       </span>
     );
-  })();
+  }, [inputValue, validationState, validExtra, warningNode, className]);
 
   if (withWrapper) {
     return <div className={wrapperClass}>{content}</div>;
   }
 
   return content;
-}
+});
