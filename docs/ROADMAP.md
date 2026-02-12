@@ -94,11 +94,10 @@
 - SEO/Accesibilidad: meta tags, OpenGraph/Twitter cards, títulos únicos por vista ✅
 - Atributos `lang`/`dir`, roles ARIA, foco visible y traps en modales ✅
 - Verificación de contraste y navegación por teclado completa ✅
-- i18n básico (ES/EN) para mejorar alcance
 
 ## 10
 
-- Calidad de código: ESLint type‑checked + reglas React, Prettier y husky
+- Calidad de código: ESLint type‑checked + reglas React, Prettier y husky ✅
 - Tests unitarios y de integración con Vitest para servicios y hooks
 - Storybook rápido para `Panel`, `Button`, `CodeEditor` y modales
 - Documentación de componentes y guía de contribución
