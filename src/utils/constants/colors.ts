@@ -27,9 +27,6 @@ export type IconColorKey = keyof typeof ICON_COLORS;
  * Helper function to get icon color class
  * Returns the Tailwind class or a default if the color is not found
  */
-export function getIconColorClass(
-  color?: string,
-  defaultColor: IconColorKey = "blue-400",
-): string {
+export function getIconColorClass(color?: string, defaultColor: IconColorKey = "blue-400"): string {
   return ICON_COLORS[color as IconColorKey] || ICON_COLORS[defaultColor];
 }

@@ -70,14 +70,8 @@ export function Modal({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
-          <h3
-            id={titleId}
-            className="text-lg font-semibold text-white flex items-center gap-2"
-          >
-            <i
-              className={`fas fa-${icon} ${iconColorClass}`}
-              aria-hidden="true"
-            ></i>
+          <h3 id={titleId} className="text-lg font-semibold text-white flex items-center gap-2">
+            <i className={`fas fa-${icon} ${iconColorClass}`} aria-hidden="true"></i>
             {title}
           </h3>
           <button
@@ -91,16 +85,10 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="p-4 overflow-y-auto max-h-[calc(80vh-120px)]">
-          {children}
-        </div>
+        <div className="p-4 overflow-y-auto max-h-[calc(80vh-120px)]">{children}</div>
 
         {/* Footer */}
-        {footer && (
-          <div className="p-4 border-t border-white/10 bg-white/5">
-            {footer}
-          </div>
-        )}
+        {footer && <div className="p-4 border-t border-white/10 bg-white/5">{footer}</div>}
       </div>
     </div>
   );

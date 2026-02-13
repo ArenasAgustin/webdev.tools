@@ -34,7 +34,9 @@ The following technologies are **mandatory**:
 - jsonpath-plus
 
 ### Explicit exclusions
+
 Do NOT suggest or introduce:
+
 - Backend or server-side code
 - Frameworks like Next.js, Astro, Vue, Svelte
 - State managers heavier than Zustand or React Context
@@ -109,9 +111,7 @@ Errors must be returned as typed results, not thrown unless unavoidable.
 ### Preferred error pattern
 
 ```typescript
-type Result<T, E> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 ```
 
 ---
@@ -137,14 +137,14 @@ type Result<T, E> =
 
 ## 9. AI Behavior Rules
 
-### An AI assisting this project MUST:
+### An AI assisting this project MUST
 
 - Follow this document strictly
 - Propose solutions aligned with the existing architecture
 - Prefer simple, explicit implementations
 - Ask for confirmation ONLY if a decision contradicts this document
 
-### An AI assisting this project MUST NOT:
+### An AI assisting this project MUST NOT
 
 - Change the technology stack
 - Introduce architectural patterns not described here
@@ -170,7 +170,7 @@ it must be considered invalid and ignored.**
 
 ---
 
-## 🧠 Por qué esta versión funciona con *cualquier* IA
+## 🧠 Por qué esta versión funciona con _cualquier_ IA
 
 - Lenguaje **imperativo y normativo**
 - Nada de "yo", "nosotros", "podrías"

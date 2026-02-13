@@ -77,10 +77,7 @@ export function useJsonPlaygroundActions({
     }
 
     if (toast) {
-      toast.error(
-        inputTooLargeMessage ||
-          "El contenido es demasiado grande para procesarlo.",
-      );
+      toast.error(inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.");
     }
 
     return true;
@@ -122,7 +119,7 @@ export function useJsonPlaygroundActions({
 
     const result = await formatFn(inputJson, formatConfig);
     if (!result.ok && toast) {
-      toast.error(result.error || "Error al formatear JSON");
+      toast.error(result.error ?? "Error al formatear JSON");
     } else if (result.ok && toast) {
       toast.success("JSON formateado correctamente");
     }
@@ -135,7 +132,7 @@ export function useJsonPlaygroundActions({
 
     const result = await minifyFn(inputJson, minifyConfig);
     if (!result.ok && toast) {
-      toast.error(result.error || "Error al minificar JSON");
+      toast.error(result.error ?? "Error al minificar JSON");
     } else if (result.ok && toast) {
       toast.success("JSON minificado correctamente");
     }
@@ -148,7 +145,7 @@ export function useJsonPlaygroundActions({
 
     const result = await cleanFn(inputJson, cleanConfig);
     if (!result.ok && toast) {
-      toast.error(result.error || "Error al limpiar JSON");
+      toast.error(result.error ?? "Error al limpiar JSON");
     } else if (result.ok && toast) {
       toast.success("JSON limpiado correctamente");
     }
@@ -163,13 +160,7 @@ export function useJsonPlaygroundActions({
     if (result.ok) {
       await addToHistory(jsonPathExpression);
     }
-  }, [
-    inputJson,
-    filterJsonPath,
-    addToHistory,
-    jsonPathExpression,
-    guardInputSize,
-  ]);
+  }, [inputJson, filterJsonPath, addToHistory, jsonPathExpression, guardInputSize]);
 
   const handleReuseFromHistory = useCallback(
     async (expression: string) => {
@@ -183,13 +174,7 @@ export function useJsonPlaygroundActions({
         await addToHistory(expression);
       }
     },
-    [
-      inputJson,
-      setJsonPathExpression,
-      filterJsonPath,
-      addToHistory,
-      guardInputSize,
-    ],
+    [inputJson, setJsonPathExpression, filterJsonPath, addToHistory, guardInputSize],
   );
 
   return {

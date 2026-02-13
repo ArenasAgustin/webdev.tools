@@ -1,1475 +1,1781 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSON Tools - Formatear, Minificar y Filtrar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/jsonpath@1.1.1/lib/jsonpath.min.js"></script>
     <style>
-        .json-editor {
-            font-family: 'Courier New', monospace;
-            tab-size: 2;
+      .json-editor {
+        font-family: "Courier New", monospace;
+        tab-size: 2;
+      }
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-5px);
         }
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .json-key { color: #fbbf24; font-weight: 600; }
-        .json-string { color: #4ade80; }
-        .json-number { color: #60a5fa; }
-        .json-boolean { color: #f87171; font-weight: bold; }
-        .json-null { color: #a1a1aa; font-style: italic; }
-        .json-bracket { color: #ffffff; font-weight: bold; }
-        
-        .fullscreen-mode {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9999 !important;
-            border-radius: 0 !important;
-            margin: 0 !important;
-            padding: 20px !important;
-            background: rgba(17, 24, 39, 0.98) !important;
-        }
-        
-        .fullscreen-mode textarea,
-        .fullscreen-mode #jsonOutput {
-            height: calc(100vh - 120px) !important;
-        }
+      }
+      .json-key {
+        color: #fbbf24;
+        font-weight: 600;
+      }
+      .json-string {
+        color: #4ade80;
+      }
+      .json-number {
+        color: #60a5fa;
+      }
+      .json-boolean {
+        color: #f87171;
+        font-weight: bold;
+      }
+      .json-null {
+        color: #a1a1aa;
+        font-style: italic;
+      }
+      .json-bracket {
+        color: #ffffff;
+        font-weight: bold;
+      }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-        
-        /* Compact layout adjustments */
-        @media (min-height: 700px) and (min-width: 1024px) {
-            body { overflow: hidden; height: 100vh; }
-            .main-container { height: 100vh; display: flex; flex-direction: column; padding-bottom: 1rem; }
-            .grid-container { flex: 1; min-height: 0; }
-            .editor-box { height: 100%; max-height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
-            .json-editor-area { flex: 1; min-height: 0; }
+      .fullscreen-mode {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        background: rgba(17, 24, 39, 0.98) !important;
+      }
+
+      .fullscreen-mode textarea,
+      .fullscreen-mode #jsonOutput {
+        height: calc(100vh - 120px) !important;
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 10px;
+      }
+
+      /* Compact layout adjustments */
+      @media (min-height: 700px) and (min-width: 1024px) {
+        body {
+          overflow: hidden;
+          height: 100vh;
         }
+        .main-container {
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 1rem;
+        }
+        .grid-container {
+          flex: 1;
+          min-height: 0;
+        }
+        .editor-box {
+          height: 100%;
+          max-height: 100%;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        .json-editor-area {
+          flex: 1;
+          min-height: 0;
+        }
+      }
     </style>
-</head>
-<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen text-sm">
+  </head>
+  <body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen text-sm">
     <div class="main-container container mx-auto px-4 py-4 max-w-7xl">
-        <!-- Header -->
-        <header class="text-center mb-4 fade-in">
-            <h1 class="text-2xl md:text-3xl font-bold text-white mb-1 flex items-center justify-center gap-2">
-                <i class="fas fa-code text-blue-400"></i>
-                JSON Tools
-            </h1>
-        </header>
+      <!-- Header -->
+      <header class="text-center mb-4 fade-in">
+        <h1
+          class="text-2xl md:text-3xl font-bold text-white mb-1 flex items-center justify-center gap-2"
+        >
+          <i class="fas fa-code text-blue-400"></i>
+          JSON Tools
+        </h1>
+      </header>
 
-        <!-- Main Content -->
-        <main class="grid-container grid lg:grid-cols-2 gap-4">
-            <!-- Input Section -->
-            <section id="inputSection" class="editor-box bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                        <i class="fas fa-edit text-blue-400"></i>
-                        Entrada
-                    </h2>
-                    <div class="flex gap-2">
-                        <button onclick="clearInput()" class="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded transition-colors text-xs">
-                            <i class="fas fa-trash"></i> Limpiar
-                        </button>
-                        <button onclick="loadSample()" class="px-2 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded transition-colors text-xs">
-                            <i class="fas fa-file-import"></i> Ejemplo
-                        </button>
-                        <button onclick="toggleFullscreen('input')" class="px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded transition-colors text-xs">
-                            <i class="fas fa-expand" id="fullscreenIconInput"></i>
-                        </button>
-                    </div>
-                </div>
-                <textarea 
-                    id="jsonInput" 
-                    class="json-editor-area w-full h-64 p-3 bg-black/40 text-white rounded-lg json-editor resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-inner border border-white/10 text-xs"
-                    placeholder="Pega tu JSON aquí..."
-                    oninput="validateJSON(); saveJSON()"
-                ></textarea>
-                <div id="validationStatus" class="mt-2 text-xs h-4"></div>
-            </section>
-
-            <!-- Output Section -->
-            <section id="outputSection" class="editor-box bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                        <i class="fas fa-terminal text-green-400"></i>
-                        Resultado
-                    </h2>
-                    <div class="flex gap-2">
-                        <button onclick="copyOutput()" class="px-2 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded transition-colors text-xs">
-                            <i class="fas fa-copy"></i> Copiar
-                        </button>
-                        <button onclick="toggleFullscreen('output')" class="px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded transition-colors text-xs">
-                            <i class="fas fa-expand" id="fullscreenIconOutput"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="jsonOutput" class="json-editor-area w-full h-64 p-3 bg-black/40 text-white rounded-lg json-editor overflow-y-auto overflow-x-hidden resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50 whitespace-pre-wrap shadow-inner border border-white/10 text-xs"></div>
-                <div id="outputStats" class="mt-2 text-xs text-gray-400 h-4"></div>
-            </section>
-        </main>
-
-        <!-- Controls Section -->
-        <section class="mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/5">
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Action Buttons -->
-                <div>
-                    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                        <i class="fas fa-tools text-yellow-400"></i> Herramientas
-                        <button onclick="showConfigModal()" class="ml-auto text-gray-400 hover:text-yellow-300 transition-colors" title="Configurar herramientas">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                    </h3>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="formatJSON()" class="px-2 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-all text-xs border border-blue-500/30">
-                            <i class="fas fa-indent mr-1"></i> Formatear
-                        </button>
-                        <button onclick="minifyJSON()" class="px-2 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-all text-xs border border-purple-500/30">
-                            <i class="fas fa-compress mr-1"></i> Minificar
-                        </button>
-                        <button onclick="removeEmpty()" class="px-2 py-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 rounded-lg transition-all text-xs border border-orange-500/30">
-                            <i class="fas fa-broom mr-1"></i> Limpiar vacíos
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Filter Section -->
-                <div>
-                    <h4 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                        <i class="fas fa-filter text-cyan-400"></i> Filtro JSONPath
-                        <div class="ml-auto flex gap-2">
-                            <button onclick="showHistoryModal()" class="text-gray-400 hover:text-cyan-300 transition-colors" title="Historial de filtros">
-                                <i class="fas fa-history"></i>
-                            </button>
-                            <button onclick="showTipsModal()" class="text-gray-400 hover:text-cyan-300 transition-colors" title="Ver tips de filtros">
-                                <i class="fas fa-question-circle"></i>
-                            </button>
-                        </div>
-                    </h4>
-                    <div class="flex gap-2">
-                        <input 
-                            type="text" 
-                            id="jsonFilter" 
-                            class="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
-                            placeholder="Ej: $.users[0].name"
-                        >
-                        <button onclick="applyFilter()" class="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 rounded-lg transition-all text-xs border border-cyan-500/30">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
+      <!-- Main Content -->
+      <main class="grid-container grid lg:grid-cols-2 gap-4">
+        <!-- Input Section -->
+        <section
+          id="inputSection"
+          class="editor-box bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+              <i class="fas fa-edit text-blue-400"></i>
+              Entrada
+            </h2>
+            <div class="flex gap-2">
+              <button
+                onclick="clearInput()"
+                class="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded transition-colors text-xs"
+              >
+                <i class="fas fa-trash"></i> Limpiar
+              </button>
+              <button
+                onclick="loadSample()"
+                class="px-2 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded transition-colors text-xs"
+              >
+                <i class="fas fa-file-import"></i> Ejemplo
+              </button>
+              <button
+                onclick="toggleFullscreen('input')"
+                class="px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded transition-colors text-xs"
+              >
+                <i class="fas fa-expand" id="fullscreenIconInput"></i>
+              </button>
             </div>
+          </div>
+          <textarea
+            id="jsonInput"
+            class="json-editor-area w-full h-64 p-3 bg-black/40 text-white rounded-lg json-editor resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-inner border border-white/10 text-xs"
+            placeholder="Pega tu JSON aquí..."
+            oninput="
+              validateJSON();
+              saveJSON();
+            "
+          ></textarea>
+          <div id="validationStatus" class="mt-2 text-xs h-4"></div>
         </section>
+
+        <!-- Output Section -->
+        <section
+          id="outputSection"
+          class="editor-box bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-2xl transition-all duration-300 border border-white/5"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+              <i class="fas fa-terminal text-green-400"></i>
+              Resultado
+            </h2>
+            <div class="flex gap-2">
+              <button
+                onclick="copyOutput()"
+                class="px-2 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded transition-colors text-xs"
+              >
+                <i class="fas fa-copy"></i> Copiar
+              </button>
+              <button
+                onclick="toggleFullscreen('output')"
+                class="px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded transition-colors text-xs"
+              >
+                <i class="fas fa-expand" id="fullscreenIconOutput"></i>
+              </button>
+            </div>
+          </div>
+          <div
+            id="jsonOutput"
+            class="json-editor-area w-full h-64 p-3 bg-black/40 text-white rounded-lg json-editor overflow-y-auto overflow-x-hidden resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50 whitespace-pre-wrap shadow-inner border border-white/10 text-xs"
+          ></div>
+          <div id="outputStats" class="mt-2 text-xs text-gray-400 h-4"></div>
+        </section>
+      </main>
+
+      <!-- Controls Section -->
+      <section
+        class="mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/5"
+      >
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Action Buttons -->
+          <div>
+            <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <i class="fas fa-tools text-yellow-400"></i> Herramientas
+              <button
+                onclick="showConfigModal()"
+                class="ml-auto text-gray-400 hover:text-yellow-300 transition-colors"
+                title="Configurar herramientas"
+              >
+                <i class="fas fa-cog"></i>
+              </button>
+            </h3>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                onclick="formatJSON()"
+                class="px-2 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-all text-xs border border-blue-500/30"
+              >
+                <i class="fas fa-indent mr-1"></i> Formatear
+              </button>
+              <button
+                onclick="minifyJSON()"
+                class="px-2 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-all text-xs border border-purple-500/30"
+              >
+                <i class="fas fa-compress mr-1"></i> Minificar
+              </button>
+              <button
+                onclick="removeEmpty()"
+                class="px-2 py-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 rounded-lg transition-all text-xs border border-orange-500/30"
+              >
+                <i class="fas fa-broom mr-1"></i> Limpiar vacíos
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter Section -->
+          <div>
+            <h4 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <i class="fas fa-filter text-cyan-400"></i> Filtro JSONPath
+              <div class="ml-auto flex gap-2">
+                <button
+                  onclick="showHistoryModal()"
+                  class="text-gray-400 hover:text-cyan-300 transition-colors"
+                  title="Historial de filtros"
+                >
+                  <i class="fas fa-history"></i>
+                </button>
+                <button
+                  onclick="showTipsModal()"
+                  class="text-gray-400 hover:text-cyan-300 transition-colors"
+                  title="Ver tips de filtros"
+                >
+                  <i class="fas fa-question-circle"></i>
+                </button>
+              </div>
+            </h4>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="jsonFilter"
+                class="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
+                placeholder="Ej: $.users[0].name"
+              />
+              <button
+                onclick="applyFilter()"
+                class="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 rounded-lg transition-all text-xs border border-cyan-500/30"
+              >
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- Config Modal -->
-    <div id="configModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[80vh] overflow-hidden fade-in">
-            <div class="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
-                <h3 class="text-lg font-semibold text-white flex items-center gap-2">
-                    <i class="fas fa-cog text-yellow-400"></i>
-                    Configuración de Herramientas
-                </h3>
-                <button onclick="closeConfigModal()" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-4 overflow-y-auto max-h-[60vh]">
-                <div class="space-y-6 text-xs">
-                    <!-- Formatear -->
-                    <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                        <h4 class="font-semibold text-blue-400 mb-3 flex items-center gap-2">
-                            <i class="fas fa-indent"></i> Formatear JSON
-                        </h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-gray-300 mb-1">Espaciado</label>
-                                <div class="flex gap-2">
-                                    <button onclick="setFormatSpacing(2)" id="spacing2" class="flex-1 p-2 bg-blue-500/30 border border-blue-500/50 rounded text-white transition-colors">
-                                        2 espacios
-                                    </button>
-                                    <button onclick="setFormatSpacing(4)" id="spacing4" class="flex-1 p-2 bg-white/10 border border-white/20 rounded text-gray-400 hover:text-white transition-colors">
-                                        4 espacios
-                                    </button>
-                                    <button onclick="setFormatSpacing('\t')" id="spacingTab" class="flex-1 p-2 bg-white/10 border border-white/20 rounded text-gray-400 hover:text-white transition-colors">
-                                        Tab
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-gray-300 mb-1">Ordenar claves alfabéticamente</label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="sortKeys" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500 focus:ring-blue-500">
-                                    <span class="text-gray-400">Habilitar ordenamiento</span>
-                                </label>
-                            </div>
-                            <div>
-                                <label class="block text-gray-300 mb-1">Copiar automáticamente al formatear</label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="autoCopyFormat" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500 focus:ring-blue-500">
-                                    <span class="text-gray-400">Habilitar auto-copia</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Minificar -->
-                    <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                        <h4 class="font-semibold text-purple-400 mb-3 flex items-center gap-2">
-                            <i class="fas fa-compress"></i> Minificar JSON
-                        </h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-gray-300 mb-1">Opciones de minificación</label>
-                                <div class="space-y-2">
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" id="minifySpaces" checked class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500">
-                                        <span class="text-gray-400">Eliminar todos los espacios</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" id="sortKeysMinify" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500">
-                                        <span class="text-gray-400">Ordenar claves alfabéticamente</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-gray-300 mb-1">Copiar automáticamente</label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="autoCopyMinify" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500">
-                                    <span class="text-gray-400">Habilitar auto-copia</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Limpiar vacíos -->
-                    <div class="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-                        <h4 class="font-semibold text-orange-400 mb-3 flex items-center gap-2">
-                            <i class="fas fa-broom"></i> Limpiar Valores Vacíos
-                        </h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-gray-300 mb-2">Valores a eliminar</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                                        <input type="checkbox" id="removeNull" checked class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500">
-                                        <span class="text-gray-400">null</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                                        <input type="checkbox" id="removeUndefined" checked class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500">
-                                        <span class="text-gray-400">undefined</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                                        <input type="checkbox" id="removeEmptyString" checked class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500">
-                                        <span class="text-gray-400">"" (vacío)</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                                        <input type="checkbox" id="removeEmptyArray" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500">
-                                        <span class="text-gray-400">[] (array vacío)</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
-                                        <input type="checkbox" id="removeEmptyObject" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500">
-                                        <span class="text-gray-400">{} (objeto vacío)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-gray-300 mb-2">Formato de salida</label>
-                                <div class="flex gap-4">
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="cleanOutputMode" id="cleanOutputFormat" onchange="setCleanOutputMode(true)" class="w-4 h-4 text-orange-500 focus:ring-orange-500 bg-gray-800 border-gray-600">
-                                        <span class="text-gray-400">Formatear</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="cleanOutputMode" id="cleanOutputMinify" onchange="setCleanOutputMode(false)" class="w-4 h-4 text-orange-500 focus:ring-orange-500 bg-gray-800 border-gray-600">
-                                        <span class="text-gray-400">Minificar</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 border-t border-white/10 bg-white/5 flex justify-end gap-2">
-                <button onclick="resetConfig()" class="px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors">
-                    <i class="fas fa-undo mr-1"></i> Restablecer
-                </button>
-                <button onclick="saveConfig()" class="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 rounded-lg transition-colors border border-yellow-500/30">
-                    <i class="fas fa-save mr-1"></i> Guardar
-                </button>
-            </div>
+    <div
+      id="configModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[80vh] overflow-hidden fade-in"
+      >
+        <div class="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+          <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+            <i class="fas fa-cog text-yellow-400"></i>
+            Configuración de Herramientas
+          </h3>
+          <button
+            onclick="closeConfigModal()"
+            class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-times"></i>
+          </button>
         </div>
+        <div class="p-4 overflow-y-auto max-h-[60vh]">
+          <div class="space-y-6 text-xs">
+            <!-- Formatear -->
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <h4 class="font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                <i class="fas fa-indent"></i> Formatear JSON
+              </h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-gray-300 mb-1">Espaciado</label>
+                  <div class="flex gap-2">
+                    <button
+                      onclick="setFormatSpacing(2)"
+                      id="spacing2"
+                      class="flex-1 p-2 bg-blue-500/30 border border-blue-500/50 rounded text-white transition-colors"
+                    >
+                      2 espacios
+                    </button>
+                    <button
+                      onclick="setFormatSpacing(4)"
+                      id="spacing4"
+                      class="flex-1 p-2 bg-white/10 border border-white/20 rounded text-gray-400 hover:text-white transition-colors"
+                    >
+                      4 espacios
+                    </button>
+                    <button
+                      onclick="setFormatSpacing('\t')"
+                      id="spacingTab"
+                      class="flex-1 p-2 bg-white/10 border border-white/20 rounded text-gray-400 hover:text-white transition-colors"
+                    >
+                      Tab
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-1">Ordenar claves alfabéticamente</label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="sortKeys"
+                      class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span class="text-gray-400">Habilitar ordenamiento</span>
+                  </label>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-1"
+                    >Copiar automáticamente al formatear</label
+                  >
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="autoCopyFormat"
+                      class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500 focus:ring-blue-500"
+                    />
+                    <span class="text-gray-400">Habilitar auto-copia</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Minificar -->
+            <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+              <h4 class="font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                <i class="fas fa-compress"></i> Minificar JSON
+              </h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-gray-300 mb-1">Opciones de minificación</label>
+                  <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id="minifySpaces"
+                        checked
+                        class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500"
+                      />
+                      <span class="text-gray-400">Eliminar todos los espacios</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id="sortKeysMinify"
+                        class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500"
+                      />
+                      <span class="text-gray-400">Ordenar claves alfabéticamente</span>
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-1">Copiar automáticamente</label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="autoCopyMinify"
+                      class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-purple-500 focus:ring-purple-500"
+                    />
+                    <span class="text-gray-400">Habilitar auto-copia</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Limpiar vacíos -->
+            <div class="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+              <h4 class="font-semibold text-orange-400 mb-3 flex items-center gap-2">
+                <i class="fas fa-broom"></i> Limpiar Valores Vacíos
+              </h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-gray-300 mb-2">Valores a eliminar</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
+                      <input
+                        type="checkbox"
+                        id="removeNull"
+                        checked
+                        class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span class="text-gray-400">null</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
+                      <input
+                        type="checkbox"
+                        id="removeUndefined"
+                        checked
+                        class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span class="text-gray-400">undefined</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
+                      <input
+                        type="checkbox"
+                        id="removeEmptyString"
+                        checked
+                        class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span class="text-gray-400">"" (vacío)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
+                      <input
+                        type="checkbox"
+                        id="removeEmptyArray"
+                        class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span class="text-gray-400">[] (array vacío)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-white/5 rounded">
+                      <input
+                        type="checkbox"
+                        id="removeEmptyObject"
+                        class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span class="text-gray-400">{} (objeto vacío)</span>
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-2">Formato de salida</label>
+                  <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="cleanOutputMode"
+                        id="cleanOutputFormat"
+                        onchange="setCleanOutputMode(true)"
+                        class="w-4 h-4 text-orange-500 focus:ring-orange-500 bg-gray-800 border-gray-600"
+                      />
+                      <span class="text-gray-400">Formatear</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="cleanOutputMode"
+                        id="cleanOutputMinify"
+                        onchange="setCleanOutputMode(false)"
+                        class="w-4 h-4 text-orange-500 focus:ring-orange-500 bg-gray-800 border-gray-600"
+                      />
+                      <span class="text-gray-400">Minificar</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 border-t border-white/10 bg-white/5 flex justify-end gap-2">
+          <button
+            onclick="resetConfig()"
+            class="px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+          >
+            <i class="fas fa-undo mr-1"></i> Restablecer
+          </button>
+          <button
+            onclick="saveConfig()"
+            class="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 rounded-lg transition-colors border border-yellow-500/30"
+          >
+            <i class="fas fa-save mr-1"></i> Guardar
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Tips Modal -->
-    <div id="tipsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden fade-in">
-            <div class="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
-                <h3 class="text-lg font-semibold text-white flex items-center gap-2">
-                    <i class="fas fa-lightbulb text-yellow-400"></i>
-                    Tips para Filtros JSONPath
-                </h3>
-                <button onclick="closeTipsModal()" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-4 overflow-y-auto max-h-[60vh]">
-                <div class="space-y-4 text-xs">
-                    <!-- Acceso básico -->
-                    <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                        <h4 class="font-semibold text-blue-400 mb-2 flex items-center gap-2">
-                            <i class="fas fa-bolt"></i> Acceso Básico
-                        </h4>
-                        <ul class="space-y-1 text-gray-300">
-                            <li><code class="bg-gray-800 px-1 rounded text-blue-300">$.propiedad</code> - Acceso desde la raíz</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-blue-300">$.users</code> - Obtener el array de usuarios</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-blue-300">$.metadata.total</code> - Propiedad anidada</li>
-                        </ul>
-                    </div>
-
-                    <!-- Arrays -->
-                    <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
-                        <h4 class="font-semibold text-purple-400 mb-2 flex items-center gap-2">
-                            <i class="fas fa-list"></i> Arrays
-                        </h4>
-                        <ul class="space-y-1 text-gray-300">
-                            <li><code class="bg-gray-800 px-1 rounded text-purple-300">$.users[0]</code> - Primer elemento</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-purple-300">$.users[-1:]</code> - Último elemento</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-purple-300">$.users[0,2]</code> - Múltiples índices</li>
-                        </ul>
-                    </div>
-
-                    <!-- Wildcard -->
-                    <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                        <h4 class="font-semibold text-green-400 mb-2 flex items-center gap-2">
-                            <i class="fas fa-asterisk"></i> Wildcard (*)
-                        </h4>
-                        <ul class="space-y-1 text-gray-300">
-                            <li><code class="bg-gray-800 px-1 rounded text-green-300">$.users[*]</code> - Todos los usuarios</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-green-300">$.users[*].name</code> - Todos los nombres</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-green-300">$..name</code> - Nombres en cualquier nivel</li>
-                        </ul>
-                    </div>
-
-                    <!-- Filtros condicionales -->
-                    <div class="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
-                        <h4 class="font-semibold text-orange-400 mb-2 flex items-center gap-2">
-                            <i class="fas fa-filter"></i> Filtros Condicionales
-                        </h4>
-                        <ul class="space-y-1 text-gray-300">
-                            <li><code class="bg-gray-800 px-1 rounded text-orange-300">$.users[?(@.age > 25)]</code> - Edad mayor a 25</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-orange-300">$.users[?(@.active)]</code> - Usuarios activos</li>
-                            <li><code class="bg-gray-800 px-1 rounded text-orange-300">$.products[?(@.price < 100)]</code> - Baratos</li>
-                        </ul>
-                    </div>
-
-                    <!-- Ejemplos rápidos -->
-                    <div class="bg-pink-500/10 border border-pink-500/20 rounded-lg p-3">
-                        <h4 class="font-semibold text-pink-400 mb-2 flex items-center gap-2">
-                            <i class="fas fa-magic"></i> Ejemplos Rápidos
-                        </h4>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="tryExample('$.users')" class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors">
-                                <code class="text-pink-300">$.users</code>
-                                <div class="text-gray-500 mt-1">Array completo</div>
-                            </button>
-                            <button onclick="tryExample('$.users[0]')" class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors">
-                                <code class="text-pink-300">$.users[0]</code>
-                                <div class="text-gray-500 mt-1">Primer usuario</div>
-                            </button>
-                            <button onclick="tryExample('$.users[*].name')" class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors">
-                                <code class="text-pink-300">$.users[*].name</code>
-                                <div class="text-gray-500 mt-1">Todos nombres</div>
-                            </button>
-                            <button onclick="tryExample('$.users[?(@.active)]')" class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors">
-                                <code class="text-pink-300">$.users[?(@.active)]</code>
-                                <div class="text-gray-500 mt-1">Solo activos</div>
-                            </button>
-                            <button onclick="tryExample('$.metadata')" class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors">
-                                <code class="text-pink-300">$.metadata</code>
-                                <div class="text-gray-500 mt-1">Metadatos</div>
-                            </button>
-                            <button onclick="tryExample('$..name')" class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors">
-                                <code class="text-pink-300">$..name</code>
-                                <div class="text-gray-500 mt-1">Nombres (Deep)</div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div
+      id="tipsModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden fade-in"
+      >
+        <div class="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+          <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+            <i class="fas fa-lightbulb text-yellow-400"></i>
+            Tips para Filtros JSONPath
+          </h3>
+          <button
+            onclick="closeTipsModal()"
+            class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-times"></i>
+          </button>
         </div>
+        <div class="p-4 overflow-y-auto max-h-[60vh]">
+          <div class="space-y-4 text-xs">
+            <!-- Acceso básico -->
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+              <h4 class="font-semibold text-blue-400 mb-2 flex items-center gap-2">
+                <i class="fas fa-bolt"></i> Acceso Básico
+              </h4>
+              <ul class="space-y-1 text-gray-300">
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-blue-300">$.propiedad</code> - Acceso
+                  desde la raíz
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-blue-300">$.users</code> - Obtener el
+                  array de usuarios
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-blue-300">$.metadata.total</code> -
+                  Propiedad anidada
+                </li>
+              </ul>
+            </div>
+
+            <!-- Arrays -->
+            <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+              <h4 class="font-semibold text-purple-400 mb-2 flex items-center gap-2">
+                <i class="fas fa-list"></i> Arrays
+              </h4>
+              <ul class="space-y-1 text-gray-300">
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-purple-300">$.users[0]</code> - Primer
+                  elemento
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-purple-300">$.users[-1:]</code> -
+                  Último elemento
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-purple-300">$.users[0,2]</code> -
+                  Múltiples índices
+                </li>
+              </ul>
+            </div>
+
+            <!-- Wildcard -->
+            <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+              <h4 class="font-semibold text-green-400 mb-2 flex items-center gap-2">
+                <i class="fas fa-asterisk"></i> Wildcard (*)
+              </h4>
+              <ul class="space-y-1 text-gray-300">
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-green-300">$.users[*]</code> - Todos
+                  los usuarios
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-green-300">$.users[*].name</code> -
+                  Todos los nombres
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-green-300">$..name</code> - Nombres en
+                  cualquier nivel
+                </li>
+              </ul>
+            </div>
+
+            <!-- Filtros condicionales -->
+            <div class="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
+              <h4 class="font-semibold text-orange-400 mb-2 flex items-center gap-2">
+                <i class="fas fa-filter"></i> Filtros Condicionales
+              </h4>
+              <ul class="space-y-1 text-gray-300">
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-orange-300"
+                    >$.users[?(@.age > 25)]</code
+                  >
+                  - Edad mayor a 25
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-orange-300">$.users[?(@.active)]</code>
+                  - Usuarios activos
+                </li>
+                <li>
+                  <code class="bg-gray-800 px-1 rounded text-orange-300"
+                    >$.products[?(@.price < 100)]</code
+                  >
+                  - Baratos
+                </li>
+              </ul>
+            </div>
+
+            <!-- Ejemplos rápidos -->
+            <div class="bg-pink-500/10 border border-pink-500/20 rounded-lg p-3">
+              <h4 class="font-semibold text-pink-400 mb-2 flex items-center gap-2">
+                <i class="fas fa-magic"></i> Ejemplos Rápidos
+              </h4>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  onclick="tryExample('$.users')"
+                  class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors"
+                >
+                  <code class="text-pink-300">$.users</code>
+                  <div class="text-gray-500 mt-1">Array completo</div>
+                </button>
+                <button
+                  onclick="tryExample('$.users[0]')"
+                  class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors"
+                >
+                  <code class="text-pink-300">$.users[0]</code>
+                  <div class="text-gray-500 mt-1">Primer usuario</div>
+                </button>
+                <button
+                  onclick="tryExample('$.users[*].name')"
+                  class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors"
+                >
+                  <code class="text-pink-300">$.users[*].name</code>
+                  <div class="text-gray-500 mt-1">Todos nombres</div>
+                </button>
+                <button
+                  onclick="tryExample('$.users[?(@.active)]')"
+                  class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors"
+                >
+                  <code class="text-pink-300">$.users[?(@.active)]</code>
+                  <div class="text-gray-500 mt-1">Solo activos</div>
+                </button>
+                <button
+                  onclick="tryExample('$.metadata')"
+                  class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors"
+                >
+                  <code class="text-pink-300">$.metadata</code>
+                  <div class="text-gray-500 mt-1">Metadatos</div>
+                </button>
+                <button
+                  onclick="tryExample('$..name')"
+                  class="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors"
+                >
+                  <code class="text-pink-300">$..name</code>
+                  <div class="text-gray-500 mt-1">Nombres (Deep)</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- History Modal -->
-    <div id="historyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden fade-in">
-            <div class="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
-                <h3 class="text-lg font-semibold text-white flex items-center gap-2">
-                    <i class="fas fa-history text-cyan-400"></i>
-                    Historial de Filtros
-                </h3>
-                <button onclick="closeHistoryModal()" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="historyList" class="p-4 overflow-y-auto max-h-[50vh] space-y-2">
-                <!-- Items will be injected here -->
-                <div class="text-center text-gray-500 italic py-4">No hay historial reciente</div>
-            </div>
-            <div class="p-4 border-t border-white/10 bg-white/5 flex justify-end">
-                <button onclick="clearFilterHistory()" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors border border-red-500/30 text-xs">
-                    <i class="fas fa-trash-alt mr-1"></i> Borrar Historial
-                </button>
-            </div>
+    <div
+      id="historyModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden fade-in"
+      >
+        <div class="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+          <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+            <i class="fas fa-history text-cyan-400"></i>
+            Historial de Filtros
+          </h3>
+          <button
+            onclick="closeHistoryModal()"
+            class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-times"></i>
+          </button>
         </div>
+        <div id="historyList" class="p-4 overflow-y-auto max-h-[50vh] space-y-2">
+          <!-- Items will be injected here -->
+          <div class="text-center text-gray-500 italic py-4">No hay historial reciente</div>
+        </div>
+        <div class="p-4 border-t border-white/10 bg-white/5 flex justify-end">
+          <button
+            onclick="clearFilterHistory()"
+            class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors border border-red-500/30 text-xs"
+          >
+            <i class="fas fa-trash-alt mr-1"></i> Borrar Historial
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Tool Configuration
-        const defaultConfig = {
-            formatSpacing: 2,
-            sortKeys: false,
-            autoCopyFormat: false,
-            minifySpaces: true,
-            sortKeysMinify: false, // Nueva opción
-            autoCopyMinify: false,
-            removeNull: true,
-            removeUndefined: true,
-            removeEmptyString: true,
-            removeEmptyArray: false,
-            removeEmptyObject: false,
-            formatAfterClean: true // true = format, false = minify
-        };
+      // Tool Configuration
+      const defaultConfig = {
+        formatSpacing: 2,
+        sortKeys: false,
+        autoCopyFormat: false,
+        minifySpaces: true,
+        sortKeysMinify: false, // Nueva opción
+        autoCopyMinify: false,
+        removeNull: true,
+        removeUndefined: true,
+        removeEmptyString: true,
+        removeEmptyArray: false,
+        removeEmptyObject: false,
+        formatAfterClean: true, // true = format, false = minify
+      };
 
-        let toolConfig = { ...defaultConfig };
+      let toolConfig = { ...defaultConfig };
 
-        // Load config from localStorage
-        function loadConfig() {
-            const saved = localStorage.getItem('jsonToolsConfig');
-            if (saved) {
-                toolConfig = { ...defaultConfig, ...JSON.parse(saved) };
-            }
-            updateConfigUI();
+      // Load config from localStorage
+      function loadConfig() {
+        const saved = localStorage.getItem("jsonToolsConfig");
+        if (saved) {
+          toolConfig = { ...defaultConfig, ...JSON.parse(saved) };
         }
+        updateConfigUI();
+      }
 
-        // Save config to localStorage
-        function saveConfig() {
-            localStorage.setItem('jsonToolsConfig', JSON.stringify(toolConfig));
-            closeConfigModal();
-            showNotification('Configuración guardada', 'success');
+      // Save config to localStorage
+      function saveConfig() {
+        localStorage.setItem("jsonToolsConfig", JSON.stringify(toolConfig));
+        closeConfigModal();
+        showNotification("Configuración guardada", "success");
+      }
+
+      // Load JSON from localStorage
+      function loadJSON() {
+        const saved = localStorage.getItem("jsonToolsInput");
+        if (saved) {
+          document.getElementById("jsonInput").value = saved;
+          validateJSON();
         }
+      }
 
-        // Load JSON from localStorage
-        function loadJSON() {
-            const saved = localStorage.getItem('jsonToolsInput');
-            if (saved) {
-                document.getElementById('jsonInput').value = saved;
-                validateJSON();
-            }
+      // Save JSON to localStorage
+      function saveJSON() {
+        const json = document.getElementById("jsonInput").value;
+        if (json.trim()) {
+          localStorage.setItem("jsonToolsInput", json);
         }
+      }
 
-        // Save JSON to localStorage
-        function saveJSON() {
-            const json = document.getElementById('jsonInput').value;
-            if (json.trim()) {
-                localStorage.setItem('jsonToolsInput', json);
-            }
-        }
+      // Reset config to defaults
+      function resetConfig() {
+        toolConfig = { ...defaultConfig };
+        updateConfigUI();
+        showNotification("Configuración restablecida", "success");
+      }
 
-        // Reset config to defaults
-        function resetConfig() {
-            toolConfig = { ...defaultConfig };
-            updateConfigUI();
-            showNotification('Configuración restablecida', 'success');
-        }
-
-        // Update UI to reflect current config
-        function updateConfigUI() {
-            // Format spacing buttons
-            document.querySelectorAll('[id^="spacing"]').forEach(btn => {
-                btn.classList.remove('bg-blue-500/30', 'border-blue-500/50', 'text-white');
-                btn.classList.add('bg-white/10', 'border-white/20', 'text-gray-400');
-            });
-
-            const spacingId = toolConfig.formatSpacing === '\t' ? 'spacingTab' : `spacing${toolConfig.formatSpacing}`;
-            const activeSpacingBtn = document.getElementById(spacingId);
-            if (activeSpacingBtn) {
-                activeSpacingBtn.classList.remove('bg-white/10', 'border-white/20', 'text-gray-400');
-                activeSpacingBtn.classList.add('bg-blue-500/30', 'border-blue-500/50', 'text-white');
-            }
-
-            // Checkboxes
-            document.getElementById('sortKeys').checked = toolConfig.sortKeys;
-            document.getElementById('autoCopyFormat').checked = toolConfig.autoCopyFormat;
-            document.getElementById('minifySpaces').checked = toolConfig.minifySpaces;
-            document.getElementById('sortKeysMinify').checked = toolConfig.sortKeysMinify;
-            document.getElementById('autoCopyMinify').checked = toolConfig.autoCopyMinify;
-            document.getElementById('removeNull').checked = toolConfig.removeNull;
-            document.getElementById('removeUndefined').checked = toolConfig.removeUndefined;
-            document.getElementById('removeEmptyString').checked = toolConfig.removeEmptyString;
-            document.getElementById('removeEmptyArray').checked = toolConfig.removeEmptyArray;
-            document.getElementById('removeEmptyObject').checked = toolConfig.removeEmptyObject;
-            
-            // Radios for Clean Output
-            document.getElementById('cleanOutputFormat').checked = toolConfig.formatAfterClean;
-            document.getElementById('cleanOutputMinify').checked = !toolConfig.formatAfterClean;
-        }
-
-        // Set clean output mode
-        function setCleanOutputMode(format) {
-            toolConfig.formatAfterClean = format;
-            updateConfigUI();
-        }
-
-        // Set format spacing
-        function setFormatSpacing(value) {
-            toolConfig.formatSpacing = value;
-            updateConfigUI();
-        }
-
-        // Config modal functions
-        function showConfigModal() {
-            const modal = document.getElementById('configModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-            updateConfigUI();
-        }
-
-        function closeConfigModal() {
-            const modal = document.getElementById('configModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Sample JSON data
-        const sampleJSON = {
-            "users": [
-                {
-                    "id": 1,
-                    "name": "Juan Pérez",
-                    "age": 28,
-                    "email": "juan@example.com",
-                    "active": true,
-                    "roles": ["admin", "user"]
-                },
-                {
-                    "id": 2,
-                    "name": "María García",
-                    "age": 32,
-                    "email": "maria@example.com",
-                    "active": false,
-                    "roles": ["user"]
-                },
-                {
-                    "id": 3,
-                    "name": "Carlos López",
-                    "age": 25,
-                    "email": "carlos@example.com",
-                    "active": true,
-                    "roles": ["user", "moderator"]
-                }
-            ],
-            "metadata": {
-                "total": 3,
-                "page": 1,
-                "timestamp": "2024-01-15T10:30:00Z"
-            },
-            "products": [
-                {"id": "p1", "name": "Laptop", "price": 1200, "category": "electronics"},
-                {"id": "p2", "name": "Mouse", "price": 25, "category": "electronics"},
-                {"id": "p3", "name": "Keyboard", "price": 75, "category": "electronics"}
-            ]
-        };
-
-        function loadSample() {
-            document.getElementById('jsonInput').value = JSON.stringify(sampleJSON, null, 2);
-            validateJSON();
-            showNotification('Ejemplo cargado', 'success');
-        }
-
-        function clearInput() {
-            document.getElementById('jsonInput').value = '';
-            document.getElementById('jsonOutput').innerHTML = '';
-            document.getElementById('validationStatus').innerHTML = '';
-            document.getElementById('outputStats').innerHTML = '';
-            localStorage.removeItem('jsonToolsInput');
-            showNotification('JSON eliminado', 'success');
-        }
-
-        function validateJSON() {
-            const input = document.getElementById('jsonInput').value;
-            const statusDiv = document.getElementById('validationStatus');
-            
-            if (!input.trim()) {
-                statusDiv.innerHTML = '';
-                return false;
-            }
-
-            try {
-                const parsed = JSON.parse(input);
-                statusDiv.innerHTML = `<span class="text-green-400"><i class="fas fa-check-circle"></i> JSON válido</span>`;
-                return true;
-            } catch (error) {
-                statusDiv.innerHTML = `<span class="text-red-400"><i class="fas fa-exclamation-circle"></i> Error: ${error.message}</span>`;
-                return false;
-            }
-        }
-
-        function formatJSON() {
-            const input = document.getElementById('jsonInput').value;
-            
-            if (!input.trim()) {
-                showNotification('Por favor, ingresa un JSON', 'error');
-                return;
-            }
-
-            try {
-                const parsed = JSON.parse(input);
-                
-                // Sort keys if enabled
-                let processed = parsed;
-                if (toolConfig.sortKeys) {
-                    processed = sortKeys(parsed);
-                }
-                
-                const formatted = JSON.stringify(processed, null, toolConfig.formatSpacing);
-                document.getElementById('jsonOutput').innerHTML = syntaxHighlight(formatted);
-                updateStats(formatted);
-                showNotification('JSON formateado', 'success');
-                
-                // Auto copy if enabled
-                if (toolConfig.autoCopyFormat) {
-                    copyOutput();
-                }
-            } catch (error) {
-                showNotification('JSON inválido: ' + error.message, 'error');
-            }
-        }
-
-        function minifyJSON() {
-            const input = document.getElementById('jsonInput').value;
-            
-            if (!input.trim()) {
-                showNotification('Por favor, ingresa un JSON', 'error');
-                return;
-            }
-
-            try {
-                let parsed = JSON.parse(input);
-                
-                // Sort keys if enabled for minify
-                if (toolConfig.sortKeysMinify) {
-                    parsed = sortKeys(parsed);
-                }
-
-                let minified;
-                
-                if (toolConfig.minifySpaces) {
-                    minified = JSON.stringify(parsed);
-                } else {
-                    // Keep newlines but minimize other spaces
-                    minified = JSON.stringify(parsed, null, 0);
-                }
-                
-                document.getElementById('jsonOutput').innerHTML = syntaxHighlight(minified);
-                updateStats(minified);
-                showNotification('JSON minificado', 'success');
-                
-                // Auto copy if enabled
-                if (toolConfig.autoCopyMinify) {
-                    copyOutput();
-                }
-            } catch (error) {
-                showNotification('JSON inválido: ' + error.message, 'error');
-            }
-        }
-
-        function removeEmpty() {
-            const input = document.getElementById('jsonInput').value;
-            
-            if (!input.trim()) {
-                showNotification('Por favor, ingresa un JSON', 'error');
-                return;
-            }
-
-            try {
-                const parsed = JSON.parse(input);
-                const cleaned = removeEmptyValues(parsed);
-                const spacing = toolConfig.formatAfterClean ? toolConfig.formatSpacing : 0;
-                const formatted = JSON.stringify(cleaned, null, spacing);
-                document.getElementById('jsonOutput').innerHTML = syntaxHighlight(formatted);
-                updateStats(formatted);
-                showNotification('Valores vacíos eliminados', 'success');
-            } catch (error) {
-                showNotification('JSON inválido: ' + error.message, 'error');
-            }
-        }
-
-        function removeEmptyValues(obj) {
-            if (Array.isArray(obj)) {
-                return obj.filter(item => {
-                    // Check if empty array
-                    if (toolConfig.removeEmptyArray && Array.isArray(item) && item.length === 0) {
-                        return false;
-                    }
-                    if (typeof item === 'object' && item !== null) {
-                        return Object.keys(removeEmptyValues(item)).length > 0;
-                    }
-                    // Check individual values
-                    if (toolConfig.removeNull && item === null) return false;
-                    if (toolConfig.removeUndefined && item === undefined) return false;
-                    if (toolConfig.removeEmptyString && item === '') return false;
-                    return true;
-                }).map(item => removeEmptyValues(item));
-            } else if (typeof obj === 'object' && obj !== null) {
-                const result = {};
-                for (const key in obj) {
-                    const value = obj[key];
-                    
-                    // Check if empty object
-                    if (toolConfig.removeEmptyObject && typeof value === 'object' && value !== null && Object.keys(value).length === 0) {
-                        continue;
-                    }
-                    
-                    // Check individual values
-                    if (toolConfig.removeNull && value === null) continue;
-                    if (toolConfig.removeUndefined && value === undefined) continue;
-                    if (toolConfig.removeEmptyString && value === '') continue;
-                    
-                    result[key] = removeEmptyValues(value);
-                }
-                return result;
-            }
-            return obj;
-        }
-
-        // Helper function to sort object keys alphabetically
-        function sortKeys(obj) {
-            if (Array.isArray(obj)) {
-                return obj.map(item => sortKeys(item));
-            } else if (obj !== null && typeof obj === 'object') {
-                const sorted = {};
-                Object.keys(obj).sort().forEach(key => {
-                    sorted[key] = sortKeys(obj[key]);
-                });
-                return sorted;
-            }
-            return obj;
-        }
-
-        // Implementación alternativa de JSONPath para mayor compatibilidad
-        const jsonpathImpl = {
-            query: function(obj, path) {
-                // Normalizar el path
-                path = path.trim();
-
-                // Si no empieza con $, agregarlo
-                if (!path.startsWith('$')) {
-                    if (path.startsWith('.')) {
-                        path = '$' + path;
-                    } else if (path.startsWith('[')) {
-                        path = '$' + path;
-                    } else if (!path.includes('.')) {
-                        path = '$.' + path;
-                    } else {
-                        path = '$' + path;
-                    }
-                }
-
-                try {
-                    // Usar la librería si está disponible
-                    if (typeof jsonpath !== 'undefined' && jsonpath.query) {
-                        return jsonpath.query(obj, path);
-                    }
-
-                    // Implementación manual para casos comunes
-                    return this.manualQuery(obj, path);
-                } catch (e) {
-                    // Si falla, intentar con implementación manual
-                    try {
-                        return this.manualQuery(obj, path);
-                    } catch (e2) {
-                        throw new Error('Filtro no válido: ' + e2.message);
-                    }
-                }
-            },
-
-            manualQuery: function(obj, path) {
-                const results = [];
-                const tokens = this.tokenize(path);
-
-                function getValue(o, key) {
-                    if (key === '*') return o;
-                    if (Array.isArray(o)) {
-                        return o.map(item => {
-                            if (key === '@') return item;
-                            return item[key];
-                        });
-                    }
-                    if (o && typeof o === 'object') {
-                        return o[key];
-                    }
-                    return undefined;
-                }
-
-                function traverse(current, remainingTokens) {
-                    if (remainingTokens.length === 0) {
-                        if (Array.isArray(current)) {
-                            current.forEach(item => results.push(item));
-                        } else if (current !== undefined) {
-                            results.push(current);
-                        }
-                        return;
-                    }
-
-                    const token = remainingTokens[0];
-                    const rest = remainingTokens.slice(1);
-
-                    if (token === '$') {
-                        traverse(obj, rest);
-                    } else if (token.type === 'property') {
-                        const values = getValue(current, token.value);
-                        if (values !== undefined) {
-                            if (Array.isArray(values)) {
-                                values.forEach(v => traverse(v, rest));
-                            } else {
-                                traverse(values, rest);
-                            }
-                        }
-                    } else if (token.type === 'wildcard') {
-                        if (Array.isArray(current)) {
-                            current.forEach(item => traverse(item, rest));
-                        } else if (current && typeof current === 'object') {
-                            Object.values(current).forEach(v => traverse(v, rest));
-                        }
-                    } else if (token.type === 'arrayAccess') {
-                        if (Array.isArray(current)) {
-                            const indices = token.value;
-                            if (indices === '*') {
-                                current.forEach((item, idx) => traverse(item, rest));
-                            } else if (typeof indices === 'number') {
-                                if (current[indices] !== undefined) {
-                                    traverse(current[indices], rest);
-                                }
-                            } else if (Array.isArray(indices)) {
-                                indices.forEach(idx => {
-                                    if (current[idx] !== undefined) {
-                                        traverse(current[idx], rest);
-                                    }
-                                });
-                            }
-                        }
-                    } else if (token.type === 'filter') {
-                        if (Array.isArray(current)) {
-                            current.filter(item => {
-                                if (token.condition.startsWith('@.')) {
-                                    const prop = token.condition.substring(2);
-                                    const val = item[prop];
-                                    switch (token.operator) {
-                                        case '>': return token.value !== undefined ? val > token.value : val;
-                                        case '<': return token.value !== undefined ? val < token.value : val;
-                                        case '>=': return token.value !== undefined ? val >= token.value : val;
-                                        case '<=': return token.value !== undefined ? val <= token.value : val;
-                                        case '==': return token.value !== undefined ? val == token.value : !!val;
-                                        case '!=': return token.value !== undefined ? val != token.value : !val;
-                                        default: return !!val;
-                                    }
-                                }
-                                return true;
-                            }).forEach(item => traverse(item, rest));
-                        }
-                    } else if (token.type === 'deep') {
-                        this.deepSearch(current, token.value, rest).forEach(r => results.push(r));
-                    }
-                }
-
-                traverse(obj, tokens);
-                return results;
-            },
-
-            deepSearch: function(obj, propName, remainingTokens) {
-                const results = [];
-
-                function search(current) {
-                    if (current && typeof current === 'object') {
-                        if (Array.isArray(current)) {
-                            current.forEach(item => search(item));
-                        } else {
-                            if (current[propName] !== undefined) {
-                                if (remainingTokens.length > 0) {
-                                    traverseDeep(current[propName], remainingTokens);
-                                } else {
-                                    results.push(current[propName]);
-                                }
-                            }
-                            Object.values(current).forEach(v => search(v));
-                        }
-                    }
-                }
-
-                function traverseDeep(current, tokens) {
-                    if (tokens.length === 0) {
-                        if (Array.isArray(current)) {
-                            current.forEach(item => results.push(item));
-                        } else if (current !== undefined) {
-                            results.push(current);
-                        }
-                        return;
-                    }
-                    const token = tokens[0];
-                    const rest = tokens.slice(1);
-
-                    if (token.type === 'property' || token.type === 'arrayAccess') {
-                        if (Array.isArray(current)) {
-                            current.forEach(item => traverseDeep(item, tokens));
-                        } else if (token.type === 'property' && current[token.value] !== undefined) {
-                            traverseDeep(current[token.value], rest);
-                        }
-                    }
-                }
-
-                search(obj);
-                return results;
-            },
-
-            tokenize: function(path) {
-                const tokens = [];
-                let i = 0;
-
-                function skipSpaces() {
-                    while (i < path.length && path[i] === ' ') i++;
-                }
-
-                function parseToken() {
-                    skipSpaces();
-                    if (i >= path.length) return;
-
-                    if (path[i] === '$') {
-                        tokens.push({ type: 'root', value: '$' });
-                        i++;
-                    } else if (path[i] === '.') {
-                        i++;
-                        if (path[i] === '*') {
-                            tokens.push({ type: 'wildcard', value: '*' });
-                            i++;
-                        } else {
-                            let name = '';
-                            while (i < path.length && /[a-zA-Z0-9_]/.test(path[i])) {
-                                name += path[i];
-                                i++;
-                            }
-                            if (name) {
-                                tokens.push({ type: 'property', value: name });
-                            }
-                        }
-                    } else if (path[i] === '[') {
-                        i++;
-                        skipSpaces();
-
-                        if (path[i] === '?') {
-                            // Filtro [?(...)]
-                            i++;
-                            const conditionStart = path.indexOf('(', i);
-                            if (conditionStart !== -1) {
-                                i = conditionStart + 1;
-                                let condition = '';
-                                let depth = 1;
-                                while (i < path.length && depth > 0) {
-                                    if (path[i] === '(') depth++;
-                                    else if (path[i] === ')') depth--;
-                                    if (depth > 0) condition += path[i];
-                                    i++;
-                                }
-
-                                // Parsear condición
-                                let operator = '==';
-                                let propName = condition;
-                                let value = undefined;
-
-                                if (condition.includes('>')) {
-                                    operator = '>';
-                                    const parts = condition.split('>');
-                                    propName = parts[0].trim();
-                                    value = parseFloat(parts[1].trim());
-                                } else if (condition.includes('<')) {
-                                    operator = '<';
-                                    const parts = condition.split('<');
-                                    propName = parts[0].trim();
-                                    value = parseFloat(parts[1].trim());
-                                } else if (condition.includes('>=')) {
-                                    operator = '>=';
-                                    const parts = condition.split('>=');
-                                    propName = parts[0].trim();
-                                    value = parseFloat(parts[1].trim());
-                                } else if (condition.includes('<=')) {
-                                    operator = '<=';
-                                    const parts = condition.split('<=');
-                                    propName = parts[0].trim();
-                                    value = parseFloat(parts[1].trim());
-                                } else if (condition.includes('==')) {
-                                    operator = '==';
-                                    const parts = condition.split('==');
-                                    propName = parts[0].trim();
-                                    value = parts[1].trim().replace(/'/g, '');
-                                } else if (condition.startsWith('@.')) {
-                                    propName = condition.substring(2);
-                                    operator = 'truthy';
-                                }
-
-                                tokens.push({ type: 'filter', condition: condition, operator, propName, value });
-                            }
-                        } else if (path[i] === '*') {
-                            tokens.push({ type: 'arrayAccess', value: '*' });
-                            i++;
-                        } else if (path[i] === '-') {
-                            // Índice negativo
-                            let num = '-';
-                            i++;
-                            while (i < path.length && /[0-9]/.test(path[i])) {
-                                num += path[i];
-                                i++;
-                            }
-                            if (num === '-') num = -1;
-                            else num = parseInt(num);
-                            tokens.push({ type: 'arrayAccess', value: num });
-                        } else {
-                            // Número
-                            let num = '';
-                            while (i < path.length && /[0-9]/.test(path[i])) {
-                                num += path[i];
-                                i++;
-                            }
-                            if (num) {
-                                tokens.push({ type: 'arrayAccess', value: parseInt(num) });
-                            }
-                        }
-
-                        skipSpaces();
-                        if (path[i] === ']') i++;
-                    } else if (path[i] === '.' && i + 1 < path.length && path[i + 1] === '.') {
-                        // Operador deep search ..
-                        i += 2;
-                        let name = '';
-                        while (i < path.length && /[a-zA-Z0-9_]/.test(path[i])) {
-                            name += path[i];
-                            i++;
-                        }
-                        if (name) {
-                            tokens.push({ type: 'deep', value: name });
-                        }
-                    } else {
-                        i++;
-                    }
-                }
-
-                while (i < path.length) {
-                    parseToken();
-                }
-
-                return tokens;
-            }
-        };
-
-        function applyFilter() {
-            const input = document.getElementById('jsonInput').value;
-            let filter = document.getElementById('jsonFilter').value.trim();
-
-            if (!input.trim()) {
-                showNotification('Por favor, ingresa un JSON', 'error');
-                return;
-            }
-
-            if (!filter) {
-                showNotification('Por favor, ingresa un filtro', 'error');
-                return;
-            }
-
-            try {
-                const parsed = JSON.parse(input);
-                const result = jsonpathImpl.query(parsed, filter);
-
-                const formatted = JSON.stringify(result, null, 2);
-                document.getElementById('jsonOutput').innerHTML = syntaxHighlight(formatted);
-                updateStats(formatted);
-
-                if (result.length === 0) {
-                    showNotification('No se encontraron coincidencias', 'warning');
-                } else {
-                    showNotification(`Filtro aplicado: ${result.length} resultado(s)`, 'success');
-                    // Save to history only on success
-                    saveFilterToHistory(filter);
-                }
-            } catch (error) {
-                showNotification('Error en filtro: ' + error.message, 'error');
-            }
-        }
-
-        function syntaxHighlight(json) {
-            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-                let cls = 'json-number';
-                if (/^"/.test(match)) {
-                    if (/:$/.test(match)) {
-                        cls = 'json-key';
-                    } else {
-                        cls = 'json-string';
-                    }
-                } else if (/true|false/.test(match)) {
-                    cls = 'json-boolean';
-                } else if (/null/.test(match)) {
-                    cls = 'json-null';
-                }
-                return '<span class="' + cls + '">' + match + '</span>';
-            }).replace(/([{}[\],])/g, '<span class="json-bracket">$1</span>');
-        }
-
-        function updateStats(json) {
-            const stats = document.getElementById('outputStats');
-            const lines = json.split('\n').length;
-            const chars = json.length;
-            const size = (new Blob([json]).size / 1024).toFixed(2);
-            
-            try {
-                const parsed = JSON.parse(json);
-                const depth = getDepth(parsed);
-                stats.innerHTML = `<i class="fas fa-info-circle"></i> ${lines} líneas | ${chars} caracteres | ${size} KB | Profundidad: ${depth}`;
-            } catch {
-                stats.innerHTML = `<i class="fas fa-info-circle"></i> ${lines} líneas | ${chars} caracteres | ${size} KB`;
-            }
-        }
-
-        function getDepth(obj) {
-            if (typeof obj !== 'object' || obj === null) return 0;
-            if (Array.isArray(obj)) {
-                return Math.max(0, ...obj.map(getDepth)) + 1;
-            }
-            return Math.max(0, ...Object.values(obj).map(getDepth)) + 1;
-        }
-
-        function copyOutput() {
-            const output = document.getElementById('jsonOutput').textContent;
-            if (!output) {
-                showNotification('No hay contenido para copiar', 'error');
-                return;
-            }
-
-            navigator.clipboard.writeText(output).then(() => {
-                showNotification('Copiado al portapapeles', 'success');
-            }).catch(() => {
-                showNotification('Error al copiar', 'error');
-            });
-        }
-
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white fade-in z-50 ${
-                type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            }`;
-            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle mr-2"></i>${message}`;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Fullscreen toggle functionality
-        function toggleFullscreen(type) {
-            const section = document.getElementById(type === 'input' ? 'inputSection' : 'outputSection');
-            const icon = document.getElementById(type === 'input' ? 'fullscreenIconInput' : 'fullscreenIconOutput');
-            
-            if (section.classList.contains('fullscreen-mode')) {
-                section.classList.remove('fullscreen-mode');
-                icon.classList.remove('fa-compress');
-                icon.classList.add('fa-expand');
-                document.body.style.overflow = 'auto';
-            } else {
-                // Close any other fullscreen first
-                document.querySelectorAll('.fullscreen-mode').forEach(el => {
-                    el.classList.remove('fullscreen-mode');
-                });
-                document.querySelectorAll('[id^="fullscreenIcon"]').forEach(el => {
-                    el.classList.remove('fa-compress');
-                    el.classList.add('fa-expand');
-                });
-                
-                section.classList.add('fullscreen-mode');
-                icon.classList.remove('fa-expand');
-                icon.classList.add('fa-compress');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        // Close fullscreen with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.fullscreen-mode').forEach(el => {
-                    el.classList.remove('fullscreen-mode');
-                });
-                document.querySelectorAll('[id^="fullscreenIcon"]').forEach(el => {
-                    el.classList.remove('fa-compress');
-                    el.classList.add('fa-expand');
-                });
-                document.body.style.overflow = 'auto';
-            }
+      // Update UI to reflect current config
+      function updateConfigUI() {
+        // Format spacing buttons
+        document.querySelectorAll('[id^="spacing"]').forEach((btn) => {
+          btn.classList.remove("bg-blue-500/30", "border-blue-500/50", "text-white");
+          btn.classList.add("bg-white/10", "border-white/20", "text-gray-400");
         });
 
-        // IndexedDB Configuration
-        const DB_NAME = 'JsonToolsDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'filterHistory';
-        let db;
+        const spacingId =
+          toolConfig.formatSpacing === "\t" ? "spacingTab" : `spacing${toolConfig.formatSpacing}`;
+        const activeSpacingBtn = document.getElementById(spacingId);
+        if (activeSpacingBtn) {
+          activeSpacingBtn.classList.remove("bg-white/10", "border-white/20", "text-gray-400");
+          activeSpacingBtn.classList.add("bg-blue-500/30", "border-blue-500/50", "text-white");
+        }
 
-        // Initialize IndexedDB
-        function initDB() {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
+        // Checkboxes
+        document.getElementById("sortKeys").checked = toolConfig.sortKeys;
+        document.getElementById("autoCopyFormat").checked = toolConfig.autoCopyFormat;
+        document.getElementById("minifySpaces").checked = toolConfig.minifySpaces;
+        document.getElementById("sortKeysMinify").checked = toolConfig.sortKeysMinify;
+        document.getElementById("autoCopyMinify").checked = toolConfig.autoCopyMinify;
+        document.getElementById("removeNull").checked = toolConfig.removeNull;
+        document.getElementById("removeUndefined").checked = toolConfig.removeUndefined;
+        document.getElementById("removeEmptyString").checked = toolConfig.removeEmptyString;
+        document.getElementById("removeEmptyArray").checked = toolConfig.removeEmptyArray;
+        document.getElementById("removeEmptyObject").checked = toolConfig.removeEmptyObject;
 
-            request.onerror = (event) => {
-                console.error("IndexedDB error:", event.target.error);
-            };
+        // Radios for Clean Output
+        document.getElementById("cleanOutputFormat").checked = toolConfig.formatAfterClean;
+        document.getElementById("cleanOutputMinify").checked = !toolConfig.formatAfterClean;
+      }
 
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
-                if (!db.objectStoreNames.contains(STORE_NAME)) {
-                    const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                    objectStore.createIndex('timestamp', 'timestamp', { unique: false });
+      // Set clean output mode
+      function setCleanOutputMode(format) {
+        toolConfig.formatAfterClean = format;
+        updateConfigUI();
+      }
+
+      // Set format spacing
+      function setFormatSpacing(value) {
+        toolConfig.formatSpacing = value;
+        updateConfigUI();
+      }
+
+      // Config modal functions
+      function showConfigModal() {
+        const modal = document.getElementById("configModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.style.overflow = "hidden";
+        updateConfigUI();
+      }
+
+      function closeConfigModal() {
+        const modal = document.getElementById("configModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.style.overflow = "auto";
+      }
+
+      // Sample JSON data
+      const sampleJSON = {
+        users: [
+          {
+            id: 1,
+            name: "Juan Pérez",
+            age: 28,
+            email: "juan@example.com",
+            active: true,
+            roles: ["admin", "user"],
+          },
+          {
+            id: 2,
+            name: "María García",
+            age: 32,
+            email: "maria@example.com",
+            active: false,
+            roles: ["user"],
+          },
+          {
+            id: 3,
+            name: "Carlos López",
+            age: 25,
+            email: "carlos@example.com",
+            active: true,
+            roles: ["user", "moderator"],
+          },
+        ],
+        metadata: {
+          total: 3,
+          page: 1,
+          timestamp: "2024-01-15T10:30:00Z",
+        },
+        products: [
+          { id: "p1", name: "Laptop", price: 1200, category: "electronics" },
+          { id: "p2", name: "Mouse", price: 25, category: "electronics" },
+          { id: "p3", name: "Keyboard", price: 75, category: "electronics" },
+        ],
+      };
+
+      function loadSample() {
+        document.getElementById("jsonInput").value = JSON.stringify(sampleJSON, null, 2);
+        validateJSON();
+        showNotification("Ejemplo cargado", "success");
+      }
+
+      function clearInput() {
+        document.getElementById("jsonInput").value = "";
+        document.getElementById("jsonOutput").innerHTML = "";
+        document.getElementById("validationStatus").innerHTML = "";
+        document.getElementById("outputStats").innerHTML = "";
+        localStorage.removeItem("jsonToolsInput");
+        showNotification("JSON eliminado", "success");
+      }
+
+      function validateJSON() {
+        const input = document.getElementById("jsonInput").value;
+        const statusDiv = document.getElementById("validationStatus");
+
+        if (!input.trim()) {
+          statusDiv.innerHTML = "";
+          return false;
+        }
+
+        try {
+          const parsed = JSON.parse(input);
+          statusDiv.innerHTML = `<span class="text-green-400"><i class="fas fa-check-circle"></i> JSON válido</span>`;
+          return true;
+        } catch (error) {
+          statusDiv.innerHTML = `<span class="text-red-400"><i class="fas fa-exclamation-circle"></i> Error: ${error.message}</span>`;
+          return false;
+        }
+      }
+
+      function formatJSON() {
+        const input = document.getElementById("jsonInput").value;
+
+        if (!input.trim()) {
+          showNotification("Por favor, ingresa un JSON", "error");
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(input);
+
+          // Sort keys if enabled
+          let processed = parsed;
+          if (toolConfig.sortKeys) {
+            processed = sortKeys(parsed);
+          }
+
+          const formatted = JSON.stringify(processed, null, toolConfig.formatSpacing);
+          document.getElementById("jsonOutput").innerHTML = syntaxHighlight(formatted);
+          updateStats(formatted);
+          showNotification("JSON formateado", "success");
+
+          // Auto copy if enabled
+          if (toolConfig.autoCopyFormat) {
+            copyOutput();
+          }
+        } catch (error) {
+          showNotification("JSON inválido: " + error.message, "error");
+        }
+      }
+
+      function minifyJSON() {
+        const input = document.getElementById("jsonInput").value;
+
+        if (!input.trim()) {
+          showNotification("Por favor, ingresa un JSON", "error");
+          return;
+        }
+
+        try {
+          let parsed = JSON.parse(input);
+
+          // Sort keys if enabled for minify
+          if (toolConfig.sortKeysMinify) {
+            parsed = sortKeys(parsed);
+          }
+
+          let minified;
+
+          if (toolConfig.minifySpaces) {
+            minified = JSON.stringify(parsed);
+          } else {
+            // Keep newlines but minimize other spaces
+            minified = JSON.stringify(parsed, null, 0);
+          }
+
+          document.getElementById("jsonOutput").innerHTML = syntaxHighlight(minified);
+          updateStats(minified);
+          showNotification("JSON minificado", "success");
+
+          // Auto copy if enabled
+          if (toolConfig.autoCopyMinify) {
+            copyOutput();
+          }
+        } catch (error) {
+          showNotification("JSON inválido: " + error.message, "error");
+        }
+      }
+
+      function removeEmpty() {
+        const input = document.getElementById("jsonInput").value;
+
+        if (!input.trim()) {
+          showNotification("Por favor, ingresa un JSON", "error");
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(input);
+          const cleaned = removeEmptyValues(parsed);
+          const spacing = toolConfig.formatAfterClean ? toolConfig.formatSpacing : 0;
+          const formatted = JSON.stringify(cleaned, null, spacing);
+          document.getElementById("jsonOutput").innerHTML = syntaxHighlight(formatted);
+          updateStats(formatted);
+          showNotification("Valores vacíos eliminados", "success");
+        } catch (error) {
+          showNotification("JSON inválido: " + error.message, "error");
+        }
+      }
+
+      function removeEmptyValues(obj) {
+        if (Array.isArray(obj)) {
+          return obj
+            .filter((item) => {
+              // Check if empty array
+              if (toolConfig.removeEmptyArray && Array.isArray(item) && item.length === 0) {
+                return false;
+              }
+              if (typeof item === "object" && item !== null) {
+                return Object.keys(removeEmptyValues(item)).length > 0;
+              }
+              // Check individual values
+              if (toolConfig.removeNull && item === null) return false;
+              if (toolConfig.removeUndefined && item === undefined) return false;
+              if (toolConfig.removeEmptyString && item === "") return false;
+              return true;
+            })
+            .map((item) => removeEmptyValues(item));
+        } else if (typeof obj === "object" && obj !== null) {
+          const result = {};
+          for (const key in obj) {
+            const value = obj[key];
+
+            // Check if empty object
+            if (
+              toolConfig.removeEmptyObject &&
+              typeof value === "object" &&
+              value !== null &&
+              Object.keys(value).length === 0
+            ) {
+              continue;
+            }
+
+            // Check individual values
+            if (toolConfig.removeNull && value === null) continue;
+            if (toolConfig.removeUndefined && value === undefined) continue;
+            if (toolConfig.removeEmptyString && value === "") continue;
+
+            result[key] = removeEmptyValues(value);
+          }
+          return result;
+        }
+        return obj;
+      }
+
+      // Helper function to sort object keys alphabetically
+      function sortKeys(obj) {
+        if (Array.isArray(obj)) {
+          return obj.map((item) => sortKeys(item));
+        } else if (obj !== null && typeof obj === "object") {
+          const sorted = {};
+          Object.keys(obj)
+            .sort()
+            .forEach((key) => {
+              sorted[key] = sortKeys(obj[key]);
+            });
+          return sorted;
+        }
+        return obj;
+      }
+
+      // Implementación alternativa de JSONPath para mayor compatibilidad
+      const jsonpathImpl = {
+        query: function (obj, path) {
+          // Normalizar el path
+          path = path.trim();
+
+          // Si no empieza con $, agregarlo
+          if (!path.startsWith("$")) {
+            if (path.startsWith(".")) {
+              path = "$" + path;
+            } else if (path.startsWith("[")) {
+              path = "$" + path;
+            } else if (!path.includes(".")) {
+              path = "$." + path;
+            } else {
+              path = "$" + path;
+            }
+          }
+
+          try {
+            // Usar la librería si está disponible
+            if (typeof jsonpath !== "undefined" && jsonpath.query) {
+              return jsonpath.query(obj, path);
+            }
+
+            // Implementación manual para casos comunes
+            return this.manualQuery(obj, path);
+          } catch (e) {
+            // Si falla, intentar con implementación manual
+            try {
+              return this.manualQuery(obj, path);
+            } catch (e2) {
+              throw new Error("Filtro no válido: " + e2.message);
+            }
+          }
+        },
+
+        manualQuery: function (obj, path) {
+          const results = [];
+          const tokens = this.tokenize(path);
+
+          function getValue(o, key) {
+            if (key === "*") return o;
+            if (Array.isArray(o)) {
+              return o.map((item) => {
+                if (key === "@") return item;
+                return item[key];
+              });
+            }
+            if (o && typeof o === "object") {
+              return o[key];
+            }
+            return undefined;
+          }
+
+          function traverse(current, remainingTokens) {
+            if (remainingTokens.length === 0) {
+              if (Array.isArray(current)) {
+                current.forEach((item) => results.push(item));
+              } else if (current !== undefined) {
+                results.push(current);
+              }
+              return;
+            }
+
+            const token = remainingTokens[0];
+            const rest = remainingTokens.slice(1);
+
+            if (token === "$") {
+              traverse(obj, rest);
+            } else if (token.type === "property") {
+              const values = getValue(current, token.value);
+              if (values !== undefined) {
+                if (Array.isArray(values)) {
+                  values.forEach((v) => traverse(v, rest));
+                } else {
+                  traverse(values, rest);
                 }
-            };
+              }
+            } else if (token.type === "wildcard") {
+              if (Array.isArray(current)) {
+                current.forEach((item) => traverse(item, rest));
+              } else if (current && typeof current === "object") {
+                Object.values(current).forEach((v) => traverse(v, rest));
+              }
+            } else if (token.type === "arrayAccess") {
+              if (Array.isArray(current)) {
+                const indices = token.value;
+                if (indices === "*") {
+                  current.forEach((item, idx) => traverse(item, rest));
+                } else if (typeof indices === "number") {
+                  if (current[indices] !== undefined) {
+                    traverse(current[indices], rest);
+                  }
+                } else if (Array.isArray(indices)) {
+                  indices.forEach((idx) => {
+                    if (current[idx] !== undefined) {
+                      traverse(current[idx], rest);
+                    }
+                  });
+                }
+              }
+            } else if (token.type === "filter") {
+              if (Array.isArray(current)) {
+                current
+                  .filter((item) => {
+                    if (token.condition.startsWith("@.")) {
+                      const prop = token.condition.substring(2);
+                      const val = item[prop];
+                      switch (token.operator) {
+                        case ">":
+                          return token.value !== undefined ? val > token.value : val;
+                        case "<":
+                          return token.value !== undefined ? val < token.value : val;
+                        case ">=":
+                          return token.value !== undefined ? val >= token.value : val;
+                        case "<=":
+                          return token.value !== undefined ? val <= token.value : val;
+                        case "==":
+                          return token.value !== undefined ? val == token.value : !!val;
+                        case "!=":
+                          return token.value !== undefined ? val != token.value : !val;
+                        default:
+                          return !!val;
+                      }
+                    }
+                    return true;
+                  })
+                  .forEach((item) => traverse(item, rest));
+              }
+            } else if (token.type === "deep") {
+              this.deepSearch(current, token.value, rest).forEach((r) => results.push(r));
+            }
+          }
 
-            request.onsuccess = (event) => {
-                db = event.target.result;
-            };
+          traverse(obj, tokens);
+          return results;
+        },
+
+        deepSearch: function (obj, propName, remainingTokens) {
+          const results = [];
+
+          function search(current) {
+            if (current && typeof current === "object") {
+              if (Array.isArray(current)) {
+                current.forEach((item) => search(item));
+              } else {
+                if (current[propName] !== undefined) {
+                  if (remainingTokens.length > 0) {
+                    traverseDeep(current[propName], remainingTokens);
+                  } else {
+                    results.push(current[propName]);
+                  }
+                }
+                Object.values(current).forEach((v) => search(v));
+              }
+            }
+          }
+
+          function traverseDeep(current, tokens) {
+            if (tokens.length === 0) {
+              if (Array.isArray(current)) {
+                current.forEach((item) => results.push(item));
+              } else if (current !== undefined) {
+                results.push(current);
+              }
+              return;
+            }
+            const token = tokens[0];
+            const rest = tokens.slice(1);
+
+            if (token.type === "property" || token.type === "arrayAccess") {
+              if (Array.isArray(current)) {
+                current.forEach((item) => traverseDeep(item, tokens));
+              } else if (token.type === "property" && current[token.value] !== undefined) {
+                traverseDeep(current[token.value], rest);
+              }
+            }
+          }
+
+          search(obj);
+          return results;
+        },
+
+        tokenize: function (path) {
+          const tokens = [];
+          let i = 0;
+
+          function skipSpaces() {
+            while (i < path.length && path[i] === " ") i++;
+          }
+
+          function parseToken() {
+            skipSpaces();
+            if (i >= path.length) return;
+
+            if (path[i] === "$") {
+              tokens.push({ type: "root", value: "$" });
+              i++;
+            } else if (path[i] === ".") {
+              i++;
+              if (path[i] === "*") {
+                tokens.push({ type: "wildcard", value: "*" });
+                i++;
+              } else {
+                let name = "";
+                while (i < path.length && /[a-zA-Z0-9_]/.test(path[i])) {
+                  name += path[i];
+                  i++;
+                }
+                if (name) {
+                  tokens.push({ type: "property", value: name });
+                }
+              }
+            } else if (path[i] === "[") {
+              i++;
+              skipSpaces();
+
+              if (path[i] === "?") {
+                // Filtro [?(...)]
+                i++;
+                const conditionStart = path.indexOf("(", i);
+                if (conditionStart !== -1) {
+                  i = conditionStart + 1;
+                  let condition = "";
+                  let depth = 1;
+                  while (i < path.length && depth > 0) {
+                    if (path[i] === "(") depth++;
+                    else if (path[i] === ")") depth--;
+                    if (depth > 0) condition += path[i];
+                    i++;
+                  }
+
+                  // Parsear condición
+                  let operator = "==";
+                  let propName = condition;
+                  let value = undefined;
+
+                  if (condition.includes(">")) {
+                    operator = ">";
+                    const parts = condition.split(">");
+                    propName = parts[0].trim();
+                    value = parseFloat(parts[1].trim());
+                  } else if (condition.includes("<")) {
+                    operator = "<";
+                    const parts = condition.split("<");
+                    propName = parts[0].trim();
+                    value = parseFloat(parts[1].trim());
+                  } else if (condition.includes(">=")) {
+                    operator = ">=";
+                    const parts = condition.split(">=");
+                    propName = parts[0].trim();
+                    value = parseFloat(parts[1].trim());
+                  } else if (condition.includes("<=")) {
+                    operator = "<=";
+                    const parts = condition.split("<=");
+                    propName = parts[0].trim();
+                    value = parseFloat(parts[1].trim());
+                  } else if (condition.includes("==")) {
+                    operator = "==";
+                    const parts = condition.split("==");
+                    propName = parts[0].trim();
+                    value = parts[1].trim().replace(/'/g, "");
+                  } else if (condition.startsWith("@.")) {
+                    propName = condition.substring(2);
+                    operator = "truthy";
+                  }
+
+                  tokens.push({ type: "filter", condition: condition, operator, propName, value });
+                }
+              } else if (path[i] === "*") {
+                tokens.push({ type: "arrayAccess", value: "*" });
+                i++;
+              } else if (path[i] === "-") {
+                // Índice negativo
+                let num = "-";
+                i++;
+                while (i < path.length && /[0-9]/.test(path[i])) {
+                  num += path[i];
+                  i++;
+                }
+                if (num === "-") num = -1;
+                else num = parseInt(num);
+                tokens.push({ type: "arrayAccess", value: num });
+              } else {
+                // Número
+                let num = "";
+                while (i < path.length && /[0-9]/.test(path[i])) {
+                  num += path[i];
+                  i++;
+                }
+                if (num) {
+                  tokens.push({ type: "arrayAccess", value: parseInt(num) });
+                }
+              }
+
+              skipSpaces();
+              if (path[i] === "]") i++;
+            } else if (path[i] === "." && i + 1 < path.length && path[i + 1] === ".") {
+              // Operador deep search ..
+              i += 2;
+              let name = "";
+              while (i < path.length && /[a-zA-Z0-9_]/.test(path[i])) {
+                name += path[i];
+                i++;
+              }
+              if (name) {
+                tokens.push({ type: "deep", value: name });
+              }
+            } else {
+              i++;
+            }
+          }
+
+          while (i < path.length) {
+            parseToken();
+          }
+
+          return tokens;
+        },
+      };
+
+      function applyFilter() {
+        const input = document.getElementById("jsonInput").value;
+        let filter = document.getElementById("jsonFilter").value.trim();
+
+        if (!input.trim()) {
+          showNotification("Por favor, ingresa un JSON", "error");
+          return;
         }
 
-        // Save filter to history
-        function saveFilterToHistory(filterText) {
-            if (!db || !filterText.trim()) return;
-
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            
-            // Check if filter already exists recently to avoid duplicates
-            // For simplicity, just add new one. Or we could query first.
-            // Let's just add it with timestamp.
-            
-            const filter = {
-                filter: filterText,
-                timestamp: new Date().getTime()
-            };
-
-            store.add(filter);
+        if (!filter) {
+          showNotification("Por favor, ingresa un filtro", "error");
+          return;
         }
 
-        // Load history and render to modal
-        function loadFilterHistory() {
-            if (!db) return;
+        try {
+          const parsed = JSON.parse(input);
+          const result = jsonpathImpl.query(parsed, filter);
 
-            const transaction = db.transaction([STORE_NAME], 'readonly');
-            const store = transaction.objectStore(STORE_NAME);
-            const index = store.index('timestamp');
-            const request = index.openCursor(null, 'prev'); // Newest first
-            const historyList = document.getElementById('historyList');
-            historyList.innerHTML = '';
-            
-            let count = 0;
-            const maxItems = 20; // Limit display
+          const formatted = JSON.stringify(result, null, 2);
+          document.getElementById("jsonOutput").innerHTML = syntaxHighlight(formatted);
+          updateStats(formatted);
 
-            request.onsuccess = (event) => {
-                const cursor = event.target.result;
-                if (cursor && count < maxItems) {
-                    const item = cursor.value;
-                    const date = new Date(item.timestamp).toLocaleString();
-                    
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer group';
-                    div.onclick = () => {
-                        document.getElementById('jsonFilter').value = item.filter;
-                        applyFilter();
-                        closeHistoryModal();
-                    };
-                    
-                    div.innerHTML = `
+          if (result.length === 0) {
+            showNotification("No se encontraron coincidencias", "warning");
+          } else {
+            showNotification(`Filtro aplicado: ${result.length} resultado(s)`, "success");
+            // Save to history only on success
+            saveFilterToHistory(filter);
+          }
+        } catch (error) {
+          showNotification("Error en filtro: " + error.message, "error");
+        }
+      }
+
+      function syntaxHighlight(json) {
+        json = json.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return json
+          .replace(
+            /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+            function (match) {
+              let cls = "json-number";
+              if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                  cls = "json-key";
+                } else {
+                  cls = "json-string";
+                }
+              } else if (/true|false/.test(match)) {
+                cls = "json-boolean";
+              } else if (/null/.test(match)) {
+                cls = "json-null";
+              }
+              return '<span class="' + cls + '">' + match + "</span>";
+            },
+          )
+          .replace(/([{}[\],])/g, '<span class="json-bracket">$1</span>');
+      }
+
+      function updateStats(json) {
+        const stats = document.getElementById("outputStats");
+        const lines = json.split("\n").length;
+        const chars = json.length;
+        const size = (new Blob([json]).size / 1024).toFixed(2);
+
+        try {
+          const parsed = JSON.parse(json);
+          const depth = getDepth(parsed);
+          stats.innerHTML = `<i class="fas fa-info-circle"></i> ${lines} líneas | ${chars} caracteres | ${size} KB | Profundidad: ${depth}`;
+        } catch {
+          stats.innerHTML = `<i class="fas fa-info-circle"></i> ${lines} líneas | ${chars} caracteres | ${size} KB`;
+        }
+      }
+
+      function getDepth(obj) {
+        if (typeof obj !== "object" || obj === null) return 0;
+        if (Array.isArray(obj)) {
+          return Math.max(0, ...obj.map(getDepth)) + 1;
+        }
+        return Math.max(0, ...Object.values(obj).map(getDepth)) + 1;
+      }
+
+      function copyOutput() {
+        const output = document.getElementById("jsonOutput").textContent;
+        if (!output) {
+          showNotification("No hay contenido para copiar", "error");
+          return;
+        }
+
+        navigator.clipboard
+          .writeText(output)
+          .then(() => {
+            showNotification("Copiado al portapapeles", "success");
+          })
+          .catch(() => {
+            showNotification("Error al copiar", "error");
+          });
+      }
+
+      function showNotification(message, type) {
+        const notification = document.createElement("div");
+        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white fade-in z-50 ${
+          type === "success" ? "bg-green-500" : "bg-red-500"
+        }`;
+        notification.innerHTML = `<i class="fas fa-${type === "success" ? "check" : "exclamation"}-circle mr-2"></i>${message}`;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+
+      // Fullscreen toggle functionality
+      function toggleFullscreen(type) {
+        const section = document.getElementById(
+          type === "input" ? "inputSection" : "outputSection",
+        );
+        const icon = document.getElementById(
+          type === "input" ? "fullscreenIconInput" : "fullscreenIconOutput",
+        );
+
+        if (section.classList.contains("fullscreen-mode")) {
+          section.classList.remove("fullscreen-mode");
+          icon.classList.remove("fa-compress");
+          icon.classList.add("fa-expand");
+          document.body.style.overflow = "auto";
+        } else {
+          // Close any other fullscreen first
+          document.querySelectorAll(".fullscreen-mode").forEach((el) => {
+            el.classList.remove("fullscreen-mode");
+          });
+          document.querySelectorAll('[id^="fullscreenIcon"]').forEach((el) => {
+            el.classList.remove("fa-compress");
+            el.classList.add("fa-expand");
+          });
+
+          section.classList.add("fullscreen-mode");
+          icon.classList.remove("fa-expand");
+          icon.classList.add("fa-compress");
+          document.body.style.overflow = "hidden";
+        }
+      }
+
+      // Close fullscreen with Escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          document.querySelectorAll(".fullscreen-mode").forEach((el) => {
+            el.classList.remove("fullscreen-mode");
+          });
+          document.querySelectorAll('[id^="fullscreenIcon"]').forEach((el) => {
+            el.classList.remove("fa-compress");
+            el.classList.add("fa-expand");
+          });
+          document.body.style.overflow = "auto";
+        }
+      });
+
+      // IndexedDB Configuration
+      const DB_NAME = "JsonToolsDB";
+      const DB_VERSION = 1;
+      const STORE_NAME = "filterHistory";
+      let db;
+
+      // Initialize IndexedDB
+      function initDB() {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onerror = (event) => {
+          console.error("IndexedDB error:", event.target.error);
+        };
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            const objectStore = db.createObjectStore(STORE_NAME, {
+              keyPath: "id",
+              autoIncrement: true,
+            });
+            objectStore.createIndex("timestamp", "timestamp", { unique: false });
+          }
+        };
+
+        request.onsuccess = (event) => {
+          db = event.target.result;
+        };
+      }
+
+      // Save filter to history
+      function saveFilterToHistory(filterText) {
+        if (!db || !filterText.trim()) return;
+
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+
+        // Check if filter already exists recently to avoid duplicates
+        // For simplicity, just add new one. Or we could query first.
+        // Let's just add it with timestamp.
+
+        const filter = {
+          filter: filterText,
+          timestamp: new Date().getTime(),
+        };
+
+        store.add(filter);
+      }
+
+      // Load history and render to modal
+      function loadFilterHistory() {
+        if (!db) return;
+
+        const transaction = db.transaction([STORE_NAME], "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const index = store.index("timestamp");
+        const request = index.openCursor(null, "prev"); // Newest first
+        const historyList = document.getElementById("historyList");
+        historyList.innerHTML = "";
+
+        let count = 0;
+        const maxItems = 20; // Limit display
+
+        request.onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor && count < maxItems) {
+            const item = cursor.value;
+            const date = new Date(item.timestamp).toLocaleString();
+
+            const div = document.createElement("div");
+            div.className =
+              "flex items-center justify-between p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer group";
+            div.onclick = () => {
+              document.getElementById("jsonFilter").value = item.filter;
+              applyFilter();
+              closeHistoryModal();
+            };
+
+            div.innerHTML = `
                         <div class="flex-1">
                             <code class="text-cyan-300 text-xs font-mono block mb-1">${escapeHtml(item.filter)}</code>
                             <div class="text-[10px] text-gray-500">${date}</div>
                         </div>
                         <i class="fas fa-chevron-right text-gray-600 group-hover:text-cyan-400 transition-colors text-xs"></i>
                     `;
-                    
-                    historyList.appendChild(div);
-                    
-                    count++;
-                    cursor.continue();
-                } else if (count === 0) {
-                    historyList.innerHTML = '<div class="text-center text-gray-500 italic py-4 text-xs">No hay historial reciente</div>';
-                }
-            };
+
+            historyList.appendChild(div);
+
+            count++;
+            cursor.continue();
+          } else if (count === 0) {
+            historyList.innerHTML =
+              '<div class="text-center text-gray-500 italic py-4 text-xs">No hay historial reciente</div>';
+          }
+        };
+      }
+
+      // Clear history
+      function clearFilterHistory() {
+        if (!db) return;
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.clear();
+
+        request.onsuccess = () => {
+          loadFilterHistory();
+          showNotification("Historial borrado", "success");
+        };
+      }
+
+      function escapeHtml(text) {
+        if (!text) return text;
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // History Modal functions
+      function showHistoryModal() {
+        loadFilterHistory();
+        const modal = document.getElementById("historyModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeHistoryModal() {
+        const modal = document.getElementById("historyModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.style.overflow = "auto";
+      }
+
+      // Initialize with sample on load
+      window.addEventListener("load", () => {
+        initDB(); // Init DB
+        loadConfig();
+        // Intentar cargar JSON guardado, si no hay, cargar ejemplo
+        loadJSON();
+        if (!document.getElementById("jsonInput").value.trim()) {
+          loadSample();
         }
+      });
 
-        // Clear history
-        function clearFilterHistory() {
-            if (!db) return;
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.clear();
-            
-            request.onsuccess = () => {
-                loadFilterHistory();
-                showNotification('Historial borrado', 'success');
-            };
+      // Tips Modal functions
+      function showTipsModal() {
+        const modal = document.getElementById("tipsModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeTipsModal() {
+        const modal = document.getElementById("tipsModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.style.overflow = "auto";
+      }
+
+      function tryExample(filter) {
+        document.getElementById("jsonFilter").value = filter;
+        applyFilter();
+        closeTipsModal();
+        showNotification("Filtro aplicado", "success");
+      }
+
+      // Close modal on backdrop click
+      document.getElementById("tipsModal").addEventListener("click", (e) => {
+        if (e.target.id === "tipsModal") {
+          closeTipsModal();
         }
+      });
 
-        function escapeHtml(text) {
-            if (!text) return text;
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        // History Modal functions
-        function showHistoryModal() {
-            loadFilterHistory();
-            const modal = document.getElementById('historyModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeHistoryModal() {
-            const modal = document.getElementById('historyModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Initialize with sample on load
-        window.addEventListener('load', () => {
-            initDB(); // Init DB
-            loadConfig();
-            // Intentar cargar JSON guardado, si no hay, cargar ejemplo
-            loadJSON();
-            if (!document.getElementById('jsonInput').value.trim()) {
-                loadSample();
-            }
-        });
-
-        // Tips Modal functions
-        function showTipsModal() {
-            const modal = document.getElementById('tipsModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeTipsModal() {
-            const modal = document.getElementById('tipsModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-
-        function tryExample(filter) {
-            document.getElementById('jsonFilter').value = filter;
-            applyFilter();
+      // Close modal on Escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const tipsModal = document.getElementById("tipsModal");
+          const configModal = document.getElementById("configModal");
+          if (!tipsModal.classList.contains("hidden")) {
             closeTipsModal();
-            showNotification('Filtro aplicado', 'success');
+          }
+          if (!configModal.classList.contains("hidden")) {
+            closeConfigModal();
+          }
+          const historyModal = document.getElementById("historyModal");
+          if (!historyModal.classList.contains("hidden")) {
+            closeHistoryModal();
+          }
+        }
+      });
+
+      // Close config modal on backdrop click
+      document.getElementById("configModal").addEventListener("click", (e) => {
+        if (e.target.id === "configModal") {
+          closeConfigModal();
+        }
+      });
+
+      // Close history modal on backdrop click
+      document.getElementById("historyModal").addEventListener("click", (e) => {
+        if (e.target.id === "historyModal") {
+          closeHistoryModal();
+        }
+      });
+
+      // Listen for checkbox changes
+      document.querySelectorAll('#configModal input[type="checkbox"]').forEach((checkbox) => {
+        checkbox.addEventListener("change", (e) => {
+          // Skip checkboxes that are handled explicitly if any (currently none conflict directly)
+          if (toolConfig.hasOwnProperty(e.target.id)) {
+            toolConfig[e.target.id] = e.target.checked;
+          }
+        });
+      });
+
+      // Keyboard Shortcuts
+      document.addEventListener("keydown", (e) => {
+        // Filter Input Enter Key
+        if (e.target.id === "jsonFilter" && e.key === "Enter") {
+          e.preventDefault();
+          applyFilter();
+          return;
         }
 
-        // Close modal on backdrop click
-        document.getElementById('tipsModal').addEventListener('click', (e) => {
-            if (e.target.id === 'tipsModal') {
-                closeTipsModal();
-            }
-        });
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const tipsModal = document.getElementById('tipsModal');
-                const configModal = document.getElementById('configModal');
-                if (!tipsModal.classList.contains('hidden')) {
-                    closeTipsModal();
-                }
-                if (!configModal.classList.contains('hidden')) {
-                    closeConfigModal();
-                }
-                const historyModal = document.getElementById('historyModal');
-                if (!historyModal.classList.contains('hidden')) {
-                    closeHistoryModal();
-                }
-            }
-        });
-
-        // Close config modal on backdrop click
-        document.getElementById('configModal').addEventListener('click', (e) => {
-            if (e.target.id === 'configModal') {
-                closeConfigModal();
-            }
-        });
-        
-        // Close history modal on backdrop click
-        document.getElementById('historyModal').addEventListener('click', (e) => {
-            if (e.target.id === 'historyModal') {
-                closeHistoryModal();
-            }
-        });
-
-        // Listen for checkbox changes
-        document.querySelectorAll('#configModal input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                // Skip checkboxes that are handled explicitly if any (currently none conflict directly)
-                if (toolConfig.hasOwnProperty(e.target.id)) {
-                    toolConfig[e.target.id] = e.target.checked;
-                }
-            });
-        });
-
-        // Keyboard Shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Filter Input Enter Key
-            if (e.target.id === 'jsonFilter' && e.key === 'Enter') {
-                e.preventDefault();
-                applyFilter();
-                return;
-            }
-
-            // Tools Shortcuts
-            if (e.ctrlKey) {
-                // Ctrl + Shift + F -> Format
-                if (e.shiftKey && (e.key === 'F' || e.key === 'f')) {
-                    e.preventDefault();
-                    formatJSON();
-                    showNotification('Shortcut: Formatear', 'success');
-                }
-                // Ctrl + M -> Minify
-                else if (!e.shiftKey && (e.key === 'm' || e.key === 'M')) {
-                    e.preventDefault();
-                    minifyJSON();
-                    showNotification('Shortcut: Minificar', 'success');
-                }
-                // Ctrl + L -> Clean
-                else if (!e.shiftKey && (e.key === 'l' || e.key === 'L')) {
-                    e.preventDefault();
-                    removeEmpty();
-                    showNotification('Shortcut: Limpiar vacíos', 'success');
-                }
-            }
-        });
+        // Tools Shortcuts
+        if (e.ctrlKey) {
+          // Ctrl + Shift + F -> Format
+          if (e.shiftKey && (e.key === "F" || e.key === "f")) {
+            e.preventDefault();
+            formatJSON();
+            showNotification("Shortcut: Formatear", "success");
+          }
+          // Ctrl + M -> Minify
+          else if (!e.shiftKey && (e.key === "m" || e.key === "M")) {
+            e.preventDefault();
+            minifyJSON();
+            showNotification("Shortcut: Minificar", "success");
+          }
+          // Ctrl + L -> Clean
+          else if (!e.shiftKey && (e.key === "l" || e.key === "L")) {
+            e.preventDefault();
+            removeEmpty();
+            showNotification("Shortcut: Limpiar vacíos", "success");
+          }
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

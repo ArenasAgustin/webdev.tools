@@ -11,7 +11,7 @@ export function PlaygroundPage() {
   const playground = getPlaygroundById(playgroundId ?? "");
 
   useDocumentMeta({
-    title: playground?.name || "Playground",
+    title: playground?.name ?? "Playground",
     description: playground
       ? `${playground.description}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.`
       : "Herramientas de desarrollo web online",
@@ -58,20 +58,14 @@ export function PlaygroundPage() {
       <div>
         <div className="container mx-auto flex min-h-screen max-w-7xl flex-col gap-4 px-2 py-3 sm:px-4 sm:py-5">
           <header className="rounded-xl border border-white/5 bg-white/10 px-4 py-3 shadow-2xl shadow-black/30 backdrop-blur-md">
-            <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/70">
-              Playground
-            </p>
+            <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/70">Playground</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-cyan-100">
                 <i className={`${playground.icon}`}></i>
               </div>
               <div>
-                <h1 className="text-lg font-semibold sm:text-xl">
-                  {playground.name}
-                </h1>
-                <p className="text-xs text-white/60">
-                  {playground.description}
-                </p>
+                <h1 className="text-lg font-semibold sm:text-xl">{playground.name}</h1>
+                <p className="text-xs text-white/60">{playground.description}</p>
               </div>
             </div>
           </header>

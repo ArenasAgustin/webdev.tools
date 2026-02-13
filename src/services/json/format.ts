@@ -24,10 +24,7 @@ function sortJsonKeys(value: JsonValue): JsonValue {
  * Format JSON with indentation
  * Pure function - no side effects
  */
-export function formatJson(
-  input: string,
-  options: FormatOptions = {},
-): Result<string, JsonError> {
+export function formatJson(input: string, options: FormatOptions = {}): Result<string, JsonError> {
   if (!input.trim()) {
     return {
       ok: false,

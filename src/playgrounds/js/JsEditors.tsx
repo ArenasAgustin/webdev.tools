@@ -56,9 +56,7 @@ export function JsEditors({
                 characters={inputStats.characters}
                 bytes={inputStats.bytes}
               />
-              {inputWarning && (
-                <span className="text-amber-400 truncate">{inputWarning}</span>
-              )}
+              {inputWarning && <span className="text-amber-400 truncate">{inputWarning}</span>}
             </div>
           }
           value={inputCode}
@@ -87,8 +85,7 @@ export function JsEditors({
               withWrapper
               validExtra={
                 <span className="text-gray-400">
-                  Líneas: {output.split("\n").length} | Caracteres:{" "}
-                  {output.length}
+                  Líneas: {output.split("\n").length} | Caracteres: {output.length}
                 </span>
               }
             />
@@ -119,9 +116,7 @@ export function JsEditors({
                 characters={inputStats.characters}
                 bytes={inputStats.bytes}
               />
-              {inputWarning && (
-                <span className="text-amber-400 truncate">{inputWarning}</span>
-              )}
+              {inputWarning && <span className="text-amber-400 truncate">{inputWarning}</span>}
             </div>
           }
         >
@@ -153,8 +148,7 @@ export function JsEditors({
               withWrapper
               validExtra={
                 <span className="text-gray-400">
-                  Líneas: {output.split("\n").length} | Caracteres:{" "}
-                  {output.length}
+                  Líneas: {output.split("\n").length} | Caracteres: {output.length}
                 </span>
               }
             />

@@ -29,9 +29,7 @@ export function PlaygroundSidebar({
               <i className="fas fa-layer-group"></i>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">
-                WebDev Tools
-              </p>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">WebDev Tools</p>
               <p className="text-sm font-semibold">Inicio</p>
             </div>
           </Link>
@@ -46,9 +44,7 @@ export function PlaygroundSidebar({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-6">
-          <p className="px-2 text-xs uppercase tracking-[0.25em] text-white/50">
-            Playgrounds
-          </p>
+          <p className="px-2 text-xs uppercase tracking-[0.25em] text-white/50">Playgrounds</p>
           <ul className="mt-4 space-y-2">
             {playgroundRegistry.map((playground) => {
               const isActive = playground.id === currentPlaygroundId;

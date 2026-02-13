@@ -30,9 +30,7 @@ export function Checkbox({
   };
 
   return (
-    <label
-      className={`flex items-center gap-2 cursor-pointer ${containerClassName}`}
-    >
+    <label className={`flex items-center gap-2 cursor-pointer ${containerClassName}`}>
       <input
         type="checkbox"
         className={`w-4 h-4 rounded bg-gray-800 border-gray-600 ${colorClasses[color]}`}

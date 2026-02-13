@@ -9,10 +9,7 @@ export interface JsMinifyOptions {
  * Minify JavaScript code - remove unnecessary whitespace and comments
  * Pure function - no side effects
  */
-export function minifyJs(
-  input: string,
-  options: JsMinifyOptions = {},
-): Result<string, string> {
+export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<string, string> {
   try {
     if (!input.trim()) {
       return { ok: true, value: "" };

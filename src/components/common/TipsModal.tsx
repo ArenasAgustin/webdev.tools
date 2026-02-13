@@ -8,10 +8,10 @@ export interface TipItem {
   category: string;
   categoryIcon?: string;
   categoryColor?: IconColorKey; // color class like "blue-400", "purple-400", etc.
-  items: Array<{
+  items: {
     code: string;
     description: string;
-  }>;
+  }[];
 }
 
 export interface QuickExample {
@@ -31,10 +31,7 @@ interface TipsModalProps {
   onTryExample: (code: string) => void;
 }
 
-const TIP_COLOR_MAP: Record<
-  string,
-  { container: string; text: string; code: string }
-> = {
+const TIP_COLOR_MAP: Record<string, { container: string; text: string; code: string }> = {
   "blue-400": {
     container: "bg-blue-500/10 border-blue-500/20",
     text: "text-blue-400",
@@ -75,9 +72,7 @@ export const TipsModal = memo(function TipsModal({
   const renderedTips = useMemo(
     () =>
       tips.map((tip) => {
-        const color =
-          TIP_COLOR_MAP[tip.categoryColor || "blue-400"] ||
-          TIP_COLOR_MAP["blue-400"];
+        const color = TIP_COLOR_MAP[tip.categoryColor ?? "blue-400"] ?? TIP_COLOR_MAP["blue-400"];
 
         return (
           <Card
@@ -90,10 +85,8 @@ export const TipsModal = memo(function TipsModal({
             <ul className="space-y-1 text-gray-300">
               {tip.items.map((item, idx) => (
                 <li key={idx}>
-                  <code className={`bg-gray-800 px-1 rounded ${color.code}`}>
-                    {item.code}
-                  </code>{" "}
-                  - {item.description}
+                  <code className={`bg-gray-800 px-1 rounded ${color.code}`}>{item.code}</code> -{" "}
+                  {item.description}
                 </li>
               ))}
             </ul>
@@ -120,9 +113,7 @@ export const TipsModal = memo(function TipsModal({
                 className="p-2 bg-white/5 hover:bg-white/10 rounded text-gray-300 text-left text-xs transition-colors"
               >
                 <code className="text-pink-400">{example.label}</code>
-                <div className="text-gray-500 mt-1 text-xs">
-                  {example.description}
-                </div>
+                <div className="text-gray-500 mt-1 text-xs">{example.description}</div>
               </button>
             ))}
           </div>
@@ -132,13 +123,7 @@ export const TipsModal = memo(function TipsModal({
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      title={title}
-      icon={icon}
-      iconColor={iconColor}
-      onClose={onClose}
-    >
+    <Modal isOpen={isOpen} title={title} icon={icon} iconColor={iconColor} onClose={onClose}>
       <div className="space-y-4 text-xs max-h-[60vh] overflow-y-auto pr-2">
         {renderedTips}
         {renderedQuickExamples}

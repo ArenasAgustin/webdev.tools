@@ -5,10 +5,7 @@ import { type Result, type JsonValue, type JsonError } from "@/types/common";
  * Apply JSONPath filter to JSON data
  * Pure function - no side effects
  */
-export function applyJsonPath(
-  input: string,
-  path: string
-): Result<string, JsonError> {
+export function applyJsonPath(input: string, path: string): Result<string, JsonError> {
   if (!input.trim()) {
     return {
       ok: false,
@@ -29,12 +26,13 @@ export function applyJsonPath(
 
   try {
     // Parse input JSON
-    const parsed = JSON.parse(input) as JsonValue;
+    const parsed: unknown = JSON.parse(input) as unknown;
 
     // Apply JSONPath filter
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = JSONPath({
       path,
-      json: parsed,
+      json: parsed as JsonValue,
       wrap: false,
     });
 

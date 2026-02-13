@@ -26,18 +26,13 @@ export const Stats = memo(function Stats({
   const isSmaller = hasComparison && bytes < comparisonBytes;
 
   const percentageColor =
-    percentage > 0
-      ? "text-green-400"
-      : percentage < 0
-        ? "text-red-400"
-        : "text-gray-400";
+    percentage > 0 ? "text-green-400" : percentage < 0 ? "text-red-400" : "text-gray-400";
 
   const percentageLabel = isSmaller ? "más pequeño" : "más grande";
 
   return (
     <span className="text-gray-400">
-      · {lines} líneas · {characters.toLocaleString()} caracteres ·{" "}
-      {bytes.toLocaleString()} bytes
+      · {lines} líneas · {characters.toLocaleString()} caracteres · {bytes.toLocaleString()} bytes
       {hasComparison && (
         <span className={`ml-1 ${percentageColor}`}>
           ({Math.abs(percentage)}% {percentageLabel})

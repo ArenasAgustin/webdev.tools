@@ -5,11 +5,7 @@ import { ToggleButtonGroup } from "./ToggleButtonGroup";
 import { Checkbox } from "./Checkbox";
 import { RadioGroup } from "./RadioGroup";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
-import {
-  DEFAULT_FORMAT_CONFIG,
-  DEFAULT_MINIFY_CONFIG,
-  DEFAULT_CLEAN_CONFIG,
-} from "@/types/json";
+import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
 import { saveToolsConfig, removeToolsConfig } from "@/services/storage";
 
 interface ConfigModalProps {
@@ -84,20 +80,14 @@ export function ConfigModal({
                   { value: "\t", label: "Tab" },
                 ]}
                 value={formatConfig.indent}
-                onChange={(indent) =>
-                  onFormatConfigChange({ ...formatConfig, indent })
-                }
+                onChange={(indent) => onFormatConfigChange({ ...formatConfig, indent })}
               />
             </div>
             <div>
-              <label className="block text-gray-300 mb-1">
-                Ordenar claves alfabéticamente
-              </label>
+              <label className="block text-gray-300 mb-1">Ordenar claves alfabéticamente</label>
               <Checkbox
                 checked={formatConfig.sortKeys}
-                onChange={(checked) =>
-                  onFormatConfigChange({ ...formatConfig, sortKeys: checked })
-                }
+                onChange={(checked) => onFormatConfigChange({ ...formatConfig, sortKeys: checked })}
                 label="Habilitar ordenamiento"
                 color="blue"
               />
@@ -108,9 +98,7 @@ export function ConfigModal({
               </label>
               <Checkbox
                 checked={formatConfig.autoCopy}
-                onChange={(checked) =>
-                  onFormatConfigChange({ ...formatConfig, autoCopy: checked })
-                }
+                onChange={(checked) => onFormatConfigChange({ ...formatConfig, autoCopy: checked })}
                 label="Habilitar auto-copia"
                 color="blue"
               />
@@ -127,9 +115,7 @@ export function ConfigModal({
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-gray-300 mb-1">
-                Opciones de minificación
-              </label>
+              <label className="block text-gray-300 mb-1">Opciones de minificación</label>
               <div className="space-y-2">
                 <Checkbox
                   checked={minifyConfig.removeSpaces}
@@ -153,14 +139,10 @@ export function ConfigModal({
               </div>
             </div>
             <div>
-              <label className="block text-gray-300 mb-1">
-                Copiar automáticamente
-              </label>
+              <label className="block text-gray-300 mb-1">Copiar automáticamente</label>
               <Checkbox
                 checked={minifyConfig.autoCopy}
-                onChange={(checked) =>
-                  onMinifyConfigChange({ ...minifyConfig, autoCopy: checked })
-                }
+                onChange={(checked) => onMinifyConfigChange({ ...minifyConfig, autoCopy: checked })}
                 label="Habilitar auto-copia"
                 color="purple"
               />
@@ -177,9 +159,7 @@ export function ConfigModal({
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-gray-300 mb-2">
-                Valores a eliminar
-              </label>
+              <label className="block text-gray-300 mb-2">Valores a eliminar</label>
               <div className="grid grid-cols-2 gap-2">
                 <Checkbox
                   checked={cleanConfig.removeNull}
@@ -241,9 +221,7 @@ export function ConfigModal({
               </div>
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">
-                Formato de salida
-              </label>
+              <label className="block text-gray-300 mb-2">Formato de salida</label>
               <RadioGroup
                 name="cleanOutputMode"
                 value={cleanConfig.outputFormat}
@@ -251,21 +229,15 @@ export function ConfigModal({
                   { value: "format", label: "Formatear" },
                   { value: "minify", label: "Minificar" },
                 ]}
-                onChange={(value) =>
-                  onCleanConfigChange({ ...cleanConfig, outputFormat: value })
-                }
+                onChange={(value) => onCleanConfigChange({ ...cleanConfig, outputFormat: value })}
                 color="orange"
               />
             </div>
             <div>
-              <label className="block text-gray-300 mb-1">
-                Copiar automáticamente
-              </label>
+              <label className="block text-gray-300 mb-1">Copiar automáticamente</label>
               <Checkbox
                 checked={cleanConfig.autoCopy}
-                onChange={(checked) =>
-                  onCleanConfigChange({ ...cleanConfig, autoCopy: checked })
-                }
+                onChange={(checked) => onCleanConfigChange({ ...cleanConfig, autoCopy: checked })}
                 label="Habilitar auto-copia"
                 color="orange"
               />

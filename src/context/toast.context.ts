@@ -15,8 +15,6 @@ export interface ToastContextType {
   removeToast: (id: string) => void;
 }
 
-export const ToastContext = createContext<ToastContextType | undefined>(
-  undefined,
-);
+export const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export type { ReactNode };

@@ -2,9 +2,7 @@ import { type Result, type JsonValue, type JsonError } from "@/types/common";
 import type { MinifyConfig } from "@/types/json";
 
 // Export for backward compatibility
-export type MinifyOptions = Partial<
-  Pick<MinifyConfig, "removeSpaces" | "sortKeys">
->;
+export type MinifyOptions = Partial<Pick<MinifyConfig, "removeSpaces" | "sortKeys">>;
 
 function sortJsonKeys(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {
@@ -26,10 +24,7 @@ function sortJsonKeys(value: JsonValue): JsonValue {
  * Minify JSON (remove whitespace)
  * Pure function - no side effects
  */
-export function minifyJson(
-  input: string,
-  options: MinifyOptions = {},
-): Result<string, JsonError> {
+export function minifyJson(input: string, options: MinifyOptions = {}): Result<string, JsonError> {
   if (!input.trim()) {
     return {
       ok: false,

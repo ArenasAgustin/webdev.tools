@@ -91,8 +91,7 @@ export function JsonEditors({
               withWrapper
               validExtra={
                 <span className="text-gray-400">
-                  Líneas: {outputValue.split("\n").length} | Caracteres:{" "}
-                  {outputValue.length}
+                  Líneas: {outputValue.split("\n").length} | Caracteres: {outputValue.length}
                 </span>
               }
             />

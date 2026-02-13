@@ -1,6 +1,29 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { JsPlayground } from "./JsPlayground";
+import { ToastProvider } from "@/context/ToastContext";
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, "localStorage", {
+  value: localStorageMock,
+});
 
 vi.mock("@/components/editor/LazyCodeEditor", () => ({
   LazyCodeEditor: ({
@@ -34,6 +57,7 @@ describe("JsPlayground", () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(console, "warn").mockImplementation(() => {});
+    localStorageMock.clear();
   });
 
   afterEach(() => {
@@ -43,21 +67,25 @@ describe("JsPlayground", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders the example code by default", () => {
-    render(<JsPlayground />);
+  const renderWithProviders = (component: React.ReactNode) => {
+    return render(<ToastProvider>{component}</ToastProvider>);
+  };
 
-    const editors = screen.getAllByRole("textbox") as HTMLTextAreaElement[];
-    const input = editors[0];
+  it("renders the example code by default", () => {
+    renderWithProviders(<JsPlayground />);
+
+    const editors = screen.getAllByRole("textbox");
+    const input = editors[0] as HTMLTextAreaElement;
 
     expect(input.value).toContain("factorial");
   });
 
   it("executes code and displays console output", () => {
-    render(<JsPlayground />);
+    renderWithProviders(<JsPlayground />);
 
-    const editors = screen.getAllByRole("textbox") as HTMLTextAreaElement[];
-    const input = editors[0];
-    const output = editors[1];
+    const editors = screen.getAllByRole("textbox");
+    const input = editors[0] as HTMLTextAreaElement;
+    const output = editors[1] as HTMLTextAreaElement;
 
     fireEvent.change(input, { target: { value: 'console.log("Hola")' } });
     fireEvent.click(screen.getByRole("button", { name: /Ejecutar/i }));
@@ -66,10 +94,10 @@ describe("JsPlayground", () => {
   });
 
   it("shows runtime errors when execution fails", () => {
-    render(<JsPlayground />);
+    renderWithProviders(<JsPlayground />);
 
-    const editors = screen.getAllByRole("textbox") as HTMLTextAreaElement[];
-    const input = editors[0];
+    const editors = screen.getAllByRole("textbox");
+    const input = editors[0] as HTMLTextAreaElement;
 
     fireEvent.change(input, {
       target: { value: 'throw new Error("Boom")' },
@@ -80,10 +108,10 @@ describe("JsPlayground", () => {
   });
 
   it("formats and minifies input code", () => {
-    render(<JsPlayground />);
+    renderWithProviders(<JsPlayground />);
 
-    const editors = screen.getAllByRole("textbox") as HTMLTextAreaElement[];
-    const input = editors[0];
+    const editors = screen.getAllByRole("textbox");
+    const input = editors[0] as HTMLTextAreaElement;
 
     fireEvent.change(input, { target: { value: "const x=1;" } });
     fireEvent.click(screen.getByRole("button", { name: /Formatear/i }));
@@ -96,10 +124,10 @@ describe("JsPlayground", () => {
   });
 
   it("formats multi-line blocks", () => {
-    render(<JsPlayground />);
+    renderWithProviders(<JsPlayground />);
 
-    const editors = screen.getAllByRole("textbox") as HTMLTextAreaElement[];
-    const input = editors[0];
+    const editors = screen.getAllByRole("textbox");
+    const input = editors[0] as HTMLTextAreaElement;
 
     fireEvent.change(input, {
       target: { value: "if(true){console.log(1);}" },
@@ -110,10 +138,10 @@ describe("JsPlayground", () => {
   });
 
   it("minifies by removing comments and whitespace", () => {
-    render(<JsPlayground />);
+    renderWithProviders(<JsPlayground />);
 
-    const editors = screen.getAllByRole("textbox") as HTMLTextAreaElement[];
-    const input = editors[0];
+    const editors = screen.getAllByRole("textbox");
+    const input = editors[0] as HTMLTextAreaElement;
 
     fireEvent.change(input, {
       target: {

@@ -8,12 +8,8 @@ export function PlaygroundLoader() {
       <div className="text-center space-y-4">
         <div className="inline-block w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         <div className="space-y-2">
-          <div className="text-white text-lg font-semibold">
-            Cargando JSON Tools
-          </div>
-          <div className="text-gray-400 text-sm">
-            Preparando el playground...
-          </div>
+          <div className="text-white text-lg font-semibold">Cargando JSON Tools</div>
+          <div className="text-gray-400 text-sm">Preparando el playground...</div>
         </div>
       </div>
     </div>

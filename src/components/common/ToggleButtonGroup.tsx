@@ -25,9 +25,7 @@ export function ToggleButtonGroup<T>({
           key={String(option.value)}
           type="button"
           onClick={() => onChange(option.value)}
-          className={
-            value === option.value ? activeClassName : inactiveClassName
-          }
+          className={value === option.value ? activeClassName : inactiveClassName}
           aria-pressed={value === option.value}
         >
           {option.label}

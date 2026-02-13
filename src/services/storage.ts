@@ -117,7 +117,7 @@ export function removeToolsConfig(): boolean {
 export function loadLastJson(): string {
   try {
     const item = localStorage.getItem(STORAGE_KEYS.LAST_JSON);
-    return item || "";
+    return item ?? "";
   } catch (error) {
     console.error("Error loading last JSON:", error);
     return "";
@@ -154,7 +154,7 @@ export function removeLastJson(): boolean {
 export function loadLastJs(): string {
   try {
     const item = localStorage.getItem(STORAGE_KEYS.LAST_JS);
-    return item || "";
+    return item ?? "";
   } catch (error) {
     console.error("Error loading last JS:", error);
     return "";

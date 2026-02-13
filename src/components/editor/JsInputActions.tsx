@@ -6,11 +6,7 @@ interface JsInputActionsProps {
   onExpand: () => void;
 }
 
-export function JsInputActions({
-  onCopyInput,
-  onDownloadInput,
-  onExpand,
-}: JsInputActionsProps) {
+export function JsInputActions({ onCopyInput, onDownloadInput, onExpand }: JsInputActionsProps) {
   return (
     <>
       <Button variant="primary" onClick={onCopyInput}>

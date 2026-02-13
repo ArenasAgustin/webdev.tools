@@ -29,10 +29,7 @@ export const ValidationStatus = memo(function ValidationStatus({
     : "";
 
   const warningNode = useMemo(
-    () =>
-      warning ? (
-        <span className="text-amber-400 ml-2 truncate">{warning}</span>
-      ) : null,
+    () => (warning ? <span className="text-amber-400 ml-2 truncate">{warning}</span> : null),
     [warning],
   );
 
@@ -59,7 +56,7 @@ export const ValidationStatus = memo(function ValidationStatus({
     return (
       <span className={`text-red-400 flex items-center gap-1 ${className}`}>
         <i className="fas fa-exclamation-circle"></i>{" "}
-        {validationState.error?.message || "JSON inválido"}
+        {validationState.error?.message ?? "JSON inválido"}
         {warningNode}
       </span>
     );

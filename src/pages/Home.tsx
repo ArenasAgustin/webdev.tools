@@ -28,19 +28,14 @@ export function Home() {
               Crea, formatea y valida rápido.
             </h1>
             <p className="mt-4 text-base text-white/70 sm:text-lg">
-              Elige una zona de pruebas para empezar a editar. Cada herramienta
-              está optimizada para velocidad, claridad y flujos de trabajo
-              rápidos.
+              Elige una zona de pruebas para empezar a editar. Cada herramienta está optimizada para
+              velocidad, claridad y flujos de trabajo rápidos.
             </p>
           </header>
 
           <section className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {playgroundRegistry.map((playground) => (
-              <Link
-                key={playground.id}
-                to={`/playground/${playground.id}`}
-                className="h-full"
-              >
+              <Link key={playground.id} to={`/playground/${playground.id}`} className="h-full">
                 <PlaygroundCard playground={playground} />
               </Link>
             ))}

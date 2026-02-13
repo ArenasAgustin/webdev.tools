@@ -14,16 +14,8 @@ import { useToast } from "@/hooks/useToast";
 import { downloadFile } from "@/utils/download";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
-import {
-  DEFAULT_FORMAT_CONFIG,
-  DEFAULT_MINIFY_CONFIG,
-  DEFAULT_CLEAN_CONFIG,
-} from "@/types/json";
-import {
-  loadToolsConfig,
-  loadLastJson,
-  saveLastJson,
-} from "@/services/storage";
+import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
+import { loadToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
 
 const savedConfig = loadToolsConfig();
 
@@ -34,13 +26,13 @@ const savedConfig = loadToolsConfig();
 export function JsonPlayground() {
   const [inputJson, setInputJson] = useState<string>(() => loadLastJson());
   const [formatConfig, setFormatConfig] = useState<FormatConfig>(
-    savedConfig?.format || DEFAULT_FORMAT_CONFIG,
+    savedConfig?.format ?? DEFAULT_FORMAT_CONFIG,
   );
   const [minifyConfig, setMinifyConfig] = useState<MinifyConfig>(
-    savedConfig?.minify || DEFAULT_MINIFY_CONFIG,
+    savedConfig?.minify ?? DEFAULT_MINIFY_CONFIG,
   );
   const [cleanConfig, setCleanConfig] = useState<CleanConfig>(
-    savedConfig?.clean || DEFAULT_CLEAN_CONFIG,
+    savedConfig?.clean ?? DEFAULT_CLEAN_CONFIG,
   );
 
   // Auto-save last JSON to localStorage
@@ -63,8 +55,8 @@ export function JsonPlayground() {
   const jsonPathHistory = useJsonPathHistory();
 
   // Determine which output to show (formatter or jsonPath)
-  const outputJson = jsonPath.output || formatter.output;
-  const outputError = jsonPath.error || formatter.error;
+  const outputJson = jsonPath.output ?? formatter.output;
+  const outputError = jsonPath.error ?? formatter.error;
 
   // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
   const [showConfig, setShowConfig] = useState(false);
@@ -72,9 +64,7 @@ export function JsonPlayground() {
 
   useEffect(() => {
     if (inputTooLarge && !sizeWarningShown.current) {
-      toast.info(
-        `El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`,
-      );
+      toast.info(`El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`);
       sizeWarningShown.current = true;
     }
 

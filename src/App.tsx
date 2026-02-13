@@ -10,10 +10,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route
-            path="/playground/:playgroundId"
-            element={<PlaygroundPage />}
-          />
+          <Route path="/playground/:playgroundId" element={<PlaygroundPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

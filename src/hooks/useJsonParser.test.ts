@@ -55,10 +55,9 @@ describe("useJsonParser", () => {
   });
 
   it("should update when input changes", () => {
-    const { result, rerender } = renderHook(
-      ({ input }) => useJsonParser(input),
-      { initialProps: { input: "{invalid}" } },
-    );
+    const { result, rerender } = renderHook(({ input }) => useJsonParser(input), {
+      initialProps: { input: "{invalid}" },
+    });
 
     expect(result.current.isValid).toBe(false);
 

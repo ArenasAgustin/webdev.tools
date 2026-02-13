@@ -17,10 +17,7 @@ interface UseExpandedEditorReturn {
 export function useExpandedEditor(): UseExpandedEditorReturn {
   const [expanded, setExpanded] = useState<EditorType | null>(null);
 
-  const isExpanded = useCallback(
-    (type: EditorType) => expanded === type,
-    [expanded],
-  );
+  const isExpanded = useCallback((type: EditorType) => expanded === type, [expanded]);
 
   const expand = useCallback((type: EditorType) => {
     setExpanded(type);

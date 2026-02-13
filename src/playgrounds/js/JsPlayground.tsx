@@ -10,12 +10,7 @@ import { useToast } from "@/hooks/useToast";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTextStats } from "@/hooks/useTextStats";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
-import {
-  loadLastJs,
-  saveLastJs,
-  loadJsToolsConfig,
-  saveJsToolsConfig,
-} from "@/services/storage";
+import { loadLastJs, saveLastJs, loadJsToolsConfig, saveJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 
@@ -34,10 +29,10 @@ export function JsPlayground() {
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [formatConfig, setFormatConfig] = useState<JsFormatConfig>(
-    savedConfig?.format || DEFAULT_JS_FORMAT_CONFIG,
+    savedConfig?.format ?? DEFAULT_JS_FORMAT_CONFIG,
   );
   const [minifyConfig, setMinifyConfig] = useState<JsMinifyConfig>(
-    savedConfig?.minify || DEFAULT_JS_MINIFY_CONFIG,
+    savedConfig?.minify ?? DEFAULT_JS_MINIFY_CONFIG,
   );
   const [showConfig, setShowConfig] = useState(false);
 
@@ -61,9 +56,7 @@ export function JsPlayground() {
 
   useEffect(() => {
     if (inputTooLarge && !sizeWarningShown.current) {
-      toast.info(
-        `El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`,
-      );
+      toast.info(`El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`);
       sizeWarningShown.current = true;
     }
 
@@ -77,9 +70,7 @@ export function JsPlayground() {
       return false;
     }
 
-    toast.error(
-      `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`,
-    );
+    toast.error(`El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`);
     return true;
   }, [inputTooLarge, toast]);
 
@@ -115,7 +106,7 @@ export function JsPlayground() {
       };
 
       // Execute code using Function constructor (safer than eval)
-      const executeUserCode = new Function(inputCode);
+      const executeUserCode = new Function(inputCode) as () => unknown;
       const result = executeUserCode();
 
       // Restore console
@@ -333,8 +324,10 @@ function formatValue(value: unknown): string {
     try {
       return JSON.stringify(value, null, 2);
     } catch {
-      return String(value);
+      return Object.prototype.toString.call(value);
     }
   }
-  return String(value);
+  if (typeof value === "number") return String(value);
+  if (typeof value === "boolean") return String(value);
+  return Object.prototype.toString.call(value);
 }

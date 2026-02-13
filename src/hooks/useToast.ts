@@ -9,11 +9,8 @@ export function useToast() {
   }
 
   return {
-    success: (message: string, duration?: number) =>
-      context.addToast(message, "success", duration),
-    error: (message: string, duration?: number) =>
-      context.addToast(message, "error", duration),
-    info: (message: string, duration?: number) =>
-      context.addToast(message, "info", duration),
+    success: (message: string, duration?: number) => context.addToast(message, "success", duration),
+    error: (message: string, duration?: number) => context.addToast(message, "error", duration),
+    info: (message: string, duration?: number) => context.addToast(message, "info", duration),
   };
 }

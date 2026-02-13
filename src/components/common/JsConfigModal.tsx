@@ -60,9 +60,7 @@ export function JsConfigModal({
                   { value: 4, label: "4 espacios" },
                 ]}
                 value={formatConfig.indentSize}
-                onChange={(indentSize) =>
-                  onFormatConfigChange({ ...formatConfig, indentSize })
-                }
+                onChange={(indentSize) => onFormatConfigChange({ ...formatConfig, indentSize })}
               />
             </div>
             <div>
@@ -71,9 +69,7 @@ export function JsConfigModal({
               </label>
               <Checkbox
                 checked={formatConfig.autoCopy}
-                onChange={(checked) =>
-                  onFormatConfigChange({ ...formatConfig, autoCopy: checked })
-                }
+                onChange={(checked) => onFormatConfigChange({ ...formatConfig, autoCopy: checked })}
                 label="Habilitar auto-copia"
                 color="blue"
               />
@@ -89,9 +85,7 @@ export function JsConfigModal({
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-gray-300 mb-1">
-                Opciones de minificacion
-              </label>
+              <label className="block text-gray-300 mb-1">Opciones de minificacion</label>
               <div className="space-y-2">
                 <Checkbox
                   checked={minifyConfig.removeComments}
@@ -118,14 +112,10 @@ export function JsConfigModal({
               </div>
             </div>
             <div>
-              <label className="block text-gray-300 mb-1">
-                Copiar automaticamente
-              </label>
+              <label className="block text-gray-300 mb-1">Copiar automaticamente</label>
               <Checkbox
                 checked={minifyConfig.autoCopy}
-                onChange={(checked) =>
-                  onMinifyConfigChange({ ...minifyConfig, autoCopy: checked })
-                }
+                onChange={(checked) => onMinifyConfigChange({ ...minifyConfig, autoCopy: checked })}
                 label="Habilitar auto-copia"
                 color="purple"
               />

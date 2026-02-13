@@ -6,30 +6,27 @@ import type { Result, JsonError } from "@/types/common";
 
 type JsonWorkerAction = "format" | "minify" | "clean" | "jsonPath";
 
-type JsonWorkerRequest = {
+interface JsonWorkerRequest {
   id: string;
   action: JsonWorkerAction;
   input: string;
   options?: FormatOptions | MinifyOptions | CleanOptions;
   path?: string;
-};
+}
 
-type JsonWorkerResponse = {
+interface JsonWorkerResponse {
   id: string;
   ok: boolean;
   value?: string;
   error?: JsonError;
-};
+}
 
 const ctx = self as unknown as {
   postMessage: (message: JsonWorkerResponse) => void;
   onmessage: (event: MessageEvent<JsonWorkerRequest>) => void;
 };
 
-const toResponse = (
-  id: string,
-  result: Result<string, JsonError>,
-): JsonWorkerResponse => {
+const toResponse = (id: string, result: Result<string, JsonError>): JsonWorkerResponse => {
   if (result.ok) {
     return { id, ok: true, value: result.value };
   }
@@ -42,28 +39,22 @@ ctx.onmessage = (event: MessageEvent<JsonWorkerRequest>) => {
 
   try {
     if (action === "format") {
-      ctx.postMessage(
-        toResponse(id, formatJson(input, options as FormatOptions)),
-      );
+      ctx.postMessage(toResponse(id, formatJson(input, options as FormatOptions)));
       return;
     }
 
     if (action === "minify") {
-      ctx.postMessage(
-        toResponse(id, minifyJson(input, options as MinifyOptions)),
-      );
+      ctx.postMessage(toResponse(id, minifyJson(input, options as MinifyOptions)));
       return;
     }
 
     if (action === "clean") {
-      ctx.postMessage(
-        toResponse(id, cleanJson(input, options as CleanOptions)),
-      );
+      ctx.postMessage(toResponse(id, cleanJson(input, options as CleanOptions)));
       return;
     }
 
     if (action === "jsonPath") {
-      ctx.postMessage(toResponse(id, applyJsonPath(input, path || "")));
+      ctx.postMessage(toResponse(id, applyJsonPath(input, path ?? "")));
       return;
     }
 

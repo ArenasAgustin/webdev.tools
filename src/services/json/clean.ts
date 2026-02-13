@@ -11,10 +11,7 @@ export type CleanOptions = Partial<CleanConfig>;
 /**
  * Remove empty values from JSON based on options
  */
-function removeEmpty(
-  value: JsonValue,
-  options: CleanOptions = {},
-): JsonValue | undefined {
+function removeEmpty(value: JsonValue, options: CleanOptions = {}): JsonValue | undefined {
   // Ensure options has default values
   const opts = {
     removeNull: options?.removeNull ?? true,
@@ -67,10 +64,7 @@ function removeEmpty(
  * Clean empty values from JSON
  * Pure function - no side effects
  */
-export function cleanJson(
-  input: string,
-  options: CleanOptions = {},
-): Result<string, JsonError> {
+export function cleanJson(input: string, options: CleanOptions = {}): Result<string, JsonError> {
   if (!input.trim()) {
     return {
       ok: false,

@@ -2,11 +2,7 @@
  * Generic download utility
  * Downloads content as a file
  */
-export function downloadFile(
-  content: string,
-  filename: string,
-  mimeType: string = "text/plain"
-): void {
+export function downloadFile(content: string, filename: string, mimeType = "text/plain"): void {
   if (!content) return;
 
   const blob = new Blob([content], { type: mimeType });

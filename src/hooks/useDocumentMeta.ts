@@ -43,8 +43,8 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
       if (!element) {
         element = document.createElement("meta");
         const [attr, value] = selector.includes("property=")
-          ? ["property", selector.match(/property="([^"]+)"/)?.[1] || ""]
-          : ["name", selector.match(/name="([^"]+)"/)?.[1] || ""];
+          ? ["property", /property="([^"]+)"/.exec(selector)?.[1] ?? ""]
+          : ["name", /name="([^"]+)"/.exec(selector)?.[1] ?? ""];
         element.setAttribute(attr, value);
         document.head.appendChild(element);
       }
@@ -58,19 +58,13 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
     }
 
     // Open Graph
-    updateMetaTag('meta[property="og:title"]', ogTitle || fullTitle);
-    updateMetaTag(
-      'meta[property="og:description"]',
-      ogDescription || description,
-    );
-    updateMetaTag('meta[property="og:url"]', ogUrl || BASE_URL);
+    updateMetaTag('meta[property="og:title"]', ogTitle ?? fullTitle);
+    updateMetaTag('meta[property="og:description"]', ogDescription ?? description);
+    updateMetaTag('meta[property="og:url"]', ogUrl ?? BASE_URL);
 
     // Twitter Card
-    updateMetaTag('meta[name="twitter:title"]', twitterTitle || fullTitle);
-    updateMetaTag(
-      'meta[name="twitter:description"]',
-      twitterDescription || description,
-    );
+    updateMetaTag('meta[name="twitter:title"]', twitterTitle ?? fullTitle);
+    updateMetaTag('meta[name="twitter:description"]', twitterDescription ?? description);
 
     // Canonical URL
     let canonical = document.querySelector('link[rel="canonical"]');
@@ -79,6 +73,6 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
       canonical.setAttribute("rel", "canonical");
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute("href", ogUrl || BASE_URL);
+    canonical.setAttribute("href", ogUrl ?? BASE_URL);
   }, [options]);
 }

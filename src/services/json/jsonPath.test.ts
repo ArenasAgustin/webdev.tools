@@ -34,8 +34,7 @@ describe("applyJsonPath", () => {
   });
 
   it("should filter array elements", () => {
-    const input =
-      '{"users": [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]}';
+    const input = '{"users": [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]}';
     const result = applyJsonPath(input, "$.users[?(@.age > 27)]");
 
     expect(result.ok).toBe(true);

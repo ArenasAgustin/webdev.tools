@@ -91,9 +91,7 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
         </div>
       }
     >
-      <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-        {renderedHistory}
-      </div>
+      <div className="space-y-2 max-h-[50vh] overflow-y-auto">{renderedHistory}</div>
     </Modal>
   );
 });

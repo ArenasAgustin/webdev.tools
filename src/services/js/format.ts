@@ -1,13 +1,6 @@
 import { type Result } from "@/types/common";
 
-type TokenType =
-  | "word"
-  | "number"
-  | "string"
-  | "template"
-  | "comment"
-  | "punct"
-  | "operator";
+type TokenType = "word" | "number" | "string" | "template" | "comment" | "punct" | "operator";
 
 interface Token {
   type: TokenType;
@@ -18,10 +11,7 @@ interface Token {
  * Format JavaScript code - add proper indentation and spacing
  * Pure function - no side effects
  */
-export function formatJs(
-  input: string,
-  indentSize: number = 2,
-): Result<string, string> {
+export function formatJs(input: string, indentSize = 2): Result<string, string> {
   try {
     if (!input.trim()) {
       return { ok: true, value: "" };
@@ -71,18 +61,10 @@ export function formatJs(
       if (!previous) return false;
       if (previous.type === "comment") return true;
       if (current.value === "(" && previous.type === "word") return false;
-      if (
-        current.value === "[" &&
-        (previous.type === "word" || previous.type === "number")
-      )
+      if (current.value === "[" && (previous.type === "word" || previous.type === "number"))
         return false;
       if (current.value === "." || previous.value === ".") return false;
-      const wordish = new Set([
-        "word",
-        "number",
-        "string",
-        "template",
-      ] as TokenType[]);
+      const wordish = new Set(["word", "number", "string", "template"] as TokenType[]);
       if (wordish.has(previous.type) && wordish.has(current.type)) return true;
       if (previous.value === ")" && current.type === "word") return true;
       return false;

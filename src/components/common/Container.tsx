@@ -47,10 +47,7 @@ export function Container({
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-          <i
-            className={`fas fa-${icon} ${iconColorClass}`}
-            aria-hidden="true"
-          ></i>
+          <i className={`fas fa-${icon} ${iconColorClass}`} aria-hidden="true"></i>
           {title}
         </h2>
         {actions && <div className="flex gap-2">{actions}</div>}

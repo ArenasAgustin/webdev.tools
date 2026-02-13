@@ -63,9 +63,7 @@ describe("formatJson", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       const parsed = JSON.parse(result.value);
-      expect(
-        Object.keys((parsed.arr as Array<Record<string, number>>)[0]),
-      ).toEqual(["a", "b"]);
+      expect(Object.keys((parsed.arr as Record<string, number>[])[0])).toEqual(["a", "b"]);
     }
   });
 

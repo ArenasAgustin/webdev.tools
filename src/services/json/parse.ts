@@ -21,7 +21,7 @@ export function parseJson(input: string): Result<JsonValue, JsonError> {
   } catch (error) {
     // Extract line and column from error message if available
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const match = errorMessage.match(/position (\d+)/);
+    const match = /position (\d+)/.exec(errorMessage);
 
     return {
       ok: false,

@@ -9,13 +9,7 @@ import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 
 type ModalType = "tips" | "history" | "config" | null;
 
-type ToolbarButtonVariant =
-  | "primary"
-  | "danger"
-  | "success"
-  | "purple"
-  | "cyan"
-  | "orange";
+type ToolbarButtonVariant = "primary" | "danger" | "success" | "purple" | "cyan" | "orange";
 
 interface ToolbarAction {
   label: string;
@@ -79,8 +73,7 @@ export function Toolbar(props: ToolbarProps) {
 
   if (props.variant === "generic") {
     const toolsTitle = props.tools.title ?? "Herramientas";
-    const toolsGridClass =
-      props.tools.gridClassName ?? "grid grid-cols-2 sm:grid-cols-3 gap-2";
+    const toolsGridClass = props.tools.gridClassName ?? "grid grid-cols-2 sm:grid-cols-3 gap-2";
 
     return (
       <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 sticky bottom-0 z-10 shrink-0">
@@ -93,12 +86,8 @@ export function Toolbar(props: ToolbarProps) {
                   type="button"
                   onClick={props.tools.onOpenConfig}
                   className="ml-auto text-gray-300 hover:text-yellow-300 transition-colors"
-                  title={
-                    props.tools.configButtonTitle || "Configurar herramientas"
-                  }
-                  aria-label={
-                    props.tools.configButtonTitle || "Configurar herramientas"
-                  }
+                  title={props.tools.configButtonTitle ?? "Configurar herramientas"}
+                  aria-label={props.tools.configButtonTitle ?? "Configurar herramientas"}
                 >
                   <i className="fas fa-cog" aria-hidden="true"></i>
                 </button>
@@ -112,8 +101,7 @@ export function Toolbar(props: ToolbarProps) {
                   size="md"
                   onClick={action.onClick}
                 >
-                  <i className={`fas fa-${action.icon} mr-1`}></i>{" "}
-                  {action.label}
+                  <i className={`fas fa-${action.icon} mr-1`}></i> {action.label}
                 </Button>
               ))}
             </div>

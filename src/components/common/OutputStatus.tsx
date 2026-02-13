@@ -37,19 +37,13 @@ export const OutputStatus = memo(function OutputStatus({
     }
 
     if (outputValue.trim() === "") {
-      return (
-        <span className={`text-gray-400 ${className}`}>
-          Esperando operación...
-        </span>
-      );
+      return <span className={`text-gray-400 ${className}`}>Esperando operación...</span>;
     }
 
     return (
       <>
         {showValidLabel && (
-          <span
-            className={`text-green-400 flex items-center gap-1 ${className}`}
-          >
+          <span className={`text-green-400 flex items-center gap-1 ${className}`}>
             <i className="fas fa-check-circle"></i> JSON válido
           </span>
         )}

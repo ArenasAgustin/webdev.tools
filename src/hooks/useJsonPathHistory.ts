@@ -43,7 +43,7 @@ const openDb = (): Promise<IDBDatabase> =>
     };
 
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(new Error(request.error?.message ?? "IndexedDB error"));
   });
 
 const loadHistoryFromDb = async (): Promise<JsonPathHistoryItem[]> => {
@@ -64,7 +64,8 @@ const loadHistoryFromDb = async (): Promise<JsonPathHistoryItem[]> => {
         resolve();
       }
     };
-    cursorRequest.onerror = () => reject(cursorRequest.error);
+    cursorRequest.onerror = () =>
+      reject(new Error(cursorRequest.error?.message ?? "Cursor request error"));
   });
 
   return items;
@@ -92,7 +93,8 @@ const pruneHistory = async () => {
       }
       cursor.continue();
     };
-    cursorRequest.onerror = () => reject(cursorRequest.error);
+    cursorRequest.onerror = () =>
+      reject(new Error(cursorRequest.error?.message ?? "Cursor request error"));
   });
 };
 
@@ -113,8 +115,9 @@ const migrateLocalStorage = async () => {
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
+      transaction.onerror = () =>
+        reject(new Error(transaction.error?.message ?? "Transaction error"));
+      transaction.onabort = () => reject(new Error("Transaction aborted"));
     });
 
     removeItem(HISTORY_KEY);
@@ -142,7 +145,9 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
       }
     };
 
-    initialize();
+    void initialize().catch((error) => {
+      console.error("Failed to initialize history:", error);
+    });
     return () => {
       isActive = false;
     };
@@ -157,13 +162,14 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
       const store = transaction.objectStore(STORE_NAME);
       const expressionIndex = store.index("expression");
 
-      const existing = await new Promise<JsonPathHistoryItem | null>(
-        (resolve, reject) => {
-          const request = expressionIndex.get(expression);
-          request.onsuccess = () => resolve(request.result || null);
-          request.onerror = () => reject(request.error);
-        },
-      );
+      const existing = await new Promise<JsonPathHistoryItem | null>((resolve, reject) => {
+        const request = expressionIndex.get(expression);
+        request.onsuccess = () => {
+          const result = (request.result as JsonPathHistoryItem | undefined) ?? null;
+          resolve(result);
+        };
+        request.onerror = () => reject(new Error(request.error?.message ?? "Request error"));
+      });
 
       if (existing) {
         store.put({
@@ -182,8 +188,9 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
 
       await new Promise<void>((resolve, reject) => {
         transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
+        transaction.onerror = () =>
+          reject(new Error(transaction.error?.message ?? "Transaction error"));
+        transaction.onabort = () => reject(new Error("Transaction aborted"));
       });
 
       await pruneHistory();
@@ -203,8 +210,9 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
 
       await new Promise<void>((resolve, reject) => {
         transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
+        transaction.onerror = () =>
+          reject(new Error(transaction.error?.message ?? "Transaction error"));
+        transaction.onabort = () => reject(new Error("Transaction aborted"));
       });
 
       const items = await loadHistoryFromDb();
@@ -223,8 +231,9 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
 
       await new Promise<void>((resolve, reject) => {
         transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
+        transaction.onerror = () =>
+          reject(new Error(transaction.error?.message ?? "Transaction error"));
+        transaction.onabort = () => reject(new Error("Transaction aborted"));
       });
 
       setHistory([]);

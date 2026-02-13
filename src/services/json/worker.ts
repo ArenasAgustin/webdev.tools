@@ -8,8 +8,7 @@ import { WORKER_THRESHOLD_BYTES } from "@/utils/constants/limits";
 
 const getInputBytes = (input: string) => new TextEncoder().encode(input).length;
 
-const shouldUseWorker = (input: string) =>
-  getInputBytes(input) >= WORKER_THRESHOLD_BYTES;
+const shouldUseWorker = (input: string) => getInputBytes(input) >= WORKER_THRESHOLD_BYTES;
 
 const toFallbackError = (message: string): Result<string, JsonError> => ({
   ok: false,
@@ -28,7 +27,7 @@ const runWorkerSafely = async (
       return { ok: true, value: response.value ?? "" };
     }
 
-    return toFallbackError(response.error?.message || "Error en worker");
+    return toFallbackError(response.error?.message ?? "Error en worker");
   } catch {
     return null;
   }
@@ -81,12 +80,7 @@ export const applyJsonPathAsync = async (
   path: string,
 ): Promise<Result<string, JsonError>> => {
   if (shouldUseWorker(input)) {
-    const workerResult = await runWorkerSafely(
-      "jsonPath",
-      input,
-      undefined,
-      path,
-    );
+    const workerResult = await runWorkerSafely("jsonPath", input, undefined, path);
     if (workerResult) {
       return workerResult;
     }

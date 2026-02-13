@@ -17,17 +17,11 @@ export function PlaygroundCard({ playground }: PlaygroundCardProps) {
             <i className={`${playground.icon} text-xl`}></i>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">
-              Playground
-            </p>
-            <h3 className="text-xl font-semibold text-white">
-              {playground.name}
-            </h3>
+            <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">Playground</p>
+            <h3 className="text-xl font-semibold text-white">{playground.name}</h3>
           </div>
         </div>
-        <p className="mt-4 text-sm leading-relaxed text-white/70">
-          {playground.description}
-        </p>
+        <p className="mt-4 text-sm leading-relaxed text-white/70">{playground.description}</p>
         <div className="mt-6 flex items-center justify-between">
           <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-widest text-white/70">
             {playground.language}

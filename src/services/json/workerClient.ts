@@ -1,30 +1,29 @@
 type JsonWorkerAction = "format" | "minify" | "clean" | "jsonPath";
 
-type JsonWorkerRequest = {
+interface JsonWorkerRequest {
   id: string;
   action: JsonWorkerAction;
   input: string;
   options?: unknown;
   path?: string;
-};
+}
 
-type JsonWorkerResponse = {
+interface JsonWorkerResponse {
   id: string;
   ok: boolean;
   value?: string;
   error?: { message: string };
-};
+}
 
-type PendingRequest = {
+interface PendingRequest {
   resolve: (value: JsonWorkerResponse) => void;
   reject: (error: Error) => void;
-};
+}
 
 const pending = new Map<string, PendingRequest>();
 let worker: Worker | null = null;
 
-const canUseWorker = () =>
-  typeof window !== "undefined" && typeof Worker !== "undefined";
+const canUseWorker = () => typeof window !== "undefined" && typeof Worker !== "undefined";
 
 const ensureWorker = () => {
   if (!canUseWorker()) {
@@ -32,12 +31,9 @@ const ensureWorker = () => {
   }
 
   if (!worker) {
-    worker = new Worker(
-      new URL("../../workers/jsonWorker.ts", import.meta.url),
-      {
-        type: "module",
-      },
-    );
+    worker = new Worker(new URL("../../workers/jsonWorker.ts", import.meta.url), {
+      type: "module",
+    });
 
     worker.onmessage = (event: MessageEvent<JsonWorkerResponse>) => {
       const response = event.data;
