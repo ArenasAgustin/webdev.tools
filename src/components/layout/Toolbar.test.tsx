@@ -226,7 +226,11 @@ describe("Toolbar", () => {
           onCleanChange: vi.fn(),
         }}
         tips={{
-          config: { tips: [{ icon: "info", color: "yellow", text: "tip" }] },
+          config: {
+            tips: [
+              { id: "1", category: "Filter", items: [{ code: "example", description: "test" }] },
+            ],
+          },
           onShow,
         }}
       />,
