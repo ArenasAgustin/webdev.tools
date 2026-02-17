@@ -6,6 +6,22 @@
 import type { ToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
 
+const getStorage = (): Storage | null => {
+  if (typeof window !== "undefined" && window.localStorage) {
+    const storage = window.localStorage;
+    if (
+      typeof storage.getItem === "function" &&
+      typeof storage.setItem === "function" &&
+      typeof storage.removeItem === "function" &&
+      typeof storage.clear === "function"
+    ) {
+      return storage;
+    }
+  }
+
+  return null;
+};
+
 /**
  * Storage keys constants
  */
@@ -22,7 +38,10 @@ export const STORAGE_KEYS = {
  */
 export function getItem<T>(key: string, defaultValue?: T): T | null {
   try {
-    const item = localStorage.getItem(key);
+    const storage = getStorage();
+    if (!storage) return defaultValue ?? null;
+
+    const item = storage.getItem(key);
     if (item === null) {
       return defaultValue ?? null;
     }
@@ -38,7 +57,10 @@ export function getItem<T>(key: string, defaultValue?: T): T | null {
  */
 export function setItem<T>(key: string, value: T): boolean {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    const storage = getStorage();
+    if (!storage) return false;
+
+    storage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
     console.error(`Error writing to localStorage (${key}):`, error);
@@ -51,7 +73,10 @@ export function setItem<T>(key: string, value: T): boolean {
  */
 export function removeItem(key: string): boolean {
   try {
-    localStorage.removeItem(key);
+    const storage = getStorage();
+    if (!storage) return false;
+
+    storage.removeItem(key);
     return true;
   } catch (error) {
     console.error(`Error removing from localStorage (${key}):`, error);
@@ -64,7 +89,10 @@ export function removeItem(key: string): boolean {
  */
 export function clearAll(): boolean {
   try {
-    localStorage.clear();
+    const storage = getStorage();
+    if (!storage) return false;
+
+    storage.clear();
     return true;
   } catch (error) {
     console.error("Error clearing localStorage:", error);
@@ -77,9 +105,12 @@ export function clearAll(): boolean {
  */
 export function isAvailable(): boolean {
   try {
+    const storage = getStorage();
+    if (!storage) return false;
+
     const testKey = "__storage_test__";
-    localStorage.setItem(testKey, "test");
-    localStorage.removeItem(testKey);
+    storage.setItem(testKey, "test");
+    storage.removeItem(testKey);
     return true;
   } catch {
     return false;
@@ -116,7 +147,10 @@ export function removeToolsConfig(): boolean {
  */
 export function loadLastJson(): string {
   try {
-    const item = localStorage.getItem(STORAGE_KEYS.LAST_JSON);
+    const storage = getStorage();
+    if (!storage) return "";
+
+    const item = storage.getItem(STORAGE_KEYS.LAST_JSON);
     return item ?? "";
   } catch (error) {
     console.error("Error loading last JSON:", error);
@@ -129,7 +163,10 @@ export function loadLastJson(): string {
  */
 export function saveLastJson(json: string): boolean {
   try {
-    localStorage.setItem(STORAGE_KEYS.LAST_JSON, json);
+    const storage = getStorage();
+    if (!storage) return false;
+
+    storage.setItem(STORAGE_KEYS.LAST_JSON, json);
     return true;
   } catch (error) {
     console.error("Error saving last JSON:", error);
@@ -153,7 +190,10 @@ export function removeLastJson(): boolean {
  */
 export function loadLastJs(): string {
   try {
-    const item = localStorage.getItem(STORAGE_KEYS.LAST_JS);
+    const storage = getStorage();
+    if (!storage) return "";
+
+    const item = storage.getItem(STORAGE_KEYS.LAST_JS);
     return item ?? "";
   } catch (error) {
     console.error("Error loading last JS:", error);
@@ -166,7 +206,10 @@ export function loadLastJs(): string {
  */
 export function saveLastJs(code: string): boolean {
   try {
-    localStorage.setItem(STORAGE_KEYS.LAST_JS, code);
+    const storage = getStorage();
+    if (!storage) return false;
+
+    storage.setItem(STORAGE_KEYS.LAST_JS, code);
     return true;
   } catch (error) {
     console.error("Error saving last JS:", error);

@@ -98,7 +98,7 @@
 ## 10
 
 - Calidad de código: ESLint type‑checked + reglas React, Prettier y husky ✅
-- Tests unitarios y de integración con Vitest para servicios y hooks
+- Tests unitarios y de integración con Vitest para servicios y hooks ✅
 - Storybook rápido para `Panel`, `Button`, `CodeEditor` y modales
 - Documentación de componentes y guía de contribución
 
