@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
@@ -24,7 +25,7 @@ interface JsonEditorsProps {
   onDownloadOutput: () => void;
 }
 
-export function JsonEditors({
+export const JsonEditors = memo(function JsonEditors({
   inputValue,
   outputValue,
   validationState,
@@ -180,4 +181,4 @@ export function JsonEditors({
       </main>
     </>
   );
-}
+});

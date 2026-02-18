@@ -1,4 +1,4 @@
-import type { Meta, StoryContext } from "@storybook/react-vite";
+import type { Meta } from "@storybook/react-vite";
 import { fn, userEvent, within, expect } from "storybook/test";
 import { ConfigModal } from "./ConfigModal";
 import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
@@ -141,7 +141,13 @@ export const InteractionCloseModal = {
     mode: "json",
     onClose: fn(),
   },
-  play: async ({ canvasElement, args }: StoryContext<typeof meta>) => {
+  play: async ({
+    canvasElement,
+    args,
+  }: {
+    canvasElement: HTMLElement;
+    args: { mode: "json"; onClose: ReturnType<typeof fn> };
+  }) => {
     const canvas = within(canvasElement);
 
     // Find and click the close button (X)

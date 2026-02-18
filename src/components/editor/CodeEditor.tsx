@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Editor from "@monaco-editor/react";
 
 interface CodeEditorProps {
@@ -8,7 +9,7 @@ interface CodeEditorProps {
   placeholder?: string;
 }
 
-export function CodeEditor({
+export const CodeEditor = memo(function CodeEditor({
   value,
   language,
   readOnly = false,
@@ -50,4 +51,4 @@ export function CodeEditor({
       />
     </div>
   );
-}
+});

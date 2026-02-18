@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
@@ -20,7 +21,7 @@ interface JsEditorsProps {
   onDownloadOutput: () => void;
 }
 
-export function JsEditors({
+export const JsEditors = memo(function JsEditors({
   inputCode,
   output,
   error,
@@ -164,4 +165,4 @@ export function JsEditors({
       </main>
     </>
   );
-}
+});
