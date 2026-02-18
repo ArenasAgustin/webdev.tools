@@ -1,5 +1,4 @@
 import type { Preview, Decorator } from "@storybook/react-vite";
-import React from "react";
 import { ToastProvider } from "../src/context/ToastContext";
 import { ToastContainer } from "../src/components/common/ToastContainer";
 
@@ -7,24 +6,24 @@ import { ToastContainer } from "../src/components/common/ToastContainer";
  * Global Decorator: Toast Provider
  * Provides toast context and container to all stories
  */
-const withToastProvider: Decorator = (Story) =>
-  React.createElement(
-    ToastProvider,
-    null,
-    React.createElement(Story),
-    React.createElement(ToastContainer),
-  );
+const withToastProvider: Decorator = (Story) => (
+  <ToastProvider>
+    <Story />
+    <ToastContainer />
+  </ToastProvider>
+);
 
 /**
  * Global Decorator: Consistent Layout & Padding
  * Adds consistent spacing and background for better story presentation
  */
-const withLayout: Decorator = (Story) =>
-  React.createElement(
-    "div",
-    { className: "p-6 bg-gray-50 min-h-screen" },
-    React.createElement("div", { className: "max-w-7xl mx-auto" }, React.createElement(Story)),
-  );
+const withLayout: Decorator = (Story) => (
+  <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="max-w-7xl mx-auto">
+      <Story />
+    </div>
+  </div>
+);
 
 const preview: Preview = {
   decorators: [withToastProvider, withLayout],
