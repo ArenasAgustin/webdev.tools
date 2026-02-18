@@ -29,6 +29,10 @@ export default defineConfig({
           if (id.includes("node_modules/react-router")) {
             return "router";
           }
+          // JSONPath Plus en chunk separado (usado solo en JSON playground)
+          if (id.includes("jsonpath-plus")) {
+            return "jsonpath";
+          }
           // Vendor libraries pesadas (React core)
           if (id.includes("node_modules/react") || id.includes("node_modules/scheduler")) {
             return "vendor";

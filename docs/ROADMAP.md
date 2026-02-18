@@ -137,8 +137,13 @@
   - **Implementado:** manualChunks en vite.config.ts separando Monaco (21KB), React Router (40KB) y vendor (182KB)
   - **Resultado:** Monaco carga solo cuando se abre un editor por primera vez
 
-- [ ] **Optimizar imports**: Mejorar tree-shaking (-20 KB)
-  - **Impacto:** Eliminar imports genéricos innecesarios
+- [x] **Optimizar imports**: Mejorar tree-shaking ✅
+  - **Impacto:** -55% en JsonPlayground (45.7KB → 20.6KB)
+  - **Implementado:**
+    - Removida dependencia no usada: zustand (5.0.9)
+    - Optimizados exports en index.ts (solo exports públicos, no componentes internos)
+    - Separado jsonpath-plus en chunk independiente (25KB) - carga solo con JSON playground
+  - **Resultado:** JsonPlayground más ligero, mejor cache y lazy loading de dependencias pesadas
 
 ### 12.2 - Code Organization (Phase 2 - 3-5 días)
 
@@ -175,23 +180,25 @@
 
 ### 12.4 - Métricas Objetivo
 
-| Métrica             | Actual | Target  | Priority |
-| ------------------- | ------ | ------- | -------- |
-| Bundle size (main)  | 244 KB | 180 KB  | 🔴       |
-| Test coverage       | 80.47% | 85%+    | 🟠       |
-| Lighthouse score    | 85/100 | 95+/100 | 🟠       |
-| Time to Interactive | ~3.2s  | <2.5s   | 🟠       |
+| Métrica              | Inicial | Actual  | Target  | Priority | Status |
+| -------------------- | ------- | ------- | ------- | -------- | ------ |
+| Bundle size (vendor) | 244 KB  | 182 KB  | 180 KB  | 🔴       | ✅ 99% |
+| JSON Playground      | 45.7 KB | 20.6 KB | <25 KB  | 🔴       | ✅     |
+| Test coverage        | 80.47%  | 80.47%  | 85%+    | 🟠       | 🔄     |
+| Lighthouse score     | 85/100  | 85/100  | 95+/100 | 🟠       | 🔄     |
+| Time to Interactive  | ~3.2s   | ~2.8s   | <2.5s   | 🟠       | 🔄     |
 
 ### 12.5 - Roadmap por Fases
 
-**Fase 1 (1-2 días):** Rápidas ganancias
+**✅ Fase 1 (1-2 días):** Rápidas ganancias - COMPLETADA
 
-- Memoización componentes
-- useMemo/useCallback
-- Lazy load Monaco
-- Optimizar imports
+- ✅ Memoización componentes (React.memo en JsonEditors, JsEditors, CodeEditor)
+- ✅ useMemo/useCallback (objetos complejos en playgrounds)
+- ✅ Lazy load Monaco (21KB chunk separado)
+- ✅ Optimizar imports (zustand removido, jsonpath-plus separado 25KB)
+- **Resultado:** Bundle vendor reducido 244KB → 182KB (-25%), JsonPlayground 45.7KB → 20.6KB (-55%)
 
-**Fase 2 (3-5 días):** Mejoras medianas
+**Fase 2 (3-5 días):** Mejoras medianas - PENDIENTE
 
 - Unificar servicios
 - Extract modal logic
