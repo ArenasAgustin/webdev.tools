@@ -109,7 +109,13 @@
 - [x] **Stories para componentes complejos**: ConfigModal (JSON/JS), JsonPathHistoryModal, TipsModal, Toolbar ✅
 - [x] **Documentación en MDX**: Explicar props, casos de uso y patrones de cada componente ✅
 - [x] **Decorators globales**: Provider de temas, context API, layouts compartidos ✅
-- [ ] **Stories avanzadas**: Estados de error, loading, interacciones, variantes edge-case
+- [x] **Stories avanzadas**: Estados de error, loading, interacciones, variantes edge-case ✅
+  - Button: Loading, WithIcon, LongText, AllVariants, AllSizes
+  - JsonPathHistoryModal: VeryLongExpressions, HighFrequency, OldTimestamps, ScrollableList
+  - Toolbar: JsonWithLongPath, JsonEmptyHistory, GenericManyActions, GenericWithLongLabels
+  - ConfigModal: InteractionToggleCheckbox, InteractionChangeIndent, InteractionCloseModal, EdgeCaseAllOptionsEnabled/Disabled
+  - Card: VeryLongTitle, MinimalContent, ComplexContent, VeryLongScrollableContent, MultipleCards
+  - Modal: VeryLongTitle, ScrollableContent, WithComplexFooter, WithFormContent, LoadingState, SuccessState
 - [ ] **Accessibility testing**: Optimizar addon-a11y y crear historias con verificación automatizada
 
 ## 12 - Refactoring & Performance Optimization
@@ -120,18 +126,14 @@
 
 - [ ] **Memoizar componentes complejos**: `JsonEditors`, `JsEditors`, `CodeEditor`
   - **Impacto:** 10-15% mejora responsividad con JSON >1MB
-  - **Estimado:** 2-3h
 - [ ] **useMemo & useCallback en playgrounds**: Evitar recreación de handlers y objetos
   - **Impacto:** Prevenir re-renders innecesarios en Toolbar
-  - **Estimado:** 3-4h
 - [ ] **Lazy Load Monaco Editor**: Reducir bundle inicial en 200KB
   - **Impacto:** -26% tamaño bundle (244KB → 180KB)
-  - **Estimado:** 2h
   - **Status:** Parcialmente hecho en `LazyCodeEditor.tsx`, falta completar
 
 - [ ] **Optimizar imports**: Mejorar tree-shaking (-20 KB)
   - **Impacto:** Eliminar imports genéricos innecesarios
-  - **Estimado:** 2h
 
 ### 12.2 - Code Organization (Phase 2 - 3-5 días)
 
@@ -139,31 +141,25 @@
 
 - [ ] **Unificar servicios JSON/JS**: Crear `services/format/`, `services/minify/` genéricos
   - **Impacto:** -300 líneas duplicadas, mejor escalabilidad
-  - **Estimado:** 4-5h
   - **Archivos:** `services/json/format.ts`, `services/js/format.ts`, minify, etc.
 
 - [ ] **Extraer lógica de modales a hooks**: `useModalState`, `useFormState`
   - **Impacto:** Mejor testabilidad, código más limpio
-  - **Estimado:** 2-3h
   - **Uso:** Simplificar estado en `Toolbar`, `JsonPlayground`, `JsPlayground`
 
 - [ ] **Type-safe handler factory**: Crear patrón de validación en handlers
   - **Impacto:** Prevenir bugs, mejor error handling
-  - **Estimado:** 2h
 
 - [ ] **Discriminated unions para actions**: Patrón Action dispatch type-safe
   - **Impacto:** Prevenir estados inválidos
-  - **Estimado:** 3-4h
 
 #### 🟡 Baja Prioridad
 
 - [ ] **Centralizar tipos de configuración**: Crear `types/config.ts` genérico
   - **Impacto:** Código más DRY
-  - **Estimado:** 2h
 
 - [ ] **Guía de patrones**: Crear `docs/PATTERNS.md`
   - **Impacto:** Mejor onboarding, arquitectura documentada
-  - **Estimado:** 3h
 
 ### 12.3 - Testing & Quality (Phase 3 - 2-4 semanas)
 
@@ -171,11 +167,9 @@
 
 - [ ] **Aumentar coverage a 85%+**: Actualmente 80.47%
   - **Archivos sin cobertura:** `PlaygroundCard`, `PlaygroundSidebar`, `Home`
-  - **Estimado:** 3-4h
 
 - [ ] **Agregar E2E tests (Playwright)**: Full workflow testing
   - **Coverage:** JSON workflow, JS workflow, cross-playground navigation
-  - **Estimado:** 6-8h
 
 #### 🟡 Baja Prioridad
 
@@ -183,10 +177,8 @@
   - **Estimado:** 4-5h setup + tests
 
 - [ ] **Accessibility testing (a11y)**: Jest-axe integration
-  - **Estimado:** 4-6h
 
 - [ ] **Performance metrics**: Web Vitals integration
-  - **Estimado:** 2h
 
 ### 12.4 - Métricas Objetivo
 
@@ -205,7 +197,6 @@
 - useMemo/useCallback
 - Lazy load Monaco
 - Optimizar imports
-- **Total:** ~8h | **Impact:** 15-20% perf improvement
 
 **Fase 2 (3-5 días):** Mejoras medianas
 
@@ -213,7 +204,6 @@
 - Extract modal logic
 - Type-safe handlers
 - Aumentar coverage
-- **Total:** ~14h | **Impact:** -100KB bundle + maintainability
 
 **Fase 3 (2-4 semanas):** Enterprise quality
 
@@ -222,7 +212,6 @@
 - Visual regression tests
 - A11y testing
 - Patterns guide
-- **Total:** ~25h | **Impact:** Production-ready quality
 
 ## 13
 

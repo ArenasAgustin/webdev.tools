@@ -75,6 +75,117 @@ export const ManyItems: Story = {
   },
 };
 
+// Advanced Stories
+export const VeryLongExpressions: Story = {
+  args: {
+    history: [
+      {
+        id: "1",
+        expression:
+          "$.store.book[?(@.price < 10 && @.category == 'fiction' && @.author.name.length > 20)].title",
+        timestamp: Date.now() - 60000,
+        frequency: 3,
+      },
+      {
+        id: "2",
+        expression: "$..book[?(@.isbn)][?(@.price > 8.95 && @.price < 22.99)].[author,title,price]",
+        timestamp: Date.now() - 120000,
+        frequency: 1,
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: expresiones JSONPath muy largas que podrían afectar el layout",
+      },
+    },
+  },
+};
+
+export const HighFrequency: Story = {
+  args: {
+    history: [
+      {
+        id: "1",
+        expression: "$.store.book[*]",
+        timestamp: Date.now() - 60000,
+        frequency: 99,
+      },
+      {
+        id: "2",
+        expression: "$..*",
+        timestamp: Date.now() - 120000,
+        frequency: 150,
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: frecuencias muy altas (números de 2-3 dígitos)",
+      },
+    },
+  },
+};
+
+export const OldTimestamps: Story = {
+  args: {
+    history: [
+      {
+        id: "1",
+        expression: "$.store.book[*]",
+        timestamp: Date.now() - 86400000 * 30, // 30 días
+        frequency: 5,
+      },
+      {
+        id: "2",
+        expression: "$..price",
+        timestamp: Date.now() - 86400000 * 365, // 1 año
+        frequency: 2,
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: timestamps muy antiguos (meses/años atrás)",
+      },
+    },
+  },
+};
+
+export const SingleItem: Story = {
+  args: {
+    history: [mockHistory[0]],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Caso simple: solo un item en el historial",
+      },
+    },
+  },
+};
+
+export const ScrollableList: Story = {
+  args: {
+    history: Array.from({ length: 20 }, (_, i) => ({
+      id: String(i + 1),
+      expression: `$.store.book[${i}].title`,
+      timestamp: Date.now() - i * 60000,
+      frequency: Math.floor(Math.random() * 10) + 1,
+    })),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: muchos items que requieren scroll",
+      },
+    },
+  },
+};
+
 export const Documentation = {
   parameters: { docs: { source: { code: "" } } },
   render: () => (

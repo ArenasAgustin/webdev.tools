@@ -67,6 +67,80 @@ export const Disabled: Story = {
   },
 };
 
+// Advanced Stories
+export const WithIcon: Story = {
+  args: {
+    variant: "primary",
+    children: (
+      <>
+        <span>⬇</span> Download
+      </>
+    ),
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    variant: "primary",
+    disabled: true,
+    children: (
+      <>
+        <span className="inline-block animate-spin">⏳</span> Loading...
+      </>
+    ),
+  },
+};
+
+export const LongText: Story = {
+  args: {
+    children: "This is a very long button text that might cause layout issues",
+    size: "md",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: texto muy largo que podría afectar el layout",
+      },
+    },
+  },
+};
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      <Button variant="primary">Primary</Button>
+      <Button variant="danger">Danger</Button>
+      <Button variant="success">Success</Button>
+      <Button variant="purple">Purple</Button>
+      <Button variant="cyan">Cyan</Button>
+      <Button variant="orange">Orange</Button>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "Todas las variantes de color disponibles",
+      },
+    },
+  },
+};
+
+export const AllSizes: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <Button size="sm">Small</Button>
+      <Button size="md">Medium</Button>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "Todos los tamaños disponibles",
+      },
+    },
+  },
+};
+
 export const Documentation = {
   parameters: { docs: { source: { code: "" } } },
   render: () => (

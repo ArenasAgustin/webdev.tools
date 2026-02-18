@@ -125,6 +125,133 @@ export const GenericMinimal: Story = {
   } as GenericToolbarProps,
 };
 
+// Advanced Stories
+export const JsonWithLongPath: Story = {
+  args: {
+    variant: "json",
+    actions: {
+      onFormat: fn(),
+      onMinify: fn(),
+      onClean: fn(),
+      onFilter: fn(),
+    },
+    jsonPath: {
+      value:
+        "$.store.book[?(@.price < 10 && @.category == 'fiction' && @.author.name.length > 20)].title",
+      onChange: fn(),
+    },
+    config: {
+      format: DEFAULT_FORMAT_CONFIG,
+      onFormatChange: fn(),
+      minify: DEFAULT_MINIFY_CONFIG,
+      onMinifyChange: fn(),
+      clean: DEFAULT_CLEAN_CONFIG,
+      onCleanChange: fn(),
+    },
+  } as JsonToolbarProps,
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: JSONPath muy largo que podría afectar el layout del input",
+      },
+    },
+  },
+};
+
+export const JsonEmptyHistory: Story = {
+  args: {
+    variant: "json",
+    actions: {
+      onFormat: fn(),
+      onMinify: fn(),
+      onClean: fn(),
+      onFilter: fn(),
+    },
+    jsonPath: {
+      value: "",
+      onChange: fn(),
+    },
+    history: {
+      items: [],
+      onReuse: fn(),
+      onDelete: fn(),
+      onClear: fn(),
+    },
+    config: {
+      format: DEFAULT_FORMAT_CONFIG,
+      onFormatChange: fn(),
+      minify: DEFAULT_MINIFY_CONFIG,
+      onMinifyChange: fn(),
+      clean: DEFAULT_CLEAN_CONFIG,
+      onCleanChange: fn(),
+    },
+  } as JsonToolbarProps,
+  parameters: {
+    docs: {
+      description: {
+        story: "Estado: historial vacío (sin items previos)",
+      },
+    },
+  },
+};
+
+export const GenericManyActions: Story = {
+  args: {
+    variant: "generic",
+    tools: {
+      title: "Herramientas Múltiples",
+      actions: [
+        { label: "Formatear", icon: "indent", variant: "primary" as const, onClick: fn() },
+        { label: "Minificar", icon: "compress", variant: "success" as const, onClick: fn() },
+        { label: "Validar", icon: "check", variant: "cyan" as const, onClick: fn() },
+        { label: "Descargar", icon: "download", variant: "purple" as const, onClick: fn() },
+        { label: "Copiar", icon: "copy", variant: "orange" as const, onClick: fn() },
+        { label: "Limpiar", icon: "trash", variant: "danger" as const, onClick: fn() },
+      ],
+      onOpenConfig: fn(),
+      gridClassName: "grid grid-cols-3 gap-2",
+    },
+  } as GenericToolbarProps,
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: muchas acciones (6+ botones) que requieren grid layout",
+      },
+    },
+  },
+};
+
+export const GenericWithLongLabels: Story = {
+  args: {
+    variant: "generic",
+    tools: {
+      title: "Herramientas con Etiquetas Muy Largas",
+      actions: [
+        {
+          label: "Formatear y Embellecer",
+          icon: "indent",
+          variant: "primary" as const,
+          onClick: fn(),
+        },
+        {
+          label: "Minificar y Comprimir",
+          icon: "compress",
+          variant: "success" as const,
+          onClick: fn(),
+        },
+      ],
+      onOpenConfig: fn(),
+    },
+  } as GenericToolbarProps,
+  parameters: {
+    docs: {
+      description: {
+        story: "Edge case: labels largos que podrían romper el layout de los botones",
+      },
+    },
+  },
+};
+
 export const Documentation = {
   parameters: { docs: { source: { code: "" } } },
   render: () => (
