@@ -1,13 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { ConfigModal } from "./ConfigModal";
 import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
+import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 
 const meta = {
   title: "Common/ConfigModal",
   component: ConfigModal,
   tags: ["autodocs"],
   args: {
+    mode: "json",
     isOpen: true,
     onClose: fn(),
     formatConfig: DEFAULT_FORMAT_CONFIG,
@@ -20,18 +22,23 @@ const meta = {
 } satisfies Meta<typeof ConfigModal>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-export const Closed: Story = {
+export const Default = {
   args: {
+    mode: "json",
+  },
+};
+
+export const Closed = {
+  args: {
+    mode: "json",
     isOpen: false,
   },
 };
 
-export const CustomConfig: Story = {
+export const CustomConfig = {
   args: {
+    mode: "json",
     formatConfig: {
       ...DEFAULT_FORMAT_CONFIG,
       indent: 4,
@@ -39,6 +46,40 @@ export const CustomConfig: Story = {
     },
     minifyConfig: {
       ...DEFAULT_MINIFY_CONFIG,
+      autoCopy: true,
+    },
+  },
+};
+
+export const JsDefault = {
+  args: {
+    mode: "js",
+    isOpen: true,
+    onClose: fn(),
+    formatConfig: DEFAULT_JS_FORMAT_CONFIG,
+    onFormatConfigChange: fn(),
+    minifyConfig: DEFAULT_JS_MINIFY_CONFIG,
+    onMinifyConfigChange: fn(),
+  },
+};
+
+export const JsClosed = {
+  args: {
+    ...JsDefault.args,
+    isOpen: false,
+  },
+};
+
+export const JsWithCustomConfig = {
+  args: {
+    ...JsDefault.args,
+    formatConfig: {
+      ...DEFAULT_JS_FORMAT_CONFIG,
+      indentSize: 4,
+      autoCopy: true,
+    },
+    minifyConfig: {
+      ...DEFAULT_JS_MINIFY_CONFIG,
       autoCopy: true,
     },
   },

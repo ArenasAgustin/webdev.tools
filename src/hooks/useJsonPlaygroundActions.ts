@@ -117,39 +117,42 @@ export function useJsonPlaygroundActions({
       return;
     }
 
+    clearJsonPathOutput();
     const result = await formatFn(inputJson, formatConfig);
     if (!result.ok && toast) {
       toast.error(result.error ?? "Error al formatear JSON");
     } else if (result.ok && toast) {
       toast.success("JSON formateado correctamente");
     }
-  }, [inputJson, formatFn, formatConfig, toast, guardInputSize]);
+  }, [inputJson, formatFn, formatConfig, toast, guardInputSize, clearJsonPathOutput]);
 
   const handleMinify = useCallback(async () => {
     if (guardInputSize()) {
       return;
     }
 
+    clearJsonPathOutput();
     const result = await minifyFn(inputJson, minifyConfig);
     if (!result.ok && toast) {
       toast.error(result.error ?? "Error al minificar JSON");
     } else if (result.ok && toast) {
       toast.success("JSON minificado correctamente");
     }
-  }, [inputJson, minifyFn, minifyConfig, toast, guardInputSize]);
+  }, [inputJson, minifyFn, minifyConfig, toast, guardInputSize, clearJsonPathOutput]);
 
   const handleClean = useCallback(async () => {
     if (guardInputSize()) {
       return;
     }
 
+    clearJsonPathOutput();
     const result = await cleanFn(inputJson, cleanConfig);
     if (!result.ok && toast) {
       toast.error(result.error ?? "Error al limpiar JSON");
     } else if (result.ok && toast) {
       toast.success("JSON limpiado correctamente");
     }
-  }, [inputJson, cleanFn, cleanConfig, toast, guardInputSize]);
+  }, [inputJson, cleanFn, cleanConfig, toast, guardInputSize, clearJsonPathOutput]);
 
   const handleApplyJsonPath = useCallback(async () => {
     if (guardInputSize()) {

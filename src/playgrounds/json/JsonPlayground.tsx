@@ -55,8 +55,10 @@ export function JsonPlayground() {
   const jsonPathHistory = useJsonPathHistory();
 
   // Determine which output to show (formatter or jsonPath)
-  const outputJson = jsonPath.output ?? formatter.output;
-  const outputError = jsonPath.error ?? formatter.error;
+  // jsonPath.output starts as "", so nullish-coalescing would always prefer it.
+  const hasJsonPathResult = jsonPath.output !== "" || jsonPath.error !== null;
+  const outputJson = hasJsonPathResult ? jsonPath.output : formatter.output;
+  const outputError = hasJsonPathResult ? jsonPath.error : formatter.error;
 
   // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
   const [showConfig, setShowConfig] = useState(false);

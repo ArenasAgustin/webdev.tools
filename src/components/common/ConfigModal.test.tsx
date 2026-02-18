@@ -2,11 +2,19 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ConfigModal } from "./ConfigModal";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import {
+  DEFAULT_JS_FORMAT_CONFIG,
+  DEFAULT_JS_MINIFY_CONFIG,
+  type JsFormatConfig,
+  type JsMinifyConfig,
+} from "@/types/js";
 
 // Mock storage functions
 vi.mock("@/services/storage", () => ({
   saveToolsConfig: vi.fn(),
   removeToolsConfig: vi.fn(),
+  saveJsToolsConfig: vi.fn(),
+  removeJsToolsConfig: vi.fn(),
 }));
 
 describe("ConfigModal", () => {
@@ -290,6 +298,92 @@ describe("ConfigModal", () => {
         format: mockFormatConfig,
         minify: mockMinifyConfig,
         clean: mockCleanConfig,
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe("JS mode", () => {
+    const jsFormatConfig: JsFormatConfig = {
+      indentSize: 2,
+      autoCopy: false,
+    };
+
+    const jsMinifyConfig: JsMinifyConfig = {
+      removeComments: true,
+      removeSpaces: true,
+      autoCopy: false,
+    };
+
+    const jsProps = {
+      mode: "js" as const,
+      isOpen: true,
+      onClose: vi.fn(),
+      formatConfig: jsFormatConfig,
+      onFormatConfigChange: vi.fn(),
+      minifyConfig: jsMinifyConfig,
+      onMinifyConfigChange: vi.fn(),
+    };
+
+    it("renders JS sections and hides clean section", () => {
+      render(<ConfigModal {...jsProps} />);
+
+      expect(screen.getByText("Configuración de Herramientas JS")).toBeInTheDocument();
+      expect(screen.getByText("Formatear JavaScript")).toBeInTheDocument();
+      expect(screen.getByText("Minificar JavaScript")).toBeInTheDocument();
+      expect(screen.queryByText("Limpiar Valores Vacíos")).not.toBeInTheDocument();
+    });
+
+    it("changes JS indent size", () => {
+      const onFormatConfigChange = vi.fn();
+      render(<ConfigModal {...jsProps} onFormatConfigChange={onFormatConfigChange} />);
+
+      fireEvent.click(screen.getByRole("button", { name: "4 espacios" }));
+
+      expect(onFormatConfigChange).toHaveBeenCalledWith({ ...jsFormatConfig, indentSize: 4 });
+    });
+
+    it("toggles JS minify options", () => {
+      const onMinifyConfigChange = vi.fn();
+      render(<ConfigModal {...jsProps} onMinifyConfigChange={onMinifyConfigChange} />);
+
+      fireEvent.click(screen.getByLabelText("Eliminar comentarios"));
+      fireEvent.click(screen.getByLabelText("Eliminar espacios"));
+
+      expect(onMinifyConfigChange).toHaveBeenNthCalledWith(1, {
+        ...jsMinifyConfig,
+        removeComments: false,
+      });
+      expect(onMinifyConfigChange).toHaveBeenNthCalledWith(2, {
+        ...jsMinifyConfig,
+        removeSpaces: false,
+      });
+    });
+
+    it("resets and persists JS config", async () => {
+      const { removeJsToolsConfig, saveJsToolsConfig } = await import("@/services/storage");
+      const onFormatConfigChange = vi.fn();
+      const onMinifyConfigChange = vi.fn();
+      const onClose = vi.fn();
+
+      render(
+        <ConfigModal
+          {...jsProps}
+          onFormatConfigChange={onFormatConfigChange}
+          onMinifyConfigChange={onMinifyConfigChange}
+          onClose={onClose}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /Restablecer/i }));
+      expect(onFormatConfigChange).toHaveBeenCalledWith(DEFAULT_JS_FORMAT_CONFIG);
+      expect(onMinifyConfigChange).toHaveBeenCalledWith(DEFAULT_JS_MINIFY_CONFIG);
+      expect(removeJsToolsConfig).toHaveBeenCalled();
+
+      fireEvent.click(screen.getByLabelText("Cerrar modal"));
+      expect(saveJsToolsConfig).toHaveBeenCalledWith({
+        format: jsFormatConfig,
+        minify: jsMinifyConfig,
       });
       expect(onClose).toHaveBeenCalled();
     });

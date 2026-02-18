@@ -110,15 +110,17 @@ vi.mock("@/components/layout/Toolbar", () => ({
   ),
 }));
 
-vi.mock("@/components/common/JsConfigModal", () => ({
-  JsConfigModal: ({
+vi.mock("@/components/common/ConfigModal", () => ({
+  ConfigModal: ({
     isOpen,
     onClose,
     onFormatConfigChange,
     onMinifyConfigChange,
+    mode,
   }: {
     isOpen: boolean;
     onClose: () => void;
+    mode: "js";
     onFormatConfigChange: (config: { indentSize: number; autoCopy: boolean }) => void;
     onMinifyConfigChange: (config: {
       removeComments: boolean;
@@ -127,6 +129,7 @@ vi.mock("@/components/common/JsConfigModal", () => ({
     }) => void;
   }) => (
     <div>
+      <span>{mode}</span>
       <span>{isOpen ? "config-open" : "config-closed"}</span>
       <button onClick={() => onFormatConfigChange({ indentSize: 2, autoCopy: true })}>
         enable-format-autocopy

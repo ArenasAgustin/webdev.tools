@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { JsConfigModal } from "@/components/common/JsConfigModal";
+import { ConfigModal } from "@/components/common/ConfigModal";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/useToast";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTextStats } from "@/hooks/useTextStats";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
-import { loadLastJs, saveLastJs, loadJsToolsConfig, saveJsToolsConfig } from "@/services/storage";
+import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 
@@ -47,10 +47,6 @@ export function JsPlayground() {
   useEffect(() => {
     saveLastJs(debouncedInputCode);
   }, [debouncedInputCode]);
-
-  useEffect(() => {
-    saveJsToolsConfig({ format: formatConfig, minify: minifyConfig });
-  }, [formatConfig, minifyConfig]);
 
   const toast = useToast();
 
@@ -301,7 +297,8 @@ export function JsPlayground() {
         }}
       />
 
-      <JsConfigModal
+      <ConfigModal
+        mode="js"
         isOpen={showConfig}
         onClose={() => setShowConfig(false)}
         formatConfig={formatConfig}
