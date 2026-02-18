@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { ConfigModal } from "@/components/common/ConfigModal";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsEditors } from "./JsEditors";
@@ -242,6 +242,48 @@ export function JsPlayground() {
     }
   }, [inputCode, formatConfig, toast, guardInputSize]);
 
+  // Memoize complex toolbar configuration to prevent re-renders
+  const toolbarTools = useMemo(
+    () => ({
+      actions: [
+        {
+          label: "Ejecutar",
+          icon: "play" as const,
+          variant: "orange" as const,
+          onClick: executeCode,
+        },
+        {
+          label: "Formatear",
+          icon: "indent" as const,
+          variant: "primary" as const,
+          onClick: handleFormat,
+        },
+        {
+          label: "Minificar",
+          icon: "compress" as const,
+          variant: "purple" as const,
+          onClick: handleMinify,
+        },
+        {
+          label: "Limpiar",
+          icon: "trash" as const,
+          variant: "danger" as const,
+          onClick: handleClearInput,
+        },
+        {
+          label: "Ejemplo",
+          icon: "file-import" as const,
+          variant: "success" as const,
+          onClick: handleLoadExample,
+        },
+      ],
+      onOpenConfig: () => setShowConfig(true),
+      configButtonTitle: "Configurar herramientas",
+      gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
+    }),
+    [executeCode, handleFormat, handleMinify, handleClearInput, handleLoadExample],
+  );
+
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4">
       <JsEditors
@@ -256,46 +298,7 @@ export function JsPlayground() {
         onDownloadOutput={handleDownloadOutput}
       />
 
-      <Toolbar
-        variant="generic"
-        tools={{
-          actions: [
-            {
-              label: "Ejecutar",
-              icon: "play",
-              variant: "orange",
-              onClick: executeCode,
-            },
-            {
-              label: "Formatear",
-              icon: "indent",
-              variant: "primary",
-              onClick: handleFormat,
-            },
-            {
-              label: "Minificar",
-              icon: "compress",
-              variant: "purple",
-              onClick: handleMinify,
-            },
-            {
-              label: "Limpiar",
-              icon: "trash",
-              variant: "danger",
-              onClick: handleClearInput,
-            },
-            {
-              label: "Ejemplo",
-              icon: "file-import",
-              variant: "success",
-              onClick: handleLoadExample,
-            },
-          ],
-          onOpenConfig: () => setShowConfig(true),
-          configButtonTitle: "Configurar herramientas",
-          gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
-        }}
-      />
+      <Toolbar variant="generic" tools={toolbarTools} />
 
       <ConfigModal
         mode="js"

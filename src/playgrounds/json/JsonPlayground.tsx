@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsonEditors } from "./JsonEditors";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
@@ -155,6 +155,64 @@ export function JsonPlayground() {
     onOpenConfig: () => setShowConfig(true),
   });
 
+  // Memoize complex objects to prevent Toolbar re-renders
+  const toolbarActions = useMemo(
+    () => ({
+      onFormat: handleFormat,
+      onMinify: handleMinify,
+      onClean: handleClean,
+      onFilter: handleApplyJsonPath,
+    }),
+    [handleFormat, handleMinify, handleClean, handleApplyJsonPath],
+  );
+
+  const toolbarJsonPath = useMemo(
+    () => ({
+      value: jsonPath.expression,
+      onChange: jsonPath.setExpression,
+    }),
+    [jsonPath.expression, jsonPath.setExpression],
+  );
+
+  const toolbarHistory = useMemo(
+    () => ({
+      items: jsonPathHistory.history,
+      onReuse: handleReuseFromHistory,
+      onDelete: jsonPathHistory.removeFromHistory,
+      onClear: jsonPathHistory.clearHistory,
+    }),
+    [
+      jsonPathHistory.history,
+      handleReuseFromHistory,
+      jsonPathHistory.removeFromHistory,
+      jsonPathHistory.clearHistory,
+    ],
+  );
+
+  const toolbarConfig = useMemo(
+    () => ({
+      format: formatConfig,
+      onFormatChange: setFormatConfig,
+      minify: minifyConfig,
+      onMinifyChange: setMinifyConfig,
+      clean: cleanConfig,
+      onCleanChange: setCleanConfig,
+      isOpen: showConfig,
+      onOpenChange: setShowConfig,
+    }),
+    [formatConfig, minifyConfig, cleanConfig, showConfig],
+  );
+
+  const toolbarTips = useMemo(
+    () => ({
+      config: {
+        tips: jsonPathTips,
+        quickExamples: jsonPathQuickExamples,
+      },
+    }),
+    [],
+  );
+
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4">
       <JsonEditors
@@ -173,38 +231,11 @@ export function JsonPlayground() {
 
       <Toolbar
         variant="json"
-        actions={{
-          onFormat: handleFormat,
-          onMinify: handleMinify,
-          onClean: handleClean,
-          onFilter: handleApplyJsonPath,
-        }}
-        jsonPath={{
-          value: jsonPath.expression,
-          onChange: jsonPath.setExpression,
-        }}
-        history={{
-          items: jsonPathHistory.history,
-          onReuse: handleReuseFromHistory,
-          onDelete: jsonPathHistory.removeFromHistory,
-          onClear: jsonPathHistory.clearHistory,
-        }}
-        config={{
-          format: formatConfig,
-          onFormatChange: setFormatConfig,
-          minify: minifyConfig,
-          onMinifyChange: setMinifyConfig,
-          clean: cleanConfig,
-          onCleanChange: setCleanConfig,
-          isOpen: showConfig,
-          onOpenChange: setShowConfig,
-        }}
-        tips={{
-          config: {
-            tips: jsonPathTips,
-            quickExamples: jsonPathQuickExamples,
-          },
-        }}
+        actions={toolbarActions}
+        jsonPath={toolbarJsonPath}
+        history={toolbarHistory}
+        config={toolbarConfig}
+        tips={toolbarTips}
       />
     </div>
   );

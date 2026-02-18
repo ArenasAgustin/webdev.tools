@@ -127,8 +127,10 @@
   - **Impacto:** 10-15% mejora responsividad con JSON >1MB
   - **Implementado:** React.memo aplicado a JsonEditors, JsEditors y CodeEditor
   - **Resultado:** Previene re-renders innecesarios cuando props no cambian
-- [ ] **useMemo & useCallback en playgrounds**: Evitar recreación de handlers y objetos
+- [x] **useMemo & useCallback en playgrounds**: Evitar recreación de handlers y objetos ✅
   - **Impacto:** Prevenir re-renders innecesarios en Toolbar
+  - **Implementado:** useMemo aplicado a objetos complejos de Toolbar en ambos playgrounds
+  - **Resultado:** Toolbar ya no re-renderiza cuando props memoizadas no cambian
 - [ ] **Lazy Load Monaco Editor**: Reducir bundle inicial en 200KB
   - **Impacto:** -26% tamaño bundle (244KB → 180KB)
   - **Status:** Parcialmente hecho en `LazyCodeEditor.tsx`, falta completar
@@ -159,9 +161,6 @@
 - [ ] **Centralizar tipos de configuración**: Crear `types/config.ts` genérico
   - **Impacto:** Código más DRY
 
-- [ ] **Guía de patrones**: Crear `docs/PATTERNS.md`
-  - **Impacto:** Mejor onboarding, arquitectura documentada
-
 ### 12.3 - Testing & Quality (Phase 3 - 2-4 semanas)
 
 #### 🟠 Media Prioridad
@@ -171,15 +170,6 @@
 
 - [ ] **Agregar E2E tests (Playwright)**: Full workflow testing
   - **Coverage:** JSON workflow, JS workflow, cross-playground navigation
-
-#### 🟡 Baja Prioridad
-
-- [ ] **Visual regression tests**: Setup Percy o similar
-  - **Estimado:** 4-5h setup + tests
-
-- [ ] **Accessibility testing (a11y)**: Jest-axe integration
-
-- [ ] **Performance metrics**: Web Vitals integration
 
 ### 12.4 - Métricas Objetivo
 
