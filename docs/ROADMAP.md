@@ -99,9 +99,19 @@
 
 - Calidad de código: ESLint type‑checked + reglas React, Prettier y husky ✅
 - Tests unitarios y de integración con Vitest para servicios y hooks ✅
-- Storybook rápido para `Panel`, `Button`, `CodeEditor` y modales
-- Documentación de componentes
+- Storybook rápido para componentes comunes ✅
 
 ## 11
+
+### Storybook Enhancements
+
+- [x] **Stories básicas**: Button, Checkbox, RadioGroup, Card, Modal, ToggleButtonGroup ✅
+- [x] **Stories para componentes complejos**: ConfigModal, JsConfigModal, JsonPathHistoryModal, TipsModal, Toolbar ✅
+- [x] **Documentación en MDX**: Explicar props, casos de uso y patrones de cada componente ✅
+- [ ] **Decorators globales**: Provider de temas, context API, layouts compartidos
+- [ ] **Stories avanzadas**: Estados de error, loading, interacciones, variantes edge-case
+- [ ] **Accessibility testing**: Optimizar addon-a11y y crear historias con verificación automatizada
+
+## 12
 
 - Funcionalidades avanzadas: validación con JSON Schema

@@ -6,6 +6,12 @@ const meta = {
   component: Card,
   parameters: {
     layout: "centered",
+    docs: {
+      description: {
+        component:
+          "El componente `Card` es un contenedor reutilizable para agrupar contenido relacionado con estilos consistentes.",
+      },
+    },
   },
   tags: ["autodocs"],
   args: {
@@ -54,4 +60,77 @@ export const LargeContent: Story = {
       </div>
     ),
   },
+};
+
+export const Documentation = {
+  parameters: { docs: { source: { code: "" } } },
+  render: () => (
+    <div className="space-y-6">
+      <section>
+        <h2 className="text-xl font-bold mb-4">Propiedades</h2>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border p-2 text-left">Propiedad</th>
+              <th className="border p-2 text-left">Tipo</th>
+              <th className="border p-2 text-left">Default</th>
+              <th className="border p-2 text-left">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border p-2">
+                <code>title</code>
+              </td>
+              <td className="border p-2">
+                <code>string</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Título opcional de la tarjeta</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>icon</code>
+              </td>
+              <td className="border p-2">
+                <code>string</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Icono de Font Awesome</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>children</code>
+              </td>
+              <td className="border p-2">
+                <code>ReactNode</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Contenido de la tarjeta</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>className</code>
+              </td>
+              <td className="border p-2">
+                <code>string</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Clases Tailwind personalizadas</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 className="text-xl font-bold mb-4">Styling</h2>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>
+            Usa glassmorphism con <code>backdrop-blur</code>
+          </li>
+          <li>Bordes semi-transparentes</li>
+          <li>Colores adaptables mediante clases Tailwind</li>
+        </ul>
+      </section>
+    </div>
+  ),
 };

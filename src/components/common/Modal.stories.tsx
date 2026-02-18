@@ -5,6 +5,14 @@ import { Modal } from "./Modal";
 const meta = {
   title: "Common/Modal",
   component: Modal,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "El componente `Modal` es un diálogo reutilizable que muestra contenido en un overlay, con manejo automático de focus trap y tecla ESC.",
+      },
+    },
+  },
   tags: ["autodocs"],
   argTypes: {
     iconColor: {
@@ -85,4 +93,84 @@ export const Closed: Story = {
   args: {
     isOpen: false,
   },
+};
+
+export const Documentation = {
+  parameters: { docs: { source: { code: "" } } },
+  render: () => (
+    <div className="space-y-6">
+      <section>
+        <h2 className="text-xl font-bold mb-4">Propiedades</h2>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border p-2 text-left">Propiedad</th>
+              <th className="border p-2 text-left">Tipo</th>
+              <th className="border p-2 text-left">Default</th>
+              <th className="border p-2 text-left">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border p-2">
+                <code>isOpen</code>
+              </td>
+              <td className="border p-2">
+                <code>boolean</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Si el modal está visible</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>title</code>
+              </td>
+              <td className="border p-2">
+                <code>string</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Título del modal</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>icon</code>
+              </td>
+              <td className="border p-2">
+                <code>string</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Icono de Font Awesome (sin prefijo &quot;fa-&quot;)</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>onClose</code>
+              </td>
+              <td className="border p-2">
+                <code>() =&gt; void</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Callback al cerrar el modal</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 className="text-xl font-bold mb-4">Características</h2>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>
+            <strong>Focus Trap</strong> - El foco se mantiene dentro del modal
+          </li>
+          <li>
+            <strong>ESC para cerrar</strong> - Presionar ESC cierra el modal automáticamente
+          </li>
+          <li>
+            <strong>Prevención de scroll</strong> - El body no scrollea mientras el modal es visible
+          </li>
+          <li>
+            <strong>Overlay oscuro</strong> - Fondo semi-transparente que bloquea interacción
+          </li>
+        </ul>
+      </section>
+    </div>
+  ),
 };

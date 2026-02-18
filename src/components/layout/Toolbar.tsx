@@ -18,7 +18,7 @@ interface ToolbarAction {
   onClick: () => void;
 }
 
-interface JsonToolbarProps {
+export interface JsonToolbarProps {
   variant: "json";
   actions: {
     onFormat: () => void;
@@ -55,7 +55,7 @@ interface JsonToolbarProps {
   };
 }
 
-interface GenericToolbarProps {
+export interface GenericToolbarProps {
   variant: "generic";
   tools: {
     title?: string;
