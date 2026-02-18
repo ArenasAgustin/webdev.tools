@@ -131,9 +131,11 @@
   - **Impacto:** Prevenir re-renders innecesarios en Toolbar
   - **Implementado:** useMemo aplicado a objetos complejos de Toolbar en ambos playgrounds
   - **Resultado:** Toolbar ya no re-renderiza cuando props memoizadas no cambian
-- [ ] **Lazy Load Monaco Editor**: Reducir bundle inicial en 200KB
-  - **Impacto:** -26% tamaño bundle (244KB → 180KB)
-  - **Status:** Parcialmente hecho en `LazyCodeEditor.tsx`, falta completar
+- [x] **Lazy Load Monaco Editor**: Reducir bundle inicial ✅
+  - **Impacto:** -25% tamaño bundle principal (244KB → 182KB vendor)
+  - **Status:** Completado con code splitting optimizado
+  - **Implementado:** manualChunks en vite.config.ts separando Monaco (21KB), React Router (40KB) y vendor (182KB)
+  - **Resultado:** Monaco carga solo cuando se abre un editor por primera vez
 
 - [ ] **Optimizar imports**: Mejorar tree-shaking (-20 KB)
   - **Impacto:** Eliminar imports genéricos innecesarios
