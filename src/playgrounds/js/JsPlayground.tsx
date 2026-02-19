@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTextStats } from "@/hooks/useTextStats";
+import { createValidatedHandler } from "@/utils/handlerFactory";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
@@ -64,69 +65,68 @@ export function JsPlayground() {
     }
   }, [inputTooLarge, toast]);
 
-  const guardInputSize = useCallback(() => {
-    if (!inputTooLarge) {
-      return false;
-    }
-
-    toast.error(`El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`);
-    return true;
-  }, [inputTooLarge, toast]);
+  const validateInputSize = useCallback(
+    () =>
+      inputTooLarge
+        ? `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`
+        : null,
+    [inputTooLarge],
+  );
 
   // Execute the JavaScript code
   const executeCode = useCallback(() => {
-    if (guardInputSize()) {
-      return;
-    }
+    createValidatedHandler({
+      validate: validateInputSize,
+      run: () => {
+        setError(null);
+        setOutput("");
 
-    setError(null);
-    setOutput("");
+        const logs: string[] = [];
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
 
-    try {
-      const logs: string[] = [];
-      const originalLog = console.log;
-      const originalError = console.error;
-      const originalWarn = console.warn;
+        try {
+          console.log = (...args: unknown[]) => {
+            logs.push(args.map((arg) => formatValue(arg)).join(" "));
+            originalLog(...args);
+          };
 
-      // Intercept console methods
-      console.log = (...args: unknown[]) => {
-        logs.push(args.map((arg) => formatValue(arg)).join(" "));
-        originalLog(...args);
-      };
+          console.error = (...args: unknown[]) => {
+            logs.push(`ERROR: ${args.map((arg) => formatValue(arg)).join(" ")}`);
+            originalError(...args);
+          };
 
-      console.error = (...args: unknown[]) => {
-        logs.push(`ERROR: ${args.map((arg) => formatValue(arg)).join(" ")}`);
-        originalError(...args);
-      };
+          console.warn = (...args: unknown[]) => {
+            logs.push(`WARN: ${args.map((arg) => formatValue(arg)).join(" ")}`);
+            originalWarn(...args);
+          };
 
-      console.warn = (...args: unknown[]) => {
-        logs.push(`WARN: ${args.map((arg) => formatValue(arg)).join(" ")}`);
-        originalWarn(...args);
-      };
+          const executeUserCode = new Function(inputCode) as () => unknown;
+          const result = executeUserCode();
 
-      // Execute code using Function constructor (safer than eval)
-      const executeUserCode = new Function(inputCode) as () => unknown;
-      const result = executeUserCode();
-
-      // Restore console
-      console.log = originalLog;
-      console.error = originalError;
-      console.warn = originalWarn;
-
-      // Set output
-      const outputText = logs.length > 0 ? logs.join("\n") : "";
-      if (result !== undefined && result !== null && logs.length === 0) {
-        setOutput(formatValue(result));
-      } else {
-        setOutput(outputText);
-      }
-      toast.success("Código ejecutado correctamente");
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      setError(errorMsg);
-      toast.error(`Error: ${errorMsg}`);
-    }
-  }, [inputCode, toast, guardInputSize]);
+          const outputText = logs.length > 0 ? logs.join("\n") : "";
+          if (result !== undefined && result !== null && logs.length === 0) {
+            setOutput(formatValue(result));
+          } else {
+            setOutput(outputText);
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          throw new Error(`Error: ${message}`);
+        } finally {
+          console.log = originalLog;
+          console.error = originalError;
+          console.warn = originalWarn;
+        }
+      },
+      toast,
+      successMessage: "Código ejecutado correctamente",
+      onError: (message) => {
+        setError(message.replace(/^Error:\s*/, ""));
+      },
+    })();
+  }, [inputCode, toast, validateInputSize]);
 
   // Clear input code
   const handleClearInput = useCallback(() => {
@@ -146,104 +146,120 @@ export function JsPlayground() {
 
   // Copy input to clipboard
   const handleCopyInput = useCallback(() => {
-    if (!inputCode) {
-      toast.error("No hay código para copiar");
-      return;
-    }
-    navigator.clipboard
-      .writeText(inputCode)
-      .then(() => {
-        toast.success("Código copiado al portapapeles");
-      })
-      .catch(() => {
-        toast.error("Error al copiar al portapapeles");
-      });
+    createValidatedHandler({
+      validate: () => (!inputCode ? "No hay código para copiar" : null),
+      run: async () => {
+        await navigator.clipboard.writeText(inputCode);
+      },
+      toast,
+      successMessage: "Código copiado al portapapeles",
+      errorMessage: "Error al copiar al portapapeles",
+    })();
   }, [inputCode, toast]);
 
   // Copy output to clipboard
   const handleCopyOutput = useCallback(() => {
-    if (!output) {
-      toast.error("No hay resultado para copiar");
-      return;
-    }
-    navigator.clipboard
-      .writeText(output)
-      .then(() => {
-        toast.success("Resultado copiado al portapapeles");
-      })
-      .catch(() => {
-        toast.error("Error al copiar al portapapeles");
-      });
+    createValidatedHandler({
+      validate: () => (!output ? "No hay resultado para copiar" : null),
+      run: async () => {
+        await navigator.clipboard.writeText(output);
+      },
+      toast,
+      successMessage: "Resultado copiado al portapapeles",
+      errorMessage: "Error al copiar al portapapeles",
+    })();
   }, [output, toast]);
 
   // Download input code
   const handleDownloadInput = useCallback(() => {
-    if (!inputCode) {
-      toast.error("No hay código para descargar");
-      return;
-    }
-    downloadFile(inputCode, "code.js", "application/javascript");
-    toast.success("Descargado como code.js");
+    createValidatedHandler({
+      validate: () => (!inputCode ? "No hay código para descargar" : null),
+      run: () => {
+        downloadFile(inputCode, "code.js", "application/javascript");
+      },
+      toast,
+      successMessage: "Descargado como code.js",
+    })();
   }, [inputCode, toast]);
 
   // Download output
   const handleDownloadOutput = useCallback(() => {
-    if (!output) {
-      toast.error("No hay resultado para descargar");
-      return;
-    }
-    downloadFile(output, "output.txt", "text/plain");
-    toast.success("Descargado como output.txt");
+    createValidatedHandler({
+      validate: () => (!output ? "No hay resultado para descargar" : null),
+      run: () => {
+        downloadFile(output, "output.txt", "text/plain");
+      },
+      toast,
+      successMessage: "Descargado como output.txt",
+    })();
   }, [output, toast]);
 
   // Minify JavaScript code
   const handleMinify = useCallback(() => {
-    if (guardInputSize()) {
-      return;
-    }
-
-    const result = minifyJs(inputCode, {
-      removeComments: minifyConfig.removeComments,
-      removeSpaces: minifyConfig.removeSpaces,
-    });
-    if (result.ok) {
-      setInputCode(result.value);
-      setError(null);
-      setOutput("");
-      if (minifyConfig.autoCopy && result.value) {
-        navigator.clipboard.writeText(result.value).catch((err) => {
-          console.error("Error al copiar al portapapeles: ", err);
+    createValidatedHandler({
+      validate: validateInputSize,
+      run: () => {
+        const result = minifyJs(inputCode, {
+          removeComments: minifyConfig.removeComments,
+          removeSpaces: minifyConfig.removeSpaces,
         });
-      }
-      toast.success("Código minificado correctamente");
-    } else {
-      setError(result.error);
-      toast.error(result.error || "Error al minificar código");
-    }
-  }, [inputCode, minifyConfig, toast, guardInputSize]);
+
+        if (!result.ok) {
+          throw new Error(result.error || "Error al minificar código");
+        }
+
+        return result.value;
+      },
+      onSuccess: (value) => {
+        setInputCode(value);
+        setError(null);
+        setOutput("");
+        if (minifyConfig.autoCopy && value) {
+          navigator.clipboard.writeText(value).catch((err) => {
+            console.error("Error al copiar al portapapeles: ", err);
+          });
+        }
+      },
+      onError: (message) => {
+        setError(message);
+      },
+      toast,
+      successMessage: "Código minificado correctamente",
+      errorMessage: "Error al minificar código",
+    })();
+  }, [inputCode, minifyConfig, toast, validateInputSize]);
 
   // Format JavaScript code
   const handleFormat = useCallback(() => {
-    if (guardInputSize()) {
-      return;
-    }
+    createValidatedHandler({
+      validate: validateInputSize,
+      run: () => {
+        const result = formatJs(inputCode, formatConfig.indentSize);
 
-    const result = formatJs(inputCode, formatConfig.indentSize);
-    if (result.ok) {
-      setInputCode(result.value);
-      setError(null);
-      setOutput("");
-      if (formatConfig.autoCopy && result.value) {
-        navigator.clipboard.writeText(result.value).catch((err) => {
-          console.error("Error al copiar al portapapeles: ", err);
-        });
-      }
-      toast.success("Código formateado correctamente");
-    } else {
-      setError(result.error);
-      toast.error(result.error || "Error al formatear código");
-    }
-  }, [inputCode, formatConfig, toast, guardInputSize]);
+        if (!result.ok) {
+          throw new Error(result.error || "Error al formatear código");
+        }
+
+        return result.value;
+      },
+      onSuccess: (value) => {
+        setInputCode(value);
+        setError(null);
+        setOutput("");
+        if (formatConfig.autoCopy && value) {
+          navigator.clipboard.writeText(value).catch((err) => {
+            console.error("Error al copiar al portapapeles: ", err);
+          });
+        }
+      },
+      onError: (message) => {
+        setError(message);
+      },
+      toast,
+      successMessage: "Código formateado correctamente",
+      errorMessage: "Error al formatear código",
+    })();
+  }, [inputCode, formatConfig, toast, validateInputSize]);
 
   // Memoize complex toolbar configuration to prevent re-renders
   const toolbarTools = useMemo(

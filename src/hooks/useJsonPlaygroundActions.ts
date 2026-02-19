@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { formatJson } from "@/services/json/format";
+import { createValidatedHandler } from "@/utils/handlerFactory";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 
 interface ToastApi {
@@ -71,17 +72,13 @@ export function useJsonPlaygroundActions({
   cleanConfig,
   toast,
 }: UseJsonPlaygroundActionsProps) {
-  const guardInputSize = useCallback(() => {
-    if (!inputTooLarge) {
-      return false;
-    }
-
-    if (toast) {
-      toast.error(inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.");
-    }
-
-    return true;
-  }, [inputTooLarge, inputTooLargeMessage, toast]);
+  const validateInputSize = useCallback(
+    () =>
+      inputTooLarge
+        ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
+        : null,
+    [inputTooLarge, inputTooLargeMessage],
+  );
   const handleClearInput = useCallback(() => {
     setInputJson("");
     clearFormatterOutput();
@@ -112,72 +109,69 @@ export function useJsonPlaygroundActions({
     });
   }, [formatterOutput, jsonPathOutput]);
 
-  const handleFormat = useCallback(async () => {
-    if (guardInputSize()) {
-      return;
-    }
+  const handleFormat = useCallback(() => {
+    createValidatedHandler({
+      validate: validateInputSize,
+      run: () => {
+        clearJsonPathOutput();
+        return formatFn(inputJson, formatConfig);
+      },
+      toast,
+      successMessage: "JSON formateado correctamente",
+      errorMessage: "Error al formatear JSON",
+    })();
+  }, [validateInputSize, clearJsonPathOutput, formatFn, inputJson, formatConfig, toast]);
 
-    clearJsonPathOutput();
-    const result = await formatFn(inputJson, formatConfig);
-    if (!result.ok && toast) {
-      toast.error(result.error ?? "Error al formatear JSON");
-    } else if (result.ok && toast) {
-      toast.success("JSON formateado correctamente");
-    }
-  }, [inputJson, formatFn, formatConfig, toast, guardInputSize, clearJsonPathOutput]);
+  const handleMinify = useCallback(() => {
+    createValidatedHandler({
+      validate: validateInputSize,
+      run: () => {
+        clearJsonPathOutput();
+        return minifyFn(inputJson, minifyConfig);
+      },
+      toast,
+      successMessage: "JSON minificado correctamente",
+      errorMessage: "Error al minificar JSON",
+    })();
+  }, [validateInputSize, clearJsonPathOutput, minifyFn, inputJson, minifyConfig, toast]);
 
-  const handleMinify = useCallback(async () => {
-    if (guardInputSize()) {
-      return;
-    }
+  const handleClean = useCallback(() => {
+    createValidatedHandler({
+      validate: validateInputSize,
+      run: () => {
+        clearJsonPathOutput();
+        return cleanFn(inputJson, cleanConfig);
+      },
+      toast,
+      successMessage: "JSON limpiado correctamente",
+      errorMessage: "Error al limpiar JSON",
+    })();
+  }, [validateInputSize, clearJsonPathOutput, cleanFn, inputJson, cleanConfig, toast]);
 
-    clearJsonPathOutput();
-    const result = await minifyFn(inputJson, minifyConfig);
-    if (!result.ok && toast) {
-      toast.error(result.error ?? "Error al minificar JSON");
-    } else if (result.ok && toast) {
-      toast.success("JSON minificado correctamente");
-    }
-  }, [inputJson, minifyFn, minifyConfig, toast, guardInputSize, clearJsonPathOutput]);
-
-  const handleClean = useCallback(async () => {
-    if (guardInputSize()) {
-      return;
-    }
-
-    clearJsonPathOutput();
-    const result = await cleanFn(inputJson, cleanConfig);
-    if (!result.ok && toast) {
-      toast.error(result.error ?? "Error al limpiar JSON");
-    } else if (result.ok && toast) {
-      toast.success("JSON limpiado correctamente");
-    }
-  }, [inputJson, cleanFn, cleanConfig, toast, guardInputSize, clearJsonPathOutput]);
-
-  const handleApplyJsonPath = useCallback(async () => {
-    if (guardInputSize()) {
-      return;
-    }
-
-    const result = await filterJsonPath(inputJson);
-    if (result.ok) {
-      await addToHistory(jsonPathExpression);
-    }
-  }, [inputJson, filterJsonPath, addToHistory, jsonPathExpression, guardInputSize]);
+  const handleApplyJsonPath = useCallback(() => {
+    createValidatedHandler({
+      validate: validateInputSize,
+      run: () => filterJsonPath(inputJson),
+      onSuccess: () => addToHistory(jsonPathExpression),
+      toast,
+      errorMessage: "Error al aplicar JSONPath",
+    })();
+  }, [validateInputSize, filterJsonPath, inputJson, addToHistory, jsonPathExpression, toast]);
 
   const handleReuseFromHistory = useCallback(
-    async (expression: string) => {
-      if (guardInputSize()) {
-        return;
-      }
-
-      setJsonPathExpression(expression);
-      const result = await filterJsonPath(inputJson, expression);
-      if (result.ok) {
-        await addToHistory(expression);
-      }
+    (expression: string) => {
+      createValidatedHandler({
+        validate: validateInputSize,
+        run: () => {
+          setJsonPathExpression(expression);
+          return filterJsonPath(inputJson, expression);
+        },
+        onSuccess: () => addToHistory(expression),
+        toast,
+        errorMessage: "Error al aplicar JSONPath",
+      })();
     },
-    [inputJson, setJsonPathExpression, filterJsonPath, addToHistory, guardInputSize],
+    [validateInputSize, setJsonPathExpression, filterJsonPath, inputJson, addToHistory, toast],
   );
 
   return {
