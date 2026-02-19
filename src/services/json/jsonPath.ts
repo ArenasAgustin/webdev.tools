@@ -1,4 +1,5 @@
 import { JSONPath } from "jsonpath-plus";
+import { JSON_ERROR_MESSAGES } from "./utils";
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
 
 /**
@@ -10,7 +11,7 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
     return {
       ok: false,
       error: {
-        message: "El JSON está vacío",
+        message: JSON_ERROR_MESSAGES.EMPTY_INPUT,
       },
     };
   }

@@ -1,6 +1,7 @@
 import { parseJson } from "./parse";
 import { formatJson } from "./format";
 import { minifyJson } from "./minify";
+import { JSON_ERROR_MESSAGES } from "./utils";
 import type { JsonValue, Result, JsonError } from "@/types/common";
 import type { CleanConfig } from "@/types/json";
 
@@ -69,7 +70,7 @@ export function cleanJson(input: string, options: CleanOptions = {}): Result<str
     return {
       ok: false,
       error: {
-        message: "El JSON está vacío",
+        message: JSON_ERROR_MESSAGES.EMPTY_INPUT,
       },
     };
   }

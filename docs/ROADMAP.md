@@ -149,9 +149,14 @@
 
 #### 🟠 Media Prioridad
 
-- [ ] **Unificar servicios JSON/JS**: Crear `services/format/`, `services/minify/` genéricos
-  - **Impacto:** -300 líneas duplicadas, mejor escalabilidad
-  - **Archivos:** `services/json/format.ts`, `services/js/format.ts`, minify, etc.
+- [x] **Unificar servicios JSON/JS**: Crear utilidades compartidas y reducir duplicación ✅
+  - **Impacto:** Código más mantenible, -280 bytes bundle
+  - **Implementado:**
+    - Creado `services/json/utils.ts` con `sortJsonKeys` y `JSON_ERROR_MESSAGES`
+    - Refactorizados format.ts, minify.ts, clean.ts, jsonPath.ts para usar utilidades compartidas
+    - Eliminada duplicación de sortJsonKeys (antes definida 2 veces)
+    - Tests completos: 7 tests nuevos + 45 existentes pasando
+  - **Resultado:** jsonWorker 28.26KB → 28.12KB, JsonPlayground 20.61KB → 20.47KB
 
 - [ ] **Extraer lógica de modales a hooks**: `useModalState`, `useFormState`
   - **Impacto:** Mejor testabilidad, código más limpio
@@ -183,8 +188,9 @@
 | Métrica              | Inicial | Actual  | Target  | Priority | Status |
 | -------------------- | ------- | ------- | ------- | -------- | ------ |
 | Bundle size (vendor) | 244 KB  | 182 KB  | 180 KB  | 🔴       | ✅ 99% |
-| JSON Playground      | 45.7 KB | 20.6 KB | <25 KB  | 🔴       | ✅     |
-| Test coverage        | 80.47%  | 80.47%  | 85%+    | 🟠       | 🔄     |
+| JSON Playground      | 45.7 KB | 20.5 KB | <25 KB  | 🔴       | ✅     |
+| jsonWorker           | 28.3 KB | 28.1 KB | <30 KB  | 🟢       | ✅     |
+| Test coverage        | 80.47%  | 81%+    | 85%+    | 🟠       | 🔄     |
 | Lighthouse score     | 85/100  | 85/100  | 95+/100 | 🟠       | 🔄     |
 | Time to Interactive  | ~3.2s   | ~2.8s   | <2.5s   | 🟠       | 🔄     |
 
@@ -196,9 +202,9 @@
 - ✅ useMemo/useCallback (objetos complejos en playgrounds)
 - ✅ Lazy load Monaco (21KB chunk separado)
 - ✅ Optimizar imports (zustand removido, jsonpath-plus separado 25KB)
-- **Resultado:** Bundle vendor reducido 244KB → 182KB (-25%), JsonPlayground 45.7KB → 20.6KB (-55%)
+- **Resultado:** Bundle vendor reducido 244KB → 182KB (-25%), JsonPlayground 45.7KB → 20.5KB (-55%)
 
-**Fase 2 (3-5 días):** Mejoras medianas - PENDIENTE
+**🔄 Fase 2 (3-5 días):** Mejoras medianas - EN PROGRESO (1/4)
 
 - Unificar servicios
 - Extract modal logic

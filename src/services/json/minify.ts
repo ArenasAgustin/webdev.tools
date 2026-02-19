@@ -1,24 +1,9 @@
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
 import type { MinifyConfig } from "@/types/json";
+import { sortJsonKeys, JSON_ERROR_MESSAGES } from "./utils";
 
 // Export for backward compatibility
 export type MinifyOptions = Partial<Pick<MinifyConfig, "removeSpaces" | "sortKeys">>;
-
-function sortJsonKeys(value: JsonValue): JsonValue {
-  if (Array.isArray(value)) {
-    return value.map(sortJsonKeys) as JsonValue;
-  }
-  if (value && typeof value === "object") {
-    const sorted: Record<string, JsonValue> = {};
-    Object.keys(value)
-      .sort()
-      .forEach((key) => {
-        sorted[key] = sortJsonKeys((value as Record<string, JsonValue>)[key]);
-      });
-    return sorted as JsonValue;
-  }
-  return value;
-}
 
 /**
  * Minify JSON (remove whitespace)
@@ -29,7 +14,7 @@ export function minifyJson(input: string, options: MinifyOptions = {}): Result<s
     return {
       ok: false,
       error: {
-        message: "El JSON está vacío",
+        message: JSON_ERROR_MESSAGES.EMPTY_INPUT,
       },
     };
   }
