@@ -11,6 +11,7 @@ import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useToast } from "@/hooks/useToast";
+import { useModalState } from "@/hooks/useModalState";
 import { downloadFile } from "@/utils/download";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
@@ -34,6 +35,9 @@ export function JsonPlayground() {
   const [cleanConfig, setCleanConfig] = useState<CleanConfig>(
     savedConfig?.clean ?? DEFAULT_CLEAN_CONFIG,
   );
+
+  // Modal state management
+  const configModal = useModalState();
 
   // Auto-save last JSON to localStorage
   const debouncedInputJson = useDebouncedValue(inputJson, 300);
@@ -60,8 +64,6 @@ export function JsonPlayground() {
   const outputJson = hasJsonPathResult ? jsonPath.output : formatter.output;
   const outputError = hasJsonPathResult ? jsonPath.error : formatter.error;
 
-  // Setup keyboard shortcuts - need to be defined before useKeyboardShortcuts
-  const [showConfig, setShowConfig] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -152,7 +154,7 @@ export function JsonPlayground() {
     onClean: handleClean,
     onCopyOutput: handleCopyOutputWithToast,
     onClearInput: handleClearInput,
-    onOpenConfig: () => setShowConfig(true),
+    onOpenConfig: configModal.open,
   });
 
   // Memoize complex objects to prevent Toolbar re-renders
@@ -197,10 +199,10 @@ export function JsonPlayground() {
       onMinifyChange: setMinifyConfig,
       clean: cleanConfig,
       onCleanChange: setCleanConfig,
-      isOpen: showConfig,
-      onOpenChange: setShowConfig,
+      isOpen: configModal.isOpen,
+      onOpenChange: configModal.setIsOpen,
     }),
-    [formatConfig, minifyConfig, cleanConfig, showConfig],
+    [formatConfig, minifyConfig, cleanConfig, configModal.isOpen, configModal.setIsOpen],
   );
 
   const toolbarTips = useMemo(

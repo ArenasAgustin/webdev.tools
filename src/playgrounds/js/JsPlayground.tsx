@@ -7,6 +7,7 @@ import { minifyJs } from "@/services/js/minify";
 import { formatJs } from "@/services/js/format";
 import { downloadFile } from "@/utils/download";
 import { useToast } from "@/hooks/useToast";
+import { useModalState } from "@/hooks/useModalState";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTextStats } from "@/hooks/useTextStats";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
@@ -34,7 +35,9 @@ export function JsPlayground() {
   const [minifyConfig, setMinifyConfig] = useState<JsMinifyConfig>(
     savedConfig?.minify ?? DEFAULT_JS_MINIFY_CONFIG,
   );
-  const [showConfig, setShowConfig] = useState(false);
+
+  // Modal state management
+  const configModal = useModalState();
 
   const debouncedInputCode = useDebouncedValue(inputCode, 300);
   const inputStats = useTextStats(inputCode);
@@ -277,11 +280,18 @@ export function JsPlayground() {
           onClick: handleLoadExample,
         },
       ],
-      onOpenConfig: () => setShowConfig(true),
+      onOpenConfig: configModal.open,
       configButtonTitle: "Configurar herramientas",
       gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
     }),
-    [executeCode, handleFormat, handleMinify, handleClearInput, handleLoadExample],
+    [
+      executeCode,
+      handleFormat,
+      handleMinify,
+      handleClearInput,
+      handleLoadExample,
+      configModal.open,
+    ],
   );
 
   return (
@@ -302,8 +312,8 @@ export function JsPlayground() {
 
       <ConfigModal
         mode="js"
-        isOpen={showConfig}
-        onClose={() => setShowConfig(false)}
+        isOpen={configModal.isOpen}
+        onClose={configModal.close}
         formatConfig={formatConfig}
         onFormatConfigChange={setFormatConfig}
         minifyConfig={minifyConfig}

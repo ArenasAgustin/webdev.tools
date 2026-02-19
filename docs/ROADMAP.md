@@ -153,14 +153,19 @@
   - **Impacto:** Código más mantenible, -280 bytes bundle
   - **Implementado:**
     - Creado `services/json/utils.ts` con `sortJsonKeys` y `JSON_ERROR_MESSAGES`
-    - Refactorizados format.ts, minify.ts, clean.ts, jsonPath.ts para usar utilidades compartidas
-    - Eliminada duplicación de sortJsonKeys (antes definida 2 veces)
-    - Tests completos: 7 tests nuevos + 45 existentes pasando
+- Refactorizados format.ts, minify.ts, clean.ts, jsonPath.ts para usar utilidades compartidas
+  - Eliminada duplicación de sortJsonKeys (antes definida 2 veces)
+  - Tests completos: 7 tests nuevos + 45 existentes pasando
   - **Resultado:** jsonWorker 28.26KB → 28.12KB, JsonPlayground 20.61KB → 20.47KB
 
-- [ ] **Extraer lógica de modales a hooks**: `useModalState`, `useFormState`
-  - **Impacto:** Mejor testabilidad, código más limpio
-  - **Uso:** Simplificar estado en `Toolbar`, `JsonPlayground`, `JsPlayground`
+- [x] **Extraer lógica de modales a hooks**: `useModalState` ✅
+  - **Impacto:** Mejor testabilidad, código más mantenible, API consistente
+  - **Implementado:**
+    - Creado `hooks/useModalState.ts` con API completa (open, close, toggle, setIsOpen)
+    - Refactorizados JsonPlayground y JsPlayground para usar el hook
+    - Eliminados estados manuales duplicados (useState<boolean> en cada componente)
+    - Tests completos: 9 tests nuevos, cobertura 100%
+  - **Resultado:** Código más limpio, +210 bytes pero mejor arquitectura para escalabilidad
 
 - [ ] **Type-safe handler factory**: Crear patrón de validación en handlers
   - **Impacto:** Prevenir bugs, mejor error handling
@@ -204,12 +209,12 @@
 - ✅ Optimizar imports (zustand removido, jsonpath-plus separado 25KB)
 - **Resultado:** Bundle vendor reducido 244KB → 182KB (-25%), JsonPlayground 45.7KB → 20.5KB (-55%)
 
-**🔄 Fase 2 (3-5 días):** Mejoras medianas - EN PROGRESO (1/4)
+**🔄 Fase 2 (3-5 días):** Mejoras medianas - EN PROGRESO (2/4)
 
-- Unificar servicios
-- Extract modal logic
-- Type-safe handlers
-- Aumentar coverage
+- ✅ Unificar servicios (utils compartidos)
+- ✅ Extract modal logic (useModalState hook)
+- [ ] Type-safe handlers
+- [ ] Aumentar coverage
 
 **Fase 3 (2-4 semanas):** Enterprise quality
 
