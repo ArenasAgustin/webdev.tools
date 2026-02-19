@@ -182,7 +182,7 @@
 
 #### 🟠 Media Prioridad
 
-- [ ] **Aumentar coverage a 85%+**: Actualmente 80.47%
+- [x] **Aumentar coverage a 85%+**: Alcanzado 85.13%
   - **Archivos sin cobertura:** `PlaygroundCard`, `PlaygroundSidebar`, `Home`
 
 - [ ] **Agregar E2E tests (Playwright)**: Full workflow testing
@@ -195,7 +195,7 @@
 | Bundle size (vendor) | 244 KB  | 182 KB  | 180 KB  | 🔴       | ✅ 99% |
 | JSON Playground      | 45.7 KB | 20.5 KB | <25 KB  | 🔴       | ✅     |
 | jsonWorker           | 28.3 KB | 28.1 KB | <30 KB  | 🟢       | ✅     |
-| Test coverage        | 80.47%  | 81%+    | 85%+    | 🟠       | 🔄     |
+| Test coverage        | 80.47%  | 85.13%  | 85%+    | 🟠       | ✅     |
 | Lighthouse score     | 85/100  | 85/100  | 95+/100 | 🟠       | 🔄     |
 | Time to Interactive  | ~3.2s   | ~2.8s   | <2.5s   | 🟠       | 🔄     |
 
@@ -226,4 +226,5 @@
 
 ## 13
 
+- Mejorar la arquitectura del proyecto
 - Funcionalidades avanzadas: validación con JSON Schema

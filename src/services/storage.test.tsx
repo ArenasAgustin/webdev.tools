@@ -10,6 +10,8 @@ import {
   saveLastJson,
   loadJsToolsConfig,
   saveJsToolsConfig,
+  loadLastJs,
+  saveLastJs,
 } from "./storage";
 import type { ToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
@@ -334,6 +336,98 @@ describe("Storage Service", () => {
         saveLastJson(json);
         expect(loadLastJson()).toBe(json);
       }
+    });
+  });
+
+  describe("Error handling - loadLastJson", () => {
+    it("should return empty string when storage.getItem throws", () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const brokenStorage = {
+        getItem: () => {
+          throw new Error("Storage read error");
+        },
+        setItem: () => {},
+        removeItem: () => {},
+        clear: () => {},
+      };
+
+      Object.defineProperty(window, "localStorage", { value: brokenStorage });
+
+      const result = loadLastJson();
+      expect(result).toBe("");
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error loading last JSON:", expect.any(Error));
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe("Error handling - saveLastJson", () => {
+    it("should return false when storage.setItem throws", () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const brokenStorage = {
+        getItem: () => null,
+        setItem: () => {
+          throw new Error("Storage write error");
+        },
+        removeItem: () => {},
+        clear: () => {},
+      };
+
+      Object.defineProperty(window, "localStorage", { value: brokenStorage });
+
+      const result = saveLastJson('{"test": 1}');
+      expect(result).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error saving last JSON:", expect.any(Error));
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe("Error handling - loadLastJs", () => {
+    it("should return empty string when storage.getItem throws", () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const brokenStorage = {
+        getItem: () => {
+          throw new Error("Storage read error");
+        },
+        setItem: () => {},
+        removeItem: () => {},
+        clear: () => {},
+      };
+
+      Object.defineProperty(window, "localStorage", { value: brokenStorage });
+
+      const result = loadLastJs();
+      expect(result).toBe("");
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error loading last JS:", expect.any(Error));
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe("Error handling - saveLastJs", () => {
+    it("should return false when storage.setItem throws", () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const brokenStorage = {
+        getItem: () => null,
+        setItem: () => {
+          throw new Error("Storage write error");
+        },
+        removeItem: () => {},
+        clear: () => {},
+      };
+
+      Object.defineProperty(window, "localStorage", { value: brokenStorage });
+
+      const result = saveLastJs("console.log('test')");
+      expect(result).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error saving last JS:", expect.any(Error));
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      vi.restoreAllMocks();
     });
   });
 });
