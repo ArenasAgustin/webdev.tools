@@ -257,3 +257,294 @@
 - [x] **Testing shared harness**: fábrica de tests para worker clients y worker async services ✅
   - **Archivos:** `test/workerHarness.ts` (defineWorkerClientTests, defineWorkerServiceTests)
   - **Impacto:** Menos boilerplate y cobertura consistente entre playgrounds
+
+### 13.1.5 - Code Formatter & Minifier Integration (INMEDIATO - 1-2 días)
+
+#### 🔴 Alta Prioridad - PRÓXIMAMENTE
+
+- [ ] **Prettier Integration para formateo de código**
+  - [ ] Reemplazar Prettier interno por API de prettier package
+  - [ ] Actualizar `services/json/format.ts` para usar prettier
+  - [ ] Actualizar `services/js/format.ts` para usar prettier
+  - [ ] Tests: Verificar que formateo es consistente
+  - [ ] **Beneficio:** Formateo más robusto y mantenible, usa estándares de la industria
+
+- [ ] **Terser para minificación de JavaScript**
+  - [ ] Integrar `terser` package en `services/js/minify.ts`
+  - [ ] Actualizar worker para usar Terser en lugar de minificador actual
+  - [ ] Configurar opciones: mangleNames, removeComments, compress
+  - [ ] Tests: Validar que output es válido y más pequeño
+  - [ ] **Beneficio:** JS minificado más agresivo y optimizado (+5-10% reducción de tamaño)
+
+- [ ] **Actualizar dependencias**
+  - [ ] `pnpm add prettier terser`
+  - [ ] Remover minificadores internos si existen
+  - [ ] Actualizar imports en servicios
+
+---
+
+#### 🔴 Alta Prioridad (Próximas 2-4 semanas)
+
+- [ ] **Configurar Playwright**: Setup inicial y CI/CD integration
+  - **Punto de inicio:** `pnpm add -D @playwright/test`
+  - **Archivos a crear:** `playwright.config.ts`, `.github/workflows/e2e.yml`
+  - **Estimación:** 1 día
+
+- [ ] **JSON Playground E2E tests** (3-4 días)
+  - [ ] Test: Cargar JSON válido y formatear
+  - [ ] Test: Minificar JSON
+  - [ ] Test: Limpiar nulos y remover espacios
+  - [ ] Test: Aplicar JSONPath queries
+  - [ ] Test: Historial de JSONPath funciona
+  - [ ] Test: Guardar/cargar configuración
+  - [ ] Test: Descargar JSON formateado
+  - [ ] Test: Copiar output al portapapeles
+  - [ ] Test: Validación en tiempo real de errores
+  - [ ] Test: Modal de ejemplos JSONPath
+  - [ ] Test: Modal de configuración abre/cierra
+  - [ ] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.)
+
+- [ ] **JS Playground E2E tests** (3-4 días)
+  - [ ] Test: Ejecutar código JavaScript válido
+  - [ ] Test: Capturar console.log outputs
+  - [ ] Test: Mostrar errores de runtime
+  - [ ] Test: Formatear código JS
+  - [ ] Test: Minificar código JS
+  - [ ] Test: Guardar/cargar configuración
+  - [ ] Test: Descargar archivo JS
+  - [ ] Test: Copiar input/output
+  - [ ] Test: Validación de sintaxis en tiempo real
+  - [ ] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.)
+
+- [ ] **Cross-playground navigation E2E tests** (1 día)
+  - [ ] Test: Navegar entre playgrounds
+  - [ ] Test: State persistence en navegación
+  - [ ] Test: URL routing funciona
+  - [ ] Test: Home page lista ambos playgrounds
+
+- [ ] **Responsive & Mobile E2E tests** (2 días)
+  - [ ] Test: Mobile viewport (375px) - Layout adapta
+  - [ ] Test: Tablet viewport (768px) - Stacking funciona
+  - [ ] Test: Desktop viewport (1920px) - Flex layout funciona
+  - [ ] Test: Touch interactions en mobile
+  - [ ] Test: Modal accessibility en mobile
+
+- [ ] **Error handling & Edge cases E2E tests** (2 días)
+  - [ ] Test: JSON inválido - muestra error
+  - [ ] Test: JS inválido - muestra error
+  - [ ] Test: Archivo muy grande (>100MB) - manejo elegante
+  - [ ] Test: Código JS infinito - timeout después de 5s
+  - [ ] Test: localStorage lleno - fallback graceful
+  - [ ] Test: Network offline - funcionalidad local
+
+#### 🟠 Media Prioridad
+
+- [ ] **Visual regression tests** (1-2 semanas)
+  - **Tool:** Playwright visual comparison
+  - **Coverage:** Componentes clave en diferentes estados
+  - **Archivos:** `e2e/visual/*.spec.ts`
+
+- [ ] **A11y testing suite** (1 semana)
+  - **Tool:** axe-playwright + manual audit
+  - **Coverage:** Keyboard navigation, screen readers, contrast
+  - **Archivos:** `e2e/a11y/*.spec.ts`
+
+---
+
+### 13.3 - Performance Optimization (Lighthouse & TTI)
+
+#### 🟠 Media Prioridad (Próximos 3-5 días)
+
+**Objetivo:** Mejorar Lighthouse score de 85/100 a 95+/100, reducir Time to Interactive de 2.8s a <2.5s
+
+- [ ] **Performance auditing con Lighthouse CI**
+  - [ ] Crear `lighthouse-config.json`
+  - [ ] Integrar con CI pipeline
+  - [ ] Establecer umbrales mínimos (95+ score)
+
+- [ ] **Optimizaciones de carga inicial**
+  - [ ] Critical CSS inline en HTML
+  - [ ] Defer non-critical JS
+  - [ ] Preload Monaco Editor early hints
+  - [ ] Optimize font loading (system fonts vs custom)
+
+- [ ] **Code splitting & lazy loading avanzado**
+  - [ ] Dynamic import para playgrounds no visitados
+  - [ ] Preload de worker scripts
+
+- [ ] **Image optimization**
+  - [ ] Usar WebP con fallback
+  - [ ] Responsive images (srcset)
+  - [ ] Lazy loading de imágenes
+
+- [ ] **Bundle análisis profundo**
+  - [ ] Configurar `rollup-plugin-visualizer`
+  - [ ] Identificar dependencias pesadas
+  - [ ] Evaluar tree-shaking effectiveness
+
+#### 🟡 Baja Prioridad
+
+- [ ] **Métricas en producción**
+  - [ ] Web Vitals tracking (CLS, LCP, FID)
+  - [ ] Integrar con analytics
+
+---
+
+### 13.4 - New Playground Implementations
+
+#### 🟠 Media Prioridad (Próximas 5-7 semanas)
+
+**Usando stack genérico:** clientFactory, runtime, usePlaygroundActions, ToolbarConfig, TransformService
+
+**Fase 1 - SQL & Web markup (5-7 semanas):**
+
+- [ ] **SQL Playground** (5-7 días)
+  - [ ] Integrar SQL formatter/parser (sql-formatter)
+  - [ ] Implement: `services/sql/parse.ts`, `format.ts`, `validate.ts`
+  - [ ] Query execution (SQLite in-browser con sql.js)
+  - [ ] Crear `useSqlPlaygroundActions` adapter
+  - [ ] Crear página: `src/playgrounds/sql/SqlPlayground.tsx`
+  - [ ] Tab para results/schema visualization
+
+- [ ] **HTML Playground** (5-6 días)
+  - [ ] HTML validator y formatter (usando prettier)
+  - [ ] Implement: `services/html/parse.ts`, `format.ts`, `minify.ts`
+  - [ ] Minificador: integrar `html-minifier-terser` en `minify.ts`
+  - [ ] Live preview render con iframe sandbox
+  - [ ] Crear `useHtmlPlaygroundActions` adapter
+  - [ ] Crear página: `src/playgrounds/html/HtmlPlayground.tsx`
+  - [ ] Split view: editor + live preview
+  - [ ] Inspect DOM elements
+
+- [ ] **CSS Playground** (5-6 días)
+  - [ ] CSS formatter y minifier
+  - [ ] Implement: `services/css/parse.ts`, `format.ts`, `minify.ts`
+  - [ ] Live preview con HTML template wrapper
+  - [ ] Crear `useCssPlaygroundActions` adapter
+  - [ ] Crear página: `src/playgrounds/css/CssPlayground.tsx`
+  - [ ] CSS validator integrado
+  - [ ] Sugerir propiedades (autocomplete)
+
+**Fase 2 - Programming languages (1-2 semanas):**
+
+- [ ] **PHP Playground** (6-8 días)
+  - [ ] Integrar PHP parser/formatter
+  - [ ] Implement: `services/php/parse.ts`, `format.ts`, `validate.ts`
+  - [ ] Backend execution en serverless (Vercel Functions)
+  - [ ] Crear `usePhpPlaygroundActions` adapter
+  - [ ] Crear página: `src/playgrounds/php/PhpPlayground.tsx`
+  - [ ] Highlight syntax errors
+  - [ ] Output capture (sin ejecución en-browser, call API)
+  - [ ] E2E tests
+
+---
+
+### 13.5 - Advanced Features
+
+#### 🟡 Baja Prioridad (Próximas 4-8 semanas)
+
+- [ ] **JSON Schema Validation**
+  - [ ] Integrar `ajv` + web worker
+  - [ ] Create schema editor modal
+  - [ ] Real-time validation highlighting
+  - [ ] Generar schema desde JSON
+
+- [ ] **Diff Viewer**
+  - [ ] Multi-tab editor (before/after)
+  - [ ] Diff highlighting
+  - [ ] Export differences
+
+- [ ] **Import/Export Enhancement**
+  - [ ] Soportar formatos: CSV, TOML, protobuf
+  - [ ] Batch file processing
+
+- [ ] **Colaborativo (Future)**
+  - [ ] WebSocket sync entre peers
+  - [ ] Presencia de usuarios (cursores)
+  - [ ] Historial compartido
+
+---
+
+### 13.6 - Documentation & Patterns Guide
+
+#### 🟠 Media Prioridad (Próximos 3-5 días)
+
+- [ ] **Patterns & Best Practices Guide**
+  - [ ] Crear `docs/PATTERNS.md`
+  - [ ] Documentar:
+    - [ ] Discriminated unions pattern (JSON/JS workers)
+    - [ ] Generic worker lifecycle (clientFactory)
+    - [ ] Async runtime pattern (shouldUseWorker + fallback)
+    - [ ] Action handlers adapter pattern (base + playground-specific)
+    - [ ] ToolbarConfig extensibility
+    - [ ] TransformService contract
+    - [ ] Testing with shared harness
+
+- [ ] **Architecture Decision Records (ADR)**
+  - [ ] Crear `docs/adr/` folder
+  - [ ] ADR-001: Por qué discriminated unions vs plain objects
+  - [ ] ADR-002: Por qué generic worker factory vs duplicación
+  - [ ] ADR-003: Por qué Web Workers para JSON >100KB
+
+- [ ] **Contribute Guide**
+  - [ ] Crear `CONTRIBUTE.md`
+  - [ ] Setup local development
+  - [ ] Adding a new playground (step-by-step)
+  - [ ] Testing requirements
+  - [ ] PR checklist
+
+- [ ] **API Documentation**
+  - [ ] JSDoc improvements en servicios clave
+  - [ ] TypeDoc generation
+  - [ ] Readme updates
+
+---
+
+### 13.7 - Deployment & Monitoring
+
+#### 🟡 Baja Prioridad (Próximas 2-3 semanas)
+
+- [ ] **Production Monitoring**
+  - [ ] Sentry integration para error tracking
+  - [ ] Web Vitals reporting
+  - [ ] User session analytics
+
+- [ ] **CI/CD Enhancement**
+  - [ ] E2E tests en PR validation
+  - [ ] Lighthouse CI checks
+  - [ ] Bundle size monitoring
+  - [ ] Visual regression checks en PRs
+
+- [ ] **Vercel Optimization**
+  - [ ] Edge functions para transform preview
+  - [ ] Serverless functions para heavy processing
+  - [ ] Analytics integración
+
+- [ ] **Uptime & Reliability**
+  - [ ] Health check endpoint
+  - [ ] Redundancy strategy
+  - [ ] CDN optimization
+
+---
+
+## 📋 Resumen de Pendientes
+
+| Sección                       | Estimación  | Prioridad | Status       |
+| ----------------------------- | ----------- | --------- | ------------ |
+| 13.1.5 Formatter & Minifier   | 1-2 días    | 🔴 Alta   | ⏳ Inmediato |
+| 13.2 E2E Testing              | 2-4 semanas | 🔴 Alta   | ⏳ Pendiente |
+| 13.3 Performance Optimization | 3-5 días    | 🟠 Media  | ⏳ Pendiente |
+| 13.4 New Playgrounds          | 3-4 semanas | 🟠 Media  | ⏳ Pendiente |
+| 13.5 Advanced Features        | 4-8 semanas | 🟡 Baja   | ⏳ Pendiente |
+| 13.6 Documentation            | 3-5 días    | 🟠 Media  | ⏳ Pendiente |
+| 13.7 Deployment & Monitoring  | 2-3 semanas | 🟡 Baja   | ⏳ Pendiente |
+
+**Total Estimado:** 10-20 semanas de trabajo
+
+**Recomendado por impacto/esfuerzo:** 0. ✅ **13.1.5** → Prettier + Terser (1-2 días, integración rápida y mejoría visible)
+
+1. ✅ **13.3** → Performance optimization (3-5 días, +10 Lighthouse points)
+2. ✅ **13.2** → E2E testing (2-4 semanas, garantiza quality)
+3. ✅ **13.4 Fase 1** → Data & Web playgrounds (SQL, HTML, CSS: 3-4 semanas, valida stack genérico)
+4. ✅ **13.6** → Documentation (3-5 días, facilita nuevas contribuciones)
+5. ✅ **13.4 Fase 2** → PHP playground (1-2 semanas, server-side support)
