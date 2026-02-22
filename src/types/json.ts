@@ -3,45 +3,44 @@
  * Centralized type definitions for JSON tool configurations
  */
 
+import type { ConfigWithAutoCopy, PlaygroundToolsConfig } from "@/types/config";
+
 /**
  * Format configuration options
  */
-export interface FormatConfig {
+export type FormatConfig = ConfigWithAutoCopy<{
   indent: number | "\t";
   sortKeys: boolean;
-  autoCopy: boolean;
-}
+}>;
 
 /**
  * Minify configuration options
  */
-export interface MinifyConfig {
+export type MinifyConfig = ConfigWithAutoCopy<{
   removeSpaces: boolean;
   sortKeys: boolean;
-  autoCopy: boolean;
-}
+}>;
 
 /**
  * Clean configuration options
  */
-export interface CleanConfig {
+export type CleanConfig = ConfigWithAutoCopy<{
   removeNull: boolean;
   removeUndefined: boolean;
   removeEmptyString: boolean;
   removeEmptyArray: boolean;
   removeEmptyObject: boolean;
   outputFormat: "format" | "minify";
-  autoCopy: boolean;
-}
+}>;
 
 /**
  * All tool configurations combined
  */
-export interface ToolsConfig {
+export type ToolsConfig = PlaygroundToolsConfig<{
   format: FormatConfig;
   minify: MinifyConfig;
   clean: CleanConfig;
-}
+}>;
 
 /**
  * Default configuration values

@@ -1,18 +1,18 @@
-export interface JsFormatConfig {
-  indentSize: number;
-  autoCopy: boolean;
-}
+import type { ConfigWithAutoCopy, PlaygroundToolsConfig } from "@/types/config";
 
-export interface JsMinifyConfig {
+export type JsFormatConfig = ConfigWithAutoCopy<{
+  indentSize: number;
+}>;
+
+export type JsMinifyConfig = ConfigWithAutoCopy<{
   removeComments: boolean;
   removeSpaces: boolean;
-  autoCopy: boolean;
-}
+}>;
 
-export interface JsToolsConfig {
+export type JsToolsConfig = PlaygroundToolsConfig<{
   format: JsFormatConfig;
   minify: JsMinifyConfig;
-}
+}>;
 
 export const DEFAULT_JS_FORMAT_CONFIG: JsFormatConfig = {
   indentSize: 2,

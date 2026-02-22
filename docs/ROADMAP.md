@@ -176,7 +176,7 @@
 
 #### 🟡 Baja Prioridad
 
-- [ ] **Centralizar tipos de configuración**: Crear `types/config.ts` genérico
+- [x] **Centralizar tipos de configuración**: Crear `types/config.ts` genérico ✅
   - **Impacto:** Código más DRY
 
 ### 12.3 - Testing & Quality (Phase 3 - 2-4 semanas)
@@ -239,7 +239,7 @@
 
 #### 🔄 Próximos pasos (generalización)
 
-- [ ] **Runtime genérico de operaciones async**: extraer helper común para `shouldUseWorker` + fallback sync
+- [x] **Runtime genérico de operaciones async**: extraer helper común para `shouldUseWorker` + fallback sync ✅
   - **Impacto:** Menos código repetido al sumar nuevos playgrounds
 - [ ] **Action handlers por playground**: crear `usePlaygroundActions` base y adapters (JSON/JS)
   - **Impacto:** Reutilizar validaciones, toasts, copy/download y flujo de ejecución
