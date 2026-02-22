@@ -4,6 +4,7 @@ import { minifyJson, type MinifyOptions } from "@/services/json/minify";
 import { cleanJson, type CleanOptions } from "@/services/json/clean";
 import { applyJsonPath } from "@/services/json/jsonPath";
 import { runJsonWorker } from "@/services/json/workerClient";
+import type { JsonWorkerPayload } from "@/services/json/worker.types";
 import { WORKER_THRESHOLD_BYTES } from "@/utils/constants/limits";
 
 const getInputBytes = (input: string) => new TextEncoder().encode(input).length;
@@ -16,13 +17,10 @@ const toFallbackError = (message: string): Result<string, JsonError> => ({
 });
 
 const runWorkerSafely = async (
-  action: "format" | "minify" | "clean" | "jsonPath",
-  input: string,
-  options?: FormatOptions | MinifyOptions | CleanOptions,
-  path?: string,
+  payload: JsonWorkerPayload,
 ): Promise<Result<string, JsonError> | null> => {
   try {
-    const response = await runJsonWorker({ action, input, options, path });
+    const response = await runJsonWorker(payload);
     if (response.ok) {
       return { ok: true, value: response.value ?? "" };
     }
@@ -38,7 +36,7 @@ export const formatJsonAsync = async (
   options: FormatOptions = {},
 ): Promise<Result<string, JsonError>> => {
   if (shouldUseWorker(input)) {
-    const workerResult = await runWorkerSafely("format", input, options);
+    const workerResult = await runWorkerSafely({ action: "format", input, options });
     if (workerResult) {
       return workerResult;
     }
@@ -52,7 +50,7 @@ export const minifyJsonAsync = async (
   options: MinifyOptions = {},
 ): Promise<Result<string, JsonError>> => {
   if (shouldUseWorker(input)) {
-    const workerResult = await runWorkerSafely("minify", input, options);
+    const workerResult = await runWorkerSafely({ action: "minify", input, options });
     if (workerResult) {
       return workerResult;
     }
@@ -66,7 +64,7 @@ export const cleanJsonAsync = async (
   options: CleanOptions = {},
 ): Promise<Result<string, JsonError>> => {
   if (shouldUseWorker(input)) {
-    const workerResult = await runWorkerSafely("clean", input, options);
+    const workerResult = await runWorkerSafely({ action: "clean", input, options });
     if (workerResult) {
       return workerResult;
     }
@@ -80,7 +78,7 @@ export const applyJsonPathAsync = async (
   path: string,
 ): Promise<Result<string, JsonError>> => {
   if (shouldUseWorker(input)) {
-    const workerResult = await runWorkerSafely("jsonPath", input, undefined, path);
+    const workerResult = await runWorkerSafely({ action: "jsonPath", input, path });
     if (workerResult) {
       return workerResult;
     }

@@ -3,8 +3,7 @@ import { ConfigModal } from "@/components/common/ConfigModal";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
-import { minifyJs } from "@/services/js/minify";
-import { formatJs } from "@/services/js/format";
+import { minifyJsAsync, formatJsAsync } from "@/services/js/worker";
 import { downloadFile } from "@/utils/download";
 import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
@@ -198,8 +197,8 @@ export function JsPlayground() {
   const handleMinify = useCallback(() => {
     createValidatedHandler({
       validate: validateInputSize,
-      run: () => {
-        const result = minifyJs(inputCode, {
+      run: async () => {
+        const result = await minifyJsAsync(inputCode, {
           removeComments: minifyConfig.removeComments,
           removeSpaces: minifyConfig.removeSpaces,
         });
@@ -233,8 +232,8 @@ export function JsPlayground() {
   const handleFormat = useCallback(() => {
     createValidatedHandler({
       validate: validateInputSize,
-      run: () => {
-        const result = formatJs(inputCode, formatConfig.indentSize);
+      run: async () => {
+        const result = await formatJsAsync(inputCode, formatConfig.indentSize);
 
         if (!result.ok) {
           throw new Error(result.error || "Error al formatear código");

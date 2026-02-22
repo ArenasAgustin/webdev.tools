@@ -171,7 +171,7 @@
   - **Impacto:** Prevenir bugs, mejor error handling
   - **Implementado:** `utils/handlerFactory.ts` usado en `useJsonPlaygroundActions` y `JsPlayground`
 
-- [ ] **Discriminated unions para actions**: Patrón Action dispatch type-safe
+- [x] **Discriminated unions para actions**: Patrón Action dispatch type-safe ✅
   - **Impacto:** Prevenir estados inválidos
 
 #### 🟡 Baja Prioridad

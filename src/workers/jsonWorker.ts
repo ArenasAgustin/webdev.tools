@@ -1,25 +1,9 @@
-import { formatJson, type FormatOptions } from "@/services/json/format";
-import { minifyJson, type MinifyOptions } from "@/services/json/minify";
-import { cleanJson, type CleanOptions } from "@/services/json/clean";
+import { formatJson } from "@/services/json/format";
+import { minifyJson } from "@/services/json/minify";
+import { cleanJson } from "@/services/json/clean";
 import { applyJsonPath } from "@/services/json/jsonPath";
 import type { Result, JsonError } from "@/types/common";
-
-type JsonWorkerAction = "format" | "minify" | "clean" | "jsonPath";
-
-interface JsonWorkerRequest {
-  id: string;
-  action: JsonWorkerAction;
-  input: string;
-  options?: FormatOptions | MinifyOptions | CleanOptions;
-  path?: string;
-}
-
-interface JsonWorkerResponse {
-  id: string;
-  ok: boolean;
-  value?: string;
-  error?: JsonError;
-}
+import type { JsonWorkerRequest, JsonWorkerResponse } from "@/services/json/worker.types";
 
 const ctx = self as unknown as {
   postMessage: (message: JsonWorkerResponse) => void;
@@ -35,34 +19,24 @@ const toResponse = (id: string, result: Result<string, JsonError>): JsonWorkerRe
 };
 
 ctx.onmessage = (event: MessageEvent<JsonWorkerRequest>) => {
-  const { id, action, input, options, path } = event.data;
+  const request = event.data;
+  const { id, input } = request;
 
   try {
-    if (action === "format") {
-      ctx.postMessage(toResponse(id, formatJson(input, options as FormatOptions)));
-      return;
+    switch (request.action) {
+      case "format":
+        ctx.postMessage(toResponse(id, formatJson(input, request.options)));
+        return;
+      case "minify":
+        ctx.postMessage(toResponse(id, minifyJson(input, request.options)));
+        return;
+      case "clean":
+        ctx.postMessage(toResponse(id, cleanJson(input, request.options)));
+        return;
+      case "jsonPath":
+        ctx.postMessage(toResponse(id, applyJsonPath(input, request.path)));
+        return;
     }
-
-    if (action === "minify") {
-      ctx.postMessage(toResponse(id, minifyJson(input, options as MinifyOptions)));
-      return;
-    }
-
-    if (action === "clean") {
-      ctx.postMessage(toResponse(id, cleanJson(input, options as CleanOptions)));
-      return;
-    }
-
-    if (action === "jsonPath") {
-      ctx.postMessage(toResponse(id, applyJsonPath(input, path ?? "")));
-      return;
-    }
-
-    ctx.postMessage({
-      id,
-      ok: false,
-      error: { message: "Accion no soportada" },
-    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     ctx.postMessage({ id, ok: false, error: { message } });

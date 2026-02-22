@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { JsPlayground } from "./JsPlayground";
 import { ToastProvider } from "@/context/ToastContext";
 
@@ -107,7 +107,7 @@ describe("JsPlayground", () => {
     expect(screen.getByText("Boom")).toBeInTheDocument();
   });
 
-  it("formats and minifies input code", () => {
+  it("formats and minifies input code", async () => {
     renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
@@ -116,14 +116,18 @@ describe("JsPlayground", () => {
     fireEvent.change(input, { target: { value: "const x=1;" } });
     fireEvent.click(screen.getByRole("button", { name: /Formatear/i }));
 
-    expect(input.value).toBe("const x = 1;");
+    await waitFor(() => {
+      expect(input.value).toBe("const x = 1;");
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /Minificar/i }));
 
-    expect(input.value).toBe("const x=1;");
+    await waitFor(() => {
+      expect(input.value).toBe("const x=1;");
+    });
   });
 
-  it("formats multi-line blocks", () => {
+  it("formats multi-line blocks", async () => {
     renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
@@ -134,10 +138,12 @@ describe("JsPlayground", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /Formatear/i }));
 
-    expect(input.value).toBe("if(true){\n  console.log(1);\n}");
+    await waitFor(() => {
+      expect(input.value).toBe("if(true){\n  console.log(1);\n}");
+    });
   });
 
-  it("minifies by removing comments and whitespace", () => {
+  it("minifies by removing comments and whitespace", async () => {
     renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
@@ -150,6 +156,8 @@ describe("JsPlayground", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /Minificar/i }));
 
-    expect(input.value).toBe("const x=1; const y=x+2;");
+    await waitFor(() => {
+      expect(input.value).toBe("const x=1; const y=x+2;");
+    });
   });
 });

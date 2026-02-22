@@ -4,8 +4,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 const {
   toastMocks,
   storageMocks,
-  minifyJsMock,
-  formatJsMock,
+  minifyJsAsyncMock,
+  formatJsAsyncMock,
   downloadFileMock,
   clipboardWriteTextMock,
 } = vi.hoisted(() => ({
@@ -20,8 +20,8 @@ const {
     loadJsToolsConfig: vi.fn(() => null),
     saveJsToolsConfig: vi.fn(),
   },
-  minifyJsMock: vi.fn(),
-  formatJsMock: vi.fn(),
+  minifyJsAsyncMock: vi.fn(),
+  formatJsAsyncMock: vi.fn(),
   downloadFileMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
 }));
@@ -32,18 +32,15 @@ vi.mock("@/hooks/useToast", () => ({
 
 vi.mock("@/services/storage", () => storageMocks);
 
-vi.mock("@/services/js/minify", () => ({
-  minifyJs: minifyJsMock as (
+vi.mock("@/services/js/worker", () => ({
+  minifyJsAsync: minifyJsAsyncMock as (
     input: string,
     options: { removeComments: boolean; removeSpaces: boolean },
-  ) => { ok: boolean; value?: string; error?: string },
-}));
-
-vi.mock("@/services/js/format", () => ({
-  formatJs: formatJsMock as (
+  ) => Promise<{ ok: boolean; value?: string; error?: string }>,
+  formatJsAsync: formatJsAsyncMock as (
     input: string,
     indentSize: number,
-  ) => { ok: boolean; value?: string; error?: string },
+  ) => Promise<{ ok: boolean; value?: string; error?: string }>,
 }));
 
 vi.mock("@/utils/download", () => ({
@@ -155,8 +152,8 @@ import { JsPlayground } from "./JsPlayground";
 describe("JsPlayground branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    minifyJsMock.mockReturnValue({ ok: true, value: "const x=1;" });
-    formatJsMock.mockReturnValue({ ok: true, value: "const x = 1;" });
+    minifyJsAsyncMock.mockResolvedValue({ ok: true, value: "const x=1;" });
+    formatJsAsyncMock.mockResolvedValue({ ok: true, value: "const x = 1;" });
     clipboardWriteTextMock.mockResolvedValue(undefined);
 
     Object.defineProperty(navigator, "clipboard", {
@@ -219,7 +216,7 @@ describe("JsPlayground branches", () => {
     expect(downloadFileMock).toHaveBeenCalledWith("2", "output.txt", "text/plain");
   });
 
-  it("runs format and minify success and error flows", () => {
+  it("runs format and minify success and error flows", async () => {
     render(<JsPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
@@ -228,21 +225,27 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "enable-minify-autocopy" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
-    expect(formatJsMock).toHaveBeenCalled();
-    expect(toastMocks.success).toHaveBeenCalledWith("Código formateado correctamente");
+    await waitFor(() => {
+      expect(formatJsAsyncMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("Código formateado correctamente");
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
-    expect(minifyJsMock).toHaveBeenCalled();
-    expect(toastMocks.success).toHaveBeenCalledWith("Código minificado correctamente");
+    await waitFor(() => {
+      expect(minifyJsAsyncMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("Código minificado correctamente");
+    });
 
-    formatJsMock.mockReturnValueOnce({ ok: false, error: "format fail" });
-    minifyJsMock.mockReturnValueOnce({ ok: false, error: "minify fail" });
+    formatJsAsyncMock.mockResolvedValueOnce({ ok: false, error: "format fail" });
+    minifyJsAsyncMock.mockResolvedValueOnce({ ok: false, error: "minify fail" });
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("format fail");
-    expect(toastMocks.error).toHaveBeenCalledWith("minify fail");
+    await waitFor(() => {
+      expect(toastMocks.error).toHaveBeenCalledWith("format fail");
+      expect(toastMocks.error).toHaveBeenCalledWith("minify fail");
+    });
   });
 
   it("guards operations when input exceeds max size", async () => {
@@ -263,7 +266,7 @@ describe("JsPlayground branches", () => {
     expect(toastMocks.error).toHaveBeenCalledWith(
       "El contenido supera 500 KB. Reduce el tamano para procesarlo.",
     );
-    expect(formatJsMock).not.toHaveBeenCalled();
-    expect(minifyJsMock).not.toHaveBeenCalled();
+    expect(formatJsAsyncMock).not.toHaveBeenCalled();
+    expect(minifyJsAsyncMock).not.toHaveBeenCalled();
   });
 });
