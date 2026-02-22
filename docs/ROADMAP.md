@@ -229,3 +229,25 @@
 
 - Mejorar la arquitectura del proyecto
 - Funcionalidades avanzadas: validación con JSON Schema
+
+### 13.1 - Plataforma Genérica Multi-Playground
+
+#### ✅ Implementado
+
+- [x] **Worker client genérico compartido**: `services/worker/clientFactory.ts` usado por JSON y JS ✅
+  - **Impacto:** Reducir duplicación en ciclo de vida de workers (pending map, onmessage/onerror, ids)
+
+#### 🔄 Próximos pasos (generalización)
+
+- [ ] **Runtime genérico de operaciones async**: extraer helper común para `shouldUseWorker` + fallback sync
+  - **Impacto:** Menos código repetido al sumar nuevos playgrounds
+- [ ] **Action handlers por playground**: crear `usePlaygroundActions` base y adapters (JSON/JS)
+  - **Impacto:** Reutilizar validaciones, toasts, copy/download y flujo de ejecución
+- [ ] **Tipos de config unificados**: mover a `types/config.ts` con base `ToolConfig`/`PlaygroundConfig`
+  - **Impacto:** Contratos consistentes para futuros playgrounds (YAML, XML, SQL, etc.)
+- [ ] **Toolbar actions model genérico**: estandarizar contrato de acciones (`id`, `label`, `icon`, `execute`)
+  - **Impacto:** Toolbars extensibles sin cambios estructurales en UI
+- [ ] **Base services para transformaciones**: interfaz `transform(input, options) -> Result`
+  - **Impacto:** Plug & play de nuevos motores de formato/minify/clean
+- [ ] **Testing shared harness**: fábrica de tests para worker clients y worker async services
+  - **Impacto:** Menos boilerplate y cobertura consistente entre playgrounds
