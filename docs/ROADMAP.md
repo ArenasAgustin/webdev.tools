@@ -254,5 +254,6 @@
 - [x] **Base services para transformaciones**: interfaz `transform(input, options) -> Result` ✅
   - **Archivos:** `services/transform.ts` (TransformService) + adapters en JSON/JS
   - **Impacto:** Plug & play de nuevos motores de formato/minify/clean
-- [ ] **Testing shared harness**: fábrica de tests para worker clients y worker async services
+- [x] **Testing shared harness**: fábrica de tests para worker clients y worker async services ✅
+  - **Archivos:** `test/workerHarness.ts` (defineWorkerClientTests, defineWorkerServiceTests)
   - **Impacto:** Menos boilerplate y cobertura consistente entre playgrounds
