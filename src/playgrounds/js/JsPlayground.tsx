@@ -11,6 +11,7 @@ import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
+import type { ToolbarConfig } from "@/types/toolbar";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 
 const savedConfig = loadJsToolsConfig();
@@ -87,37 +88,37 @@ export function JsPlayground() {
   });
 
   // Memoize complex toolbar configuration to prevent re-renders
-  const toolbarTools = useMemo(
+  const toolbarTools = useMemo<ToolbarConfig>(
     () => ({
       actions: [
         {
           label: "Ejecutar",
-          icon: "play" as const,
-          variant: "orange" as const,
+          icon: "play",
+          variant: "orange",
           onClick: handleExecute,
         },
         {
           label: "Formatear",
-          icon: "indent" as const,
-          variant: "primary" as const,
+          icon: "indent",
+          variant: "primary",
           onClick: handleFormat,
         },
         {
           label: "Minificar",
-          icon: "compress" as const,
-          variant: "purple" as const,
+          icon: "compress",
+          variant: "purple",
           onClick: handleMinify,
         },
         {
           label: "Limpiar",
-          icon: "trash" as const,
-          variant: "danger" as const,
+          icon: "trash",
+          variant: "danger",
           onClick: handleClearInput,
         },
         {
           label: "Ejemplo",
-          icon: "file-import" as const,
-          variant: "success" as const,
+          icon: "file-import",
+          variant: "success",
           onClick: handleLoadExample,
         },
       ],

@@ -6,17 +6,9 @@ import type { TipItem, QuickExample } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { ToolbarConfig } from "@/types/toolbar";
 
 type ModalType = "tips" | "history" | "config" | null;
-
-type ToolbarButtonVariant = "primary" | "danger" | "success" | "purple" | "cyan" | "orange";
-
-interface ToolbarAction {
-  label: string;
-  icon: string;
-  variant: ToolbarButtonVariant;
-  onClick: () => void;
-}
 
 export interface JsonToolbarProps {
   variant: "json";
@@ -57,13 +49,7 @@ export interface JsonToolbarProps {
 
 export interface GenericToolbarProps {
   variant: "generic";
-  tools: {
-    title?: string;
-    actions: ToolbarAction[];
-    onOpenConfig?: () => void;
-    configButtonTitle?: string;
-    gridClassName?: string;
-  };
+  tools: ToolbarConfig;
 }
 
 type ToolbarProps = JsonToolbarProps | GenericToolbarProps;
@@ -96,12 +82,20 @@ export function Toolbar(props: ToolbarProps) {
             <div className={toolsGridClass}>
               {props.tools.actions.map((action) => (
                 <Button
-                  key={action.label}
+                  key={action.id ?? action.label}
                   variant={action.variant}
                   size="md"
                   onClick={action.onClick}
+                  disabled={action.disabled}
+                  title={action.tooltip ?? action.label}
+                  aria-label={action.tooltip ?? action.label}
                 >
-                  <i className={`fas fa-${action.icon} mr-1`}></i> {action.label}
+                  {action.loading ? (
+                    <i className="fas fa-spinner fa-spin mr-1"></i>
+                  ) : (
+                    <i className={`fas fa-${action.icon} mr-1`}></i>
+                  )}
+                  {action.label}
                 </Button>
               ))}
             </div>

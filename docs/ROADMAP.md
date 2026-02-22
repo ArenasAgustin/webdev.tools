@@ -244,10 +244,13 @@
 - [x] **Action handlers por playground**: crear `usePlaygroundActions` base y adapters (JSON/JS) ✅
   - **Archivos:** `hooks/usePlaygroundActions.ts` (base), `hooks/useJsonPlaygroundActions.ts`, `hooks/useJsPlaygroundActions.ts`
   - **Impacto:** Reutilizar validaciones, toasts, copy/download y flujo de ejecución. JsPlayground refactorizado ~200 líneas reducidas
-- [ ] **Tipos de config unificados**: mover a `types/config.ts` con base `ToolConfig`/`PlaygroundConfig`
+- [x] **Tipos de config unificados**: mover a `types/config.ts` con base `ToolConfig`/`PlaygroundConfig` ✅
+  - **Archivos:** `types/config.ts` (AutoCopyConfig, ConfigWithAutoCopy, PlaygroundToolsConfig)
   - **Impacto:** Contratos consistentes para futuros playgrounds (YAML, XML, SQL, etc.)
-- [ ] **Toolbar actions model genérico**: estandarizar contrato de acciones (`id`, `label`, `icon`, `execute`)
-  - **Impacto:** Toolbars extensibles sin cambios estructurales en UI
+- [x] **Toolbar actions model genérico**: estandarizar contrato de acciones (`id`, `label`, `icon`, `execute`) ✅
+  - **Archivos:** `types/toolbar.ts` (ToolbarAction, ToolbarConfig, helpers)
+  - **Nuevas features:** Soporte para disabled, loading, tooltip, id único
+  - **Impacto:** Toolbars extensibles sin cambios estructurales en UI. JsPlayground usa tipos compartidos
 - [ ] **Base services para transformaciones**: interfaz `transform(input, options) -> Result`
   - **Impacto:** Plug & play de nuevos motores de formato/minify/clean
 - [ ] **Testing shared harness**: fábrica de tests para worker clients y worker async services
