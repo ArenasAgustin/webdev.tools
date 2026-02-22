@@ -1,4 +1,5 @@
 import { type Result } from "@/types/common";
+import type { TransformService } from "@/services/transform";
 
 export interface JsMinifyOptions {
   removeComments?: boolean;
@@ -67,3 +68,7 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
     return { ok: false, error: message };
   }
 }
+
+export const minifyJsTransform: TransformService<JsMinifyOptions, string> = {
+  transform: (input, options = {}) => minifyJs(input, options),
+};

@@ -4,6 +4,7 @@ import { minifyJson } from "./minify";
 import { JSON_ERROR_MESSAGES } from "./utils";
 import type { JsonValue, Result, JsonError } from "@/types/common";
 import type { CleanConfig } from "@/types/json";
+import type { TransformService } from "@/services/transform";
 
 // Export for backward compatibility
 export type { CleanConfig };
@@ -126,3 +127,7 @@ export function cleanJson(input: string, options: CleanOptions = {}): Result<str
     };
   }
 }
+
+export const cleanJsonTransform: TransformService<CleanOptions, JsonError> = {
+  transform: (input, options = {}) => cleanJson(input, options),
+};

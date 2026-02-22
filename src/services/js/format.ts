@@ -1,4 +1,5 @@
 import { type Result } from "@/types/common";
+import type { TransformService } from "@/services/transform";
 
 type TokenType = "word" | "number" | "string" | "template" | "comment" | "punct" | "operator";
 
@@ -164,6 +165,10 @@ export function formatJs(input: string, indentSize = 2): Result<string, string> 
     return { ok: false, error: message };
   }
 }
+
+export const formatJsTransform: TransformService<number, string> = {
+  transform: (input, indentSize = 2) => formatJs(input, indentSize),
+};
 
 function tokenize(input: string): Token[] {
   const tokens: Token[] = [];

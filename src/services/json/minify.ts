@@ -1,4 +1,5 @@
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
+import type { TransformService } from "@/services/transform";
 import type { MinifyConfig } from "@/types/json";
 import { sortJsonKeys, JSON_ERROR_MESSAGES } from "./utils";
 
@@ -37,3 +38,7 @@ export function minifyJson(input: string, options: MinifyOptions = {}): Result<s
     };
   }
 }
+
+export const minifyJsonTransform: TransformService<MinifyOptions, JsonError> = {
+  transform: (input, options = {}) => minifyJson(input, options),
+};

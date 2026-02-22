@@ -251,7 +251,8 @@
   - **Archivos:** `types/toolbar.ts` (ToolbarAction, ToolbarConfig, helpers)
   - **Nuevas features:** Soporte para disabled, loading, tooltip, id único
   - **Impacto:** Toolbars extensibles sin cambios estructurales en UI. JsPlayground usa tipos compartidos
-- [ ] **Base services para transformaciones**: interfaz `transform(input, options) -> Result`
+- [x] **Base services para transformaciones**: interfaz `transform(input, options) -> Result` ✅
+  - **Archivos:** `services/transform.ts` (TransformService) + adapters en JSON/JS
   - **Impacto:** Plug & play de nuevos motores de formato/minify/clean
 - [ ] **Testing shared harness**: fábrica de tests para worker clients y worker async services
   - **Impacto:** Menos boilerplate y cobertura consistente entre playgrounds

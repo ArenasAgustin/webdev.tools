@@ -1,4 +1,5 @@
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
+import type { TransformService } from "@/services/transform";
 import type { FormatConfig } from "@/types/json";
 import { sortJsonKeys, JSON_ERROR_MESSAGES } from "./utils";
 
@@ -35,3 +36,7 @@ export function formatJson(input: string, options: FormatOptions = {}): Result<s
     };
   }
 }
+
+export const formatJsonTransform: TransformService<FormatOptions, JsonError> = {
+  transform: (input, options = {}) => formatJson(input, options),
+};
