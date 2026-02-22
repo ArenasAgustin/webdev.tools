@@ -241,8 +241,9 @@
 
 - [x] **Runtime genérico de operaciones async**: extraer helper común para `shouldUseWorker` + fallback sync ✅
   - **Impacto:** Menos código repetido al sumar nuevos playgrounds
-- [ ] **Action handlers por playground**: crear `usePlaygroundActions` base y adapters (JSON/JS)
-  - **Impacto:** Reutilizar validaciones, toasts, copy/download y flujo de ejecución
+- [x] **Action handlers por playground**: crear `usePlaygroundActions` base y adapters (JSON/JS) ✅
+  - **Archivos:** `hooks/usePlaygroundActions.ts` (base), `hooks/useJsonPlaygroundActions.ts`, `hooks/useJsPlaygroundActions.ts`
+  - **Impacto:** Reutilizar validaciones, toasts, copy/download y flujo de ejecución. JsPlayground refactorizado ~200 líneas reducidas
 - [ ] **Tipos de config unificados**: mover a `types/config.ts` con base `ToolConfig`/`PlaygroundConfig`
   - **Impacto:** Contratos consistentes para futuros playgrounds (YAML, XML, SQL, etc.)
 - [ ] **Toolbar actions model genérico**: estandarizar contrato de acciones (`id`, `label`, `icon`, `execute`)

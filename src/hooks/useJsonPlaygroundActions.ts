@@ -2,12 +2,8 @@ import { useCallback } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { formatJson } from "@/services/json/format";
 import { createValidatedHandler } from "@/utils/handlerFactory";
+import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
-
-interface ToastApi {
-  success: (message: string) => void;
-  error: (message: string) => void;
-}
 
 interface UseJsonPlaygroundActionsProps {
   inputJson: string;
@@ -72,46 +68,42 @@ export function useJsonPlaygroundActions({
   cleanConfig,
   toast,
 }: UseJsonPlaygroundActionsProps) {
-  const validateInputSize = useCallback(
-    () =>
-      inputTooLarge
-        ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
-        : null,
-    [inputTooLarge, inputTooLargeMessage],
-  );
-  const handleClearInput = useCallback(() => {
-    setInputJson("");
-    clearFormatterOutput();
-    clearJsonPathOutput();
-    if (toast) {
-      toast.success("Entrada limpiada");
-    }
-  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput, toast]);
-
-  const handleLoadExample = useCallback(() => {
+  // Get base playground actions
+  const exampleContent = useCallback(() => {
     const result = formatJson(jsonPlaygroundConfig.example);
-    if (result.ok) {
-      setInputJson(result.value);
-    } else {
-      setInputJson(jsonPlaygroundConfig.example);
-    }
-    clearFormatterOutput();
-    clearJsonPathOutput();
-    if (toast) {
-      toast.success("Ejemplo cargado");
-    }
-  }, [setInputJson, clearFormatterOutput, clearJsonPathOutput, toast]);
+    return result.ok ? result.value : jsonPlaygroundConfig.example;
+  }, [])();
+
+  const baseActions = usePlaygroundActions({
+    input: inputJson,
+    setInput: setInputJson,
+    exampleContent,
+    toast,
+    onClearOutputs: useCallback(() => {
+      clearFormatterOutput();
+      clearJsonPathOutput();
+    }, [clearFormatterOutput, clearJsonPathOutput]),
+    validateInput: useCallback(
+      () =>
+        inputTooLarge
+          ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
+          : null,
+      [inputTooLarge, inputTooLargeMessage],
+    ),
+  });
 
   const handleCopyOutput = useCallback(() => {
     const textToCopy = jsonPathOutput || formatterOutput;
-    navigator.clipboard.writeText(textToCopy).catch((err) => {
-      console.error("Error al copiar al portapapeles: ", err);
+    baseActions.handleCopy({
+      text: textToCopy,
+      successMessage: "Resultado copiado al portapapeles",
+      validate: () => (!textToCopy ? "No hay resultado para copiar" : null),
     });
-  }, [formatterOutput, jsonPathOutput]);
+  }, [formatterOutput, jsonPathOutput, baseActions]);
 
   const handleFormat = useCallback(() => {
     createValidatedHandler({
-      validate: validateInputSize,
+      validate: baseActions.createInputValidator,
       run: () => {
         clearJsonPathOutput();
         return formatFn(inputJson, formatConfig);
@@ -120,11 +112,11 @@ export function useJsonPlaygroundActions({
       successMessage: "JSON formateado correctamente",
       errorMessage: "Error al formatear JSON",
     })();
-  }, [validateInputSize, clearJsonPathOutput, formatFn, inputJson, formatConfig, toast]);
+  }, [baseActions, clearJsonPathOutput, formatFn, inputJson, formatConfig, toast]);
 
   const handleMinify = useCallback(() => {
     createValidatedHandler({
-      validate: validateInputSize,
+      validate: baseActions.createInputValidator,
       run: () => {
         clearJsonPathOutput();
         return minifyFn(inputJson, minifyConfig);
@@ -133,11 +125,11 @@ export function useJsonPlaygroundActions({
       successMessage: "JSON minificado correctamente",
       errorMessage: "Error al minificar JSON",
     })();
-  }, [validateInputSize, clearJsonPathOutput, minifyFn, inputJson, minifyConfig, toast]);
+  }, [baseActions, clearJsonPathOutput, minifyFn, inputJson, minifyConfig, toast]);
 
   const handleClean = useCallback(() => {
     createValidatedHandler({
-      validate: validateInputSize,
+      validate: baseActions.createInputValidator,
       run: () => {
         clearJsonPathOutput();
         return cleanFn(inputJson, cleanConfig);
@@ -146,22 +138,22 @@ export function useJsonPlaygroundActions({
       successMessage: "JSON limpiado correctamente",
       errorMessage: "Error al limpiar JSON",
     })();
-  }, [validateInputSize, clearJsonPathOutput, cleanFn, inputJson, cleanConfig, toast]);
+  }, [baseActions, clearJsonPathOutput, cleanFn, inputJson, cleanConfig, toast]);
 
   const handleApplyJsonPath = useCallback(() => {
     createValidatedHandler({
-      validate: validateInputSize,
+      validate: baseActions.createInputValidator,
       run: () => filterJsonPath(inputJson),
       onSuccess: () => addToHistory(jsonPathExpression),
       toast,
       errorMessage: "Error al aplicar JSONPath",
     })();
-  }, [validateInputSize, filterJsonPath, inputJson, addToHistory, jsonPathExpression, toast]);
+  }, [baseActions, filterJsonPath, inputJson, addToHistory, jsonPathExpression, toast]);
 
   const handleReuseFromHistory = useCallback(
     (expression: string) => {
       createValidatedHandler({
-        validate: validateInputSize,
+        validate: baseActions.createInputValidator,
         run: () => {
           setJsonPathExpression(expression);
           return filterJsonPath(inputJson, expression);
@@ -171,12 +163,12 @@ export function useJsonPlaygroundActions({
         errorMessage: "Error al aplicar JSONPath",
       })();
     },
-    [validateInputSize, setJsonPathExpression, filterJsonPath, inputJson, addToHistory, toast],
+    [baseActions, setJsonPathExpression, filterJsonPath, inputJson, addToHistory, toast],
   );
 
   return {
-    handleClearInput,
-    handleLoadExample,
+    handleClearInput: baseActions.handleClearInput,
+    handleLoadExample: baseActions.handleLoadExample,
     handleCopyOutput,
     handleFormat,
     handleMinify,

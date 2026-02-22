@@ -107,7 +107,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["src/playgrounds/js/JsPlayground.tsx"],
+    files: ["src/playgrounds/js/JsPlayground.tsx", "src/hooks/useJsPlaygroundActions.ts"],
     rules: {
       "@typescript-eslint/no-implied-eval": "off",
     },
