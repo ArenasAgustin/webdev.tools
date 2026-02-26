@@ -269,19 +269,19 @@
   - [x] Tests: Verificar que formateo es consistente ✅
   - [x] **Beneficio:** Formateo más robusto y mantenible, usa estándares de la industria ✅
 
-- [ ] **Terser para minificación de JavaScript**
+- [x] **Terser para minificación de JavaScript** ✅
   - [x] Centralizar minify JSON/JS en `services/minifier/minifier.ts` ✅
   - [x] Migrar consumers (workers/servicios/tests) al minifier compartido ✅
-  - [ ] Integrar `terser` package en `services/js/minify.ts`
-  - [ ] Actualizar worker para usar Terser en lugar de minificador actual
-  - [ ] Configurar opciones: mangleNames, removeComments, compress
-  - [ ] Tests: Validar que output es válido y más pequeño
-  - [ ] **Beneficio:** JS minificado más agresivo y optimizado (+5-10% reducción de tamaño)
+  - [x] Integrar `terser` package en `services/minifier/minifier.ts` ✅
+  - [x] Actualizar worker para usar Terser en lugar de minificador actual ✅
+  - [x] Configurar opciones: mangleNames, removeComments, compress ✅
+  - [x] Tests: Validar que output es válido y más pequeño ✅
+  - [x] **Beneficio:** JS minificado más agresivo y optimizado (+5-10% reducción de tamaño) ✅
 
-- [ ] **Actualizar dependencias**
-  - [ ] `pnpm add prettier terser`
-  - [ ] Remover minificadores internos si existen
-  - [ ] Actualizar imports en servicios
+- [x] **Actualizar dependencias** ✅
+  - [x] `pnpm add prettier terser` ✅
+  - [x] Remover minificadores internos si existen ✅
+  - [x] Actualizar imports en servicios ✅
 
 ---
 

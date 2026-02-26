@@ -2,6 +2,7 @@ import { type Result, type JsonValue, type JsonError } from "@/types/common";
 import type { TransformService } from "@/services/transform";
 import type { MinifyConfig } from "@/types/json";
 import { sortJsonKeys, JSON_ERROR_MESSAGES } from "@/services/json/utils";
+import { minify_sync as terserMinifySync } from "terser";
 
 export type MinifyOptions = Partial<Pick<MinifyConfig, "removeSpaces" | "sortKeys">>;
 
@@ -9,6 +10,22 @@ export interface JsMinifyOptions {
   removeComments?: boolean;
   removeSpaces?: boolean;
 }
+
+interface TerserSyncResult {
+  code?: string;
+}
+
+type TerserSyncMinifyFn = (
+  input: string,
+  options: {
+    compress: boolean;
+    mangle: boolean;
+    format: {
+      comments: boolean;
+      beautify: boolean;
+    };
+  },
+) => TerserSyncResult | null | undefined;
 
 export function minifyJson(input: string, options: MinifyOptions = {}): Result<string, JsonError> {
   if (!input.trim()) {
@@ -51,34 +68,24 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
 
     const { removeComments = true, removeSpaces = true } = options;
 
-    let result = input;
-
-    if (removeComments) {
-      result = result.replace(/\/\/.*?$/gm, "");
-      result = result.replace(/\/\*[\s\S]*?\*\//g, "");
+    const minifySyncUnknown: unknown = terserMinifySync;
+    if (typeof minifySyncUnknown !== "function") {
+      return { ok: false, error: "Terser minify no está disponible" };
     }
 
-    if (removeSpaces) {
-      result = result
-        .split("\n")
-        .map((line) => line.trim())
-        .join("");
+    const minifySync = minifySyncUnknown as TerserSyncMinifyFn;
 
-      result = result.replace(/\s+/g, " ");
-      result = result.replace(/\s*([{}[\]()=+\-*/<>!&|^~?:;,.])\s*/g, "$1");
-      result = result.replace(
-        /\b(if|else|for|while|do|switch|case|break|continue|return|function|const|let|var|new|delete|typeof|instanceof|in|of|async|await|yield|import|export|default|class|extends|static|super|this|that|true|false|null|undefined)\b/g,
-        " $1 ",
-      );
+    const result = minifySync(input, {
+      compress: removeSpaces,
+      mangle: removeSpaces,
+      format: {
+        comments: !removeComments,
+        beautify: !removeSpaces,
+      },
+    });
 
-      result = result.replace(/\s+/g, " ");
-      result = result.replace(/\s+;/g, ";");
-      result = result.replace(/\s+,/g, ",");
-      result = result.replace(/\(\s+/g, "(");
-      result = result.replace(/\s+\)/g, ")");
-    }
-
-    return { ok: true, value: result.trim() };
+    const code = typeof result?.code === "string" ? result.code : "";
+    return { ok: true, value: code.trim() };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return { ok: false, error: message };
