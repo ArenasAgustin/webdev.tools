@@ -1,6 +1,6 @@
 import type { Result } from "@/types/common";
-import { formatJs } from "@/services/format/formatter";
-import { minifyJs, type JsMinifyOptions } from "@/services/js/minify";
+import { formatJs } from "@/services/formatter/formatter";
+import { minifyJs, type JsMinifyOptions } from "@/services/minifier/minifier";
 import { runJsWorker } from "@/services/js/workerClient";
 import type { JsWorkerPayload } from "@/services/js/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";

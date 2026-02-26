@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { minifyJs } from "./minify";
+import { minifyJs } from "@/services/minifier/minifier";
 
 describe("minifyJs", () => {
   it("returns empty string for blank input", () => {

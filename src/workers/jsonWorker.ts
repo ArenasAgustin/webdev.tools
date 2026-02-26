@@ -1,5 +1,5 @@
-import { formatJson } from "@/services/format/formatter";
-import { minifyJson } from "@/services/json/minify";
+import { formatJson } from "@/services/formatter/formatter";
+import { minifyJson } from "@/services/minifier/minifier";
 import { cleanJson } from "@/services/json/clean";
 import { applyJsonPath } from "@/services/json/jsonPath";
 import type { Result, JsonError } from "@/types/common";

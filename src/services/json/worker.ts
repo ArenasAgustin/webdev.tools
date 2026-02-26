@@ -1,6 +1,6 @@
 import type { Result, JsonError } from "@/types/common";
-import { formatJson, type FormatOptions } from "@/services/format/formatter";
-import { minifyJson, type MinifyOptions } from "@/services/json/minify";
+import { formatJson, type FormatOptions } from "@/services/formatter/formatter";
+import { minifyJson, type MinifyOptions } from "@/services/minifier/minifier";
 import { cleanJson, type CleanOptions } from "@/services/json/clean";
 import { applyJsonPath } from "@/services/json/jsonPath";
 import { runJsonWorker } from "@/services/json/workerClient";

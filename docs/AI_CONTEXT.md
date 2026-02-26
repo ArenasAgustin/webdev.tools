@@ -106,7 +106,7 @@ This structure MUST be preserved.
 ## 6. Business Logic Rules
 
 JSON operations must live in `services/json/`.
-Formatting operations for JSON/JS must be centralized in `services/format/formatter.ts`.
+Formatting operations for JSON/JS must be centralized in `services/formatter/formatter.ts`.
 
 Services must:
 

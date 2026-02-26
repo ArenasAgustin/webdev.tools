@@ -31,11 +31,15 @@ Herramienta web client-side para desarrolladores con playgrounds de JSON y JavaS
 
 El formateo de JSON y JS está centralizado en:
 
-- `src/services/format/formatter.ts`
+- `src/services/formatter/formatter.ts`
 
 Integración con Prettier aislada en:
 
-- `src/services/format/prettier.ts`
+- `src/services/formatter/prettier.ts`
+
+Minificación centralizada en:
+
+- `src/services/minifier/minifier.ts`
 
 Esto evita duplicación entre playgrounds y asegura comportamiento consistente (espacios/tabs, parser y normalización de output).
 

@@ -264,12 +264,14 @@
 
 - [x] **Prettier Integration para formateo de código** ✅
   - [x] Reemplazar Prettier interno por API de prettier package ✅
-  - [x] Centralizar implementación en `services/format/formatter.ts` ✅
+  - [x] Centralizar implementación en `services/formatter/formatter.ts` ✅
   - [x] Migrar consumidores (workers/servicios/tests) al formatter compartido ✅
   - [x] Tests: Verificar que formateo es consistente ✅
   - [x] **Beneficio:** Formateo más robusto y mantenible, usa estándares de la industria ✅
 
 - [ ] **Terser para minificación de JavaScript**
+  - [x] Centralizar minify JSON/JS en `services/minifier/minifier.ts` ✅
+  - [x] Migrar consumers (workers/servicios/tests) al minifier compartido ✅
   - [ ] Integrar `terser` package en `services/js/minify.ts`
   - [ ] Actualizar worker para usar Terser en lugar de minificador actual
   - [ ] Configurar opciones: mangleNames, removeComments, compress

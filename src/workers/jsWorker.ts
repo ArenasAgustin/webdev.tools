@@ -1,5 +1,5 @@
-import { formatJs } from "@/services/format/formatter";
-import { minifyJs } from "@/services/js/minify";
+import { formatJs } from "@/services/formatter/formatter";
+import { minifyJs } from "@/services/minifier/minifier";
 import type { Result } from "@/types/common";
 import type { JsWorkerRequest, JsWorkerResponse } from "@/services/js/worker.types";
 

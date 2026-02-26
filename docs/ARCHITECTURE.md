@@ -94,7 +94,8 @@ src/
 ├── pages/                  # Home / PlaygroundPage
 ├── playgrounds/            # JSON y JS playgrounds + registry
 ├── services/               # lógica framework-agnostic
-│   ├── format/             # formatter.ts (JSON/JS) + prettier.ts
+│   ├── formatter/          # formatter.ts (JSON/JS) + prettier.ts
+│   ├── minifier/           # minifier.ts (JSON/JS)
 │   ├── json/               # parse/minify/clean/jsonPath
 │   ├── js/                 # minify + worker adapters
 │   ├── worker/             # runtime/shared worker infra
@@ -147,8 +148,8 @@ parseJson(input: string): Result<JsonValue, JsonError>
 
 ### Actualización (2026-02)
 
-- El formateo de JSON/JS está centralizado en `src/services/format/formatter.ts`.
-- `src/services/format/prettier.ts` encapsula integración con Prettier (parser/plugins/indentación tabs/espacios).
+- El formateo de JSON/JS está centralizado en `src/services/formatter/formatter.ts`.
+- `src/services/formatter/prettier.ts` encapsula integración con Prettier (parser/plugins/indentación tabs/espacios).
 - Workers y servicios de playground consumen el módulo compartido para evitar duplicación y asegurar comportamiento consistente.
 
 ---

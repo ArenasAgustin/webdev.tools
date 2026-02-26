@@ -1,6 +1,6 @@
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
 import type { TransformService } from "@/services/transform";
-import { formatWithPrettier } from "@/services/format/prettier";
+import { formatWithPrettier } from "@/services/formatter/prettier";
 import type { FormatConfig } from "@/types/json";
 import type { IndentStyle } from "@/types/format";
 import { sortJsonKeys, JSON_ERROR_MESSAGES } from "@/services/json/utils";

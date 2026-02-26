@@ -1,4 +1,4 @@
-import type { JsMinifyOptions } from "@/services/js/minify";
+import type { JsMinifyOptions } from "@/services/minifier/minifier";
 import type { IndentStyle } from "@/types/format";
 
 export interface JsFormatOptions {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatJs } from "@/services/format/formatter";
+import { formatJs } from "@/services/formatter/formatter";
 
 describe("formatJs", () => {
   it("should format minified JavaScript", async () => {

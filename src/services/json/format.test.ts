@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatJson } from "@/services/format/formatter";
+import { formatJson } from "@/services/formatter/formatter";
 
 describe("formatJson", () => {
   it("should format minified JSON", async () => {

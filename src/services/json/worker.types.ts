@@ -1,5 +1,5 @@
-import type { FormatOptions } from "@/services/format/formatter";
-import type { MinifyOptions } from "@/services/json/minify";
+import type { FormatOptions } from "@/services/formatter/formatter";
+import type { MinifyOptions } from "@/services/minifier/minifier";
 import type { CleanOptions } from "@/services/json/clean";
 import type { JsonError } from "@/types/common";
 

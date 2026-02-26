@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { minifyJson } from "./minify";
+import { minifyJson } from "@/services/minifier/minifier";
 
 describe("minifyJson", () => {
   it("should minify formatted JSON", () => {

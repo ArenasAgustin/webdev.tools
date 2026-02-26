@@ -1,15 +1,48 @@
-import { type Result } from "@/types/common";
+import { type Result, type JsonValue, type JsonError } from "@/types/common";
 import type { TransformService } from "@/services/transform";
+import type { MinifyConfig } from "@/types/json";
+import { sortJsonKeys, JSON_ERROR_MESSAGES } from "@/services/json/utils";
+
+export type MinifyOptions = Partial<Pick<MinifyConfig, "removeSpaces" | "sortKeys">>;
 
 export interface JsMinifyOptions {
   removeComments?: boolean;
   removeSpaces?: boolean;
 }
 
-/**
- * Minify JavaScript code - remove unnecessary whitespace and comments
- * Pure function - no side effects
- */
+export function minifyJson(input: string, options: MinifyOptions = {}): Result<string, JsonError> {
+  if (!input.trim()) {
+    return {
+      ok: false,
+      error: {
+        message: JSON_ERROR_MESSAGES.EMPTY_INPUT,
+      },
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(input) as JsonValue;
+    const processed = options.sortKeys ? sortJsonKeys(parsed) : parsed;
+    const minified =
+      options.removeSpaces === false
+        ? JSON.stringify(processed, null, 1)
+        : JSON.stringify(processed);
+    return { ok: true, value: minified };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return {
+      ok: false,
+      error: {
+        message: errorMessage,
+      },
+    };
+  }
+}
+
+export const minifyJsonTransform: TransformService<MinifyOptions, JsonError> = {
+  transform: (input, options = {}) => minifyJson(input, options),
+};
+
 export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<string, string> {
   try {
     if (!input.trim()) {
@@ -21,47 +54,30 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
     let result = input;
 
     if (removeComments) {
-      // Remove single-line comments
       result = result.replace(/\/\/.*?$/gm, "");
-
-      // Remove multi-line comments
       result = result.replace(/\/\*[\s\S]*?\*\//g, "");
     }
 
     if (removeSpaces) {
-      // Remove leading/trailing whitespace from each line
       result = result
         .split("\n")
         .map((line) => line.trim())
         .join("");
 
-      // Collapse multiple spaces, but preserve necessary ones
       result = result.replace(/\s+/g, " ");
-
-      // Remove spaces around operators and punctuation
       result = result.replace(/\s*([{}[\]()=+\-*/<>!&|^~?:;,.])\s*/g, "$1");
-
-      // Restore spaces where necessary (after keywords and before certain tokens)
       result = result.replace(
         /\b(if|else|for|while|do|switch|case|break|continue|return|function|const|let|var|new|delete|typeof|instanceof|in|of|async|await|yield|import|export|default|class|extends|static|super|this|that|true|false|null|undefined)\b/g,
         " $1 ",
       );
 
-      // Clean up multiple spaces
       result = result.replace(/\s+/g, " ");
-
-      // Remove space before semicolons
       result = result.replace(/\s+;/g, ";");
-
-      // Remove space before commas
       result = result.replace(/\s+,/g, ",");
-
-      // Remove spaces inside parentheses
       result = result.replace(/\(\s+/g, "(");
       result = result.replace(/\s+\)/g, ")");
     }
 
-    // Return minified code
     return { ok: true, value: result.trim() };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

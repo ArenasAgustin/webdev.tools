@@ -1,5 +1,5 @@
 import { parseJson } from "./parse";
-import { minifyJson } from "./minify";
+import { minifyJson } from "@/services/minifier/minifier";
 import { JSON_ERROR_MESSAGES } from "./utils";
 import type { JsonValue, Result, JsonError } from "@/types/common";
 import type { CleanConfig } from "@/types/json";
