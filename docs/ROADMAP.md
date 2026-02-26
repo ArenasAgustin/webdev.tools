@@ -287,10 +287,10 @@
 
 #### 🔴 Alta Prioridad (Próximas 2-4 semanas)
 
-- [ ] **Configurar Playwright**: Setup inicial y CI/CD integration
-  - **Punto de inicio:** `pnpm add -D @playwright/test`
-  - **Archivos a crear:** `playwright.config.ts`, `.github/workflows/e2e.yml`
-  - **Estimación:** 1 día
+- [x] **Configurar Playwright**: Setup inicial y CI/CD integration ✅
+  - **Punto de inicio:** `pnpm add -D @playwright/test` ✅
+  - **Archivos creados:** `playwright.config.ts`, `.github/workflows/e2e.yml`, `e2e/smoke.spec.ts` ✅
+  - **Resultado:** `pnpm e2e` ejecuta smoke tests sobre preview build ✅
 
 - [ ] **JSON Playground E2E tests** (3-4 días)
   - [ ] Test: Cargar JSON válido y formatear
