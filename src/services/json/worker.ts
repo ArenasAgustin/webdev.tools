@@ -1,5 +1,5 @@
 import type { Result, JsonError } from "@/types/common";
-import { formatJson, type FormatOptions } from "@/services/json/format";
+import { formatJson, type FormatOptions } from "@/services/format/formatter";
 import { minifyJson, type MinifyOptions } from "@/services/json/minify";
 import { cleanJson, type CleanOptions } from "@/services/json/clean";
 import { applyJsonPath } from "@/services/json/jsonPath";
@@ -7,7 +7,10 @@ import { runJsonWorker } from "@/services/json/workerClient";
 import type { JsonWorkerPayload } from "@/services/json/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 
-const runJsonOperation = (payload: JsonWorkerPayload, runSync: () => Result<string, JsonError>) =>
+const runJsonOperation = (
+  payload: JsonWorkerPayload,
+  runSync: () => Result<string, JsonError> | Promise<Result<string, JsonError>>,
+) =>
   executeWorkerOperation({
     input: payload.input,
     payload,

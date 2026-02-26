@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
-import { formatJson } from "@/services/json/format";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
@@ -70,8 +69,11 @@ export function useJsonPlaygroundActions({
 }: UseJsonPlaygroundActionsProps) {
   // Get base playground actions
   const exampleContent = useCallback(() => {
-    const result = formatJson(jsonPlaygroundConfig.example);
-    return result.ok ? result.value : jsonPlaygroundConfig.example;
+    try {
+      return JSON.stringify(JSON.parse(jsonPlaygroundConfig.example), null, 2);
+    } catch {
+      return jsonPlaygroundConfig.example;
+    }
   }, [])();
 
   const baseActions = usePlaygroundActions({

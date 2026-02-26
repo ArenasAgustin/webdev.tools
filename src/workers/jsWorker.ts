@@ -1,4 +1,4 @@
-import { formatJs } from "@/services/js/format";
+import { formatJs } from "@/services/format/formatter";
 import { minifyJs } from "@/services/js/minify";
 import type { Result } from "@/types/common";
 import type { JsWorkerRequest, JsWorkerResponse } from "@/services/js/worker.types";
@@ -20,19 +20,21 @@ ctx.onmessage = (event: MessageEvent<JsWorkerRequest>) => {
   const request = event.data;
   const { id, input } = request;
 
-  try {
-    switch (request.action) {
-      case "format":
-        ctx.postMessage(toResponse(id, formatJs(input, request.options?.indentSize ?? 2)));
-        return;
-      case "minify":
-        ctx.postMessage(toResponse(id, minifyJs(input, request.options)));
-        return;
+  void (async () => {
+    try {
+      switch (request.action) {
+        case "format":
+          ctx.postMessage(toResponse(id, await formatJs(input, request.options?.indentSize ?? 2)));
+          return;
+        case "minify":
+          ctx.postMessage(toResponse(id, minifyJs(input, request.options)));
+          return;
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      ctx.postMessage({ id, ok: false, error: { message } });
     }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    ctx.postMessage({ id, ok: false, error: { message } });
-  }
+  })();
 };
 
 export {};

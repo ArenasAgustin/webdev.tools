@@ -1,5 +1,4 @@
 import { parseJson } from "./parse";
-import { formatJson } from "./format";
 import { minifyJson } from "./minify";
 import { JSON_ERROR_MESSAGES } from "./utils";
 import type { JsonValue, Result, JsonError } from "@/types/common";
@@ -107,13 +106,7 @@ export function cleanJson(input: string, options: CleanOptions = {}): Result<str
       }
       result = minifyResult.value;
     } else {
-      const formatResult = formatJson(JSON.stringify(cleaned), {
-        indent: 2,
-      });
-      if (!formatResult.ok) {
-        return formatResult;
-      }
-      result = formatResult.value;
+      result = JSON.stringify(cleaned, null, 2);
     }
 
     return { ok: true, value: result };

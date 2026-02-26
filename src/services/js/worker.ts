@@ -1,11 +1,15 @@
 import type { Result } from "@/types/common";
-import { formatJs } from "@/services/js/format";
+import { formatJs } from "@/services/format/formatter";
 import { minifyJs, type JsMinifyOptions } from "@/services/js/minify";
 import { runJsWorker } from "@/services/js/workerClient";
 import type { JsWorkerPayload } from "@/services/js/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
+import type { IndentStyle } from "@/types/format";
 
-const runJsOperation = (payload: JsWorkerPayload, runSync: () => Result<string, string>) =>
+const runJsOperation = (
+  payload: JsWorkerPayload,
+  runSync: () => Result<string, string> | Promise<Result<string, string>>,
+) =>
   executeWorkerOperation({
     input: payload.input,
     payload,
@@ -16,7 +20,7 @@ const runJsOperation = (payload: JsWorkerPayload, runSync: () => Result<string, 
 
 export const formatJsAsync = async (
   input: string,
-  indentSize = 2,
+  indentSize: IndentStyle = 2,
 ): Promise<Result<string, string>> => {
   return runJsOperation(
     {

@@ -4,12 +4,13 @@
  */
 
 import type { ConfigWithAutoCopy, PlaygroundToolsConfig } from "@/types/config";
+import type { IndentStyle } from "@/types/format";
 
 /**
  * Format configuration options
  */
 export type FormatConfig = ConfigWithAutoCopy<{
-  indent: number | "\t";
+  indent: IndentStyle;
   sortKeys: boolean;
 }>;
 

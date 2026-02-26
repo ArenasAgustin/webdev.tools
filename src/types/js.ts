@@ -1,7 +1,8 @@
 import type { ConfigWithAutoCopy, PlaygroundToolsConfig } from "@/types/config";
+import type { IndentStyle } from "@/types/format";
 
 export type JsFormatConfig = ConfigWithAutoCopy<{
-  indentSize: number;
+  indentSize: IndentStyle;
 }>;
 
 export type JsMinifyConfig = ConfigWithAutoCopy<{

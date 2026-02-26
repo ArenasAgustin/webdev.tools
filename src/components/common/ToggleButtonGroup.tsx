@@ -4,7 +4,7 @@ interface ToggleOption<T> {
 }
 
 interface ToggleButtonGroupProps<T> {
-  options: ToggleOption<T>[];
+  options: readonly ToggleOption<T>[];
   value: T;
   onChange: (value: T) => void;
   activeClassName?: string;

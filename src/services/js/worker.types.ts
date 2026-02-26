@@ -1,7 +1,8 @@
 import type { JsMinifyOptions } from "@/services/js/minify";
+import type { IndentStyle } from "@/types/format";
 
 export interface JsFormatOptions {
-  indentSize?: number;
+  indentSize?: IndentStyle;
 }
 
 export type JsWorkerPayload =

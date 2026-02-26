@@ -6,6 +6,7 @@ import { Checkbox } from "./Checkbox";
 import { RadioGroup } from "./RadioGroup";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
+import { INDENT_OPTIONS } from "@/types/format";
 import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 import {
@@ -103,10 +104,7 @@ export function ConfigModal(props: ConfigModalProps) {
               <label className="block text-gray-300 mb-1">Espaciado</label>
               {isJsMode ? (
                 <ToggleButtonGroup
-                  options={[
-                    { value: 2, label: "2 espacios" },
-                    { value: 4, label: "4 espacios" },
-                  ]}
+                  options={INDENT_OPTIONS}
                   value={props.formatConfig.indentSize}
                   onChange={(indentSize) =>
                     props.onFormatConfigChange({
@@ -117,11 +115,7 @@ export function ConfigModal(props: ConfigModalProps) {
                 />
               ) : (
                 <ToggleButtonGroup
-                  options={[
-                    { value: 2, label: "2 espacios" },
-                    { value: 4, label: "4 espacios" },
-                    { value: "\t", label: "Tab" },
-                  ]}
+                  options={INDENT_OPTIONS}
                   value={props.formatConfig.indent}
                   onChange={(indent) =>
                     props.onFormatConfigChange({

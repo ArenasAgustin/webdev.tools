@@ -1,4 +1,4 @@
-import { formatJson } from "@/services/json/format";
+import { formatJson } from "@/services/format/formatter";
 import { minifyJson } from "@/services/json/minify";
 import { cleanJson } from "@/services/json/clean";
 import { applyJsonPath } from "@/services/json/jsonPath";
@@ -22,25 +22,27 @@ ctx.onmessage = (event: MessageEvent<JsonWorkerRequest>) => {
   const request = event.data;
   const { id, input } = request;
 
-  try {
-    switch (request.action) {
-      case "format":
-        ctx.postMessage(toResponse(id, formatJson(input, request.options)));
-        return;
-      case "minify":
-        ctx.postMessage(toResponse(id, minifyJson(input, request.options)));
-        return;
-      case "clean":
-        ctx.postMessage(toResponse(id, cleanJson(input, request.options)));
-        return;
-      case "jsonPath":
-        ctx.postMessage(toResponse(id, applyJsonPath(input, request.path)));
-        return;
+  void (async () => {
+    try {
+      switch (request.action) {
+        case "format":
+          ctx.postMessage(toResponse(id, await formatJson(input, request.options)));
+          return;
+        case "minify":
+          ctx.postMessage(toResponse(id, minifyJson(input, request.options)));
+          return;
+        case "clean":
+          ctx.postMessage(toResponse(id, cleanJson(input, request.options)));
+          return;
+        case "jsonPath":
+          ctx.postMessage(toResponse(id, applyJsonPath(input, request.path)));
+          return;
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      ctx.postMessage({ id, ok: false, error: { message } });
     }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    ctx.postMessage({ id, ok: false, error: { message } });
-  }
+  })();
 };
 
 export {};
