@@ -20,7 +20,7 @@ utilizadas en el proyecto **JSON Tools / Code Playground**, una aplicación web
 
 ### Frontend
 
-- **React 18**
+- **React 19**
   - Renderizado de UI
   - Composición por componentes
 - **TypeScript**
@@ -61,20 +61,14 @@ utilizadas en el proyecto **JSON Tools / Code Playground**, una aplicación web
 
 - **React hooks**
   - Estado local
-- **Zustand**
-  - Estado global liviano
-  - Sin boilerplate
 
 ---
 
 ### Persistencia
 
 - **localStorage**
-  - Último JSON
+  - Último JSON / JS
   - Preferencias
-- **IndexedDB**
-  - Historial
-  - Datos grandes
 
 ---
 
@@ -92,63 +86,23 @@ utilizadas en el proyecto **JSON Tools / Code Playground**, una aplicación web
 
 ```txt
 src/
-├── app/                    # Bootstrap de la aplicación
-│   ├── App.tsx
-│   ├── routes.tsx          # (futuro)
-│   └── providers.tsx
-│
-├── playgrounds/            # Playgrounds por tecnología
-│   └── json/
-│       ├── JsonPlayground.tsx
-│       ├── JsonToolbar.tsx
-│       ├── JsonEditors.tsx
-│       ├── JsonPathPanel.tsx
-│       ├── json.config.ts
-│       ├── json.types.ts
-│       └── json.constants.ts
-│
-├── components/             # UI reutilizable
-│   ├── editor/
-│   │   ├── CodeEditor.tsx
-│   │   └── EditorStatus.tsx
-│   ├── layout/
-│   │   ├── Header.tsx
-│   │   ├── Panel.tsx
-│   │   └── SplitView.tsx
-│   └── common/
-│
-├── hooks/                  # Lógica React reutilizable
-│   ├── useJsonParser.ts
-│   ├── useJsonFormatter.ts
-│   ├── useJsonPath.ts
-│   ├── useClipboard.ts
-│   └── useLocalStorage.ts
-│
-├── services/               # Lógica pura (framework-agnostic)
-│   └── json/
-│       ├── parse.ts
-│       ├── format.ts
-│       ├── minify.ts
-│       ├── clean.ts
-│       └── jsonPath.ts
-│
-├── store/                  # Estado global
-│   ├── json.store.ts
-│   └── ui.store.ts
-│
-├── styles/
-│   └── globals.css
-│
-├── types/
-│   ├── common.ts
-│   └── playground.ts
-│
-├── utils/
-│   ├── errors.ts
-│   ├── guards.ts
-│   └── debounce.ts
-│
-└── main.tsx
+├── App.tsx
+├── main.tsx
+├── app/                    # assets y componentes base de app
+├── components/             # UI reusable (common/editor/layout)
+├── hooks/                  # hooks de estado y acciones
+├── pages/                  # Home / PlaygroundPage
+├── playgrounds/            # JSON y JS playgrounds + registry
+├── services/               # lógica framework-agnostic
+│   ├── format/             # formatter.ts (JSON/JS) + prettier.ts
+│   ├── json/               # parse/minify/clean/jsonPath
+│   ├── js/                 # minify + worker adapters
+│   ├── worker/             # runtime/shared worker infra
+│   └── storage.ts
+├── workers/                # web workers (jsonWorker/jsWorker)
+├── context/                # Toast context
+├── types/                  # contratos compartidos (json/js/format/toolbar)
+└── utils/                  # helpers utilitarios
 ```
 
 ---
@@ -158,13 +112,13 @@ src/
 ```txt
 CodeEditor (input)
    ↓
-Store / State
+State local (hooks)
    ↓
 Services (parse / format / filter)
    ↓
-Hooks
+Workers (cuando aplica)
    ↓
-Store / State
+Hooks / Actions
    ↓
 CodeEditor (output)
 ```
@@ -190,6 +144,12 @@ Los servicios:
 ```typescript
 parseJson(input: string): Result<JsonValue, JsonError>
 ```
+
+### Actualización (2026-02)
+
+- El formateo de JSON/JS está centralizado en `src/services/format/formatter.ts`.
+- `src/services/format/prettier.ts` encapsula integración con Prettier (parser/plugins/indentación tabs/espacios).
+- Workers y servicios de playground consumen el módulo compartido para evitar duplicación y asegurar comportamiento consistente.
 
 ---
 

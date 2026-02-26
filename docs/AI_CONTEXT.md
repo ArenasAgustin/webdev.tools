@@ -25,7 +25,7 @@ scalable developer tool.
 
 The following technologies are **mandatory**:
 
-- React 18
+- React 19
 - TypeScript (strict typing)
 - Vite
 - Monaco Editor
@@ -40,8 +40,9 @@ Do NOT suggest or introduce:
 - Backend or server-side code
 - Frameworks like Next.js, Astro, Vue, Svelte
 - State managers heavier than Zustand or React Context
-- Runtime code evaluation (`eval`, `new Function`)
 - Any technology not listed above without explicit user request
+
+`new Function` is allowed only in the JavaScript playground execution flow, with the existing in-browser constraints.
 
 ---
 
@@ -60,17 +61,23 @@ Do NOT suggest or introduce:
 
 ```txt
 src/
-├── app/                    # Application bootstrap
-├── playgrounds/            # Feature modules per language
-│   └── json/
-├── components/             # Reusable, UI-only components
-├── services/               # Pure logic (no React, no state)
-│   └── json/
-├── hooks/                  # React-specific adapters
-├── store/                  # Minimal global state
-├── styles/
+├── app/
+├── components/
+├── context/
+├── hooks/
+├── pages/
+├── playgrounds/
+├── services/
+│   ├── format/             # formatter.ts + prettier.ts
+│   ├── json/
+│   ├── js/
+│   └── worker/
+├── workers/
+├── test/
 ├── types/
 ├── utils/
+├── App.tsx
+└── main.tsx
 ```
 
 This structure MUST be preserved.
@@ -98,7 +105,8 @@ This structure MUST be preserved.
 
 ## 6. Business Logic Rules
 
-All JSON operations must live in `services/json/`
+JSON operations must live in `services/json/`.
+Formatting operations for JSON/JS must be centralized in `services/format/formatter.ts`.
 
 Services must:
 
@@ -156,10 +164,9 @@ type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
 ## 10. Reference Files
 
-- `ui-spec.html` → Visual and layout reference
-- `ROADMAP.md` → Development plan
-- `ARCHITECTURE.md` → Detailed architecture
-- `AI_CONTEXT.md` → This document
+- `docs/ROADMAP.md` → Development plan
+- `docs/ARCHITECTURE.md` → Detailed architecture
+- `docs/AI_CONTEXT.md` → This document
 
 ---
 

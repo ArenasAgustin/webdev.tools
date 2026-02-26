@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# webdev.tools
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Herramienta web client-side para desarrolladores con playgrounds de JSON y JavaScript.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19
+- TypeScript (strict)
+- Vite
+- Monaco Editor
+- Tailwind CSS
+- Vitest
 
-## React Compiler
+## Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `pnpm dev` → entorno local
+- `pnpm build` → build producción
+- `pnpm test` → tests
+- `pnpm test:coverage` → cobertura
+- `pnpm lint` / `pnpm lint:fix`
+- `pnpm storybook` / `pnpm build-storybook`
 
-## Expanding the ESLint configuration
+## Arquitectura (resumen)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- UI en `src/components` y `src/playgrounds`
+- Lógica reusable en `src/hooks`
+- Servicios puros en `src/services`
+- Workers en `src/workers`
 
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+### Formateo centralizado
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+El formateo de JSON y JS está centralizado en:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+- `src/services/format/formatter.ts`
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Integración con Prettier aislada en:
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+- `src/services/format/prettier.ts`
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+Esto evita duplicación entre playgrounds y asegura comportamiento consistente (espacios/tabs, parser y normalización de output).
+
+## Documentación interna
+
+- `docs/ROADMAP.md` → plan y estado
+- `docs/ARCHITECTURE.md` → decisiones y estructura técnica
+- `docs/AI_CONTEXT.md` → reglas para asistentes IA
