@@ -36,7 +36,11 @@ export function JsPlayground() {
   );
 
   // Modal state management
-  const configModal = useModalState();
+  const {
+    isOpen: isConfigOpen,
+    open: openConfigModal,
+    close: closeConfigModal,
+  } = useModalState();
 
   const debouncedInputCode = useDebouncedValue(inputCode, 300);
   const inputStats = useTextStats(inputCode);
@@ -63,6 +67,21 @@ export function JsPlayground() {
     }
   }, [inputTooLarge, toast]);
 
+  const syntaxError = useMemo(() => {
+    const code = debouncedInputCode.trim();
+    if (!code) return null;
+
+    try {
+      new Function(code);
+      return null;
+    } catch (parseError) {
+      const message = parseError instanceof Error ? parseError.message : String(parseError);
+      return `Error de sintaxis: ${message}`;
+    }
+  }, [debouncedInputCode]);
+
+  const effectiveError = syntaxError ?? error;
+
   // Use JS playground actions hook
   const {
     handleClearInput,
@@ -86,6 +105,57 @@ export function JsPlayground() {
     minifyConfig,
     toast,
   });
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.contentEditable === "true")
+      ) {
+        return;
+      }
+
+      const hasModifier = event.ctrlKey || event.metaKey;
+      if (!hasModifier) return;
+
+      const normalizedKey = event.key.length === 1 ? event.key.toUpperCase() : event.key;
+
+      if (event.shiftKey && (event.code === "KeyF" || normalizedKey === "F")) {
+        event.preventDefault();
+        handleFormat();
+        return;
+      }
+
+      if (event.shiftKey && (event.code === "KeyM" || normalizedKey === "M")) {
+        event.preventDefault();
+        handleMinify();
+        return;
+      }
+
+      if (event.shiftKey && (event.code === "KeyC" || normalizedKey === "C")) {
+        event.preventDefault();
+        handleCopyOutput();
+        return;
+      }
+
+      if (event.shiftKey && (event.code === "Delete" || normalizedKey === "Delete")) {
+        event.preventDefault();
+        handleClearInput();
+        return;
+      }
+
+      if (event.code === "Comma" || event.key === "," || event.key === "Comma") {
+        event.preventDefault();
+        openConfigModal();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleFormat, handleMinify, handleCopyOutput, handleClearInput, openConfigModal]);
 
   // Memoize complex toolbar configuration to prevent re-renders
   const toolbarTools = useMemo<ToolbarConfig>(
@@ -122,7 +192,7 @@ export function JsPlayground() {
           onClick: handleLoadExample,
         },
       ],
-      onOpenConfig: configModal.open,
+      onOpenConfig: openConfigModal,
       configButtonTitle: "Configurar herramientas",
       gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
     }),
@@ -132,7 +202,7 @@ export function JsPlayground() {
       handleMinify,
       handleClearInput,
       handleLoadExample,
-      configModal.open,
+      openConfigModal,
     ],
   );
 
@@ -141,7 +211,7 @@ export function JsPlayground() {
       <JsEditors
         inputCode={inputCode}
         output={output}
-        error={error}
+        error={effectiveError}
         inputWarning={inputWarning}
         onInputChange={setInputCode}
         onCopyInput={handleCopyInput}
@@ -154,8 +224,8 @@ export function JsPlayground() {
 
       <ConfigModal
         mode="js"
-        isOpen={configModal.isOpen}
-        onClose={configModal.close}
+        isOpen={isConfigOpen}
+        onClose={closeConfigModal}
         formatConfig={formatConfig}
         onFormatConfigChange={setFormatConfig}
         minifyConfig={minifyConfig}

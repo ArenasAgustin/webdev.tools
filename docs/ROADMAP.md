@@ -25,13 +25,13 @@
 
 ### 4.1 - Refactorizaciones Pendientes ✅
 
-#### 🔴 Alta Prioridad
+#### 🔴 Alta Prioridad — Performance & Rendering
 
 - [x] **Duplicación de iconColors**: Crear constante compartida en `utils/constants/` para `iconColors` usado en `Panel.tsx` y `ExpandedEditorModal.tsx` ✅
 - [x] **Tipos de configuración dispersos**: Centralizar interfaces de configuración (`formatConfig`, `minifyConfig`, `cleanConfig`) en `types/json.ts` ✅
 - [x] **Servicios de localStorage**: Crear `services/storage.ts` con funciones genéricas de persistencia (`loadSavedConfig`, `loadLastJson`, etc.) ✅
 
-#### 🟠 Media Prioridad
+#### 🟠 Media Prioridad — Code Organization
 
 - [x] **Panel y ExpandedEditorModal similares**: Crear componente base `Container` o refactorizar para reutilizar lógica compartida ✅
 - [x] **Validación de estado duplicada**: Crear componente `ValidationStatus` o hook `useValidationMessage` para estados del JSON ✅
@@ -163,7 +163,7 @@
   - **Implementado:**
     - Creado `hooks/useModalState.ts` con API completa (open, close, toggle, setIsOpen)
     - Refactorizados JsonPlayground y JsPlayground para usar el hook
-    - Eliminados estados manuales duplicados (useState<boolean> en cada componente)
+    - Eliminados estados manuales duplicados (`useState<boolean>` en cada componente)
     - Tests completos: 9 tests nuevos, cobertura 100%
   - **Resultado:** Código más limpio, +210 bytes pero mejor arquitectura para escalabilidad
 
@@ -174,14 +174,14 @@
 - [x] **Discriminated unions para actions**: Patrón Action dispatch type-safe ✅
   - **Impacto:** Prevenir estados inválidos
 
-#### 🟡 Baja Prioridad
+#### 🟡 Baja Prioridad — Code Organization
 
 - [x] **Centralizar tipos de configuración**: Crear `types/config.ts` genérico ✅
   - **Impacto:** Código más DRY
 
 ### 12.3 - Testing & Quality (Phase 3 - 2-4 semanas)
 
-#### 🟠 Media Prioridad
+#### 🟠 Media Prioridad — Testing & Quality
 
 - [x] **Aumentar coverage a 85%+**: Alcanzado 85.13%
   - **Archivos sin cobertura:** `PlaygroundCard`, `PlaygroundSidebar`, `Home`
@@ -306,17 +306,17 @@
   - [x] Test: Modal de configuración abre/cierra ✅
   - [x] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.) ✅
 
-- [ ] **JS Playground E2E tests** (3-4 días)
-  - [ ] Test: Ejecutar código JavaScript válido
-  - [ ] Test: Capturar console.log outputs
-  - [ ] Test: Mostrar errores de runtime
-  - [ ] Test: Formatear código JS
-  - [ ] Test: Minificar código JS
-  - [ ] Test: Guardar/cargar configuración
-  - [ ] Test: Descargar archivo JS
-  - [ ] Test: Copiar input/output
-  - [ ] Test: Validación de sintaxis en tiempo real
-  - [ ] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.)
+- [x] **JS Playground E2E tests** (3-4 días) ✅
+  - [x] Test: Ejecutar código JavaScript válido ✅
+  - [x] Test: Capturar console.log outputs ✅
+  - [x] Test: Mostrar errores de runtime ✅
+  - [x] Test: Formatear código JS ✅
+  - [x] Test: Minificar código JS ✅
+  - [x] Test: Guardar/cargar configuración ✅
+  - [x] Test: Descargar archivo JS ✅
+  - [x] Test: Copiar input/output ✅
+  - [x] Test: Validación de sintaxis en tiempo real ✅
+  - [x] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.) ✅
 
 - [ ] **Cross-playground navigation E2E tests** (1 día)
   - [ ] Test: Navegar entre playgrounds
@@ -339,7 +339,7 @@
   - [ ] Test: localStorage lleno - fallback graceful
   - [ ] Test: Network offline - funcionalidad local
 
-#### 🟠 Media Prioridad
+#### 🟠 Media Prioridad — E2E Advanced
 
 - [ ] **Visual regression tests** (1-2 semanas)
   - **Tool:** Playwright visual comparison
@@ -355,7 +355,7 @@
 
 ### 13.3 - Performance Optimization (Lighthouse & TTI)
 
-#### 🟠 Media Prioridad (Próximos 3-5 días)
+#### 🟠 Media Prioridad — Documentation & Patterns (Próximos 3-5 días)
 
 **Objetivo:** Mejorar Lighthouse score de 85/100 a 95+/100, reducir Time to Interactive de 2.8s a <2.5s
 
@@ -383,12 +383,6 @@
   - [ ] Configurar `rollup-plugin-visualizer`
   - [ ] Identificar dependencias pesadas
   - [ ] Evaluar tree-shaking effectiveness
-
-#### 🟡 Baja Prioridad
-
-- [ ] **Métricas en producción**
-  - [ ] Web Vitals tracking (CLS, LCP, FID)
-  - [ ] Integrar con analytics
 
 ---
 

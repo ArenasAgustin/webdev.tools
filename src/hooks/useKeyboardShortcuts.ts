@@ -32,41 +32,41 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
         return;
       }
 
-      const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-      const ctrlKey = isMac ? event.metaKey : event.ctrlKey;
+      const ctrlKey = event.ctrlKey || event.metaKey;
+      const normalizedKey = event.key.length === 1 ? event.key.toUpperCase() : event.key;
 
       // Ctrl/Cmd+Shift+F: Format
-      if (ctrlKey && event.shiftKey && event.key === "F") {
+      if (ctrlKey && event.shiftKey && normalizedKey === "F") {
         event.preventDefault();
         config.onFormat?.();
       }
 
       // Ctrl/Cmd+Shift+M: Minify
-      if (ctrlKey && event.shiftKey && event.key === "M") {
+      if (ctrlKey && event.shiftKey && normalizedKey === "M") {
         event.preventDefault();
         config.onMinify?.();
       }
 
       // Ctrl/Cmd+Shift+L: Clean
-      if (ctrlKey && event.shiftKey && event.key === "L") {
+      if (ctrlKey && event.shiftKey && normalizedKey === "L") {
         event.preventDefault();
         config.onClean?.();
       }
 
       // Ctrl/Cmd+Shift+C: Copy output
-      if (ctrlKey && event.shiftKey && event.key === "C") {
+      if (ctrlKey && event.shiftKey && normalizedKey === "C") {
         event.preventDefault();
         config.onCopyOutput?.();
       }
 
       // Ctrl/Cmd+Shift+Delete: Clear input
-      if (ctrlKey && event.shiftKey && event.key === "Delete") {
+      if (ctrlKey && event.shiftKey && normalizedKey === "Delete") {
         event.preventDefault();
         config.onClearInput?.();
       }
 
       // Ctrl/Cmd+,: Open config
-      if (ctrlKey && event.key === ",") {
+      if (ctrlKey && (event.key === "," || event.key === "Comma")) {
         event.preventDefault();
         config.onOpenConfig?.();
       }
