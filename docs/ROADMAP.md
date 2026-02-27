@@ -292,19 +292,19 @@
   - **Archivos creados:** `playwright.config.ts`, `.github/workflows/e2e.yml`, `e2e/smoke.spec.ts` ✅
   - **Resultado:** `pnpm e2e` ejecuta smoke tests sobre preview build ✅
 
-- [ ] **JSON Playground E2E tests** (3-4 días)
-  - [ ] Test: Cargar JSON válido y formatear
-  - [ ] Test: Minificar JSON
-  - [ ] Test: Limpiar nulos y remover espacios
-  - [ ] Test: Aplicar JSONPath queries
-  - [ ] Test: Historial de JSONPath funciona
-  - [ ] Test: Guardar/cargar configuración
-  - [ ] Test: Descargar JSON formateado
-  - [ ] Test: Copiar output al portapapeles
-  - [ ] Test: Validación en tiempo real de errores
-  - [ ] Test: Modal de ejemplos JSONPath
-  - [ ] Test: Modal de configuración abre/cierra
-  - [ ] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.)
+- [x] **JSON Playground E2E tests** (3-4 días) ✅
+  - [x] Test: Cargar JSON válido y formatear ✅
+  - [x] Test: Minificar JSON ✅
+  - [x] Test: Limpiar nulos y remover espacios ✅
+  - [x] Test: Aplicar JSONPath queries ✅
+  - [x] Test: Historial de JSONPath funciona ✅
+  - [x] Test: Guardar/cargar configuración ✅
+  - [x] Test: Descargar JSON formateado ✅
+  - [x] Test: Copiar output al portapapeles ✅
+  - [x] Test: Validación en tiempo real de errores ✅
+  - [x] Test: Modal de ejemplos JSONPath ✅
+  - [x] Test: Modal de configuración abre/cierra ✅
+  - [x] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.) ✅
 
 - [ ] **JS Playground E2E tests** (3-4 días)
   - [ ] Test: Ejecutar código JavaScript válido
