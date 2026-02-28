@@ -13,7 +13,10 @@ test.describe("JSON workflow", () => {
   test("load example and minify JSON", async ({ page }) => {
     await page.goto("/playground/json");
 
-    await page.getByRole("button", { name: "Ejemplo" }).click();
+    const inputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Entrada", exact: true }) });
+    await inputPanel.getByRole("button", { name: "Ejemplo" }).click();
     await page.getByRole("button", { name: "Minificar" }).click();
 
     await expect(page.getByText("JSON minificado correctamente")).toBeVisible();
@@ -40,6 +43,10 @@ test.describe("JSON workflow", () => {
   });
 
   test("apply JSONPath query to filter data", async ({ page }) => {
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
+      origin: "http://127.0.0.1:4173",
+    });
+
     await page.goto("/playground/json");
 
     await page.getByRole("button", { name: "Ejemplo" }).click();
@@ -49,39 +56,17 @@ test.describe("JSON workflow", () => {
 
     await page.getByRole("button", { name: "Aplicar filtro JSONPath" }).click();
 
-    // Wait and verify the output contains the expected filtered names
-    // Extract text content from the output editor via JavaScript
-    const getOutputText = async () => {
-      const editorContent = await page.evaluate(() => {
-        const editors = document.querySelectorAll(".monaco-editor");
-        if (editors.length >= 2) {
-          const editorElement = editors[1];
-          return editorElement.textContent || "";
-        }
-        return "";
-      });
-      return editorContent;
-    };
+    const outputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Resultado", exact: true }) });
+    await outputPanel.getByRole("button", { name: "Copiar" }).click();
 
-    // Poll for results since Monaco updates asynchronously
-    let outputText = "";
-    for (let i = 0; i < 25; i++) {
-      outputText = await getOutputText();
-      if (
-        outputText.includes("Juan Pérez") &&
-        outputText.includes("María García") &&
-        outputText.includes("Carlos López")
-      ) {
-        break;
-      }
-      await page.waitForTimeout(300);
-    }
-
-    expect(outputText).toMatch(/Juan\s+Pérez/);
-    // Note: The received text contains escaped quotes and line numbers from Monaco editor
-    // So we search for the text without worrying about exact formatting
-    expect(outputText).toMatch(/María\s+García/);
-    expect(outputText).toMatch(/Carlos\s+López/);
+    await expect
+      .poll(async () => page.evaluate(async () => navigator.clipboard.readText()))
+      .toContain("Juan Pérez");
+    const copiedText = await page.evaluate(async () => navigator.clipboard.readText());
+    expect(copiedText).toContain("María García");
+    expect(copiedText).toContain("Carlos López");
   });
 
   test("JSONPath history saves and reuses expressions", async ({ page }) => {

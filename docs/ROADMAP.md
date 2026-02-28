@@ -328,12 +328,12 @@
   - [x] Test: URL routing funciona ✅
   - [x] Test: Home page lista ambos playgrounds ✅
 
-- [ ] **Responsive & Mobile E2E tests** (2 días)
-  - [ ] Test: Mobile viewport (375px) - Layout adapta
-  - [ ] Test: Tablet viewport (768px) - Stacking funciona
-  - [ ] Test: Desktop viewport (1920px) - Flex layout funciona
-  - [ ] Test: Touch interactions en mobile
-  - [ ] Test: Modal accessibility en mobile
+- [x] **Responsive & Mobile E2E tests** (2 días) ✅
+  - [x] Test: Mobile viewport (375px) - Layout adapta ✅
+  - [x] Test: Tablet viewport (768px) - Stacking funciona ✅
+  - [x] Test: Desktop viewport (1920px) - Flex layout funciona ✅
+  - [x] Test: Touch interactions en mobile ✅
+  - [x] Test: Modal accessibility en mobile ✅
 
 - [ ] **Error handling & Edge cases E2E tests** (2 días)
   - [x] Test: JSON inválido - muestra error ✅
