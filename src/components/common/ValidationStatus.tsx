@@ -1,9 +1,15 @@
 import { type ReactNode, memo, useMemo } from "react";
-import type { JsonValidationState } from "@/playgrounds/json/json.types";
+
+interface ValidationState {
+  isValid: boolean;
+  error: {
+    message: string;
+  } | null;
+}
 
 interface ValidationStatusProps {
   inputValue: string;
-  validationState: JsonValidationState;
+  validationState: ValidationState;
   validExtra?: ReactNode;
   warning?: ReactNode;
   className?: string;

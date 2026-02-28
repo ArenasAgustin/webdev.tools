@@ -3,6 +3,7 @@ import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
 import { formatJsAsync, minifyJsAsync } from "@/services/js/worker";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
+import { useTransformActions } from "./useTransformActions";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 
 /**
@@ -54,6 +55,11 @@ export function useJsPlaygroundActions({
           : null,
       [inputTooLarge, inputTooLargeMessage],
     ),
+  });
+
+  const { runTransformAction } = useTransformActions({
+    createInputValidator: baseActions.createInputValidator,
+    toast,
   });
 
   /**
@@ -114,17 +120,6 @@ export function useJsPlaygroundActions({
   }, [baseActions, inputCode, setOutput, setError, toast]);
 
   /**
-   * Copy input code to clipboard
-   */
-  const handleCopyInput = useCallback(() => {
-    baseActions.handleCopy({
-      text: inputCode,
-      successMessage: "Código copiado al portapapeles",
-      validate: () => (!inputCode ? "No hay código para copiar" : null),
-    });
-  }, [baseActions, inputCode]);
-
-  /**
    * Copy output to clipboard
    */
   const handleCopyOutput = useCallback(() => {
@@ -165,21 +160,19 @@ export function useJsPlaygroundActions({
    * Format JavaScript code
    */
   const handleFormat = useCallback(() => {
-    createValidatedHandler({
-      validate: baseActions.createInputValidator,
+    runTransformAction({
       run: async () => {
         const result = await formatJsAsync(inputCode, formatConfig.indentSize);
 
         if (!result.ok) {
-          throw new Error(result.error ?? "Error al formatear código");
+          throw new Error(result.error.message ?? "Error al formatear código");
         }
 
         return result.value;
       },
       onSuccess: (value) => {
-        setInputCode(value);
         setError(null);
-        setOutput("");
+        setOutput(value);
         if (formatConfig.autoCopy && value) {
           navigator.clipboard.writeText(value).catch((err) => {
             console.error("Error al copiar al portapapeles: ", err);
@@ -189,18 +182,16 @@ export function useJsPlaygroundActions({
       onError: (message) => {
         setError(message);
       },
-      toast,
       successMessage: "Código formateado correctamente",
       errorMessage: "Error al formatear código",
-    })();
-  }, [baseActions, inputCode, formatConfig, setInputCode, setError, setOutput, toast]);
+    });
+  }, [runTransformAction, inputCode, formatConfig, setError, setOutput]);
 
   /**
    * Minify JavaScript code
    */
   const handleMinify = useCallback(() => {
-    createValidatedHandler({
-      validate: baseActions.createInputValidator,
+    runTransformAction({
       run: async () => {
         const result = await minifyJsAsync(inputCode, {
           removeComments: minifyConfig.removeComments,
@@ -208,15 +199,14 @@ export function useJsPlaygroundActions({
         });
 
         if (!result.ok) {
-          throw new Error(result.error ?? "Error al minificar código");
+          throw new Error(result.error.message ?? "Error al minificar código");
         }
 
         return result.value;
       },
       onSuccess: (value) => {
-        setInputCode(value);
         setError(null);
-        setOutput("");
+        setOutput(value);
         if (minifyConfig.autoCopy && value) {
           navigator.clipboard.writeText(value).catch((err) => {
             console.error("Error al copiar al portapapeles: ", err);
@@ -226,17 +216,15 @@ export function useJsPlaygroundActions({
       onError: (message) => {
         setError(message);
       },
-      toast,
       successMessage: "Código minificado correctamente",
       errorMessage: "Error al minificar código",
-    })();
-  }, [baseActions, inputCode, minifyConfig, setInputCode, setError, setOutput, toast]);
+    });
+  }, [runTransformAction, inputCode, minifyConfig, setError, setOutput]);
 
   return {
     handleClearInput: baseActions.handleClearInput,
     handleLoadExample: baseActions.handleLoadExample,
     handleExecute,
-    handleCopyInput,
     handleCopyOutput,
     handleDownloadInput,
     handleDownloadOutput,

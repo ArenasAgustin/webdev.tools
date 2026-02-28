@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
+import { useTransformActions } from "./useTransformActions";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 
 interface UseJsonPlaygroundActionsProps {
@@ -94,6 +95,11 @@ export function useJsonPlaygroundActions({
     ),
   });
 
+  const { runTransformAction } = useTransformActions({
+    createInputValidator: baseActions.createInputValidator,
+    toast,
+  });
+
   const handleCopyOutput = useCallback(() => {
     const textToCopy = jsonPathOutput || formatterOutput;
     baseActions.handleCopy({
@@ -104,43 +110,37 @@ export function useJsonPlaygroundActions({
   }, [formatterOutput, jsonPathOutput, baseActions]);
 
   const handleFormat = useCallback(() => {
-    createValidatedHandler({
-      validate: baseActions.createInputValidator,
+    runTransformAction({
       run: () => {
         clearJsonPathOutput();
         return formatFn(inputJson, formatConfig);
       },
-      toast,
       successMessage: "JSON formateado correctamente",
       errorMessage: "Error al formatear JSON",
-    })();
-  }, [baseActions, clearJsonPathOutput, formatFn, inputJson, formatConfig, toast]);
+    });
+  }, [runTransformAction, clearJsonPathOutput, formatFn, inputJson, formatConfig]);
 
   const handleMinify = useCallback(() => {
-    createValidatedHandler({
-      validate: baseActions.createInputValidator,
+    runTransformAction({
       run: () => {
         clearJsonPathOutput();
         return minifyFn(inputJson, minifyConfig);
       },
-      toast,
       successMessage: "JSON minificado correctamente",
       errorMessage: "Error al minificar JSON",
-    })();
-  }, [baseActions, clearJsonPathOutput, minifyFn, inputJson, minifyConfig, toast]);
+    });
+  }, [runTransformAction, clearJsonPathOutput, minifyFn, inputJson, minifyConfig]);
 
   const handleClean = useCallback(() => {
-    createValidatedHandler({
-      validate: baseActions.createInputValidator,
+    runTransformAction({
       run: () => {
         clearJsonPathOutput();
         return cleanFn(inputJson, cleanConfig);
       },
-      toast,
       successMessage: "JSON limpiado correctamente",
       errorMessage: "Error al limpiar JSON",
-    })();
-  }, [baseActions, clearJsonPathOutput, cleanFn, inputJson, cleanConfig, toast]);
+    });
+  }, [runTransformAction, clearJsonPathOutput, cleanFn, inputJson, cleanConfig]);
 
   const handleApplyJsonPath = useCallback(() => {
     createValidatedHandler({

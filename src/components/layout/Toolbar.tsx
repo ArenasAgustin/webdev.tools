@@ -6,6 +6,7 @@ import type { TipItem, QuickExample } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { ToolbarConfig } from "@/types/toolbar";
 
 type ModalType = "tips" | "history" | "config" | null;
@@ -50,6 +51,15 @@ export interface JsonToolbarProps {
 export interface GenericToolbarProps {
   variant: "generic";
   tools: ToolbarConfig;
+  config?: {
+    mode: "js";
+    format: JsFormatConfig;
+    onFormatChange: (config: JsFormatConfig) => void;
+    minify: JsMinifyConfig;
+    onMinifyChange: (config: JsMinifyConfig) => void;
+    isOpen?: boolean;
+    onOpenChange?: (isOpen: boolean) => void;
+  };
 }
 
 type ToolbarProps = JsonToolbarProps | GenericToolbarProps;
@@ -60,48 +70,78 @@ export function Toolbar(props: ToolbarProps) {
   if (props.variant === "generic") {
     const toolsTitle = props.tools.title ?? "Herramientas";
     const toolsGridClass = props.tools.gridClassName ?? "grid grid-cols-2 sm:grid-cols-3 gap-2";
+    const genericConfig = props.config;
+    const showGenericConfig = genericConfig
+      ? (genericConfig.isOpen ?? openModal === "config")
+      : false;
+    const setShowGenericConfigState = (isOpen: boolean) => {
+      if (!genericConfig) {
+        props.tools.onOpenConfig?.();
+        return;
+      }
+
+      if (genericConfig.onOpenChange) {
+        genericConfig.onOpenChange(isOpen);
+      } else {
+        setOpenModal(isOpen ? "config" : null);
+      }
+    };
 
     return (
-      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 sticky bottom-0 z-10 shrink-0">
-        <div className="grid grid-cols-1 gap-4 sm:gap-6">
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <i className="fas fa-tools text-yellow-400"></i> {toolsTitle}
-              {props.tools.onOpenConfig && (
-                <button
-                  type="button"
-                  onClick={props.tools.onOpenConfig}
-                  className="ml-auto text-gray-300 hover:text-yellow-300 transition-colors"
-                  title={props.tools.configButtonTitle ?? "Configurar herramientas"}
-                  aria-label={props.tools.configButtonTitle ?? "Configurar herramientas"}
-                >
-                  <i className="fas fa-cog" aria-hidden="true"></i>
-                </button>
-              )}
-            </h3>
-            <div className={toolsGridClass}>
-              {props.tools.actions.map((action) => (
-                <Button
-                  key={action.id ?? action.label}
-                  variant={action.variant}
-                  size="md"
-                  onClick={action.onClick}
-                  disabled={action.disabled}
-                  title={action.tooltip ?? action.label}
-                  aria-label={action.tooltip ?? action.label}
-                >
-                  {action.loading ? (
-                    <i className="fas fa-spinner fa-spin mr-1"></i>
-                  ) : (
-                    <i className={`fas fa-${action.icon} mr-1`}></i>
-                  )}
-                  {action.label}
-                </Button>
-              ))}
+      <>
+        <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 sticky bottom-0 z-10 shrink-0">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <i className="fas fa-tools text-yellow-400"></i> {toolsTitle}
+                {(props.tools.onOpenConfig ?? genericConfig) && (
+                  <button
+                    type="button"
+                    onClick={() => setShowGenericConfigState(true)}
+                    className="ml-auto text-gray-300 hover:text-yellow-300 transition-colors"
+                    title={props.tools.configButtonTitle ?? "Configurar herramientas"}
+                    aria-label={props.tools.configButtonTitle ?? "Configurar herramientas"}
+                  >
+                    <i className="fas fa-cog" aria-hidden="true"></i>
+                  </button>
+                )}
+              </h3>
+              <div className={toolsGridClass}>
+                {props.tools.actions.map((action) => (
+                  <Button
+                    key={action.id ?? action.label}
+                    variant={action.variant}
+                    size="md"
+                    onClick={action.onClick}
+                    disabled={action.disabled}
+                    title={action.tooltip ?? action.label}
+                    aria-label={action.tooltip ?? action.label}
+                  >
+                    {action.loading ? (
+                      <i className="fas fa-spinner fa-spin mr-1"></i>
+                    ) : (
+                      <i className={`fas fa-${action.icon} mr-1`}></i>
+                    )}
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {genericConfig && (
+          <ConfigModal
+            mode="js"
+            isOpen={showGenericConfig}
+            onClose={() => setShowGenericConfigState(false)}
+            formatConfig={genericConfig.format}
+            onFormatConfigChange={genericConfig.onFormatChange}
+            minifyConfig={genericConfig.minify}
+            onMinifyConfigChange={genericConfig.onMinifyChange}
+          />
+        )}
+      </>
     );
   }
 

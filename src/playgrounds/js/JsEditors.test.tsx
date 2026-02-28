@@ -70,6 +70,10 @@ vi.mock("@/components/common/Stats", () => ({
   Stats: () => <div>stats</div>,
 }));
 
+vi.mock("@/components/common/ValidationStatus", () => ({
+  ValidationStatus: ({ warning }: { warning?: string | null }) => <div>{warning}</div>,
+}));
+
 vi.mock("@/components/common/OutputStatus", () => ({
   OutputStatus: ({ validExtra }: { validExtra?: ReactNode }) => <div>{validExtra}</div>,
 }));
@@ -84,9 +88,14 @@ describe("JsEditors", () => {
     inputCode: "const a = 1;",
     output: "1\n2",
     error: null,
+    validationState: {
+      isValid: true,
+      error: null,
+    },
     inputWarning: "warning",
     onInputChange: vi.fn(),
-    onCopyInput: vi.fn(),
+    onClearInput: vi.fn(),
+    onLoadExample: vi.fn(),
     onCopyOutput: vi.fn(),
     onDownloadInput: vi.fn(),
     onDownloadOutput: vi.fn(),

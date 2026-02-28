@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { ConfigModal } from "@/components/common/ConfigModal";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
@@ -7,7 +6,9 @@ import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTextStats } from "@/hooks/useTextStats";
+import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
@@ -36,11 +37,7 @@ export function JsPlayground() {
   );
 
   // Modal state management
-  const {
-    isOpen: isConfigOpen,
-    open: openConfigModal,
-    close: closeConfigModal,
-  } = useModalState();
+  const configModal = useModalState();
 
   const debouncedInputCode = useDebouncedValue(inputCode, 300);
   const inputStats = useTextStats(inputCode);
@@ -67,27 +64,13 @@ export function JsPlayground() {
     }
   }, [inputTooLarge, toast]);
 
-  const syntaxError = useMemo(() => {
-    const code = debouncedInputCode.trim();
-    if (!code) return null;
-
-    try {
-      new Function(code);
-      return null;
-    } catch (parseError) {
-      const message = parseError instanceof Error ? parseError.message : String(parseError);
-      return `Error de sintaxis: ${message}`;
-    }
-  }, [debouncedInputCode]);
-
-  const effectiveError = syntaxError ?? error;
+  const validation = useJsParser(debouncedInputCode);
 
   // Use JS playground actions hook
   const {
     handleClearInput,
     handleLoadExample,
     handleExecute,
-    handleCopyInput,
     handleCopyOutput,
     handleDownloadInput,
     handleDownloadOutput,
@@ -106,56 +89,13 @@ export function JsPlayground() {
     toast,
   });
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (
-        target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.contentEditable === "true")
-      ) {
-        return;
-      }
-
-      const hasModifier = event.ctrlKey || event.metaKey;
-      if (!hasModifier) return;
-
-      const normalizedKey = event.key.length === 1 ? event.key.toUpperCase() : event.key;
-
-      if (event.shiftKey && (event.code === "KeyF" || normalizedKey === "F")) {
-        event.preventDefault();
-        handleFormat();
-        return;
-      }
-
-      if (event.shiftKey && (event.code === "KeyM" || normalizedKey === "M")) {
-        event.preventDefault();
-        handleMinify();
-        return;
-      }
-
-      if (event.shiftKey && (event.code === "KeyC" || normalizedKey === "C")) {
-        event.preventDefault();
-        handleCopyOutput();
-        return;
-      }
-
-      if (event.shiftKey && (event.code === "Delete" || normalizedKey === "Delete")) {
-        event.preventDefault();
-        handleClearInput();
-        return;
-      }
-
-      if (event.code === "Comma" || event.key === "," || event.key === "Comma") {
-        event.preventDefault();
-        openConfigModal();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleFormat, handleMinify, handleCopyOutput, handleClearInput, openConfigModal]);
+  useKeyboardShortcuts({
+    onFormat: handleFormat,
+    onMinify: handleMinify,
+    onCopyOutput: handleCopyOutput,
+    onClearInput: handleClearInput,
+    onOpenConfig: configModal.open,
+  });
 
   // Memoize complex toolbar configuration to prevent re-renders
   const toolbarTools = useMemo<ToolbarConfig>(
@@ -192,17 +132,29 @@ export function JsPlayground() {
           onClick: handleLoadExample,
         },
       ],
-      onOpenConfig: openConfigModal,
       configButtonTitle: "Configurar herramientas",
       gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
     }),
+    [handleExecute, handleFormat, handleMinify, handleClearInput, handleLoadExample],
+  );
+
+  const toolbarConfig = useMemo(
+    () => ({
+      mode: "js" as const,
+      format: formatConfig,
+      onFormatChange: setFormatConfig,
+      minify: minifyConfig,
+      onMinifyChange: setMinifyConfig,
+      isOpen: configModal.isOpen,
+      onOpenChange: configModal.setIsOpen,
+    }),
     [
-      handleExecute,
-      handleFormat,
-      handleMinify,
-      handleClearInput,
-      handleLoadExample,
-      openConfigModal,
+      formatConfig,
+      minifyConfig,
+      configModal.isOpen,
+      configModal.setIsOpen,
+      setFormatConfig,
+      setMinifyConfig,
     ],
   );
 
@@ -211,26 +163,18 @@ export function JsPlayground() {
       <JsEditors
         inputCode={inputCode}
         output={output}
-        error={effectiveError}
+        error={error}
+        validationState={validation}
         inputWarning={inputWarning}
         onInputChange={setInputCode}
-        onCopyInput={handleCopyInput}
+        onClearInput={handleClearInput}
+        onLoadExample={handleLoadExample}
         onCopyOutput={handleCopyOutput}
         onDownloadInput={handleDownloadInput}
         onDownloadOutput={handleDownloadOutput}
       />
 
-      <Toolbar variant="generic" tools={toolbarTools} />
-
-      <ConfigModal
-        mode="js"
-        isOpen={isConfigOpen}
-        onClose={closeConfigModal}
-        formatConfig={formatConfig}
-        onFormatConfigChange={setFormatConfig}
-        minifyConfig={minifyConfig}
-        onMinifyConfigChange={setMinifyConfig}
-      />
+      <Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />
     </div>
   );
 }

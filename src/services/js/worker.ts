@@ -1,4 +1,5 @@
 import type { Result } from "@/types/common";
+import type { JsonError } from "@/types/common";
 import { formatJs } from "@/services/formatter/formatter";
 import { minifyJs, type JsMinifyOptions } from "@/services/minifier/minifier";
 import { runJsWorker } from "@/services/js/workerClient";
@@ -14,14 +15,26 @@ const runJsOperation = (
     input: payload.input,
     payload,
     runWorker: runJsWorker,
-    runSync,
-    toError: (message) => message,
+    runSync: async () => {
+      const result = await runSync();
+      if (result.ok) {
+        return result;
+      }
+
+      return {
+        ok: false,
+        error: {
+          message: result.error,
+        },
+      } satisfies Result<string, JsonError>;
+    },
+    toError: (message): JsonError => ({ message }),
   });
 
 export const formatJsAsync = async (
   input: string,
   indentSize: IndentStyle = 2,
-): Promise<Result<string, string>> => {
+): Promise<Result<string, JsonError>> => {
   return runJsOperation(
     {
       action: "format",
@@ -35,6 +48,6 @@ export const formatJsAsync = async (
 export const minifyJsAsync = async (
   input: string,
   options: JsMinifyOptions = {},
-): Promise<Result<string, string>> => {
+): Promise<Result<string, JsonError>> => {
   return runJsOperation({ action: "minify", input, options }, () => minifyJs(input, options));
 };

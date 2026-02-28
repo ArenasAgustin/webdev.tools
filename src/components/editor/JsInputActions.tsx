@@ -1,16 +1,25 @@
 import { Button } from "@/components/common/Button";
 
 interface JsInputActionsProps {
-  onCopyInput: () => void;
+  onClearInput: () => void;
+  onLoadExample: () => void;
   onDownloadInput: () => void;
   onExpand: () => void;
 }
 
-export function JsInputActions({ onCopyInput, onDownloadInput, onExpand }: JsInputActionsProps) {
+export function JsInputActions({
+  onClearInput,
+  onLoadExample,
+  onDownloadInput,
+  onExpand,
+}: JsInputActionsProps) {
   return (
     <>
-      <Button variant="primary" onClick={onCopyInput}>
-        <i className="fas fa-copy"></i> Copiar
+      <Button variant="danger" onClick={onClearInput}>
+        <i className="fas fa-trash"></i> Limpiar
+      </Button>
+      <Button variant="success" onClick={onLoadExample}>
+        <i className="fas fa-file-import"></i> Ejemplo
       </Button>
       <Button variant="cyan" onClick={onDownloadInput}>
         <i className="fas fa-download"></i> Descargar

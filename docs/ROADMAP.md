@@ -251,6 +251,10 @@
   - **Archivos:** `types/toolbar.ts` (ToolbarAction, ToolbarConfig, helpers)
   - **Nuevas features:** Soporte para disabled, loading, tooltip, id único
   - **Impacto:** Toolbars extensibles sin cambios estructurales en UI. JsPlayground usa tipos compartidos
+- [x] **Alinear patrón Toolbar/Config entre JSON y JS** ✅
+  - **Implementado:** JS mueve configuración al `Toolbar` (composición integrada) y elimina `ConfigModal` separado en playground
+  - **Archivos:** `playgrounds/js/JsPlayground.tsx`, `components/layout/Toolbar.tsx`
+  - **Impacto:** Patrón de composición consistente entre playgrounds, menor acoplamiento en `JsPlayground`
 - [x] **Base services para transformaciones**: interfaz `transform(input, options) -> Result` ✅
   - **Archivos:** `services/transform.ts` (TransformService) + adapters en JSON/JS
   - **Impacto:** Plug & play de nuevos motores de formato/minify/clean

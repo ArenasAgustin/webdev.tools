@@ -36,11 +36,11 @@ vi.mock("@/services/js/worker", () => ({
   minifyJsAsync: minifyJsAsyncMock as (
     input: string,
     options: { removeComments: boolean; removeSpaces: boolean },
-  ) => Promise<{ ok: boolean; value?: string; error?: string }>,
+  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
   formatJsAsync: formatJsAsyncMock as (
     input: string,
     indentSize: number,
-  ) => Promise<{ ok: boolean; value?: string; error?: string }>,
+  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
 }));
 
 vi.mock("@/utils/download", () => ({
@@ -52,9 +52,11 @@ vi.mock("./JsEditors", () => ({
     inputCode,
     output,
     error,
+    validationState,
     inputWarning,
     onInputChange,
-    onCopyInput,
+    onClearInput,
+    onLoadExample,
     onCopyOutput,
     onDownloadInput,
     onDownloadOutput,
@@ -62,9 +64,11 @@ vi.mock("./JsEditors", () => ({
     inputCode: string;
     output: string;
     error: string | null;
+    validationState: { isValid: boolean; error: { message: string } | null };
     inputWarning?: string | null;
     onInputChange: (code: string) => void;
-    onCopyInput: () => void;
+    onClearInput: () => void;
+    onLoadExample: () => void;
     onCopyOutput: () => void;
     onDownloadInput: () => void;
     onDownloadOutput: () => void;
@@ -73,13 +77,15 @@ vi.mock("./JsEditors", () => ({
       <p data-testid="input-code">{inputCode}</p>
       <p data-testid="output-code">{output}</p>
       <p data-testid="error-code">{error}</p>
+      <p data-testid="validation-valid">{String(validationState.isValid)}</p>
       <p data-testid="warning">{inputWarning}</p>
       <button onClick={() => onInputChange("return 2")}>set-return</button>
       <button onClick={() => onInputChange('throw new Error("Boom")')}>set-error</button>
       <button onClick={() => onInputChange("const x = 1;")}>set-input</button>
       <button onClick={() => onInputChange("")}>set-empty</button>
       <button onClick={() => onInputChange("x".repeat(500_001))}>set-huge</button>
-      <button onClick={onCopyInput}>copy-input</button>
+      <button onClick={onClearInput}>clear-input</button>
+      <button onClick={onLoadExample}>load-example</button>
       <button onClick={onCopyOutput}>copy-output</button>
       <button onClick={onDownloadInput}>download-input</button>
       <button onClick={onDownloadOutput}>download-output</button>
@@ -90,10 +96,20 @@ vi.mock("./JsEditors", () => ({
 vi.mock("@/components/layout/Toolbar", () => ({
   Toolbar: ({
     tools,
+    config,
   }: {
     tools: {
       actions: { label: string; onClick: () => void }[];
       onOpenConfig?: () => void;
+    };
+    config?: {
+      onOpenChange?: (isOpen: boolean) => void;
+      onFormatChange: (config: { indentSize: number; autoCopy: boolean }) => void;
+      onMinifyChange: (config: {
+        removeComments: boolean;
+        removeSpaces: boolean;
+        autoCopy: boolean;
+      }) => void;
     };
   }) => (
     <div>
@@ -102,47 +118,27 @@ vi.mock("@/components/layout/Toolbar", () => ({
           {action.label}
         </button>
       ))}
-      <button onClick={() => tools.onOpenConfig?.()}>open-config</button>
-    </div>
-  ),
-}));
-
-vi.mock("@/components/common/ConfigModal", () => ({
-  ConfigModal: ({
-    isOpen,
-    onClose,
-    onFormatConfigChange,
-    onMinifyConfigChange,
-    mode,
-  }: {
-    isOpen: boolean;
-    onClose: () => void;
-    mode: "js";
-    onFormatConfigChange: (config: { indentSize: number; autoCopy: boolean }) => void;
-    onMinifyConfigChange: (config: {
-      removeComments: boolean;
-      removeSpaces: boolean;
-      autoCopy: boolean;
-    }) => void;
-  }) => (
-    <div>
-      <span>{mode}</span>
-      <span>{isOpen ? "config-open" : "config-closed"}</span>
-      <button onClick={() => onFormatConfigChange({ indentSize: 2, autoCopy: true })}>
-        enable-format-autocopy
+      <button onClick={() => (config ? config.onOpenChange?.(true) : tools.onOpenConfig?.())}>
+        open-config
       </button>
-      <button
-        onClick={() =>
-          onMinifyConfigChange({
-            removeComments: true,
-            removeSpaces: true,
-            autoCopy: true,
-          })
-        }
-      >
-        enable-minify-autocopy
-      </button>
-      <button onClick={onClose}>close-config</button>
+      {config && (
+        <>
+          <button onClick={() => config.onFormatChange({ indentSize: 2, autoCopy: true })}>
+            enable-format-autocopy
+          </button>
+          <button
+            onClick={() =>
+              config.onMinifyChange({
+                removeComments: true,
+                removeSpaces: true,
+                autoCopy: true,
+              })
+            }
+          >
+            enable-minify-autocopy
+          </button>
+        </>
+      )}
     </div>
   ),
 }));
@@ -184,20 +180,15 @@ describe("JsPlayground branches", () => {
     render(<JsPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-empty" }));
-    fireEvent.click(screen.getByRole("button", { name: "copy-input" }));
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("No hay código para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay código para descargar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para descargar");
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
-    fireEvent.click(screen.getByRole("button", { name: "copy-input" }));
-    expect(clipboardWriteTextMock).toHaveBeenCalledWith("const x = 1;");
-
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
     expect(downloadFileMock).toHaveBeenCalledWith(
       "const x = 1;",
@@ -228,16 +219,18 @@ describe("JsPlayground branches", () => {
     await waitFor(() => {
       expect(formatJsAsyncMock).toHaveBeenCalled();
       expect(toastMocks.success).toHaveBeenCalledWith("Código formateado correctamente");
+      expect(screen.getByTestId("output-code").textContent).toBe("const x = 1;");
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
     await waitFor(() => {
       expect(minifyJsAsyncMock).toHaveBeenCalled();
       expect(toastMocks.success).toHaveBeenCalledWith("Código minificado correctamente");
+      expect(screen.getByTestId("output-code").textContent).toBe("const x=1;");
     });
 
-    formatJsAsyncMock.mockResolvedValueOnce({ ok: false, error: "format fail" });
-    minifyJsAsyncMock.mockResolvedValueOnce({ ok: false, error: "minify fail" });
+    formatJsAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: "format fail" } });
+    minifyJsAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: "minify fail" } });
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));

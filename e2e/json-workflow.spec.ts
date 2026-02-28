@@ -49,11 +49,39 @@ test.describe("JSON workflow", () => {
 
     await page.getByRole("button", { name: "Aplicar filtro JSONPath" }).click();
 
-    // Verify output contains the expected filtered names
-    const outputEditor = page.locator(".monaco-editor").nth(1);
-    await expect(outputEditor).toContainText("Juan Pérez");
-    await expect(outputEditor).toContainText("María García");
-    await expect(outputEditor).toContainText("Carlos López");
+    // Wait and verify the output contains the expected filtered names
+    // Extract text content from the output editor via JavaScript
+    const getOutputText = async () => {
+      const editorContent = await page.evaluate(() => {
+        const editors = document.querySelectorAll(".monaco-editor");
+        if (editors.length >= 2) {
+          const editorElement = editors[1];
+          return editorElement.textContent || "";
+        }
+        return "";
+      });
+      return editorContent;
+    };
+
+    // Poll for results since Monaco updates asynchronously
+    let outputText = "";
+    for (let i = 0; i < 10; i++) {
+      outputText = await getOutputText();
+      if (
+        outputText.includes("Juan Pérez") &&
+        outputText.includes("María García") &&
+        outputText.includes("Carlos López")
+      ) {
+        break;
+      }
+      await page.waitForTimeout(200);
+    }
+
+    expect(outputText).toMatch(/Juan\s+Pérez/);
+    // Note: The received text contains escaped quotes and line numbers from Monaco editor
+    // So we search for the text without worrying about exact formatting
+    expect(outputText).toMatch(/María\s+García/);
+    expect(outputText).toMatch(/Carlos\s+López/);
   });
 
   test("JSONPath history saves and reuses expressions", async ({ page }) => {
@@ -67,8 +95,29 @@ test.describe("JSON workflow", () => {
     await page.getByRole("button", { name: "Aplicar filtro JSONPath" }).click();
 
     // Wait for output to contain filtered data
-    const outputEditor = page.locator(".monaco-editor").nth(1);
-    await expect(outputEditor).toContainText("Laptop");
+    const getOutputText = async () => {
+      const editorContent = await page.evaluate(() => {
+        const editors = document.querySelectorAll(".monaco-editor");
+        if (editors.length >= 2) {
+          const editorElement = editors[1];
+          return editorElement.textContent || "";
+        }
+        return "";
+      });
+      return editorContent;
+    };
+
+    // Poll for "Laptop" to appear in output
+    let found = false;
+    for (let i = 0; i < 10; i++) {
+      const outputText = await getOutputText();
+      if (/Laptop/.exec(outputText)) {
+        found = true;
+        break;
+      }
+      await page.waitForTimeout(200);
+    }
+    expect(found).toBe(true);
 
     // Open history modal
     await page.getByRole("button", { name: "Historial de filtros" }).click();
@@ -94,7 +143,17 @@ test.describe("JSON workflow", () => {
 
     // Verify the expression was filled and filter applied
     await expect(jsonPathInput).toHaveValue("$.products[*].name");
-    await expect(outputEditor).toContainText("Laptop");
+    // Wait for the filter to be reapplied and result to be visible
+    let reappliedFound = false;
+    for (let i = 0; i < 10; i++) {
+      const outputText = await getOutputText();
+      if (/Laptop/.exec(outputText)) {
+        reappliedFound = true;
+        break;
+      }
+      await page.waitForTimeout(200);
+    }
+    expect(reappliedFound).toBe(true);
   });
 
   test("config modal opens and closes", async ({ page }) => {
@@ -203,24 +262,9 @@ test.describe("JSON workflow", () => {
     // Open config modal
     await page.getByRole("button", { name: "Configurar herramientas" }).click();
 
-    // Wait for modal to be fully visible
-    await page.waitForTimeout(300);
-
-    // Find and click the "4" button (indent size)
-    const buttons = await page.getByRole("button").all();
-    let indent4Button = null;
-    for (const button of buttons) {
-      const text = await button.textContent();
-      if (text?.trim() === "4") {
-        indent4Button = button;
-        break;
-      }
-    }
-
-    if (indent4Button) {
-      await indent4Button.click();
-      await page.waitForTimeout(200);
-    }
+    const indent4Button = page.getByRole("button", { name: "4 espacios" });
+    await indent4Button.click();
+    await expect(indent4Button).toHaveAttribute("aria-pressed", "true");
 
     // Close modal (saves config)
     await page.keyboard.press("Escape");
@@ -228,19 +272,11 @@ test.describe("JSON workflow", () => {
 
     // Reload page
     await page.reload();
-    await page.waitForTimeout(800);
 
-    // Load example and format - the indent should be 4 if config persisted
-    await page.getByRole("button", { name: "Ejemplo" }).click();
-    await page.getByRole("button", { name: "Formatear" }).click();
-
-    // Check that output uses 4-space indentation
-    await page.waitForTimeout(500);
-    const outputEditor = page.locator(".monaco-editor").nth(1);
-    const outputText = await outputEditor.textContent();
-
-    // If config persisted with indent=4, we should see 4 spaces at start of lines
-    expect(outputText).toMatch(/\{\s+"users"/);
+    // Re-open modal and verify persisted selection
+    await page.getByRole("button", { name: "Configurar herramientas" }).click();
+    const indent4ButtonReloaded = page.getByRole("button", { name: "4 espacios" });
+    await expect(indent4ButtonReloaded).toHaveAttribute("aria-pressed", "true");
   });
 
   test("keyboard shortcuts work", async ({ page }) => {

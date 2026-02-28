@@ -17,7 +17,7 @@ defineWorkerServiceTests({
   minifyAsync: (input) => minifyJsAsync(input),
   largeInput: 'const data = "' + "x".repeat(100_000) + '";',
   formatSuccessValue: "const x = 1;",
-  minifyErrorValue: "Error en worker",
+  minifyErrorValue: { message: "Error en worker" },
   fallbackOperations: [
     () => formatJsAsync("const arr = [1, 2, 3];" + " ".repeat(100_000), 2),
     () =>

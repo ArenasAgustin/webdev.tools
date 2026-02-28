@@ -4,8 +4,8 @@ test.describe("JS workflow", () => {
   test("execute valid JavaScript code", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo" }).click();
-    await page.getByRole("button", { name: "Ejecutar" }).click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
+    await page.getByRole("button", { name: "Ejecutar", exact: true }).first().click();
 
     await expect(page.getByText("Código ejecutado correctamente")).toBeVisible();
   });
@@ -45,8 +45,8 @@ test.describe("JS workflow", () => {
   test("format JS code", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo" }).click();
-    await page.getByRole("button", { name: "Formatear" }).click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
+    await page.getByRole("button", { name: "Formatear", exact: true }).first().click();
 
     await expect(page.getByText("Código formateado correctamente")).toBeVisible();
   });
@@ -54,8 +54,8 @@ test.describe("JS workflow", () => {
   test("minify JS code", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo" }).click();
-    await page.getByRole("button", { name: "Minificar" }).click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
+    await page.getByRole("button", { name: "Minificar", exact: true }).first().click();
 
     await expect(page.getByText("Código minificado correctamente")).toBeVisible();
   });
@@ -93,18 +93,12 @@ test.describe("JS workflow", () => {
     expect(download.suggestedFilename()).toBe("code.js");
   });
 
-  test("copy input and output", async ({ page }) => {
+  test("copy output", async ({ page }) => {
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
       origin: "http://127.0.0.1:4173",
     });
 
     await page.goto("/playground/js");
-
-    await page.getByRole("button", { name: "Copiar" }).first().click();
-    await expect(page.getByText("Código copiado al portapapeles")).toBeVisible();
-
-    const copiedInput = await page.evaluate(async () => navigator.clipboard.readText());
-    expect(copiedInput).toContain("factorial");
 
     await page.getByRole("button", { name: "Ejecutar" }).click();
     await page.getByRole("button", { name: "Copiar" }).last().click();
@@ -131,12 +125,12 @@ test.describe("JS workflow", () => {
   test("keyboard shortcuts", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo" }).click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
 
-    await page.getByRole("button", { name: "Formatear" }).click();
+    await page.getByRole("button", { name: "Formatear", exact: true }).first().click();
     await expect(page.getByText("Código formateado correctamente")).toBeVisible();
 
-    await page.getByRole("button", { name: "Minificar" }).click();
+    await page.getByRole("button", { name: "Minificar", exact: true }).first().click();
     await expect(page.getByText("Código minificado correctamente")).toBeVisible();
   });
 });

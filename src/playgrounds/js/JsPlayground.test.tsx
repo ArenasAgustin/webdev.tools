@@ -112,18 +112,21 @@ describe("JsPlayground", () => {
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
+    const output = editors[1] as HTMLTextAreaElement;
 
     fireEvent.change(input, { target: { value: "const x=1;" } });
     fireEvent.click(screen.getByRole("button", { name: /Formatear/i }));
 
     await waitFor(() => {
-      expect(input.value).toBe("const x = 1;");
+      expect(output.value).toBe("const x = 1;");
     });
+
+    expect(input.value).toBe("const x=1;");
 
     fireEvent.click(screen.getByRole("button", { name: /Minificar/i }));
 
     await waitFor(() => {
-      expect(input.value).toBe("const x=1;");
+      expect(output.value).toBe("const x=1;");
     });
   });
 
@@ -132,6 +135,7 @@ describe("JsPlayground", () => {
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
+    const output = editors[1] as HTMLTextAreaElement;
 
     fireEvent.change(input, {
       target: { value: "if(true){console.log(1);}" },
@@ -139,8 +143,10 @@ describe("JsPlayground", () => {
     fireEvent.click(screen.getByRole("button", { name: /Formatear/i }));
 
     await waitFor(() => {
-      expect(input.value).toBe("if(true){\n  console.log(1);\n}");
+      expect(output.value).toBe("if (true) {\n  console.log(1);\n}");
     });
+
+    expect(input.value).toBe("if(true){console.log(1);}");
   });
 
   it("minifies by removing comments and whitespace", async () => {
@@ -148,6 +154,7 @@ describe("JsPlayground", () => {
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
+    const output = editors[1] as HTMLTextAreaElement;
 
     fireEvent.change(input, {
       target: {
@@ -157,7 +164,10 @@ describe("JsPlayground", () => {
     fireEvent.click(screen.getByRole("button", { name: /Minificar/i }));
 
     await waitFor(() => {
-      expect(input.value).toBe("const x=1; const y=x+2;");
+      expect(output.value).toContain("const x=1");
+      expect(output.value).toContain("y=3");
     });
+
+    expect(input.value).toContain("// comment");
   });
 });

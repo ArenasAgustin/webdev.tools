@@ -5,6 +5,7 @@ import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
 import { JsInputActions } from "@/components/editor/JsInputActions";
 import { JsOutputActions } from "@/components/editor/JsOutputActions";
 import { Stats } from "@/components/common/Stats";
+import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor } from "@/hooks/useExpandedEditor";
@@ -13,9 +14,16 @@ interface JsEditorsProps {
   inputCode: string;
   output: string;
   error: string | null;
+  validationState: {
+    isValid: boolean;
+    error: {
+      message: string;
+    } | null;
+  };
   inputWarning?: string | null;
   onInputChange: (code: string) => void;
-  onCopyInput: () => void;
+  onClearInput: () => void;
+  onLoadExample: () => void;
   onCopyOutput: () => void;
   onDownloadInput: () => void;
   onDownloadOutput: () => void;
@@ -25,9 +33,11 @@ export const JsEditors = memo(function JsEditors({
   inputCode,
   output,
   error,
+  validationState,
   inputWarning,
   onInputChange,
-  onCopyInput,
+  onClearInput,
+  onLoadExample,
   onCopyOutput,
   onDownloadInput,
   onDownloadOutput,
@@ -45,20 +55,19 @@ export const JsEditors = memo(function JsEditors({
           iconColor="blue-400"
           actions={
             <JsInputActions
-              onCopyInput={onCopyInput}
+              onClearInput={onClearInput}
+              onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
               onExpand={editor.collapse}
             />
           }
           footer={
-            <div className="flex items-center gap-2 text-xs">
-              <Stats
-                lines={inputStats.lines}
-                characters={inputStats.characters}
-                bytes={inputStats.bytes}
-              />
-              {inputWarning && <span className="text-amber-400 truncate">{inputWarning}</span>}
-            </div>
+            <ValidationStatus
+              inputValue={inputCode}
+              validationState={validationState}
+              warning={inputWarning}
+              withWrapper
+            />
           }
           value={inputCode}
           language="javascript"
@@ -105,20 +114,27 @@ export const JsEditors = memo(function JsEditors({
           iconColor="blue-400"
           actions={
             <JsInputActions
-              onCopyInput={onCopyInput}
+              onClearInput={onClearInput}
+              onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
               onExpand={() => editor.expand("input")}
             />
           }
           footer={
-            <div className="flex items-center gap-2 text-xs">
-              <Stats
-                lines={inputStats.lines}
-                characters={inputStats.characters}
-                bytes={inputStats.bytes}
-              />
-              {inputWarning && <span className="text-amber-400 truncate">{inputWarning}</span>}
-            </div>
+            <ValidationStatus
+              inputValue={inputCode}
+              validationState={validationState}
+              warning={inputWarning}
+              withWrapper
+              withFlex
+              validExtra={
+                <Stats
+                  lines={inputStats.lines}
+                  characters={inputStats.characters}
+                  bytes={inputStats.bytes}
+                />
+              }
+            />
           }
         >
           <LazyCodeEditor
