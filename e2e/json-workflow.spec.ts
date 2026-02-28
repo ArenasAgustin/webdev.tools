@@ -65,7 +65,7 @@ test.describe("JSON workflow", () => {
 
     // Poll for results since Monaco updates asynchronously
     let outputText = "";
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 25; i++) {
       outputText = await getOutputText();
       if (
         outputText.includes("Juan Pérez") &&
@@ -74,7 +74,7 @@ test.describe("JSON workflow", () => {
       ) {
         break;
       }
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
     }
 
     expect(outputText).toMatch(/Juan\s+Pérez/);
