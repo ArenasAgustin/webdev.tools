@@ -322,11 +322,11 @@
   - [x] Test: Validación de sintaxis en tiempo real ✅
   - [x] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.) ✅
 
-- [ ] **Cross-playground navigation E2E tests** (1 día)
+- [ ] **Cross-playground navigation E2E tests** (1 día) — Parcial (2/4)
   - [ ] Test: Navegar entre playgrounds
   - [ ] Test: State persistence en navegación
-  - [ ] Test: URL routing funciona
-  - [ ] Test: Home page lista ambos playgrounds
+  - [x] Test: URL routing funciona ✅
+  - [x] Test: Home page lista ambos playgrounds ✅
 
 - [ ] **Responsive & Mobile E2E tests** (2 días)
   - [ ] Test: Mobile viewport (375px) - Layout adapta
@@ -336,8 +336,8 @@
   - [ ] Test: Modal accessibility en mobile
 
 - [ ] **Error handling & Edge cases E2E tests** (2 días)
-  - [ ] Test: JSON inválido - muestra error
-  - [ ] Test: JS inválido - muestra error
+  - [x] Test: JSON inválido - muestra error ✅
+  - [x] Test: JS inválido - muestra error ✅
   - [ ] Test: Archivo muy grande (>100MB) - manejo elegante
   - [ ] Test: Código JS infinito - timeout después de 5s
   - [ ] Test: localStorage lleno - fallback graceful

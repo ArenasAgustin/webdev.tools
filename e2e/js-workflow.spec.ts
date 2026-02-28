@@ -4,8 +4,8 @@ test.describe("JS workflow", () => {
   test("execute valid JavaScript code", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
-    await page.getByRole("button", { name: "Ejecutar", exact: true }).first().click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).click();
+    await page.getByRole("button", { name: "Ejecutar", exact: true }).click();
 
     await expect(page.getByText("Código ejecutado correctamente")).toBeVisible();
   });
@@ -45,8 +45,8 @@ test.describe("JS workflow", () => {
   test("format JS code", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
-    await page.getByRole("button", { name: "Formatear", exact: true }).first().click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).click();
+    await page.getByRole("button", { name: "Formatear", exact: true }).click();
 
     await expect(page.getByText("Código formateado correctamente")).toBeVisible();
   });
@@ -54,8 +54,8 @@ test.describe("JS workflow", () => {
   test("minify JS code", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
-    await page.getByRole("button", { name: "Minificar", exact: true }).first().click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).click();
+    await page.getByRole("button", { name: "Minificar", exact: true }).click();
 
     await expect(page.getByText("Código minificado correctamente")).toBeVisible();
   });
@@ -125,12 +125,12 @@ test.describe("JS workflow", () => {
   test("keyboard shortcuts", async ({ page }) => {
     await page.goto("/playground/js");
 
-    await page.getByRole("button", { name: "Ejemplo", exact: true }).first().click();
+    await page.getByRole("button", { name: "Ejemplo", exact: true }).click();
 
-    await page.getByRole("button", { name: "Formatear", exact: true }).first().click();
+    await page.getByRole("button", { name: "Formatear", exact: true }).click();
     await expect(page.getByText("Código formateado correctamente")).toBeVisible();
 
-    await page.getByRole("button", { name: "Minificar", exact: true }).first().click();
+    await page.getByRole("button", { name: "Minificar", exact: true }).click();
     await expect(page.getByText("Código minificado correctamente")).toBeVisible();
   });
 });

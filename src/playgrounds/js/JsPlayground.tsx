@@ -119,23 +119,11 @@ export function JsPlayground() {
           variant: "purple",
           onClick: handleMinify,
         },
-        {
-          label: "Limpiar",
-          icon: "trash",
-          variant: "danger",
-          onClick: handleClearInput,
-        },
-        {
-          label: "Ejemplo",
-          icon: "file-import",
-          variant: "success",
-          onClick: handleLoadExample,
-        },
       ],
       configButtonTitle: "Configurar herramientas",
       gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
     }),
-    [handleExecute, handleFormat, handleMinify, handleClearInput, handleLoadExample],
+    [handleExecute, handleFormat, handleMinify],
   );
 
   const toolbarConfig = useMemo(
