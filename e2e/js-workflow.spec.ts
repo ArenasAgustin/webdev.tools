@@ -84,10 +84,10 @@ test.describe("JS workflow", () => {
     await page.goto("/playground/js");
 
     const downloadPromise = page.waitForEvent("download");
-    await page
-      .getByRole("button", { name: /Descargar/i })
-      .first()
-      .click();
+    const inputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Código", exact: true }) });
+    await inputPanel.getByRole("button", { name: "Descargar" }).click();
 
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toBe("code.js");
@@ -101,7 +101,10 @@ test.describe("JS workflow", () => {
     await page.goto("/playground/js");
 
     await page.getByRole("button", { name: "Ejecutar" }).click();
-    await page.getByRole("button", { name: "Copiar" }).last().click();
+    const outputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Resultado", exact: true }) });
+    await outputPanel.getByRole("button", { name: "Copiar" }).click();
     await expect(page.getByText("Resultado copiado al portapapeles")).toBeVisible();
 
     const copiedOutput = await page.evaluate(async () => navigator.clipboard.readText());

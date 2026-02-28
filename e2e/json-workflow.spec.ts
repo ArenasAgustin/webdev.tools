@@ -139,7 +139,7 @@ test.describe("JSON workflow", () => {
     await page.getByRole("button", { name: "Historial de filtros" }).click();
 
     // Click on the history item to reuse it
-    await page.getByText("$.products[*].name").first().click();
+    await page.getByText("$.products[*].name").click();
 
     // Verify the expression was filled and filter applied
     await expect(jsonPathInput).toHaveValue("$.products[*].name");
@@ -200,10 +200,12 @@ test.describe("JSON workflow", () => {
     // Wait for format to complete
     await page.waitForTimeout(500);
 
-    // Setup download listener and click any download button in the result area
+    // Setup download listener and click download inside the output panel
     const downloadPromise = page.waitForEvent("download");
-    const downloadButtons = page.getByRole("button", { name: /Descargar/i });
-    await downloadButtons.last().click();
+    const outputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Resultado", exact: true }) });
+    await outputPanel.getByRole("button", { name: "Descargar" }).click();
 
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.json$/);
