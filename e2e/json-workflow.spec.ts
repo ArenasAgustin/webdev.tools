@@ -85,6 +85,10 @@ test.describe("JSON workflow", () => {
   });
 
   test("JSONPath history saves and reuses expressions", async ({ page }) => {
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
+      origin: "http://127.0.0.1:4173",
+    });
+
     await page.goto("/playground/json");
 
     await page.getByRole("button", { name: "Ejemplo" }).click();
@@ -94,30 +98,14 @@ test.describe("JSON workflow", () => {
     await jsonPathInput.fill("$.products[*].name");
     await page.getByRole("button", { name: "Aplicar filtro JSONPath" }).click();
 
-    // Wait for output to contain filtered data
-    const getOutputText = async () => {
-      const editorContent = await page.evaluate(() => {
-        const editors = document.querySelectorAll(".monaco-editor");
-        if (editors.length >= 2) {
-          const editorElement = editors[1];
-          return editorElement.textContent || "";
-        }
-        return "";
-      });
-      return editorContent;
+    const copyOutputAndAssertContainsLaptop = async () => {
+      await page.getByRole("button", { name: "Copiar" }).click();
+      await expect
+        .poll(async () => page.evaluate(async () => navigator.clipboard.readText()))
+        .toContain("Laptop");
     };
 
-    // Poll for "Laptop" to appear in output
-    let found = false;
-    for (let i = 0; i < 10; i++) {
-      const outputText = await getOutputText();
-      if (/Laptop/.exec(outputText)) {
-        found = true;
-        break;
-      }
-      await page.waitForTimeout(200);
-    }
-    expect(found).toBe(true);
+    await copyOutputAndAssertContainsLaptop();
 
     // Open history modal
     await page.getByRole("button", { name: "Historial de filtros" }).click();
@@ -143,17 +131,8 @@ test.describe("JSON workflow", () => {
 
     // Verify the expression was filled and filter applied
     await expect(jsonPathInput).toHaveValue("$.products[*].name");
-    // Wait for the filter to be reapplied and result to be visible
-    let reappliedFound = false;
-    for (let i = 0; i < 10; i++) {
-      const outputText = await getOutputText();
-      if (/Laptop/.exec(outputText)) {
-        reappliedFound = true;
-        break;
-      }
-      await page.waitForTimeout(200);
-    }
-    expect(reappliedFound).toBe(true);
+
+    await copyOutputAndAssertContainsLaptop();
   });
 
   test("config modal opens and closes", async ({ page }) => {

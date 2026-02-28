@@ -322,9 +322,9 @@
   - [x] Test: Validación de sintaxis en tiempo real ✅
   - [x] Test: Keyboard shortcuts (Ctrl+Shift+F, Ctrl+Shift+M, etc.) ✅
 
-- [ ] **Cross-playground navigation E2E tests** (1 día) — Parcial (2/4)
-  - [ ] Test: Navegar entre playgrounds
-  - [ ] Test: State persistence en navegación
+- [x] **Cross-playground navigation E2E tests** (1 día) ✅
+  - [x] Test: Navegar entre playgrounds ✅
+  - [x] Test: State persistence en navegación ✅
   - [x] Test: URL routing funciona ✅
   - [x] Test: Home page lista ambos playgrounds ✅
 
