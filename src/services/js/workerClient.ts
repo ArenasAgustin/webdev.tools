@@ -11,3 +11,7 @@ export const runJsWorker = createWorkerClient<JsWorkerPayload, JsWorkerRequest, 
   unavailableMessage: "Worker no disponible",
   buildRequest: (id, payload) => ({ id, ...payload }),
 });
+
+export const preloadJsWorker = () => {
+  runJsWorker.preload();
+};

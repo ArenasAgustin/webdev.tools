@@ -18,11 +18,17 @@ interface CreateWorkerClientOptions<TPayload, TRequest extends WorkerRequestBase
   unavailableMessage?: string;
 }
 
+export interface WorkerClient<TPayload, TResponse extends WorkerResponseBase> {
+  (payload: TPayload): Promise<TResponse>;
+  preload: () => void;
+  terminate: () => void;
+}
+
 export function createWorkerClient<
   TPayload,
   TRequest extends WorkerRequestBase,
   TResponse extends WorkerResponseBase,
->(options: CreateWorkerClientOptions<TPayload, TRequest>) {
+>(options: CreateWorkerClientOptions<TPayload, TRequest>): WorkerClient<TPayload, TResponse> {
   const pending = new Map<string, PendingRequest<TResponse>>();
   let worker: Worker | null = null;
 
@@ -58,7 +64,7 @@ export function createWorkerClient<
   const createId = () =>
     `${options.idPrefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
-  return (payload: TPayload): Promise<TResponse> => {
+  const run = (payload: TPayload): Promise<TResponse> => {
     const instance = ensureWorker();
     if (!instance) {
       return Promise.reject(new Error(options.unavailableMessage ?? "Worker no disponible"));
@@ -72,4 +78,20 @@ export function createWorkerClient<
       instance.postMessage(message);
     });
   };
+
+  const preload = () => {
+    ensureWorker();
+  };
+
+  const terminate = () => {
+    if (!worker) {
+      return;
+    }
+
+    worker.terminate();
+    worker = null;
+    pending.clear();
+  };
+
+  return Object.assign(run, { preload, terminate });
 }

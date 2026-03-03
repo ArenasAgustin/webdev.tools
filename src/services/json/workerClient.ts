@@ -15,3 +15,7 @@ export const runJsonWorker = createWorkerClient<
   unavailableMessage: "Worker no disponible",
   buildRequest: (id, payload) => ({ id, ...payload }),
 });
+
+export const preloadJsonWorker = () => {
+  runJsonWorker.preload();
+};

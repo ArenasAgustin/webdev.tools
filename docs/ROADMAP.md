@@ -361,30 +361,26 @@
 
 **Objetivo:** Mejorar Lighthouse score de 85/100 a 95+/100, reducir Time to Interactive de 2.8s a <2.5s
 
-- [ ] **Performance auditing con Lighthouse CI**
+- [x] **Performance auditing con Lighthouse CI** ✅
   - [x] Crear `lighthouse-config.json` ✅
-  - [ ] Integrar con CI pipeline
+  - [x] Integrar con CI pipeline ✅
   - [x] Establecer umbrales mínimos (95+ score) ✅
+  - [x] Script local con fallback para EPERM en Windows (`pnpm lighthouse`) ✅
 
-- [ ] **Optimizaciones de carga inicial**
-  - [ ] Critical CSS inline en HTML
-  - [ ] Defer non-critical JS
-  - [ ] Preload Monaco Editor early hints
-  - [ ] Optimize font loading (system fonts vs custom)
+- [x] **Optimizaciones de carga inicial** ✅
+  - [x] Critical CSS inline en HTML ✅
+  - [x] Defer non-critical JS ✅
+  - [x] Preload Monaco Editor early hints ✅
+  - [x] Optimize font loading (system fonts vs custom) ✅
 
-- [ ] **Code splitting & lazy loading avanzado**
+- [x] **Code splitting & lazy loading avanzado** ✅
   - [x] Dynamic import para playgrounds no visitados ✅
-  - [ ] Preload de worker scripts
+  - [x] Preload de worker scripts ✅
 
-- [ ] **Image optimization**
-  - [ ] Usar WebP con fallback
-  - [ ] Responsive images (srcset)
-  - [ ] Lazy loading de imágenes
-
-- [ ] **Bundle análisis profundo**
+- [x] **Bundle análisis profundo** ✅
   - [x] Configurar `rollup-plugin-visualizer` ✅
   - [x] Identificar dependencias pesadas ✅
-  - [ ] Evaluar tree-shaking effectiveness
+  - [x] Evaluar tree-shaking effectiveness ✅
 
 ---
 
@@ -396,11 +392,38 @@
 
 **Fase 0 - Corregir roadmap de playgrounds:**
 
-- [ ] Elegir como hacer el minificador y formatter de cada lenguaje (servicios genéricos vs específicos)
-- [ ] Definir alcance de features para cada playground (ej: SQL no tendrá ejecución en browser, solo parse/format/validate)
-- [ ] Priorizar orden de implementación (SQL, HTML/CSS, luego PHP u otro lenguaje)
-- [ ] Evaluar dependencias clave para cada lenguaje (ej: sql-formatter, html-minifier-terser, php-parser)
-- [ ] Definir contratos de servicios (ej: `format(input: string, options?: FormatOptions): Promise<string>`)
+**Estado:** ✅ Completada (5/5)
+
+- [x] Elegir como hacer el minificador y formatter de cada lenguaje (servicios genéricos vs específicos) ✅
+  - **Decisión:** mantener orquestación genérica (`TransformService` + adapters) y motores específicos por lenguaje.
+  - **Base compartida:** contratos de `format/minify/validate`, runtime de worker, handlers y configuración de toolbar.
+  - **Motores por lenguaje (inicial):**
+    - SQL: `sql-formatter` (sin minify agresivo, enfoque en format/validate).
+    - HTML: `prettier` (format) + `html-minifier-terser` (minify).
+    - CSS: `prettier` (format) + `cssnano` (minify).
+    - PHP: parser/formatter específico (server-side para ejecución).
+- [x] Definir alcance de features para cada playground (ej: SQL no tendrá ejecución en browser, solo parse/format/validate) ✅
+  - **SQL Playground (MVP):** format, validate, lint básico.
+  - **HTML Playground (MVP):** format, minify, validate básico, preview en iframe sandbox, sin fetch de recursos remotos por defecto.
+  - **CSS Playground (MVP):** format, minify, validate básico, preview sobre template HTML local, sin autoprefix avanzado en primera etapa.
+  - **PHP Playground (MVP):** format + validate estático; ejecución sólo vía backend sandbox/serverless, sin `eval` en navegador.
+  - **Out-of-scope inicial (todos):** colaboración en tiempo real, persistencia cloud, extensiones/plugins de terceros.
+- [x] Priorizar orden de implementación (HTML/CSS, luego PHP y luego SQL) ✅
+  - **Orden acordado:** 1) HTML → 2) CSS → 3) PHP → 4) SQL.
+- [x] Evaluar dependencias clave para cada lenguaje (ej: sql-formatter, html-minifier-terser, php-parser) ✅
+  - **SQL:** `sql-formatter` (format), `node-sql-parser` (parse/validate).
+  - **HTML:** `prettier` + parser `html`, `html-minifier-terser` (minify), `parse5` (parse robusto para validaciones).
+  - **CSS:** `prettier` + parser `css`, `cssnano` (minify), `postcss` (pipeline de validación/transform).
+  - **PHP:** `php-parser` (AST/validación), `prettier-plugin-php` (format), ejecución vía backend aislado.
+  - **Alternativas consideradas:** `lightningcss` para minify CSS/transform, `js-beautify` para HTML (descartada para mantener consistencia con Prettier).
+- [x] Definir contratos de servicios (ej: `format(input: string, options?: FormatOptions): Promise<string>`) ✅
+  - **Contrato base (propuesto):**
+    - `format(input: string, options?: FormatOptions): Promise<Result<string, ToolError>>`
+    - `minify(input: string, options?: MinifyOptions): Promise<Result<string, ToolError>>`
+    - `validate(input: string, options?: ValidateOptions): Promise<Result<ValidationOutput, ToolError>>`
+  - **Opcional por playground:**
+    - `execute?(input: string, options?: ExecuteOptions): Promise<Result<ExecuteOutput, ToolError>>`
+    - `preview?(input: string, options?: PreviewOptions): Promise<Result<PreviewOutput, ToolError>>`
 
 **Fase 1 - SQL & Web markup (5-7 semanas):**
 

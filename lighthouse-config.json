@@ -9,7 +9,8 @@
         "http://localhost/playground/js"
       ],
       "settings": {
-        "preset": "desktop"
+        "preset": "desktop",
+        "chromeFlags": "--headless=new --disable-gpu --disable-dev-shm-usage --no-first-run --no-default-browser-check --user-data-dir=.lighthouseci/chrome-profile"
       }
     },
     "assert": {
