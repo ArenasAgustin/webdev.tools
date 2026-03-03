@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { minifyJs } from "@/services/minifier/minifier";
+import { useEffect, useState } from "react";
+import { minifyJsAsync } from "@/services/js/worker";
 
 interface JsValidation {
   isValid: boolean;
@@ -9,25 +9,62 @@ interface JsValidation {
 }
 
 export function useJsParser(input: string): JsValidation {
-  return useMemo(() => {
-    if (!input.trim()) {
-      return { isValid: false, error: null };
+  const source = input.trim();
+  const [validation, setValidation] = useState<JsValidation>({
+    isValid: false,
+    error: null,
+  });
+
+  useEffect(() => {
+    if (!source) {
+      return;
     }
 
-    const parseResult = minifyJs(input, {
+    let cancelled = false;
+
+    void minifyJsAsync(source, {
       removeComments: false,
       removeSpaces: false,
-    });
+    })
+      .then((result) => {
+        if (cancelled) {
+          return;
+        }
 
-    if (parseResult.ok) {
-      return { isValid: true, error: null };
-    }
+        if (result.ok) {
+          setValidation({ isValid: true, error: null });
+          return;
+        }
 
-    return {
-      isValid: false,
-      error: {
-        message: `Error de sintaxis: ${parseResult.error}`,
-      },
+        setValidation({
+          isValid: false,
+          error: {
+            message: `Error de sintaxis: ${result.error.message ?? "Código inválido"}`,
+          },
+        });
+      })
+      .catch((error: unknown) => {
+        if (cancelled) {
+          return;
+        }
+
+        const message = error instanceof Error ? error.message : String(error);
+        setValidation({
+          isValid: false,
+          error: {
+            message: `Error de sintaxis: ${message || "Código inválido"}`,
+          },
+        });
+      });
+
+    return () => {
+      cancelled = true;
     };
-  }, [input]);
+  }, [source]);
+
+  if (!source) {
+    return { isValid: false, error: null };
+  }
+
+  return validation;
 }

@@ -8,11 +8,19 @@ export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
 };
 
+const loadJsonPlayground = () => import("./json/JsonPlayground");
+const loadJsPlayground = () => import("./js/JsPlayground");
+
+const playgroundLoaders: Record<string, () => Promise<unknown>> = {
+  [jsonPlaygroundConfig.id]: loadJsonPlayground,
+  [jsPlaygroundConfig.id]: loadJsPlayground,
+};
+
 export const playgroundRegistry: PlaygroundRegistryItem[] = [
   {
     ...jsonPlaygroundConfig,
     component: lazy(() =>
-      import("./json/JsonPlayground").then((module) => ({
+      loadJsonPlayground().then((module) => ({
         default: module.JsonPlayground,
       })),
     ),
@@ -20,7 +28,7 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
   {
     ...jsPlaygroundConfig,
     component: lazy(() =>
-      import("./js/JsPlayground").then((module) => ({
+      loadJsPlayground().then((module) => ({
         default: module.JsPlayground,
       })),
     ),
@@ -29,3 +37,16 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
 
 export const getPlaygroundById = (id: string) =>
   playgroundRegistry.find((playground) => playground.id === id);
+
+export const preloadPlaygroundById = async (id: string): Promise<void> => {
+  const loader = playgroundLoaders[id];
+  if (!loader) {
+    return;
+  }
+
+  await loader();
+};
+
+export const preloadAllPlaygrounds = async (): Promise<void> => {
+  await Promise.all(Object.values(playgroundLoaders).map((loader) => loader()));
+};

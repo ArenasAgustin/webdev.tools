@@ -1,6 +1,11 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PlaygroundCard } from "@/components/layout/PlaygroundCard";
-import { playgroundRegistry } from "@/playgrounds/registry";
+import {
+  playgroundRegistry,
+  preloadAllPlaygrounds,
+  preloadPlaygroundById,
+} from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export function Home() {
@@ -12,6 +17,33 @@ export function Home() {
       "JSON formatter, JSON minifier, JSONPath, JavaScript playground, herramientas desarrollo web, formatear JSON online",
     ogUrl: "https://webdev.tools/",
   });
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let idleId: number | null = null;
+
+    const preload = () => {
+      void preloadAllPlaygrounds();
+    };
+
+    const requestIdle = globalThis.requestIdleCallback;
+    const cancelIdle = globalThis.cancelIdleCallback;
+
+    if (typeof requestIdle === "function") {
+      idleId = requestIdle(preload, { timeout: 1500 });
+    } else {
+      timeoutId = globalThis.setTimeout(preload, 1200);
+    }
+
+    return () => {
+      if (idleId !== null && typeof cancelIdle === "function") {
+        cancelIdle(idleId);
+      }
+      if (timeoutId !== null) {
+        globalThis.clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white">
@@ -35,7 +67,17 @@ export function Home() {
 
           <section className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {playgroundRegistry.map((playground) => (
-              <Link key={playground.id} to={`/playground/${playground.id}`} className="h-full">
+              <Link
+                key={playground.id}
+                to={`/playground/${playground.id}`}
+                className="h-full"
+                onMouseEnter={() => {
+                  void preloadPlaygroundById(playground.id);
+                }}
+                onFocus={() => {
+                  void preloadPlaygroundById(playground.id);
+                }}
+              >
                 <PlaygroundCard playground={playground} />
               </Link>
             ))}

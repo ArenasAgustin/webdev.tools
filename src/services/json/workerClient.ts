@@ -10,7 +10,7 @@ export const runJsonWorker = createWorkerClient<
   JsonWorkerRequest,
   JsonWorkerResponse
 >({
-  workerUrl: new URL("../../workers/jsonWorker.ts", import.meta.url),
+  workerUrl: new URL("../../workers/jsonWorker.ts?worker", import.meta.url),
   idPrefix: "json-worker",
   unavailableMessage: "Worker no disponible",
   buildRequest: (id, payload) => ({ id, ...payload }),

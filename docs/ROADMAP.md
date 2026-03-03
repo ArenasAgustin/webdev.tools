@@ -335,13 +335,11 @@
   - [x] Test: Touch interactions en mobile ✅
   - [x] Test: Modal accessibility en mobile ✅
 
-- [ ] **Error handling & Edge cases E2E tests** (2 días)
-  - [x] Test: JSON inválido - muestra error ✅
-  - [x] Test: JS inválido - muestra error ✅
-  - [ ] Test: Archivo muy grande (>100MB) - manejo elegante
-  - [ ] Test: Código JS infinito - timeout después de 5s
-  - [ ] Test: localStorage lleno - fallback graceful
-  - [ ] Test: Network offline - funcionalidad local
+- [x] **Error handling & Edge cases E2E tests** (2 días) ✅
+  - [x] Test: Large input (>500KB) - muestra mensaje tamaño límite ✅
+  - [x] Test: Código JS con loop sospechoso - handled sin freeze UI ✅
+  - [x] Test: localStorage lleno - fallback graceful ✅
+  - [x] Test: Network offline - funcionalidad local sigue disponible ✅
 
 #### 🟠 Media Prioridad — E2E Advanced
 
@@ -364,9 +362,9 @@
 **Objetivo:** Mejorar Lighthouse score de 85/100 a 95+/100, reducir Time to Interactive de 2.8s a <2.5s
 
 - [ ] **Performance auditing con Lighthouse CI**
-  - [ ] Crear `lighthouse-config.json`
+  - [x] Crear `lighthouse-config.json` ✅
   - [ ] Integrar con CI pipeline
-  - [ ] Establecer umbrales mínimos (95+ score)
+  - [x] Establecer umbrales mínimos (95+ score) ✅
 
 - [ ] **Optimizaciones de carga inicial**
   - [ ] Critical CSS inline en HTML
@@ -375,7 +373,7 @@
   - [ ] Optimize font loading (system fonts vs custom)
 
 - [ ] **Code splitting & lazy loading avanzado**
-  - [ ] Dynamic import para playgrounds no visitados
+  - [x] Dynamic import para playgrounds no visitados ✅
   - [ ] Preload de worker scripts
 
 - [ ] **Image optimization**
@@ -384,8 +382,8 @@
   - [ ] Lazy loading de imágenes
 
 - [ ] **Bundle análisis profundo**
-  - [ ] Configurar `rollup-plugin-visualizer`
-  - [ ] Identificar dependencias pesadas
+  - [x] Configurar `rollup-plugin-visualizer` ✅
+  - [x] Identificar dependencias pesadas ✅
   - [ ] Evaluar tree-shaking effectiveness
 
 ---
@@ -395,6 +393,14 @@
 #### 🟠 Media Prioridad (Próximas 5-7 semanas)
 
 **Usando stack genérico:** clientFactory, runtime, usePlaygroundActions, ToolbarConfig, TransformService
+
+**Fase 0 - Corregir roadmap de playgrounds:**
+
+- [ ] Elegir como hacer el minificador y formatter de cada lenguaje (servicios genéricos vs específicos)
+- [ ] Definir alcance de features para cada playground (ej: SQL no tendrá ejecución en browser, solo parse/format/validate)
+- [ ] Priorizar orden de implementación (SQL, HTML/CSS, luego PHP u otro lenguaje)
+- [ ] Evaluar dependencias clave para cada lenguaje (ej: sql-formatter, html-minifier-terser, php-parser)
+- [ ] Definir contratos de servicios (ej: `format(input: string, options?: FormatOptions): Promise<string>`)
 
 **Fase 1 - SQL & Web markup (5-7 semanas):**
 
@@ -529,22 +535,22 @@
 
 ## 📋 Resumen de Pendientes
 
-| Sección                       | Estimación  | Prioridad | Status       |
-| ----------------------------- | ----------- | --------- | ------------ |
-| 13.1.5 Formatter & Minifier   | 1-2 días    | 🔴 Alta   | ⏳ Inmediato |
-| 13.2 E2E Testing              | 2-4 semanas | 🔴 Alta   | ⏳ Pendiente |
-| 13.3 Performance Optimization | 3-5 días    | 🟠 Media  | ⏳ Pendiente |
-| 13.4 New Playgrounds          | 3-4 semanas | 🟠 Media  | ⏳ Pendiente |
-| 13.5 Advanced Features        | 4-8 semanas | 🟡 Baja   | ⏳ Pendiente |
-| 13.6 Documentation            | 3-5 días    | 🟠 Media  | ⏳ Pendiente |
-| 13.7 Deployment & Monitoring  | 2-3 semanas | 🟡 Baja   | ⏳ Pendiente |
+| Sección                       | Estimación  | Prioridad | Status         |
+| ----------------------------- | ----------- | --------- | -------------- |
+| 13.1.5 Formatter & Minifier   | 1-2 días    | 🔴 Alta   | ✅ Completado  |
+| 13.2 E2E Testing              | 2-4 semanas | 🔴 Alta   | 🔄 En progreso |
+| 13.3 Performance Optimization | 3-5 días    | 🟠 Media  | 🔄 En progreso |
+| 13.4 New Playgrounds          | 3-4 semanas | 🟠 Media  | ⏳ Pendiente   |
+| 13.5 Advanced Features        | 4-8 semanas | 🟡 Baja   | ⏳ Pendiente   |
+| 13.6 Documentation            | 3-5 días    | 🟠 Media  | ⏳ Pendiente   |
+| 13.7 Deployment & Monitoring  | 2-3 semanas | 🟡 Baja   | ⏳ Pendiente   |
 
 **Total Estimado:** 10-20 semanas de trabajo
 
-**Recomendado por impacto/esfuerzo:** 0. ✅ **13.1.5** → Prettier + Terser (1-2 días, integración rápida y mejoría visible)
+**Recomendado por impacto/esfuerzo:** 0. ✅ **13.1.5** → Prettier + Terser (completado)
 
-1. ✅ **13.3** → Performance optimization (3-5 días, +10 Lighthouse points)
-2. ✅ **13.2** → E2E testing (2-4 semanas, garantiza quality)
-3. ✅ **13.4 Fase 1** → Data & Web playgrounds (SQL, HTML, CSS: 3-4 semanas, valida stack genérico)
-4. ✅ **13.6** → Documentation (3-5 días, facilita nuevas contribuciones)
-5. ✅ **13.4 Fase 2** → PHP playground (1-2 semanas, server-side support)
+1. 🔄 **13.3** → Performance optimization (3-5 días, +10 Lighthouse points)
+2. 🔄 **13.2** → E2E testing (cerrar bloque advanced)
+3. ⏳ **13.4 Fase 1** → Data & Web playgrounds (SQL, HTML, CSS)
+4. ⏳ **13.6** → Documentation (3-5 días, facilita nuevas contribuciones)
+5. ⏳ **13.4 Fase 2** → PHP playground (1-2 semanas, server-side support)

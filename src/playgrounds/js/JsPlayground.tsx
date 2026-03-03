@@ -48,6 +48,11 @@ export function JsPlayground() {
   const sizeWarningShown = useRef(false);
 
   useEffect(() => {
+    void import("@/services/formatter/formatter");
+    void import("@/services/minifier/minifier");
+  }, []);
+
+  useEffect(() => {
     saveLastJs(debouncedInputCode);
   }, [debouncedInputCode]);
 

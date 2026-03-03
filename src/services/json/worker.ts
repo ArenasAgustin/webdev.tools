@@ -1,6 +1,6 @@
 import type { Result, JsonError } from "@/types/common";
-import { formatJson, type FormatOptions } from "@/services/formatter/formatter";
-import { minifyJson, type MinifyOptions } from "@/services/minifier/minifier";
+import type { FormatOptions } from "@/services/formatter/formatter";
+import type { MinifyOptions } from "@/services/minifier/minifier";
 import { cleanJson, type CleanOptions } from "@/services/json/clean";
 import { applyJsonPath } from "@/services/json/jsonPath";
 import { runJsonWorker } from "@/services/json/workerClient";
@@ -23,14 +23,20 @@ export const formatJsonAsync = async (
   input: string,
   options: FormatOptions = {},
 ): Promise<Result<string, JsonError>> => {
-  return runJsonOperation({ action: "format", input, options }, () => formatJson(input, options));
+  return runJsonOperation({ action: "format", input, options }, async () => {
+    const { formatJson } = await import("@/services/formatter/formatter");
+    return formatJson(input, options);
+  });
 };
 
 export const minifyJsonAsync = async (
   input: string,
   options: MinifyOptions = {},
 ): Promise<Result<string, JsonError>> => {
-  return runJsonOperation({ action: "minify", input, options }, () => minifyJson(input, options));
+  return runJsonOperation({ action: "minify", input, options }, async () => {
+    const { minifyJson } = await import("@/services/minifier/minifier");
+    return minifyJson(input, options);
+  });
 };
 
 export const cleanJsonAsync = async (

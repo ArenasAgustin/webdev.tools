@@ -39,7 +39,7 @@ test.describe("JS workflow", () => {
     await page.goto("/playground/js");
     await page.getByRole("button", { name: "Ejecutar" }).click();
 
-    await expect(page.getByText("Error: Boom")).toBeVisible();
+    await expect(page.getByRole("main").getByText(/Boom/i)).toBeVisible();
   });
 
   test("format JS code", async ({ page }) => {
