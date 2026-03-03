@@ -1,9 +1,10 @@
 import { format as prettierFormat } from "prettier/standalone";
 import babelPlugin from "prettier/plugins/babel";
 import estreePlugin from "prettier/plugins/estree";
+import htmlPlugin from "prettier/plugins/html";
 import type { IndentStyle } from "@/types/format";
 
-export type PrettierParser = "babel" | "json-stringify";
+export type PrettierParser = "babel" | "json-stringify" | "html";
 
 interface ResolveIndentResult {
   tabWidth: number;
@@ -27,7 +28,7 @@ export const formatWithPrettier = async (
 
   const formatted = await prettierFormat(input, {
     parser,
-    plugins: [babelPlugin, estreePlugin],
+    plugins: [babelPlugin, estreePlugin, htmlPlugin],
     tabWidth,
     useTabs,
   });

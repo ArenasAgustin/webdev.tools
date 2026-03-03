@@ -6,14 +6,18 @@ import { Checkbox } from "./Checkbox";
 import { RadioGroup } from "./RadioGroup";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
+import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
 import { INDENT_OPTIONS } from "@/types/format";
 import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
+import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
 import {
   saveToolsConfig,
   removeToolsConfig,
   saveJsToolsConfig,
   removeJsToolsConfig,
+  saveHtmlToolsConfig,
+  removeHtmlToolsConfig,
 } from "@/services/storage";
 
 interface JsonConfigModalProps {
@@ -38,16 +42,34 @@ interface JsConfigModalProps {
   onMinifyConfigChange: (config: JsMinifyConfig) => void;
 }
 
-type ConfigModalProps = JsonConfigModalProps | JsConfigModalProps;
+interface HtmlConfigModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  mode: "html";
+  formatConfig: HtmlFormatConfig;
+  onFormatConfigChange: (config: HtmlFormatConfig) => void;
+  minifyConfig: HtmlMinifyConfig;
+  onMinifyConfigChange: (config: HtmlMinifyConfig) => void;
+}
+
+type ConfigModalProps = JsonConfigModalProps | JsConfigModalProps | HtmlConfigModalProps;
 
 export function ConfigModal(props: ConfigModalProps) {
   const isJsMode = props.mode === "js";
+  const isHtmlMode = props.mode === "html";
 
   const handleReset = () => {
     if (isJsMode) {
       props.onFormatConfigChange(DEFAULT_JS_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_JS_MINIFY_CONFIG);
       removeJsToolsConfig();
+      return;
+    }
+
+    if (isHtmlMode) {
+      props.onFormatConfigChange(DEFAULT_HTML_FORMAT_CONFIG);
+      props.onMinifyConfigChange(DEFAULT_HTML_MINIFY_CONFIG);
+      removeHtmlToolsConfig();
       return;
     }
 
@@ -67,6 +89,15 @@ export function ConfigModal(props: ConfigModalProps) {
       return;
     }
 
+    if (isHtmlMode) {
+      saveHtmlToolsConfig({
+        format: props.formatConfig,
+        minify: props.minifyConfig,
+      });
+      props.onClose();
+      return;
+    }
+
     saveToolsConfig({
       format: props.formatConfig,
       minify: props.minifyConfig,
@@ -78,7 +109,13 @@ export function ConfigModal(props: ConfigModalProps) {
   return (
     <Modal
       isOpen={props.isOpen}
-      title={isJsMode ? "Configuración de Herramientas JS" : "Configuración de Herramientas"}
+      title={
+        isJsMode
+          ? "Configuración de Herramientas JS"
+          : isHtmlMode
+            ? "Configuración de Herramientas HTML"
+            : "Configuración de Herramientas"
+      }
       icon="cog"
       iconColor="yellow-400"
       maxWidth="max-w-3xl"
@@ -94,7 +131,9 @@ export function ConfigModal(props: ConfigModalProps) {
       <div className="space-y-6 text-xs">
         {/* Formatear */}
         <Card
-          title={isJsMode ? "Formatear JavaScript" : "Formatear JSON"}
+          title={
+            isJsMode ? "Formatear JavaScript" : isHtmlMode ? "Formatear HTML" : "Formatear JSON"
+          }
           icon="indent"
           className="bg-blue-500/10 border-blue-500/20"
           headerClassName="text-blue-400"
@@ -102,7 +141,7 @@ export function ConfigModal(props: ConfigModalProps) {
           <div className="space-y-3">
             <div>
               <label className="block text-gray-300 mb-1">Espaciado</label>
-              {isJsMode ? (
+              {isJsMode || isHtmlMode ? (
                 <ToggleButtonGroup
                   options={INDENT_OPTIONS}
                   value={props.formatConfig.indentSize}
@@ -127,7 +166,7 @@ export function ConfigModal(props: ConfigModalProps) {
               )}
             </div>
 
-            {!isJsMode && (
+            {!isJsMode && !isHtmlMode && (
               <div>
                 <label className="block text-gray-300 mb-1">Ordenar claves alfabéticamente</label>
                 <Checkbox
@@ -148,7 +187,7 @@ export function ConfigModal(props: ConfigModalProps) {
               <label className="block text-gray-300 mb-1">
                 Copiar automáticamente al formatear
               </label>
-              {isJsMode ? (
+              {isJsMode || isHtmlMode ? (
                 <Checkbox
                   checked={props.formatConfig.autoCopy}
                   onChange={(checked) =>
@@ -179,7 +218,9 @@ export function ConfigModal(props: ConfigModalProps) {
 
         {/* Minificar */}
         <Card
-          title={isJsMode ? "Minificar JavaScript" : "Minificar JSON"}
+          title={
+            isJsMode ? "Minificar JavaScript" : isHtmlMode ? "Minificar HTML" : "Minificar JSON"
+          }
           icon="compress"
           className="bg-purple-500/10 border-purple-500/20"
           headerClassName="text-purple-400"
@@ -210,6 +251,53 @@ export function ConfigModal(props: ConfigModalProps) {
                         })
                       }
                       label="Eliminar espacios"
+                      color="purple"
+                    />
+                  </>
+                ) : isHtmlMode ? (
+                  <>
+                    <Checkbox
+                      checked={props.minifyConfig.removeComments}
+                      onChange={(checked) =>
+                        props.onMinifyConfigChange({
+                          ...props.minifyConfig,
+                          removeComments: checked,
+                        })
+                      }
+                      label="Eliminar comentarios"
+                      color="purple"
+                    />
+                    <Checkbox
+                      checked={props.minifyConfig.collapseWhitespace}
+                      onChange={(checked) =>
+                        props.onMinifyConfigChange({
+                          ...props.minifyConfig,
+                          collapseWhitespace: checked,
+                        })
+                      }
+                      label="Colapsar espacios"
+                      color="purple"
+                    />
+                    <Checkbox
+                      checked={props.minifyConfig.minifyCss}
+                      onChange={(checked) =>
+                        props.onMinifyConfigChange({
+                          ...props.minifyConfig,
+                          minifyCss: checked,
+                        })
+                      }
+                      label="Minificar CSS inline"
+                      color="purple"
+                    />
+                    <Checkbox
+                      checked={props.minifyConfig.minifyJs}
+                      onChange={(checked) =>
+                        props.onMinifyConfigChange({
+                          ...props.minifyConfig,
+                          minifyJs: checked,
+                        })
+                      }
+                      label="Minificar JS inline"
                       color="purple"
                     />
                   </>
@@ -255,6 +343,18 @@ export function ConfigModal(props: ConfigModalProps) {
                   label="Habilitar auto-copia"
                   color="purple"
                 />
+              ) : isHtmlMode ? (
+                <Checkbox
+                  checked={props.minifyConfig.autoCopy}
+                  onChange={(checked) =>
+                    props.onMinifyConfigChange({
+                      ...props.minifyConfig,
+                      autoCopy: checked,
+                    })
+                  }
+                  label="Habilitar auto-copia"
+                  color="purple"
+                />
               ) : (
                 <Checkbox
                   checked={props.minifyConfig.autoCopy}
@@ -273,7 +373,7 @@ export function ConfigModal(props: ConfigModalProps) {
         </Card>
 
         {/* Limpiar vacíos */}
-        {!isJsMode && (
+        {!isJsMode && !isHtmlMode && (
           <Card
             title="Limpiar Valores Vacíos"
             icon="broom"

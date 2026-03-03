@@ -7,6 +7,7 @@ import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
+import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
 import type { ToolbarConfig } from "@/types/toolbar";
 
 type ModalType = "tips" | "history" | "config" | null;
@@ -51,15 +52,25 @@ export interface JsonToolbarProps {
 export interface GenericToolbarProps {
   variant: "generic";
   tools: ToolbarConfig;
-  config?: {
-    mode: "js";
-    format: JsFormatConfig;
-    onFormatChange: (config: JsFormatConfig) => void;
-    minify: JsMinifyConfig;
-    onMinifyChange: (config: JsMinifyConfig) => void;
-    isOpen?: boolean;
-    onOpenChange?: (isOpen: boolean) => void;
-  };
+  config?:
+    | {
+        mode: "js";
+        format: JsFormatConfig;
+        onFormatChange: (config: JsFormatConfig) => void;
+        minify: JsMinifyConfig;
+        onMinifyChange: (config: JsMinifyConfig) => void;
+        isOpen?: boolean;
+        onOpenChange?: (isOpen: boolean) => void;
+      }
+    | {
+        mode: "html";
+        format: HtmlFormatConfig;
+        onFormatChange: (config: HtmlFormatConfig) => void;
+        minify: HtmlMinifyConfig;
+        onMinifyChange: (config: HtmlMinifyConfig) => void;
+        isOpen?: boolean;
+        onOpenChange?: (isOpen: boolean) => void;
+      };
 }
 
 type ToolbarProps = JsonToolbarProps | GenericToolbarProps;
@@ -130,9 +141,21 @@ export function Toolbar(props: ToolbarProps) {
           </div>
         </section>
 
-        {genericConfig && (
+        {genericConfig?.mode === "js" && (
           <ConfigModal
             mode="js"
+            isOpen={showGenericConfig}
+            onClose={() => setShowGenericConfigState(false)}
+            formatConfig={genericConfig.format}
+            onFormatConfigChange={genericConfig.onFormatChange}
+            minifyConfig={genericConfig.minify}
+            onMinifyConfigChange={genericConfig.onMinifyChange}
+          />
+        )}
+
+        {genericConfig?.mode === "html" && (
+          <ConfigModal
+            mode="html"
             isOpen={showGenericConfig}
             onClose={() => setShowGenericConfigState(false)}
             formatConfig={genericConfig.format}

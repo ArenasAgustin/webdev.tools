@@ -5,6 +5,7 @@
 
 import type { ToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
+import type { HtmlToolsConfig } from "@/types/html";
 
 const getStorage = (): Storage | null => {
   if (typeof window !== "undefined" && window.localStorage) {
@@ -28,8 +29,10 @@ const getStorage = (): Storage | null => {
 export const STORAGE_KEYS = {
   TOOLS_CONFIG: "toolsConfig",
   JS_TOOLS_CONFIG: "jsToolsConfig",
+  HTML_TOOLS_CONFIG: "htmlToolsConfig",
   LAST_JSON: "lastJson",
   LAST_JS: "lastJs",
+  LAST_HTML: "lastHtml",
   JSONPATH_HISTORY: "jsonPathHistory",
 } as const;
 
@@ -243,4 +246,68 @@ export function saveJsToolsConfig(config: Partial<JsToolsConfig>): boolean {
  */
 export function removeJsToolsConfig(): boolean {
   return removeItem(STORAGE_KEYS.JS_TOOLS_CONFIG);
+}
+
+// ============================================
+// Specific storage functions for HTML Tools
+// ============================================
+
+/**
+ * Load last HTML input from localStorage
+ */
+export function loadLastHtml(): string {
+  try {
+    const storage = getStorage();
+    if (!storage) return "";
+
+    const item = storage.getItem(STORAGE_KEYS.LAST_HTML);
+    return item ?? "";
+  } catch (error) {
+    console.error("Error loading last HTML:", error);
+    return "";
+  }
+}
+
+/**
+ * Save last HTML input to localStorage
+ */
+export function saveLastHtml(html: string): boolean {
+  try {
+    const storage = getStorage();
+    if (!storage) return false;
+
+    storage.setItem(STORAGE_KEYS.LAST_HTML, html);
+    return true;
+  } catch (error) {
+    console.error("Error saving last HTML:", error);
+    return false;
+  }
+}
+
+/**
+ * Remove last HTML from localStorage
+ */
+export function removeLastHtml(): boolean {
+  return removeItem(STORAGE_KEYS.LAST_HTML);
+}
+
+/**
+ * Load HTML tools configuration from localStorage
+ */
+export function loadHtmlToolsConfig(): Partial<HtmlToolsConfig> | null {
+  return getItem<Partial<HtmlToolsConfig>>(STORAGE_KEYS.HTML_TOOLS_CONFIG);
+}
+
+/**
+ * Save HTML tools configuration to localStorage
+ */
+export function saveHtmlToolsConfig(config: Partial<HtmlToolsConfig>): boolean {
+  return setItem(STORAGE_KEYS.HTML_TOOLS_CONFIG, config);
+}
+
+/**
+ * Remove HTML tools configuration from localStorage
+ */
+export function removeHtmlToolsConfig(): boolean {
+  return removeItem(STORAGE_KEYS.HTML_TOOLS_CONFIG);
 }
