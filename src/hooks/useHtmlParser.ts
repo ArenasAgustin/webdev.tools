@@ -36,7 +36,7 @@ export function useHtmlParser(input: string): HtmlValidation {
         setValidation({
           isValid: false,
           error: {
-            message: `Error de sintaxis: ${result.error || "HTML inválido"}`,
+            message: `Error de sintaxis: ${compactHtmlError(result.error || "HTML inválido")}`,
           },
         });
       })
@@ -49,7 +49,7 @@ export function useHtmlParser(input: string): HtmlValidation {
         setValidation({
           isValid: false,
           error: {
-            message: `Error de sintaxis: ${message || "HTML inválido"}`,
+            message: `Error de sintaxis: ${compactHtmlError(message || "HTML inválido")}`,
           },
         });
       });
@@ -64,4 +64,14 @@ export function useHtmlParser(input: string): HtmlValidation {
   }
 
   return validation;
+}
+
+function compactHtmlError(message: string): string {
+  const firstLine = message
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+
+  const compact = (firstLine ?? message).replace(/\s{2,}/g, " ").trim();
+  return compact.length > 140 ? `${compact.slice(0, 137)}...` : compact;
 }

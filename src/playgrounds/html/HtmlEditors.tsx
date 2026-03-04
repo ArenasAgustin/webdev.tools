@@ -54,7 +54,7 @@ function HtmlValidationStatus({
 
   if (validationState.isValid) {
     return (
-      <span className="text-green-400 flex items-center gap-1">
+      <span className="text-green-400 flex min-w-0 items-center gap-1">
         <i className="fas fa-check-circle"></i> HTML válido
         {warning ? <span className="text-amber-400 ml-2 truncate">{warning}</span> : null}
       </span>
@@ -62,9 +62,14 @@ function HtmlValidationStatus({
   }
 
   return (
-    <span className="text-red-400 flex items-center gap-1">
+    <span className="text-red-400 flex min-w-0 w-full items-center gap-1 overflow-hidden">
       <i className="fas fa-exclamation-circle"></i>
-      {validationState.error?.message ?? "HTML inválido"}
+      <span
+        className="block min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
+        title={validationState.error?.message ?? "HTML inválido"}
+      >
+        {validationState.error?.message ?? "HTML inválido"}
+      </span>
       {warning ? <span className="text-amber-400 ml-2 truncate">{warning}</span> : null}
     </span>
   );
@@ -105,7 +110,7 @@ export const HtmlEditors = memo(function HtmlEditors({
             />
           }
           footer={
-            <div className="text-xs h-4">
+            <div className="text-xs h-4 min-w-0 overflow-hidden">
               <HtmlValidationStatus
                 inputValue={inputHtml}
                 validationState={validationState}
@@ -137,6 +142,7 @@ export const HtmlEditors = memo(function HtmlEditors({
               outputError={error}
               showValidLabel={false}
               withWrapper
+              className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
               validExtra={
                 <span className="text-gray-400">
                   Líneas: {output.split("\n").length} | Caracteres: {output.length}
@@ -164,17 +170,19 @@ export const HtmlEditors = memo(function HtmlEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 flex items-center gap-1">
+            <div className="text-xs h-4 min-w-0 overflow-hidden flex items-center gap-1">
               <HtmlValidationStatus
                 inputValue={inputHtml}
                 validationState={validationState}
                 warning={inputWarning}
               />
-              <Stats
-                lines={inputStats.lines}
-                characters={inputStats.characters}
-                bytes={inputStats.bytes}
-              />
+              {validationState.isValid ? (
+                <Stats
+                  lines={inputStats.lines}
+                  characters={inputStats.characters}
+                  bytes={inputStats.bytes}
+                />
+              ) : null}
             </div>
           }
         >
@@ -214,6 +222,7 @@ export const HtmlEditors = memo(function HtmlEditors({
                 outputError={error}
                 showValidLabel={false}
                 withWrapper
+                className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
                 validExtra={
                   <span className="text-gray-400">
                     Líneas: {output.split("\n").length} | Caracteres: {output.length}

@@ -517,18 +517,6 @@
   - [ ] ADR-002: Por qué generic worker factory vs duplicación
   - [ ] ADR-003: Por qué Web Workers para JSON >100KB
 
-- [ ] **Contribute Guide**
-  - [ ] Crear `CONTRIBUTE.md`
-  - [ ] Setup local development
-  - [ ] Adding a new playground (step-by-step)
-  - [ ] Testing requirements
-  - [ ] PR checklist
-
-- [ ] **API Documentation**
-  - [ ] JSDoc improvements en servicios clave
-  - [ ] TypeDoc generation
-  - [ ] Readme updates
-
 ---
 
 ### 13.7 - Deployment & Monitoring

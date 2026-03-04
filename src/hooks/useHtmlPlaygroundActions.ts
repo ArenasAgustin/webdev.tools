@@ -102,7 +102,7 @@ export function useHtmlPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(message);
+        setError(compactHtmlError(message));
       },
       successMessage: "HTML formateado correctamente",
       errorMessage: "Error al formatear HTML",
@@ -135,7 +135,7 @@ export function useHtmlPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(message);
+        setError(compactHtmlError(message));
       },
       successMessage: "HTML minificado correctamente",
       errorMessage: "Error al minificar HTML",
@@ -151,4 +151,14 @@ export function useHtmlPlaygroundActions({
     handleFormat,
     handleMinify,
   };
+}
+
+function compactHtmlError(message: string): string {
+  const firstLine = message
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+
+  const compact = (firstLine ?? message).replace(/\s{2,}/g, " ").trim();
+  return compact.length > 140 ? `${compact.slice(0, 137)}...` : compact;
 }
