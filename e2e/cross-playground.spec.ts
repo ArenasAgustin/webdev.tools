@@ -18,6 +18,18 @@ test.describe("Cross-playground navigation", () => {
 
     await expect(page).toHaveURL(/\/playground\/json$/);
     await expect(page.getByRole("heading", { name: "JSON Tools" })).toBeVisible();
+
+    await page.getByRole("button", { name: /Open sidebar/i }).click();
+    await page.getByRole("link", { name: /HTML tools/i }).click();
+
+    await expect(page).toHaveURL(/\/playground\/html$/);
+    await expect(page.getByRole("heading", { name: "HTML tools" })).toBeVisible();
+
+    await page.getByRole("button", { name: /Open sidebar/i }).click();
+    await page.getByRole("link", { name: /JSON Tools/i }).click();
+
+    await expect(page).toHaveURL(/\/playground\/json$/);
+    await expect(page.getByRole("heading", { name: "JSON Tools" })).toBeVisible();
   });
 
   test("preserve state when navigating between playground routes", async ({ page }) => {
@@ -44,5 +56,19 @@ test.describe("Cross-playground navigation", () => {
     await expect
       .poll(async () => page.evaluate(() => localStorage.getItem("toolsConfig") ?? ""))
       .toContain('"indent":4');
+
+    await page.getByRole("button", { name: /Open sidebar/i }).click();
+    await page.getByRole("link", { name: /HTML tools/i }).click();
+
+    await expect(page).toHaveURL(/\/playground\/html$/);
+
+    await page.getByRole("button", { name: "Configurar herramientas" }).click();
+    const htmlIndent4 = page.getByRole("button", { name: "4 espacios" });
+    await htmlIndent4.click();
+    await expect(htmlIndent4).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("Escape");
+    await expect
+      .poll(async () => page.evaluate(() => localStorage.getItem("htmlToolsConfig") ?? ""))
+      .toContain('"indentSize":4');
   });
 });

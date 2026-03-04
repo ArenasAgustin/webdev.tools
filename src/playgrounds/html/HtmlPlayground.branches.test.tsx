@@ -4,8 +4,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 const {
   toastMocks,
   storageMocks,
-  minifyJsAsyncMock,
-  formatJsAsyncMock,
+  formatHtmlMock,
+  minifyHtmlMock,
   downloadFileMock,
   clipboardWriteTextMock,
 } = vi.hoisted(() => ({
@@ -15,13 +15,13 @@ const {
     info: vi.fn(),
   },
   storageMocks: {
-    loadLastJs: vi.fn(() => ""),
-    saveLastJs: vi.fn(),
-    loadJsToolsConfig: vi.fn(() => null),
-    saveJsToolsConfig: vi.fn(),
+    loadLastHtml: vi.fn(() => ""),
+    saveLastHtml: vi.fn(),
+    loadHtmlToolsConfig: vi.fn(() => null),
+    saveHtmlToolsConfig: vi.fn(),
   },
-  minifyJsAsyncMock: vi.fn(),
-  formatJsAsyncMock: vi.fn(),
+  formatHtmlMock: vi.fn(),
+  minifyHtmlMock: vi.fn(),
   downloadFileMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
 }));
@@ -32,27 +32,34 @@ vi.mock("@/hooks/useToast", () => ({
 
 vi.mock("@/services/storage", () => storageMocks);
 
-vi.mock("@/services/js/worker", () => ({
-  minifyJsAsync: minifyJsAsyncMock as (
+vi.mock("@/hooks/useHtmlParser", () => ({
+  useHtmlParser: () => ({ isValid: true, error: null }),
+}));
+
+vi.mock("@/services/html/transform", () => ({
+  formatHtml: formatHtmlMock as (
     input: string,
-    options: { removeComments: boolean; removeSpaces: boolean },
-  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
-  formatJsAsync: formatJsAsyncMock as (
+    indentSize: number | "\t",
+  ) => Promise<{ ok: boolean; value?: string; error?: string }>,
+  minifyHtml: minifyHtmlMock as (
     input: string,
-    indentSize: number,
-  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
+    options: unknown,
+  ) => {
+    ok: boolean;
+    value?: string;
+    error?: string;
+  },
 }));
 
 vi.mock("@/utils/download", () => ({
   downloadFile: downloadFileMock as (content: string, filename: string, mimeType: string) => void,
 }));
 
-vi.mock("./JsEditors", () => ({
-  JsEditors: ({
-    inputCode,
+vi.mock("./HtmlEditors", () => ({
+  HtmlEditors: ({
+    inputHtml,
     output,
     error,
-    validationState,
     inputWarning,
     onInputChange,
     onClearInput,
@@ -61,12 +68,11 @@ vi.mock("./JsEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputCode: string;
+    inputHtml: string;
     output: string;
     error: string | null;
-    validationState: { isValid: boolean; error: { message: string } | null };
     inputWarning?: string | null;
-    onInputChange: (code: string) => void;
+    onInputChange: (value: string) => void;
     onClearInput: () => void;
     onLoadExample: () => void;
     onCopyOutput: () => void;
@@ -74,14 +80,11 @@ vi.mock("./JsEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-code">{inputCode}</p>
-      <p data-testid="output-code">{output}</p>
-      <p data-testid="error-code">{error}</p>
-      <p data-testid="validation-valid">{String(validationState.isValid)}</p>
+      <p data-testid="input-html">{inputHtml}</p>
+      <p data-testid="output-html">{output}</p>
+      <p data-testid="error-html">{error}</p>
       <p data-testid="warning">{inputWarning}</p>
-      <button onClick={() => onInputChange("return 2")}>set-return</button>
-      <button onClick={() => onInputChange('throw new Error("Boom")')}>set-error</button>
-      <button onClick={() => onInputChange("const x = 1;")}>set-input</button>
+      <button onClick={() => onInputChange("<div>ok</div>")}>set-input</button>
       <button onClick={() => onInputChange("")}>set-empty</button>
       <button onClick={() => onInputChange("x".repeat(500_001))}>set-huge</button>
       <button onClick={onClearInput}>clear-input</button>
@@ -107,7 +110,9 @@ vi.mock("@/components/layout/Toolbar", () => ({
       onFormatChange: (config: { indentSize: number; autoCopy: boolean }) => void;
       onMinifyChange: (config: {
         removeComments: boolean;
-        removeSpaces: boolean;
+        collapseWhitespace: boolean;
+        minifyCss: boolean;
+        minifyJs: boolean;
         autoCopy: boolean;
       }) => void;
     };
@@ -130,7 +135,9 @@ vi.mock("@/components/layout/Toolbar", () => ({
             onClick={() =>
               config.onMinifyChange({
                 removeComments: true,
-                removeSpaces: true,
+                collapseWhitespace: true,
+                minifyCss: true,
+                minifyJs: true,
                 autoCopy: true,
               })
             }
@@ -143,13 +150,13 @@ vi.mock("@/components/layout/Toolbar", () => ({
   ),
 }));
 
-import { JsPlayground } from "./JsPlayground";
+import { HtmlPlayground } from "./HtmlPlayground";
 
-describe("JsPlayground branches", () => {
+describe("HtmlPlayground branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    minifyJsAsyncMock.mockResolvedValue({ ok: true, value: "const x=1;" });
-    formatJsAsyncMock.mockResolvedValue({ ok: true, value: "const x = 1;" });
+    formatHtmlMock.mockResolvedValue({ ok: true, value: "<div>formatted</div>" });
+    minifyHtmlMock.mockReturnValue({ ok: true, value: "<div>minified</div>" });
     clipboardWriteTextMock.mockResolvedValue(undefined);
 
     Object.defineProperty(navigator, "clipboard", {
@@ -162,62 +169,42 @@ describe("JsPlayground branches", () => {
     vi.restoreAllMocks();
   });
 
-  it("executes code and handles runtime errors", async () => {
-    render(<JsPlayground />);
-
-    fireEvent.click(screen.getByRole("button", { name: "set-return" }));
-    fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("output-code").textContent).toBe("2");
-      expect(toastMocks.success).toHaveBeenCalledWith("Código ejecutado correctamente");
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: "set-error" }));
-    fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("error-code").textContent).toBe("Boom");
-      expect(toastMocks.error).toHaveBeenCalledWith("Boom");
-    });
-  });
-
   it("handles copy and download input and output branches", async () => {
-    render(<JsPlayground />);
+    render(<HtmlPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-empty" }));
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("No hay código para descargar");
+    expect(toastMocks.error).toHaveBeenCalledWith("No hay HTML para descargar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para descargar");
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
-    expect(downloadFileMock).toHaveBeenCalledWith(
-      "const x = 1;",
-      "code.js",
-      "application/javascript",
-    );
+    expect(downloadFileMock).toHaveBeenCalledWith("<div>ok</div>", "index.html", "text/html");
 
-    fireEvent.click(screen.getByRole("button", { name: "set-return" }));
-    fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
-
+    fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     await waitFor(() => {
-      expect(screen.getByTestId("output-code").textContent).toBe("2");
+      expect(screen.getByTestId("output-html").textContent).toBe("<div>formatted</div>");
     });
 
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
     await waitFor(() => {
-      expect(clipboardWriteTextMock).toHaveBeenCalledWith("2");
+      expect(clipboardWriteTextMock).toHaveBeenCalledWith("<div>formatted</div>");
     });
-    expect(downloadFileMock).toHaveBeenCalledWith("2", "output.txt", "text/plain");
+    expect(downloadFileMock).toHaveBeenCalledWith(
+      "<div>formatted</div>",
+      "result.html",
+      "text/html",
+    );
   });
 
   it("runs format and minify success and error flows", async () => {
-    render(<JsPlayground />);
+    render(<HtmlPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
     fireEvent.click(screen.getByRole("button", { name: "open-config" }));
@@ -226,20 +213,20 @@ describe("JsPlayground branches", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     await waitFor(() => {
-      expect(formatJsAsyncMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("Código formateado correctamente");
-      expect(screen.getByTestId("output-code").textContent).toBe("const x = 1;");
+      expect(formatHtmlMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("HTML formateado correctamente");
+      expect(screen.getByTestId("output-html").textContent).toBe("<div>formatted</div>");
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
     await waitFor(() => {
-      expect(minifyJsAsyncMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("Código minificado correctamente");
-      expect(screen.getByTestId("output-code").textContent).toBe("const x=1;");
+      expect(minifyHtmlMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("HTML minificado correctamente");
+      expect(screen.getByTestId("output-html").textContent).toBe("<div>minified</div>");
     });
 
-    formatJsAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: "format fail" } });
-    minifyJsAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: "minify fail" } });
+    formatHtmlMock.mockResolvedValueOnce({ ok: false, error: "format fail" });
+    minifyHtmlMock.mockReturnValueOnce({ ok: false, error: "minify fail" });
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
@@ -251,7 +238,7 @@ describe("JsPlayground branches", () => {
   });
 
   it("guards operations when input exceeds max size", async () => {
-    render(<JsPlayground />);
+    render(<HtmlPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-huge" }));
 
@@ -261,17 +248,16 @@ describe("JsPlayground branches", () => {
       );
     });
 
-    const formatCallsBeforeGuard = formatJsAsyncMock.mock.calls.length;
-    const minifyCallsBeforeGuard = minifyJsAsyncMock.mock.calls.length;
+    const formatCallsBeforeGuard = formatHtmlMock.mock.calls.length;
+    const minifyCallsBeforeGuard = minifyHtmlMock.mock.calls.length;
 
-    fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
     expect(toastMocks.error).toHaveBeenCalledWith(
       "El contenido supera 500 KB. Reduce el tamano para procesarlo.",
     );
-    expect(formatJsAsyncMock.mock.calls.length).toBe(formatCallsBeforeGuard);
-    expect(minifyJsAsyncMock.mock.calls.length).toBe(minifyCallsBeforeGuard);
+    expect(formatHtmlMock.mock.calls.length).toBe(formatCallsBeforeGuard);
+    expect(minifyHtmlMock.mock.calls.length).toBe(minifyCallsBeforeGuard);
   });
 });

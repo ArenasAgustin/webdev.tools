@@ -10,6 +10,7 @@ test.describe("Smoke", () => {
 
     await expect(page.locator('a[href="/playground/json"]')).toBeVisible();
     await expect(page.locator('a[href="/playground/js"]')).toBeVisible();
+    await expect(page.locator('a[href="/playground/html"]')).toBeVisible();
   });
 
   test("can navigate to JSON playground", async ({ page }) => {
@@ -18,5 +19,13 @@ test.describe("Smoke", () => {
 
     await expect(page).toHaveURL(/\/playground\/json$/);
     await expect(page.getByRole("heading", { name: "JSON Tools" })).toBeVisible();
+  });
+
+  test("can navigate to HTML playground", async ({ page }) => {
+    await page.goto("/");
+    await page.click('a[href="/playground/html"]');
+
+    await expect(page).toHaveURL(/\/playground\/html$/);
+    await expect(page.getByRole("heading", { name: "HTML tools" })).toBeVisible();
   });
 });

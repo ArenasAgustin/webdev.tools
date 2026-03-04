@@ -436,14 +436,16 @@
   - [ ] Tab para results/schema visualization
 
 - [ ] **HTML Playground** (5-6 días)
-  - [ ] HTML validator y formatter (usando prettier)
-  - [ ] Implement: `services/html/parse.ts`, `format.ts`, `minify.ts`
-  - [ ] Minificador: integrar `html-minifier-terser` en `minify.ts`
-  - [ ] Live preview render con iframe sandbox
-  - [ ] Crear `useHtmlPlaygroundActions` adapter
-  - [ ] Crear página: `src/playgrounds/html/HtmlPlayground.tsx`
-  - [ ] Split view: editor + live preview
-  - [ ] Inspect DOM elements
+  - [x] HTML validator y formatter (usando prettier)
+  - [x] Implement base: `services/html/transform.ts` (format + minify)
+  - [x] Minificador base en browser (sin dependencia Node-only)
+  - [x] Tests unitarios/branches del playground HTML
+  - [x] E2E workflow HTML + navegación cross-playground
+  - [x] Live preview render con iframe sandbox
+  - [x] Crear `useHtmlPlaygroundActions` adapter
+  - [x] Crear página: `src/playgrounds/html/HtmlPlayground.tsx`
+  - [x] Split view: editor + live preview
+  - [x] Inspect DOM elements
 
 - [ ] **CSS Playground** (5-6 días)
   - [ ] CSS formatter y minifier

@@ -80,7 +80,7 @@ describe("JsPlayground", () => {
     expect(input.value).toContain("factorial");
   });
 
-  it("executes code and displays console output", () => {
+  it("executes code and displays console output", async () => {
     renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
@@ -90,10 +90,12 @@ describe("JsPlayground", () => {
     fireEvent.change(input, { target: { value: 'console.log("Hola")' } });
     fireEvent.click(screen.getByRole("button", { name: /Ejecutar/i }));
 
-    expect(output.value).toBe("Hola");
+    await waitFor(() => {
+      expect(output.value).toBe("Hola");
+    });
   });
 
-  it("shows runtime errors when execution fails", () => {
+  it("shows runtime errors when execution fails", async () => {
     renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
@@ -104,7 +106,9 @@ describe("JsPlayground", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /Ejecutar/i }));
 
-    expect(screen.getByText("Boom")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Boom")).toBeInTheDocument();
+    });
   });
 
   it("formats and minifies input code", async () => {
