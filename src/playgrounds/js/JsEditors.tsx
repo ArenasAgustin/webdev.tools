@@ -67,7 +67,19 @@ export const JsEditors = memo(function JsEditors({
               inputValue={inputCode}
               validationState={validationState}
               warning={inputWarning}
+              waitingLabel="Esperando JavaScript..."
+              validLabel="JavaScript válido"
+              invalidLabel="JavaScript inválido"
               withWrapper
+              withFlex
+              validExtra={
+                <Stats
+                  lines={inputStats.lines}
+                  characters={inputStats.characters}
+                  bytes={inputStats.bytes}
+                  leadingSeparator
+                />
+              }
             />
           }
           value={inputCode}
@@ -129,6 +141,9 @@ export const JsEditors = memo(function JsEditors({
               inputValue={inputCode}
               validationState={validationState}
               warning={inputWarning}
+              waitingLabel="Esperando JavaScript..."
+              validLabel="JavaScript válido"
+              invalidLabel="JavaScript inválido"
               withWrapper
               withFlex
               validExtra={

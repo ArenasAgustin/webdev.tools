@@ -6,6 +6,7 @@ import { JsInputActions } from "@/components/editor/JsInputActions";
 import { JsOutputActions } from "@/components/editor/JsOutputActions";
 import { Button } from "@/components/common/Button";
 import { Stats } from "@/components/common/Stats";
+import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor } from "@/hooks/useExpandedEditor";
@@ -27,52 +28,6 @@ interface HtmlEditorsProps {
   onCopyOutput: () => void;
   onDownloadInput: () => void;
   onDownloadOutput: () => void;
-}
-
-function HtmlValidationStatus({
-  inputValue,
-  validationState,
-  warning,
-}: {
-  inputValue: string;
-  validationState: {
-    isValid: boolean;
-    error: {
-      message: string;
-    } | null;
-  };
-  warning?: string | null;
-}) {
-  if (inputValue.trim() === "") {
-    return (
-      <span className="text-gray-400">
-        Esperando HTML...
-        {warning ? <span className="text-amber-400 ml-2 truncate">{warning}</span> : null}
-      </span>
-    );
-  }
-
-  if (validationState.isValid) {
-    return (
-      <span className="text-green-400 flex min-w-0 items-center gap-1">
-        <i className="fas fa-check-circle"></i> HTML válido
-        {warning ? <span className="text-amber-400 ml-2 truncate">{warning}</span> : null}
-      </span>
-    );
-  }
-
-  return (
-    <span className="text-red-400 flex min-w-0 w-full items-center gap-1 overflow-hidden">
-      <i className="fas fa-exclamation-circle"></i>
-      <span
-        className="block min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
-        title={validationState.error?.message ?? "HTML inválido"}
-      >
-        {validationState.error?.message ?? "HTML inválido"}
-      </span>
-      {warning ? <span className="text-amber-400 ml-2 truncate">{warning}</span> : null}
-    </span>
-  );
 }
 
 export const HtmlEditors = memo(function HtmlEditors({
@@ -111,12 +66,24 @@ export const HtmlEditors = memo(function HtmlEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 min-w-0 overflow-hidden">
-              <HtmlValidationStatus
+            <div className="text-xs h-4 min-w-0 overflow-hidden flex items-center gap-1">
+              <ValidationStatus
                 inputValue={inputHtml}
                 validationState={validationState}
                 warning={inputWarning}
+                waitingLabel="Esperando HTML..."
+                validLabel="HTML válido"
+                invalidLabel="HTML inválido"
+                truncateError
               />
+              {validationState.isValid ? (
+                <Stats
+                  lines={inputStats.lines}
+                  characters={inputStats.characters}
+                  bytes={inputStats.bytes}
+                  leadingSeparator
+                />
+              ) : null}
             </div>
           }
           value={inputHtml}
@@ -175,16 +142,21 @@ export const HtmlEditors = memo(function HtmlEditors({
           }
           footer={
             <div className="text-xs h-4 min-w-0 overflow-hidden flex items-center gap-1">
-              <HtmlValidationStatus
+              <ValidationStatus
                 inputValue={inputHtml}
                 validationState={validationState}
                 warning={inputWarning}
+                waitingLabel="Esperando HTML..."
+                validLabel="HTML válido"
+                invalidLabel="HTML inválido"
+                truncateError
               />
               {validationState.isValid ? (
                 <Stats
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
+                  leadingSeparator
                 />
               ) : null}
             </div>

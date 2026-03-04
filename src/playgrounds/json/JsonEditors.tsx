@@ -64,6 +64,15 @@ export const JsonEditors = memo(function JsonEditors({
               validationState={validationState}
               warning={inputWarning}
               withWrapper
+              withFlex
+              validExtra={
+                <Stats
+                  lines={inputStats.lines}
+                  characters={inputStats.characters}
+                  bytes={inputStats.bytes}
+                  leadingSeparator
+                />
+              }
             />
           }
           value={inputValue}
