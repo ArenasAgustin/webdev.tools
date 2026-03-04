@@ -435,7 +435,7 @@
   - [ ] Crear página: `src/playgrounds/sql/SqlPlayground.tsx`
   - [ ] Tab para results/schema visualization
 
-- [ ] **HTML Playground** (5-6 días)
+- [x] **HTML Playground** (5-6 días) ✅
   - [x] HTML validator y formatter (usando prettier)
   - [x] Implement base: `services/html/transform.ts` (format + minify)
   - [x] Minificador base en browser (sin dependencia Node-only)
