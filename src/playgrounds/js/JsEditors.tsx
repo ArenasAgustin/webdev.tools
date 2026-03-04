@@ -45,6 +45,7 @@ export const JsEditors = memo(function JsEditors({
   const editor = useExpandedEditor();
 
   const inputStats = useTextStats(inputCode);
+  const outputStats = useTextStats(output);
 
   return (
     <>
@@ -94,9 +95,12 @@ export const JsEditors = memo(function JsEditors({
               showValidLabel={false}
               withWrapper
               validExtra={
-                <span className="text-gray-400">
-                  Líneas: {output.split("\n").length} | Caracteres: {output.length}
-                </span>
+                <Stats
+                  lines={outputStats.lines}
+                  characters={outputStats.characters}
+                  bytes={outputStats.bytes}
+                  comparisonBytes={inputStats.bytes}
+                />
               }
             />
           }
@@ -132,6 +136,7 @@ export const JsEditors = memo(function JsEditors({
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
+                  leadingSeparator
                 />
               }
             />
@@ -164,9 +169,12 @@ export const JsEditors = memo(function JsEditors({
               showValidLabel={false}
               withWrapper
               validExtra={
-                <span className="text-gray-400">
-                  Líneas: {output.split("\n").length} | Caracteres: {output.length}
-                </span>
+                <Stats
+                  lines={outputStats.lines}
+                  characters={outputStats.characters}
+                  bytes={outputStats.bytes}
+                  comparisonBytes={inputStats.bytes}
+                />
               }
             />
           }

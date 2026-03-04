@@ -91,9 +91,12 @@ export const JsonEditors = memo(function JsonEditors({
               showValidLabel={false}
               withWrapper
               validExtra={
-                <span className="text-gray-400">
-                  Líneas: {outputValue.split("\n").length} | Caracteres: {outputValue.length}
-                </span>
+                <Stats
+                  lines={outputStats.lines}
+                  characters={outputStats.characters}
+                  bytes={outputStats.bytes}
+                  comparisonBytes={inputStats.bytes}
+                />
               }
             />
           }
@@ -129,6 +132,7 @@ export const JsonEditors = memo(function JsonEditors({
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
+                  leadingSeparator
                 />
               }
             />
@@ -158,6 +162,7 @@ export const JsonEditors = memo(function JsonEditors({
             <OutputStatus
               outputValue={outputValue}
               outputError={outputError}
+              showValidLabel={false}
               withWrapper
               withFlex
               validExtra={

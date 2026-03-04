@@ -5,6 +5,7 @@ interface StatsProps {
   characters: number;
   bytes: number;
   comparisonBytes?: number;
+  leadingSeparator?: boolean;
 }
 
 /**
@@ -16,6 +17,7 @@ export const Stats = memo(function Stats({
   characters,
   bytes,
   comparisonBytes,
+  leadingSeparator = false,
 }: StatsProps) {
   const hasComparison = comparisonBytes !== undefined && comparisonBytes > 0;
 
@@ -32,7 +34,8 @@ export const Stats = memo(function Stats({
 
   return (
     <span className="text-gray-400">
-      · {lines} líneas · {characters.toLocaleString()} caracteres · {bytes.toLocaleString()} bytes
+      {leadingSeparator ? "· " : ""}
+      {lines} líneas · {characters.toLocaleString()} caracteres · {bytes.toLocaleString()} bytes
       {hasComparison && (
         <span className={`ml-1 ${percentageColor}`}>
           ({Math.abs(percentage)}% {percentageLabel})

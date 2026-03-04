@@ -90,6 +90,7 @@ export const HtmlEditors = memo(function HtmlEditors({
 }: HtmlEditorsProps) {
   const editor = useExpandedEditor();
   const inputStats = useTextStats(inputHtml);
+  const outputStats = useTextStats(output);
   const [showPreview, setShowPreview] = useState(false);
   const previewSource = useMemo(() => (output.trim() ? output : inputHtml), [output, inputHtml]);
   const domInspection = useMemo(() => inspectDom(previewSource), [previewSource]);
@@ -144,9 +145,12 @@ export const HtmlEditors = memo(function HtmlEditors({
               withWrapper
               className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
               validExtra={
-                <span className="text-gray-400">
-                  Líneas: {output.split("\n").length} | Caracteres: {output.length}
-                </span>
+                <Stats
+                  lines={outputStats.lines}
+                  characters={outputStats.characters}
+                  bytes={outputStats.bytes}
+                  comparisonBytes={inputStats.bytes}
+                />
               }
             />
           }
@@ -224,9 +228,12 @@ export const HtmlEditors = memo(function HtmlEditors({
                 withWrapper
                 className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
                 validExtra={
-                  <span className="text-gray-400">
-                    Líneas: {output.split("\n").length} | Caracteres: {output.length}
-                  </span>
+                  <Stats
+                    lines={outputStats.lines}
+                    characters={outputStats.characters}
+                    bytes={outputStats.bytes}
+                    comparisonBytes={inputStats.bytes}
+                  />
                 }
               />
             }
