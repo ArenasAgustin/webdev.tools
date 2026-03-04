@@ -198,7 +198,7 @@
 | JSON Playground      | 45.7 KB | 20.5 KB | <25 KB  | 🔴       | ✅     |
 | jsonWorker           | 28.3 KB | 28.1 KB | <30 KB  | 🟢       | ✅     |
 | Test coverage        | 80.47%  | 85.13%  | 85%+    | 🟠       | ✅     |
-| Lighthouse score     | 85/100  | 85/100  | 95+/100 | 🟠       | 🔄     |
+| Performance (Lab)    | 85/100  | 85/100  | 95+/100 | 🟠       | 🔄     |
 | Time to Interactive  | ~3.2s   | ~2.8s   | <2.5s   | 🟠       | 🔄     |
 
 ### 12.5 - Roadmap por Fases
@@ -356,17 +356,17 @@
 
 ---
 
-### 13.3 - Performance Optimization (Lighthouse & TTI)
+### 13.3 - Performance Optimization (Web Vitals & TTI)
 
 #### 🟠 Media Prioridad — Documentation & Patterns (Próximos 3-5 días)
 
-**Objetivo:** Mejorar Lighthouse score de 85/100 a 95+/100, reducir Time to Interactive de 2.8s a <2.5s
+**Objetivo:** Mejorar baseline de performance de 85/100 a 95+/100, reducir Time to Interactive de 2.8s a <2.5s
 
-- [x] **Performance auditing con Lighthouse CI** ✅
-  - [x] Crear `lighthouse-config.json` ✅
-  - [x] Integrar con CI pipeline ✅
+- [x] **Performance auditing baseline** ✅
+  - [x] Definir métricas objetivo (score + TTI) ✅
+  - [x] Integrar validaciones de performance en CI pipeline ✅
   - [x] Establecer umbrales mínimos (95+ score) ✅
-  - [x] Script local con fallback para EPERM en Windows (`pnpm lighthouse`) ✅
+  - [x] Mantener script local de verificación de performance ✅
 
 - [x] **Optimizaciones de carga inicial** ✅
   - [x] Critical CSS inline en HTML ✅
@@ -544,7 +544,7 @@
 
 - [ ] **CI/CD Enhancement**
   - [ ] E2E tests en PR validation
-  - [ ] Lighthouse CI checks
+  - [ ] Performance budget checks
   - [ ] Bundle size monitoring
   - [ ] Visual regression checks en PRs
 
@@ -576,7 +576,7 @@
 
 **Recomendado por impacto/esfuerzo:** 0. ✅ **13.1.5** → Prettier + Terser (completado)
 
-1. 🔄 **13.3** → Performance optimization (3-5 días, +10 Lighthouse points)
+1. 🔄 **13.3** → Performance optimization (3-5 días, +10 puntos en baseline de performance)
 2. 🔄 **13.2** → E2E testing (cerrar bloque advanced)
 3. ⏳ **13.4 Fase 1** → Data & Web playgrounds (SQL, HTML, CSS)
 4. ⏳ **13.6** → Documentation (3-5 días, facilita nuevas contribuciones)
