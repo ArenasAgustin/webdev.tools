@@ -141,7 +141,18 @@ export function ConfigModal(props: ConfigModalProps) {
           <div className="space-y-3">
             <div>
               <label className="block text-gray-300 mb-1">Espaciado</label>
-              {isJsMode || isHtmlMode ? (
+              {isJsMode ? (
+                <ToggleButtonGroup
+                  options={INDENT_OPTIONS}
+                  value={props.formatConfig.indentSize}
+                  onChange={(indentSize) =>
+                    props.onFormatConfigChange({
+                      ...props.formatConfig,
+                      indentSize,
+                    })
+                  }
+                />
+              ) : isHtmlMode ? (
                 <ToggleButtonGroup
                   options={INDENT_OPTIONS}
                   value={props.formatConfig.indentSize}
@@ -183,11 +194,53 @@ export function ConfigModal(props: ConfigModalProps) {
               </div>
             )}
 
+            {isHtmlMode && (
+              <div>
+                <label className="block text-gray-300 mb-1">Formato embebido</label>
+                <div className="space-y-2">
+                  <Checkbox
+                    checked={props.formatConfig.formatCss}
+                    onChange={(checked) =>
+                      props.onFormatConfigChange({
+                        ...props.formatConfig,
+                        formatCss: checked,
+                      })
+                    }
+                    label="Formatear CSS en &lt;style&gt;"
+                    color="blue"
+                  />
+                  <Checkbox
+                    checked={props.formatConfig.formatJs}
+                    onChange={(checked) =>
+                      props.onFormatConfigChange({
+                        ...props.formatConfig,
+                        formatJs: checked,
+                      })
+                    }
+                    label="Formatear JS en &lt;script&gt;"
+                    color="blue"
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-gray-300 mb-1">
                 Copiar automáticamente al formatear
               </label>
-              {isJsMode || isHtmlMode ? (
+              {isJsMode ? (
+                <Checkbox
+                  checked={props.formatConfig.autoCopy}
+                  onChange={(checked) =>
+                    props.onFormatConfigChange({
+                      ...props.formatConfig,
+                      autoCopy: checked,
+                    })
+                  }
+                  label="Habilitar auto-copia"
+                  color="blue"
+                />
+              ) : isHtmlMode ? (
                 <Checkbox
                   checked={props.formatConfig.autoCopy}
                   onChange={(checked) =>

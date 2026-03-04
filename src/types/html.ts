@@ -3,6 +3,8 @@ import type { IndentStyle } from "@/types/format";
 
 export type HtmlFormatConfig = ConfigWithAutoCopy<{
   indentSize: IndentStyle;
+  formatCss: boolean;
+  formatJs: boolean;
 }>;
 
 export type HtmlMinifyConfig = ConfigWithAutoCopy<{
@@ -19,6 +21,8 @@ export type HtmlToolsConfig = PlaygroundToolsConfig<{
 
 export const DEFAULT_HTML_FORMAT_CONFIG: HtmlFormatConfig = {
   indentSize: 2,
+  formatCss: true,
+  formatJs: true,
   autoCopy: false,
 };
 

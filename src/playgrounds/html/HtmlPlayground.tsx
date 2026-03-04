@@ -24,10 +24,16 @@ export function HtmlPlayground() {
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [formatConfig, setFormatConfig] = useState<HtmlFormatConfig>(
-    savedConfig?.format ?? DEFAULT_HTML_FORMAT_CONFIG,
+    () => ({
+      ...DEFAULT_HTML_FORMAT_CONFIG,
+      ...(savedConfig?.format ?? {}),
+    }),
   );
   const [minifyConfig, setMinifyConfig] = useState<HtmlMinifyConfig>(
-    savedConfig?.minify ?? DEFAULT_HTML_MINIFY_CONFIG,
+    () => ({
+      ...DEFAULT_HTML_MINIFY_CONFIG,
+      ...(savedConfig?.minify ?? {}),
+    }),
   );
 
   const configModal = useModalState();

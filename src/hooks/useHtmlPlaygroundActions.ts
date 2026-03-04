@@ -84,7 +84,10 @@ export function useHtmlPlaygroundActions({
   const handleFormat = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await formatHtml(inputHtml, formatConfig.indentSize);
+        const result = await formatHtml(inputHtml, formatConfig.indentSize, {
+          formatCss: formatConfig.formatCss,
+          formatJs: formatConfig.formatJs,
+        });
 
         if (!result.ok) {
           throw new Error(result.error || "Error al formatear HTML");
@@ -111,8 +114,8 @@ export function useHtmlPlaygroundActions({
 
   const handleMinify = useCallback(() => {
     runTransformAction({
-      run: () => {
-        const result = minifyHtml(inputHtml, {
+      run: async () => {
+        const result = await minifyHtml(inputHtml, {
           removeComments: minifyConfig.removeComments,
           collapseWhitespace: minifyConfig.collapseWhitespace,
           minifyCss: minifyConfig.minifyCss,

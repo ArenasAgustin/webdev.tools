@@ -186,8 +186,9 @@
 - [x] **Aumentar coverage a 85%+**: Alcanzado 85.13%
   - **Archivos sin cobertura:** `PlaygroundCard`, `PlaygroundSidebar`, `Home`
 
-- [ ] **Agregar E2E tests (Playwright)**: Full workflow testing
-  - **Coverage:** JSON workflow, JS workflow, cross-playground navigation
+- [x] **Agregar E2E tests (Playwright)**: Full workflow testing ✅
+  - **Coverage completada:** JSON workflow, JS workflow, cross-playground navigation, responsive/mobile, edge cases
+  - **Pendiente:** visual regression y suite A11y avanzada
 
 ### 12.4 - Métricas Objetivo
 
@@ -210,12 +211,12 @@
 - ✅ Optimizar imports (zustand removido, jsonpath-plus separado 25KB)
 - **Resultado:** Bundle vendor reducido 244KB → 182KB (-25%), JsonPlayground 45.7KB → 20.5KB (-55%)
 
-**🔄 Fase 2 (3-5 días):** Mejoras medianas - EN PROGRESO (2/4)
+**✅ Fase 2 (3-5 días):** Mejoras medianas - COMPLETADA (4/4)
 
 - ✅ Unificar servicios (utils compartidos)
 - ✅ Extract modal logic (useModalState hook)
-- [ ] Type-safe handlers
-- [ ] Aumentar coverage
+- ✅ Type-safe handlers
+- ✅ Aumentar coverage
 
 **Fase 3 (2-4 semanas):** Enterprise quality
 
@@ -428,18 +429,24 @@
 **Fase 1 - SQL & Web markup (5-7 semanas):**
 
 - [ ] **SQL Playground** (5-7 días)
+  - [ ] **Stack/Plugins:** `sql-formatter` (format), `node-sql-parser` (validate/AST), `sql.js` (execution in-browser)
   - [ ] Integrar SQL formatter/parser (sql-formatter)
   - [ ] Implement: `services/sql/parse.ts`, `format.ts`, `validate.ts`
   - [ ] Query execution (SQLite in-browser con sql.js)
   - [ ] Crear `useSqlPlaygroundActions` adapter
   - [ ] Crear página: `src/playgrounds/sql/SqlPlayground.tsx`
   - [ ] Tab para results/schema visualization
+  - [ ] Tests unitarios (services + hooks)
+  - [ ] Tests de integración (playground + toolbar/config)
+  - [ ] E2E workflow SQL (format/validate/execute/resultados)
 
 - [x] **HTML Playground** (5-6 días) ✅
+  - [x] **Stack/Plugins:** `prettier` (format), `html-minifier-terser` (minify), `parse5` (validación), `iframe sandbox` (preview)
   - [x] HTML validator y formatter (usando prettier)
   - [x] Implement base: `services/html/transform.ts` (format + minify)
-  - [x] Minificador base en browser (sin dependencia Node-only)
+  - [x] Minificador HTML con `html-minifier-terser` (respetando checks `minifyCss`/`minifyJs`) ✅
   - [x] Tests unitarios/branches del playground HTML
+  - [x] Tests de integración (acciones/config/toolbar)
   - [x] E2E workflow HTML + navegación cross-playground
   - [x] Live preview render con iframe sandbox
   - [x] Crear `useHtmlPlaygroundActions` adapter
@@ -448,6 +455,7 @@
   - [x] Inspect DOM elements
 
 - [ ] **CSS Playground** (5-6 días)
+  - [ ] **Stack/Plugins:** `prettier` parser `css` (format), `cssnano` o `lightningcss` (minify), `postcss` (pipeline/validate)
   - [ ] CSS formatter y minifier
   - [ ] Implement: `services/css/parse.ts`, `format.ts`, `minify.ts`
   - [ ] Live preview con HTML template wrapper
@@ -455,10 +463,14 @@
   - [ ] Crear página: `src/playgrounds/css/CssPlayground.tsx`
   - [ ] CSS validator integrado
   - [ ] Sugerir propiedades (autocomplete)
+  - [ ] Tests unitarios (services + hooks)
+  - [ ] Tests de integración (playground + preview wrapper)
+  - [ ] E2E workflow CSS (format/minify/preview/config)
 
 **Fase 2 - Programming languages (1-2 semanas):**
 
 - [ ] **PHP Playground** (6-8 días)
+  - [ ] **Stack/Plugins:** `php-parser` (AST/validate), `prettier-plugin-php` (format), Vercel Functions (ejecución sandbox)
   - [ ] Integrar PHP parser/formatter
   - [ ] Implement: `services/php/parse.ts`, `format.ts`, `validate.ts`
   - [ ] Backend execution en serverless (Vercel Functions)
@@ -466,7 +478,9 @@
   - [ ] Crear página: `src/playgrounds/php/PhpPlayground.tsx`
   - [ ] Highlight syntax errors
   - [ ] Output capture (sin ejecución en-browser, call API)
-  - [ ] E2E tests
+  - [ ] Tests unitarios (services + adapters)
+  - [ ] Tests de integración (playground + API client)
+  - [ ] E2E workflow PHP (format/validate/execute API)
 
 ---
 

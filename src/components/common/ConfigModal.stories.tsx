@@ -3,6 +3,7 @@ import { fn, userEvent, within, expect } from "storybook/test";
 import { ConfigModal } from "./ConfigModal";
 import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
+import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
 
 const meta = {
   title: "Common/ConfigModal",
@@ -80,6 +81,39 @@ export const JsWithCustomConfig = {
     },
     minifyConfig: {
       ...DEFAULT_JS_MINIFY_CONFIG,
+      autoCopy: true,
+    },
+  },
+};
+
+export const HtmlDefault = {
+  args: {
+    mode: "html",
+    isOpen: true,
+    onClose: fn(),
+    formatConfig: DEFAULT_HTML_FORMAT_CONFIG,
+    onFormatConfigChange: fn(),
+    minifyConfig: DEFAULT_HTML_MINIFY_CONFIG,
+    onMinifyConfigChange: fn(),
+  },
+};
+
+export const HtmlWithCustomConfig = {
+  args: {
+    ...HtmlDefault.args,
+    formatConfig: {
+      ...DEFAULT_HTML_FORMAT_CONFIG,
+      indentSize: 4,
+      formatCss: false,
+      formatJs: true,
+      autoCopy: true,
+    },
+    minifyConfig: {
+      ...DEFAULT_HTML_MINIFY_CONFIG,
+      removeComments: true,
+      collapseWhitespace: true,
+      minifyCss: false,
+      minifyJs: true,
       autoCopy: true,
     },
   },

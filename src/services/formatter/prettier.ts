@@ -2,6 +2,7 @@ import { format as prettierFormat } from "prettier/standalone";
 import babelPlugin from "prettier/plugins/babel";
 import estreePlugin from "prettier/plugins/estree";
 import htmlPlugin from "prettier/plugins/html";
+import postcssPlugin from "prettier/plugins/postcss";
 import type { IndentStyle } from "@/types/format";
 
 export type PrettierParser = "babel" | "json-stringify" | "html";
@@ -28,7 +29,8 @@ export const formatWithPrettier = async (
 
   const formatted = await prettierFormat(input, {
     parser,
-    plugins: [babelPlugin, estreePlugin, htmlPlugin],
+    plugins: [babelPlugin, estreePlugin, htmlPlugin, postcssPlugin],
+    embeddedLanguageFormatting: "auto",
     tabWidth,
     useTabs,
   });

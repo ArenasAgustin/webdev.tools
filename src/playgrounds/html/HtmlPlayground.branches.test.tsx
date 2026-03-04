@@ -107,7 +107,12 @@ vi.mock("@/components/layout/Toolbar", () => ({
     };
     config?: {
       onOpenChange?: (isOpen: boolean) => void;
-      onFormatChange: (config: { indentSize: number; autoCopy: boolean }) => void;
+      onFormatChange: (config: {
+        indentSize: number;
+        formatCss: boolean;
+        formatJs: boolean;
+        autoCopy: boolean;
+      }) => void;
       onMinifyChange: (config: {
         removeComments: boolean;
         collapseWhitespace: boolean;
@@ -128,7 +133,16 @@ vi.mock("@/components/layout/Toolbar", () => ({
       </button>
       {config && (
         <>
-          <button onClick={() => config.onFormatChange({ indentSize: 2, autoCopy: true })}>
+          <button
+            onClick={() =>
+              config.onFormatChange({
+                indentSize: 2,
+                formatCss: true,
+                formatJs: true,
+                autoCopy: true,
+              })
+            }
+          >
             enable-format-autocopy
           </button>
           <button

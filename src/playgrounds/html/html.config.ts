@@ -21,7 +21,16 @@ export const htmlPlaygroundConfig: PlaygroundConfig = {
     <main class="card">
       <h1>Hola, webdev.tools</h1>
       <p>Este es un ejemplo inicial para formatear y minificar HTML.</p>
+      <button id="actionBtn" type="button">Haz click</button>
     </main>
+
+    <script>
+      const button = document.getElementById("actionBtn");
+
+      button?.addEventListener("click", () => {
+        button.textContent = "¡Hecho!";
+      });
+    </script>
   </body>
 </html>`,
 };
