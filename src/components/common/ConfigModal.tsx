@@ -7,10 +7,12 @@ import { RadioGroup } from "./RadioGroup";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
+import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import { INDENT_OPTIONS } from "@/types/format";
 import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
+import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
 import {
   saveToolsConfig,
   removeToolsConfig,
@@ -18,6 +20,8 @@ import {
   removeJsToolsConfig,
   saveHtmlToolsConfig,
   removeHtmlToolsConfig,
+  saveCssToolsConfig,
+  removeCssToolsConfig,
 } from "@/services/storage";
 
 interface JsonConfigModalProps {
@@ -52,11 +56,26 @@ interface HtmlConfigModalProps {
   onMinifyConfigChange: (config: HtmlMinifyConfig) => void;
 }
 
-type ConfigModalProps = JsonConfigModalProps | JsConfigModalProps | HtmlConfigModalProps;
+interface CssConfigModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  mode: "css";
+  formatConfig: CssFormatConfig;
+  onFormatConfigChange: (config: CssFormatConfig) => void;
+  minifyConfig: CssMinifyConfig;
+  onMinifyConfigChange: (config: CssMinifyConfig) => void;
+}
+
+type ConfigModalProps =
+  | JsonConfigModalProps
+  | JsConfigModalProps
+  | HtmlConfigModalProps
+  | CssConfigModalProps;
 
 export function ConfigModal(props: ConfigModalProps) {
   const isJsMode = props.mode === "js";
   const isHtmlMode = props.mode === "html";
+  const isCssMode = props.mode === "css";
 
   const handleReset = () => {
     if (isJsMode) {
@@ -70,6 +89,13 @@ export function ConfigModal(props: ConfigModalProps) {
       props.onFormatConfigChange(DEFAULT_HTML_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_HTML_MINIFY_CONFIG);
       removeHtmlToolsConfig();
+      return;
+    }
+
+    if (isCssMode) {
+      props.onFormatConfigChange(DEFAULT_CSS_FORMAT_CONFIG);
+      props.onMinifyConfigChange(DEFAULT_CSS_MINIFY_CONFIG);
+      removeCssToolsConfig();
       return;
     }
 
@@ -98,6 +124,15 @@ export function ConfigModal(props: ConfigModalProps) {
       return;
     }
 
+    if (isCssMode) {
+      saveCssToolsConfig({
+        format: props.formatConfig,
+        minify: props.minifyConfig,
+      });
+      props.onClose();
+      return;
+    }
+
     saveToolsConfig({
       format: props.formatConfig,
       minify: props.minifyConfig,
@@ -114,6 +149,8 @@ export function ConfigModal(props: ConfigModalProps) {
           ? "Configuración de Herramientas JS"
           : isHtmlMode
             ? "Configuración de Herramientas HTML"
+            : isCssMode
+              ? "Configuración de Herramientas CSS"
             : "Configuración de Herramientas"
       }
       icon="cog"
@@ -132,7 +169,13 @@ export function ConfigModal(props: ConfigModalProps) {
         {/* Formatear */}
         <Card
           title={
-            isJsMode ? "Formatear JavaScript" : isHtmlMode ? "Formatear HTML" : "Formatear JSON"
+            isJsMode
+              ? "Formatear JavaScript"
+              : isHtmlMode
+                ? "Formatear HTML"
+                : isCssMode
+                  ? "Formatear CSS"
+                  : "Formatear JSON"
           }
           icon="indent"
           className="bg-blue-500/10 border-blue-500/20"
@@ -163,6 +206,17 @@ export function ConfigModal(props: ConfigModalProps) {
                     })
                   }
                 />
+              ) : isCssMode ? (
+                <ToggleButtonGroup
+                  options={INDENT_OPTIONS}
+                  value={props.formatConfig.indentSize}
+                  onChange={(indentSize) =>
+                    props.onFormatConfigChange({
+                      ...props.formatConfig,
+                      indentSize,
+                    })
+                  }
+                />
               ) : (
                 <ToggleButtonGroup
                   options={INDENT_OPTIONS}
@@ -177,7 +231,7 @@ export function ConfigModal(props: ConfigModalProps) {
               )}
             </div>
 
-            {!isJsMode && !isHtmlMode && (
+            {!isJsMode && !isHtmlMode && !isCssMode && (
               <div>
                 <label className="block text-gray-300 mb-1">Ordenar claves alfabéticamente</label>
                 <Checkbox
@@ -252,6 +306,18 @@ export function ConfigModal(props: ConfigModalProps) {
                   label="Habilitar auto-copia"
                   color="blue"
                 />
+              ) : isCssMode ? (
+                <Checkbox
+                  checked={props.formatConfig.autoCopy}
+                  onChange={(checked) =>
+                    props.onFormatConfigChange({
+                      ...props.formatConfig,
+                      autoCopy: checked,
+                    })
+                  }
+                  label="Habilitar auto-copia"
+                  color="blue"
+                />
               ) : (
                 <Checkbox
                   checked={props.formatConfig.autoCopy}
@@ -272,7 +338,13 @@ export function ConfigModal(props: ConfigModalProps) {
         {/* Minificar */}
         <Card
           title={
-            isJsMode ? "Minificar JavaScript" : isHtmlMode ? "Minificar HTML" : "Minificar JSON"
+            isJsMode
+              ? "Minificar JavaScript"
+              : isHtmlMode
+                ? "Minificar HTML"
+                : isCssMode
+                  ? "Minificar CSS"
+                  : "Minificar JSON"
           }
           icon="compress"
           className="bg-purple-500/10 border-purple-500/20"
@@ -283,6 +355,31 @@ export function ConfigModal(props: ConfigModalProps) {
               <label className="block text-gray-300 mb-1">Opciones de minificación</label>
               <div className="space-y-2">
                 {isJsMode ? (
+                  <>
+                    <Checkbox
+                      checked={props.minifyConfig.removeComments}
+                      onChange={(checked) =>
+                        props.onMinifyConfigChange({
+                          ...props.minifyConfig,
+                          removeComments: checked,
+                        })
+                      }
+                      label="Eliminar comentarios"
+                      color="purple"
+                    />
+                    <Checkbox
+                      checked={props.minifyConfig.removeSpaces}
+                      onChange={(checked) =>
+                        props.onMinifyConfigChange({
+                          ...props.minifyConfig,
+                          removeSpaces: checked,
+                        })
+                      }
+                      label="Eliminar espacios"
+                      color="purple"
+                    />
+                  </>
+                ) : isCssMode ? (
                   <>
                     <Checkbox
                       checked={props.minifyConfig.removeComments}
@@ -408,6 +505,18 @@ export function ConfigModal(props: ConfigModalProps) {
                   label="Habilitar auto-copia"
                   color="purple"
                 />
+              ) : isCssMode ? (
+                <Checkbox
+                  checked={props.minifyConfig.autoCopy}
+                  onChange={(checked) =>
+                    props.onMinifyConfigChange({
+                      ...props.minifyConfig,
+                      autoCopy: checked,
+                    })
+                  }
+                  label="Habilitar auto-copia"
+                  color="purple"
+                />
               ) : (
                 <Checkbox
                   checked={props.minifyConfig.autoCopy}
@@ -426,7 +535,7 @@ export function ConfigModal(props: ConfigModalProps) {
         </Card>
 
         {/* Limpiar vacíos */}
-        {!isJsMode && !isHtmlMode && (
+        {!isJsMode && !isHtmlMode && !isCssMode && (
           <Card
             title="Limpiar Valores Vacíos"
             icon="broom"

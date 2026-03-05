@@ -4,6 +4,7 @@ import type { PlaygroundConfig } from "@/types/playground";
 import { jsonPlaygroundConfig } from "./json/json.config";
 import { jsPlaygroundConfig } from "./js/js.config";
 import { htmlPlaygroundConfig } from "./html/html.config";
+import { cssPlaygroundConfig } from "./css/css.config";
 
 export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
@@ -12,11 +13,13 @@ export type PlaygroundRegistryItem = PlaygroundConfig & {
 const loadJsonPlayground = () => import("./json/JsonPlayground");
 const loadJsPlayground = () => import("./js/JsPlayground");
 const loadHtmlPlayground = () => import("./html/HtmlPlayground");
+const loadCssPlayground = () => import("./css/CssPlayground");
 
 const playgroundLoaders: Record<string, () => Promise<unknown>> = {
   [jsonPlaygroundConfig.id]: loadJsonPlayground,
   [jsPlaygroundConfig.id]: loadJsPlayground,
   [htmlPlaygroundConfig.id]: loadHtmlPlayground,
+  [cssPlaygroundConfig.id]: loadCssPlayground,
 };
 
 export const playgroundRegistry: PlaygroundRegistryItem[] = [
@@ -41,6 +44,14 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
     component: lazy(() =>
       loadHtmlPlayground().then((module) => ({
         default: module.HtmlPlayground,
+      })),
+    ),
+  },
+  {
+    ...cssPlaygroundConfig,
+    component: lazy(() =>
+      loadCssPlayground().then((module) => ({
+        default: module.CssPlayground,
       })),
     ),
   },

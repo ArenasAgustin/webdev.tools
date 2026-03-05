@@ -401,7 +401,7 @@
   - **Motores por lenguaje (inicial):**
     - SQL: `sql-formatter` (sin minify agresivo, enfoque en format/validate).
     - HTML: `prettier` (format) + `html-minifier-terser` (minify).
-    - CSS: `prettier` (format) + `cssnano` (minify).
+    - CSS: `prettier` (format) + `lightningcss-wasm` (minify).
     - PHP: parser/formatter específico (server-side para ejecución).
 - [x] Definir alcance de features para cada playground (ej: SQL no tendrá ejecución en browser, solo parse/format/validate) ✅
   - **SQL Playground (MVP):** format, validate, lint básico.
@@ -414,7 +414,7 @@
 - [x] Evaluar dependencias clave para cada lenguaje (ej: sql-formatter, html-minifier-terser, php-parser) ✅
   - **SQL:** `sql-formatter` (format), `node-sql-parser` (parse/validate).
   - **HTML:** `prettier` + parser `html`, `html-minifier-terser` (minify), `parse5` (parse robusto para validaciones).
-  - **CSS:** `prettier` + parser `css`, `cssnano` (minify), `postcss` (pipeline de validación/transform).
+  - **CSS:** `prettier` + parser `css`, `lightningcss-wasm` (minify), `postcss` (pipeline de validación/transform).
   - **PHP:** `php-parser` (AST/validación), `prettier-plugin-php` (format), ejecución vía backend aislado.
   - **Alternativas consideradas:** `lightningcss` para minify CSS/transform, `js-beautify` para HTML (descartada para mantener consistencia con Prettier).
 - [x] Definir contratos de servicios (ej: `format(input: string, options?: FormatOptions): Promise<string>`) ✅
@@ -455,17 +455,17 @@
   - [x] Inspect DOM elements
 
 - [ ] **CSS Playground** (5-6 días)
-  - [ ] **Stack/Plugins:** `prettier` parser `css` (format), `cssnano` o `lightningcss` (minify), `postcss` (pipeline/validate)
-  - [ ] CSS formatter y minifier
-  - [ ] Implement: `services/css/parse.ts`, `format.ts`, `minify.ts`
-  - [ ] Live preview con HTML template wrapper
-  - [ ] Crear `useCssPlaygroundActions` adapter
-  - [ ] Crear página: `src/playgrounds/css/CssPlayground.tsx`
-  - [ ] CSS validator integrado
+  - [x] **Stack/Plugins:** `prettier` parser `css` (format), `lightningcss-wasm` + `postcss` (minify) ✅
+  - [x] CSS formatter y minifier ✅
+  - [x] Minificado CSS estable en runtime (fallback seguro si falla `lightningcss-wasm`) ✅
+  - [x] Implement base: `services/css/transform.ts` (format + minify) ✅
+  - [x] Crear `useCssPlaygroundActions` adapter ✅
+  - [x] Crear página: `src/playgrounds/css/CssPlayground.tsx` ✅
+  - [x] CSS validator integrado ✅
   - [ ] Sugerir propiedades (autocomplete)
   - [ ] Tests unitarios (services + hooks)
-  - [ ] Tests de integración (playground + preview wrapper)
-  - [ ] E2E workflow CSS (format/minify/preview/config)
+  - [x] Tests de integración (playground + acciones de toolbar/config) ✅
+  - [ ] E2E workflow CSS (format/minify/config)
 
 **Fase 2 - Programming languages (1-2 semanas):**
 

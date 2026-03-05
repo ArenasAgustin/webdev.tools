@@ -5,7 +5,7 @@ import htmlPlugin from "prettier/plugins/html";
 import postcssPlugin from "prettier/plugins/postcss";
 import type { IndentStyle } from "@/types/format";
 
-export type PrettierParser = "babel" | "json-stringify" | "html";
+export type PrettierParser = "babel" | "json-stringify" | "html" | "css";
 
 interface ResolveIndentResult {
   tabWidth: number;

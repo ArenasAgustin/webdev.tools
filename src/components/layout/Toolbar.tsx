@@ -8,6 +8,7 @@ import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
+import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import type { ToolbarConfig } from "@/types/toolbar";
 
 type ModalType = "tips" | "history" | "config" | null;
@@ -68,6 +69,15 @@ export interface GenericToolbarProps {
         onFormatChange: (config: HtmlFormatConfig) => void;
         minify: HtmlMinifyConfig;
         onMinifyChange: (config: HtmlMinifyConfig) => void;
+        isOpen?: boolean;
+        onOpenChange?: (isOpen: boolean) => void;
+      }
+    | {
+        mode: "css";
+        format: CssFormatConfig;
+        onFormatChange: (config: CssFormatConfig) => void;
+        minify: CssMinifyConfig;
+        onMinifyChange: (config: CssMinifyConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       };
@@ -156,6 +166,18 @@ export function Toolbar(props: ToolbarProps) {
         {genericConfig?.mode === "html" && (
           <ConfigModal
             mode="html"
+            isOpen={showGenericConfig}
+            onClose={() => setShowGenericConfigState(false)}
+            formatConfig={genericConfig.format}
+            onFormatConfigChange={genericConfig.onFormatChange}
+            minifyConfig={genericConfig.minify}
+            onMinifyConfigChange={genericConfig.onMinifyChange}
+          />
+        )}
+
+        {genericConfig?.mode === "css" && (
+          <ConfigModal
+            mode="css"
             isOpen={showGenericConfig}
             onClose={() => setShowGenericConfigState(false)}
             formatConfig={genericConfig.format}

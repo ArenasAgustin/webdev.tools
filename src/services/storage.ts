@@ -6,6 +6,7 @@
 import type { ToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
 import type { HtmlToolsConfig } from "@/types/html";
+import type { CssToolsConfig } from "@/types/css";
 
 const getStorage = (): Storage | null => {
   if (typeof window !== "undefined" && window.localStorage) {
@@ -30,9 +31,11 @@ export const STORAGE_KEYS = {
   TOOLS_CONFIG: "toolsConfig",
   JS_TOOLS_CONFIG: "jsToolsConfig",
   HTML_TOOLS_CONFIG: "htmlToolsConfig",
+  CSS_TOOLS_CONFIG: "cssToolsConfig",
   LAST_JSON: "lastJson",
   LAST_JS: "lastJs",
   LAST_HTML: "lastHtml",
+  LAST_CSS: "lastCss",
   JSONPATH_HISTORY: "jsonPathHistory",
 } as const;
 
@@ -310,4 +313,68 @@ export function saveHtmlToolsConfig(config: Partial<HtmlToolsConfig>): boolean {
  */
 export function removeHtmlToolsConfig(): boolean {
   return removeItem(STORAGE_KEYS.HTML_TOOLS_CONFIG);
+}
+
+// ============================================
+// Specific storage functions for CSS Tools
+// ============================================
+
+/**
+ * Load last CSS input from localStorage
+ */
+export function loadLastCss(): string {
+  try {
+    const storage = getStorage();
+    if (!storage) return "";
+
+    const item = storage.getItem(STORAGE_KEYS.LAST_CSS);
+    return item ?? "";
+  } catch (error) {
+    console.error("Error loading last CSS:", error);
+    return "";
+  }
+}
+
+/**
+ * Save last CSS input to localStorage
+ */
+export function saveLastCss(css: string): boolean {
+  try {
+    const storage = getStorage();
+    if (!storage) return false;
+
+    storage.setItem(STORAGE_KEYS.LAST_CSS, css);
+    return true;
+  } catch (error) {
+    console.error("Error saving last CSS:", error);
+    return false;
+  }
+}
+
+/**
+ * Remove last CSS from localStorage
+ */
+export function removeLastCss(): boolean {
+  return removeItem(STORAGE_KEYS.LAST_CSS);
+}
+
+/**
+ * Load CSS tools configuration from localStorage
+ */
+export function loadCssToolsConfig(): Partial<CssToolsConfig> | null {
+  return getItem<Partial<CssToolsConfig>>(STORAGE_KEYS.CSS_TOOLS_CONFIG);
+}
+
+/**
+ * Save CSS tools configuration to localStorage
+ */
+export function saveCssToolsConfig(config: Partial<CssToolsConfig>): boolean {
+  return setItem(STORAGE_KEYS.CSS_TOOLS_CONFIG, config);
+}
+
+/**
+ * Remove CSS tools configuration from localStorage
+ */
+export function removeCssToolsConfig(): boolean {
+  return removeItem(STORAGE_KEYS.CSS_TOOLS_CONFIG);
 }
