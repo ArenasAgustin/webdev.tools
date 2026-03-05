@@ -454,18 +454,17 @@
   - [x] Split view: editor + live preview
   - [x] Inspect DOM elements
 
-- [ ] **CSS Playground** (5-6 días)
-  - [x] **Stack/Plugins:** `prettier` parser `css` (format), `lightningcss-wasm` + `postcss` (minify) ✅
+- [x] **CSS Playground** (5-6 días) ✅
+  - [x] **Stack/Plugins:** `prettier` parser `css` (format), minificador nativo browser-safe (sin extensiones) ✅
   - [x] CSS formatter y minifier ✅
-  - [x] Minificado CSS estable en runtime (fallback seguro si falla `lightningcss-wasm`) ✅
+  - [x] Minificado CSS estable en runtime (sin dependencias Node/WASM) ✅
   - [x] Implement base: `services/css/transform.ts` (format + minify) ✅
   - [x] Crear `useCssPlaygroundActions` adapter ✅
   - [x] Crear página: `src/playgrounds/css/CssPlayground.tsx` ✅
   - [x] CSS validator integrado ✅
-  - [ ] Sugerir propiedades (autocomplete)
-  - [ ] Tests unitarios (services + hooks)
+  - [x] Tests unitarios (services + hooks) ✅
   - [x] Tests de integración (playground + acciones de toolbar/config) ✅
-  - [ ] E2E workflow CSS (format/minify/config)
+  - [x] E2E workflow CSS (format/minify/config) ✅
 
 **Fase 2 - Programming languages (1-2 semanas):**
 
