@@ -1,24 +1,6 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { formatWithPrettier } from "@/services/formatter/prettier";
-import lightningcssWasmUrl from "lightningcss-wasm/lightningcss_node.wasm?url";
-
-interface LightningTransformResult {
-  code: Uint8Array;
-}
-
-interface LightningTransformOptions {
-  filename: string;
-  code: Uint8Array;
-  minify?: boolean;
-}
-
-interface LightningCssModule {
-  default: (input?: string | URL | Request | BufferSource) => Promise<void>;
-  transform: (options: LightningTransformOptions) => LightningTransformResult;
-}
-
-let lightningcssModulePromise: Promise<LightningCssModule> | null = null;
 
 interface CssMinifyOptions {
   removeComments?: boolean;
@@ -42,13 +24,13 @@ export async function formatCss(
   }
 }
 
-export async function minifyCss(
+export function minifyCss(
   input: string,
   options: CssMinifyOptions = {},
 ): Promise<Result<string, string>> {
   try {
     if (!input.trim()) {
-      return { ok: true, value: "" };
+      return Promise.resolve({ ok: true, value: "" });
     }
 
     const removeComments = options.removeComments ?? true;
@@ -56,28 +38,21 @@ export async function minifyCss(
     const source = removeComments ? stripComments(input) : input;
 
     if (!removeSpaces) {
-      return {
+      return Promise.resolve({
         ok: true,
         value: source.trim(),
-      };
+      });
     }
 
-    const lightning = await loadLightningCss();
-    const encodedInput = new TextEncoder().encode(source);
-    const result = lightning.transform({
-      filename: "input.css",
-      code: encodedInput,
-      minify: true,
-    });
-    const output = new TextDecoder().decode(result.code);
+    const output = minifyCssString(source);
 
-    return {
+    return Promise.resolve({
       ok: true,
       value: output.trim(),
-    };
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || "Error al minificar CSS" };
+    return Promise.resolve({ ok: false, error: message || "Error al minificar CSS" });
   }
 }
 
@@ -85,40 +60,27 @@ function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
-async function loadLightningCss(): Promise<LightningCssModule> {
-  if (lightningcssModulePromise) {
-    return lightningcssModulePromise;
+function minifyCssString(source: string): string {
+  const preserved = new Map<string, string>();
+  let index = 0;
+
+  const withPreservedLiterals = source.replace(/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g, (match) => {
+    const token = `__CSS_LITERAL_${index}__`;
+    index += 1;
+    preserved.set(token, match);
+    return token;
+  });
+
+  const compact = withPreservedLiterals
+    .replace(/\s+/g, " ")
+    .replace(/\s*([{}:;,>+~])\s*/g, "$1")
+    .replace(/;}/g, "}")
+    .trim();
+
+  let restored = compact;
+  for (const [token, literal] of preserved.entries()) {
+    restored = restored.replace(new RegExp(token, "g"), literal);
   }
 
-  lightningcssModulePromise = (async () => {
-    const moduleValue = (await import("lightningcss-wasm")) as unknown as LightningCssModule;
-
-    try {
-      const wasmBytes = await fetchWasmBytes(lightningcssWasmUrl);
-      // Cast to BufferSource to satisfy TypeScript type checking
-      await moduleValue.default(wasmBytes.buffer as BufferSource);
-    } catch {
-      await moduleValue.default();
-    }
-
-    return moduleValue;
-  })();
-
-  return lightningcssModulePromise;
-}
-
-async function fetchWasmBytes(url: string): Promise<Uint8Array> {
-  const response = await fetch(url, { cache: "no-store" });
-
-  if (!response.ok) {
-    throw new Error(`No se pudo descargar WASM (${response.status})`);
-  }
-
-  const bytes = new Uint8Array(await response.arrayBuffer());
-
-  if (bytes.length < 4 || bytes[0] !== 0x00 || bytes[1] !== 0x61 || bytes[2] !== 0x73 || bytes[3] !== 0x6d) {
-    throw new Error("La respuesta no es un binario WASM válido");
-  }
-
-  return bytes;
+  return restored;
 }

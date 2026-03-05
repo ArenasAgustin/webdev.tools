@@ -400,7 +400,7 @@
   - **Base compartida:** contratos de `format/minify/validate`, runtime de worker, handlers y configuración de toolbar.
   - **Motores por lenguaje (inicial):**
     - SQL: `sql-formatter` (sin minify agresivo, enfoque en format/validate).
-    - HTML: `prettier` (format) + `html-minifier-terser` (minify).
+    - HTML: `prettier` (format) + `html-minifier` (minify).
     - CSS: `prettier` (format) + `lightningcss-wasm` (minify).
     - PHP: parser/formatter específico (server-side para ejecución).
 - [x] Definir alcance de features para cada playground (ej: SQL no tendrá ejecución en browser, solo parse/format/validate) ✅
@@ -411,9 +411,9 @@
   - **Out-of-scope inicial (todos):** colaboración en tiempo real, persistencia cloud, extensiones/plugins de terceros.
 - [x] Priorizar orden de implementación (HTML/CSS, luego PHP y luego SQL) ✅
   - **Orden acordado:** 1) HTML → 2) CSS → 3) PHP → 4) SQL.
-- [x] Evaluar dependencias clave para cada lenguaje (ej: sql-formatter, html-minifier-terser, php-parser) ✅
+- [x] Evaluar dependencias clave para cada lenguaje (ej: sql-formatter, html-minifier, php-parser) ✅
   - **SQL:** `sql-formatter` (format), `node-sql-parser` (parse/validate).
-  - **HTML:** `prettier` + parser `html`, `html-minifier-terser` (minify), `parse5` (parse robusto para validaciones).
+  - **HTML:** `prettier` + parser `html`, `html-minifier` (minify), `parse5` (parse robusto para validaciones).
   - **CSS:** `prettier` + parser `css`, `lightningcss-wasm` (minify), `postcss` (pipeline de validación/transform).
   - **PHP:** `php-parser` (AST/validación), `prettier-plugin-php` (format), ejecución vía backend aislado.
   - **Alternativas consideradas:** `lightningcss` para minify CSS/transform, `js-beautify` para HTML (descartada para mantener consistencia con Prettier).
@@ -441,10 +441,10 @@
   - [ ] E2E workflow SQL (format/validate/execute/resultados)
 
 - [x] **HTML Playground** (5-6 días) ✅
-  - [x] **Stack/Plugins:** `prettier` (format), `html-minifier-terser` (minify), `parse5` (validación), `iframe sandbox` (preview)
+  - [x] **Stack/Plugins:** `prettier` (format), `html-minifier` (minify), `parse5` (validación), `iframe sandbox` (preview)
   - [x] HTML validator y formatter (usando prettier)
   - [x] Implement base: `services/html/transform.ts` (format + minify)
-  - [x] Minificador HTML con `html-minifier-terser` (respetando checks `minifyCss`/`minifyJs`) ✅
+  - [x] Minificador HTML con `html-minifier` (respetando checks `minifyCss`/`minifyJs`) ✅
   - [x] Tests unitarios/branches del playground HTML
   - [x] Tests de integración (acciones/config/toolbar)
   - [x] E2E workflow HTML + navegación cross-playground

@@ -133,7 +133,7 @@ describe("minifyHtml", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value).toContain("<style>.box{color:red;margin:0}</style>");
+      expect(result.value).toContain("<style>.box{color:red;margin:0px}</style>");
       expect(result.value).toContain("<script>const value=3</script>");
     }
   });

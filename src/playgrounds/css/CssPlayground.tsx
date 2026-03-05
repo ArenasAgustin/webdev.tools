@@ -65,7 +65,7 @@ export function CssPlayground() {
     handleDownloadInput,
     handleDownloadOutput,
     handleFormat,
-    // handleMinify,
+    handleMinify,
   } = useCssPlaygroundActions({
     inputCss,
     setInputCss,
@@ -81,7 +81,7 @@ export function CssPlayground() {
 
   useKeyboardShortcuts({
     onFormat: handleFormat,
-    // onMinify: handleMinify,
+    onMinify: handleMinify,
     onCopyOutput: handleCopyOutput,
     onClearInput: handleClearInput,
     onOpenConfig: configModal.open,
@@ -96,17 +96,17 @@ export function CssPlayground() {
           variant: "primary",
           onClick: handleFormat,
         },
-        // {
-        //   label: "Minificar",
-        //   icon: "compress",
-        //   variant: "purple",
-        //   onClick: handleMinify,
-        // },
+        {
+          label: "Minificar",
+          icon: "compress",
+          variant: "purple",
+          onClick: handleMinify,
+        },
       ],
       configButtonTitle: "Configurar herramientas",
-      gridClassName: "grid grid-cols-1 lg:grid-cols-4 gap-2",
+      gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
     }),
-    [handleFormat],
+    [handleFormat, handleMinify],
   );
 
   const toolbarConfig = useMemo(
