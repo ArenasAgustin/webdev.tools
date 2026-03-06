@@ -3,9 +3,9 @@ import type {
   JsonWorkerRequest,
   JsonWorkerResponse,
 } from "@/services/json/worker.types";
-import { createWorkerClient } from "@/services/worker/clientFactory";
+import { createPlaygroundWorkerAdapter } from "@/services/worker/adapter";
 
-export const runJsonWorker = createWorkerClient<
+const jsonWorkerAdapter = createPlaygroundWorkerAdapter<
   JsonWorkerPayload,
   JsonWorkerRequest,
   JsonWorkerResponse
@@ -16,6 +16,8 @@ export const runJsonWorker = createWorkerClient<
   buildRequest: (id, payload) => ({ id, ...payload }),
 });
 
+export const runJsonWorker = jsonWorkerAdapter.run;
+
 export const preloadJsonWorker = () => {
-  runJsonWorker.preload();
+  jsonWorkerAdapter.preload();
 };

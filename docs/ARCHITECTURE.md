@@ -224,6 +224,17 @@ playgrounds/php/
 
 ---
 
+## 📐 Contrato de Playground
+
+El contrato técnico obligatorio para todos los playgrounds está definido en:
+
+- `docs/PLAYGROUND_CONTRACT.md`
+
+Ese documento es la referencia para estado mínimo, hooks obligatorios, acciones estándar,
+persistencia, atajos, estructura de archivos y matriz mínima de testing.
+
+---
+
 ## 📈 Futuro (no implementado aún)
 
 - JSON Schema validation

@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
+import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { CssEditors } from "./CssEditors";
 import { cssPlaygroundConfig } from "./css.config";
 import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { useTextStats } from "@/hooks/useTextStats";
+import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
+import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
+import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import { loadCssToolsConfig, loadLastCss, saveLastCss } from "@/services/storage";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import type { ToolbarConfig } from "@/types/toolbar";
@@ -23,38 +24,27 @@ export function CssPlayground() {
   );
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [formatConfig, setFormatConfig] = useState<CssFormatConfig>(
-    () => savedConfig?.format ?? DEFAULT_CSS_FORMAT_CONFIG,
+  const [formatConfig, setFormatConfig] = useMergedConfigState<CssFormatConfig>(
+    DEFAULT_CSS_FORMAT_CONFIG,
+    savedConfig?.format,
   );
-  const [minifyConfig, setMinifyConfig] = useState<CssMinifyConfig>(
-    () => savedConfig?.minify ?? DEFAULT_CSS_MINIFY_CONFIG,
+  const [minifyConfig, setMinifyConfig] = useMergedConfigState<CssMinifyConfig>(
+    DEFAULT_CSS_MINIFY_CONFIG,
+    savedConfig?.minify,
   );
 
   const configModal = useModalState();
-  const debouncedInputCss = useDebouncedValue(inputCss, 300);
-  const inputStats = useTextStats(inputCss);
-  const inputTooLarge = inputStats.bytes > MAX_INPUT_BYTES;
-  const inputWarning = inputTooLarge
-    ? "Entrada grande: algunas operaciones pueden ser lentas"
-    : null;
-  const sizeWarningShown = useRef(false);
-
-  useEffect(() => {
-    saveLastCss(debouncedInputCss);
-  }, [debouncedInputCss]);
-
   const toast = useToast();
 
-  useEffect(() => {
-    if (inputTooLarge && !sizeWarningShown.current) {
-      toast.info(`El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`);
-      sizeWarningShown.current = true;
-    }
-
-    if (!inputTooLarge) {
-      sizeWarningShown.current = false;
-    }
-  }, [inputTooLarge, toast]);
+  const {
+    debouncedInput: debouncedInputCss,
+    inputTooLarge,
+    inputWarning,
+  } = usePlaygroundInputLifecycle({
+    input: inputCss,
+    saveInput: saveLastCss,
+    toast,
+  });
 
   const validation = useCssParser(debouncedInputCss);
 
@@ -79,7 +69,7 @@ export function CssPlayground() {
     toast,
   });
 
-  useKeyboardShortcuts({
+  usePlaygroundShortcuts({
     onFormat: handleFormat,
     onMinify: handleMinify,
     onCopyOutput: handleCopyOutput,
@@ -130,22 +120,23 @@ export function CssPlayground() {
   );
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col gap-4">
-      <CssEditors
-        inputCss={inputCss}
-        output={output}
-        error={error}
-        validationState={validation}
-        inputWarning={inputWarning}
-        onInputChange={setInputCss}
-        onClearInput={handleClearInput}
-        onLoadExample={handleLoadExample}
-        onCopyOutput={handleCopyOutput}
-        onDownloadInput={handleDownloadInput}
-        onDownloadOutput={handleDownloadOutput}
-      />
-
-      <Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />
-    </div>
+    <PlaygroundLayout
+      editors={
+        <CssEditors
+          inputCss={inputCss}
+          output={output}
+          error={error}
+          validationState={validation}
+          inputWarning={inputWarning}
+          onInputChange={setInputCss}
+          onClearInput={handleClearInput}
+          onLoadExample={handleLoadExample}
+          onCopyOutput={handleCopyOutput}
+          onDownloadInput={handleDownloadInput}
+          onDownloadOutput={handleDownloadOutput}
+        />
+      }
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}
+    />
   );
 }

@@ -109,6 +109,28 @@ export function useJsonPlaygroundActions({
     });
   }, [formatterOutput, jsonPathOutput, baseActions]);
 
+  const handleDownloadInput = useCallback(() => {
+    baseActions.handleDownload({
+      content: inputJson,
+      fileName: "data.json",
+      mimeType: "application/json",
+      successMessage: "Descargado como data.json",
+      validate: () => (!inputJson ? "No hay contenido para descargar" : null),
+    });
+  }, [baseActions, inputJson]);
+
+  const handleDownloadOutput = useCallback(() => {
+    const textToDownload = jsonPathOutput || formatterOutput;
+
+    baseActions.handleDownload({
+      content: textToDownload,
+      fileName: "result.json",
+      mimeType: "application/json",
+      successMessage: "Descargado como result.json",
+      validate: () => (!textToDownload ? "No hay resultado para descargar" : null),
+    });
+  }, [baseActions, formatterOutput, jsonPathOutput]);
+
   const handleFormat = useCallback(() => {
     runTransformAction({
       run: () => {
@@ -172,6 +194,8 @@ export function useJsonPlaygroundActions({
     handleClearInput: baseActions.handleClearInput,
     handleLoadExample: baseActions.handleLoadExample,
     handleCopyOutput,
+    handleDownloadInput,
+    handleDownloadOutput,
     handleFormat,
     handleMinify,
     handleClean,

@@ -8,6 +8,9 @@
  */
 export type ToolbarButtonVariant = "primary" | "danger" | "success" | "purple" | "cyan" | "orange";
 
+/** Canonical click handler signature for toolbar actions */
+export type ToolbarActionHandler = () => void;
+
 /**
  * Icon identifier (FontAwesome icon name without 'fa-' prefix)
  */
@@ -27,7 +30,7 @@ export interface ToolbarAction {
   /** Visual variant/color scheme for the button */
   variant: ToolbarButtonVariant;
   /** Action handler executed on click */
-  onClick: () => void;
+  onClick: ToolbarActionHandler;
   /** Optional tooltip text (defaults to label) */
   tooltip?: string;
   /** Whether the action is currently disabled */
@@ -43,9 +46,9 @@ export interface ToolbarConfig {
   /** Optional title for the toolbar section */
   title?: string;
   /** List of toolbar actions */
-  actions: ToolbarAction[];
+  actions: readonly ToolbarAction[];
   /** Optional handler to open configuration modal */
-  onOpenConfig?: () => void;
+  onOpenConfig?: ToolbarActionHandler;
   /** Title for the config button */
   configButtonTitle?: string;
   /** Custom grid classes for layout */

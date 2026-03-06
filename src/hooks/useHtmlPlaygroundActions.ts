@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { htmlPlaygroundConfig } from "@/playgrounds/html/html.config";
-import { formatHtml, minifyHtml } from "@/services/html/transform";
+import { htmlService } from "@/services/html/service";
+import { compactTransformError } from "@/utils/transformError";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
@@ -84,7 +85,8 @@ export function useHtmlPlaygroundActions({
   const handleFormat = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await formatHtml(inputHtml, formatConfig.indentSize, {
+        const result = await htmlService.format(inputHtml, {
+          indentSize: formatConfig.indentSize,
           formatCss: formatConfig.formatCss,
           formatJs: formatConfig.formatJs,
         });
@@ -105,7 +107,7 @@ export function useHtmlPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(compactHtmlError(message));
+        setError(compactTransformError(message));
       },
       successMessage: "HTML formateado correctamente",
       errorMessage: "Error al formatear HTML",
@@ -115,7 +117,7 @@ export function useHtmlPlaygroundActions({
   const handleMinify = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await minifyHtml(inputHtml, {
+        const result = await htmlService.minify(inputHtml, {
           removeComments: minifyConfig.removeComments,
           collapseWhitespace: minifyConfig.collapseWhitespace,
           minifyCss: minifyConfig.minifyCss,
@@ -138,7 +140,7 @@ export function useHtmlPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(compactHtmlError(message));
+        setError(compactTransformError(message));
       },
       successMessage: "HTML minificado correctamente",
       errorMessage: "Error al minificar HTML",
@@ -154,14 +156,4 @@ export function useHtmlPlaygroundActions({
     handleFormat,
     handleMinify,
   };
-}
-
-function compactHtmlError(message: string): string {
-  const firstLine = message
-    .split("\n")
-    .map((line) => line.trim())
-    .find((line) => line.length > 0);
-
-  const compact = (firstLine ?? message).replace(/\s{2,}/g, " ").trim();
-  return compact.length > 140 ? `${compact.slice(0, 137)}...` : compact;
 }

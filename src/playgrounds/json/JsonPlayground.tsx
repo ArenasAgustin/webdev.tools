@@ -1,19 +1,19 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
+import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { JsonEditors } from "./JsonEditors";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonFormatter } from "@/hooks/useJsonFormatter";
 import { useJsonPath } from "@/hooks/useJsonPath";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
 import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { useTextStats } from "@/hooks/useTextStats";
+import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
+import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
-import { downloadFile } from "@/utils/download";
-import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
 import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
 import { loadToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
@@ -26,36 +26,37 @@ const savedConfig = loadToolsConfig();
  */
 export function JsonPlayground() {
   const [inputJson, setInputJson] = useState<string>(() => loadLastJson());
-  const [formatConfig, setFormatConfig] = useState<FormatConfig>(
-    savedConfig?.format ?? DEFAULT_FORMAT_CONFIG,
+  const [formatConfig, setFormatConfig] = useMergedConfigState<FormatConfig>(
+    DEFAULT_FORMAT_CONFIG,
+    savedConfig?.format,
   );
-  const [minifyConfig, setMinifyConfig] = useState<MinifyConfig>(
-    savedConfig?.minify ?? DEFAULT_MINIFY_CONFIG,
+  const [minifyConfig, setMinifyConfig] = useMergedConfigState<MinifyConfig>(
+    DEFAULT_MINIFY_CONFIG,
+    savedConfig?.minify,
   );
-  const [cleanConfig, setCleanConfig] = useState<CleanConfig>(
-    savedConfig?.clean ?? DEFAULT_CLEAN_CONFIG,
+  const [cleanConfig, setCleanConfig] = useMergedConfigState<CleanConfig>(
+    DEFAULT_CLEAN_CONFIG,
+    savedConfig?.clean,
   );
 
   // Modal state management
   const configModal = useModalState();
+  const toast = useToast();
 
-  // Auto-save last JSON to localStorage
-  const debouncedInputJson = useDebouncedValue(inputJson, 300);
-  const inputStats = useTextStats(inputJson);
-  const inputTooLarge = inputStats.bytes > MAX_INPUT_BYTES;
-  const inputWarning = inputTooLarge
-    ? "Entrada grande: algunas operaciones pueden ser lentas"
-    : null;
-  const sizeWarningShown = useRef(false);
+  const {
+    debouncedInput: debouncedInputJson,
+    inputTooLarge,
+    inputWarning,
+  } = usePlaygroundInputLifecycle({
+    input: inputJson,
+    saveInput: saveLastJson,
+    toast,
+  });
 
   useEffect(() => {
     void import("@/services/formatter/formatter");
     void import("@/services/minifier/minifier");
   }, []);
-
-  useEffect(() => {
-    saveLastJson(debouncedInputJson);
-  }, [debouncedInputJson]);
 
   // Use custom hooks for logic encapsulation
   const validation = useJsonParser(debouncedInputJson);
@@ -69,23 +70,13 @@ export function JsonPlayground() {
   const outputJson = hasJsonPathResult ? jsonPath.output : formatter.output;
   const outputError = hasJsonPathResult ? jsonPath.error : formatter.error;
 
-  const toast = useToast();
-
-  useEffect(() => {
-    if (inputTooLarge && !sizeWarningShown.current) {
-      toast.info(`El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`);
-      sizeWarningShown.current = true;
-    }
-
-    if (!inputTooLarge) {
-      sizeWarningShown.current = false;
-    }
-  }, [inputTooLarge, toast]);
-
   // Encapsulate all handlers
   const {
     handleClearInput,
     handleLoadExample,
+    handleCopyOutput,
+    handleDownloadInput,
+    handleDownloadOutput,
     handleFormat,
     handleMinify,
     handleClean,
@@ -118,46 +109,11 @@ export function JsonPlayground() {
     inputTooLargeMessage: `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`,
   });
 
-  // Wrapper para handleCopyOutput con toast
-  const handleCopyOutputWithToast = useCallback(() => {
-    const textToCopy = outputJson;
-    if (!textToCopy) {
-      toast.error("No hay contenido para copiar");
-      return;
-    }
-    navigator.clipboard
-      .writeText(textToCopy)
-      .then(() => {
-        toast.success("Copiado al portapapeles");
-      })
-      .catch(() => {
-        toast.error("Error al copiar al portapapeles");
-      });
-  }, [outputJson, toast]);
-
-  const handleDownloadInput = useCallback(() => {
-    if (!inputJson) {
-      toast.error("No hay contenido para descargar");
-      return;
-    }
-    downloadFile(inputJson, "data.json", "application/json");
-    toast.success("Descargado como data.json");
-  }, [inputJson, toast]);
-
-  const handleDownloadOutput = useCallback(() => {
-    if (!outputJson) {
-      toast.error("No hay resultado para descargar");
-      return;
-    }
-    downloadFile(outputJson, "result.json", "application/json");
-    toast.success("Descargado como result.json");
-  }, [outputJson, toast]);
-
-  useKeyboardShortcuts({
+  usePlaygroundShortcuts({
     onFormat: handleFormat,
     onMinify: handleMinify,
     onClean: handleClean,
-    onCopyOutput: handleCopyOutputWithToast,
+    onCopyOutput: handleCopyOutput,
     onClearInput: handleClearInput,
     onOpenConfig: configModal.open,
   });
@@ -207,7 +163,16 @@ export function JsonPlayground() {
       isOpen: configModal.isOpen,
       onOpenChange: configModal.setIsOpen,
     }),
-    [formatConfig, minifyConfig, cleanConfig, configModal.isOpen, configModal.setIsOpen],
+    [
+      formatConfig,
+      minifyConfig,
+      cleanConfig,
+      configModal.isOpen,
+      configModal.setIsOpen,
+      setFormatConfig,
+      setMinifyConfig,
+      setCleanConfig,
+    ],
   );
 
   const toolbarTips = useMemo(
@@ -221,29 +186,32 @@ export function JsonPlayground() {
   );
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col gap-4">
-      <JsonEditors
-        inputValue={inputJson}
-        outputValue={outputJson}
-        validationState={validation}
-        outputError={outputError}
-        inputWarning={inputWarning}
-        onInputChange={setInputJson}
-        onClearInput={handleClearInput}
-        onLoadExample={handleLoadExample}
-        onCopyOutput={handleCopyOutputWithToast}
-        onDownloadInput={handleDownloadInput}
-        onDownloadOutput={handleDownloadOutput}
-      />
-
-      <Toolbar
-        variant="json"
-        actions={toolbarActions}
-        jsonPath={toolbarJsonPath}
-        history={toolbarHistory}
-        config={toolbarConfig}
-        tips={toolbarTips}
-      />
-    </div>
+    <PlaygroundLayout
+      editors={
+        <JsonEditors
+          inputValue={inputJson}
+          outputValue={outputJson}
+          validationState={validation}
+          outputError={outputError}
+          inputWarning={inputWarning}
+          onInputChange={setInputJson}
+          onClearInput={handleClearInput}
+          onLoadExample={handleLoadExample}
+          onCopyOutput={handleCopyOutput}
+          onDownloadInput={handleDownloadInput}
+          onDownloadOutput={handleDownloadOutput}
+        />
+      }
+      toolbar={
+        <Toolbar
+          variant="json"
+          actions={toolbarActions}
+          jsonPath={toolbarJsonPath}
+          history={toolbarHistory}
+          config={toolbarConfig}
+          tips={toolbarTips}
+        />
+      }
+    />
   );
 }

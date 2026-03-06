@@ -3,15 +3,21 @@ import type {
   JsWorkerRequest,
   JsWorkerResponse,
 } from "@/services/js/worker.types";
-import { createWorkerClient } from "@/services/worker/clientFactory";
+import { createPlaygroundWorkerAdapter } from "@/services/worker/adapter";
 
-export const runJsWorker = createWorkerClient<JsWorkerPayload, JsWorkerRequest, JsWorkerResponse>({
+const jsWorkerAdapter = createPlaygroundWorkerAdapter<
+  JsWorkerPayload,
+  JsWorkerRequest,
+  JsWorkerResponse
+>({
   workerUrl: new URL("../../workers/jsWorker.ts?worker", import.meta.url),
   idPrefix: "js-worker",
   unavailableMessage: "Worker no disponible",
   buildRequest: (id, payload) => ({ id, ...payload }),
 });
 
+export const runJsWorker = jsWorkerAdapter.run;
+
 export const preloadJsWorker = () => {
-  runJsWorker.preload();
+  jsWorkerAdapter.preload();
 };

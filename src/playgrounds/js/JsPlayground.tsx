@@ -1,15 +1,16 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
+import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
 import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { useTextStats } from "@/hooks/useTextStats";
+import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
+import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
+import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { ToolbarConfig } from "@/types/toolbar";
@@ -29,45 +30,33 @@ export function JsPlayground() {
   );
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [formatConfig, setFormatConfig] = useState<JsFormatConfig>(
-    savedConfig?.format ?? DEFAULT_JS_FORMAT_CONFIG,
+  const [formatConfig, setFormatConfig] = useMergedConfigState<JsFormatConfig>(
+    DEFAULT_JS_FORMAT_CONFIG,
+    savedConfig?.format,
   );
-  const [minifyConfig, setMinifyConfig] = useState<JsMinifyConfig>(
-    savedConfig?.minify ?? DEFAULT_JS_MINIFY_CONFIG,
+  const [minifyConfig, setMinifyConfig] = useMergedConfigState<JsMinifyConfig>(
+    DEFAULT_JS_MINIFY_CONFIG,
+    savedConfig?.minify,
   );
 
   // Modal state management
   const configModal = useModalState();
+  const toast = useToast();
 
-  const debouncedInputCode = useDebouncedValue(inputCode, 300);
-  const inputStats = useTextStats(inputCode);
-  const inputTooLarge = inputStats.bytes > MAX_INPUT_BYTES;
-  const inputWarning = inputTooLarge
-    ? "Entrada grande: algunas operaciones pueden ser lentas"
-    : null;
-  const sizeWarningShown = useRef(false);
+  const {
+    debouncedInput: debouncedInputCode,
+    inputTooLarge,
+    inputWarning,
+  } = usePlaygroundInputLifecycle({
+    input: inputCode,
+    saveInput: saveLastJs,
+    toast,
+  });
 
   useEffect(() => {
     void import("@/services/formatter/formatter");
     void import("@/services/minifier/minifier");
   }, []);
-
-  useEffect(() => {
-    saveLastJs(debouncedInputCode);
-  }, [debouncedInputCode]);
-
-  const toast = useToast();
-
-  useEffect(() => {
-    if (inputTooLarge && !sizeWarningShown.current) {
-      toast.info(`El contenido supera ${MAX_INPUT_LABEL}. Algunas operaciones pueden ser lentas.`);
-      sizeWarningShown.current = true;
-    }
-
-    if (!inputTooLarge) {
-      sizeWarningShown.current = false;
-    }
-  }, [inputTooLarge, toast]);
 
   const validation = useJsParser(debouncedInputCode);
 
@@ -94,7 +83,7 @@ export function JsPlayground() {
     toast,
   });
 
-  useKeyboardShortcuts({
+  usePlaygroundShortcuts({
     onFormat: handleFormat,
     onMinify: handleMinify,
     onCopyOutput: handleCopyOutput,
@@ -152,22 +141,23 @@ export function JsPlayground() {
   );
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col gap-4">
-      <JsEditors
-        inputCode={inputCode}
-        output={output}
-        error={error}
-        validationState={validation}
-        inputWarning={inputWarning}
-        onInputChange={setInputCode}
-        onClearInput={handleClearInput}
-        onLoadExample={handleLoadExample}
-        onCopyOutput={handleCopyOutput}
-        onDownloadInput={handleDownloadInput}
-        onDownloadOutput={handleDownloadOutput}
-      />
-
-      <Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />
-    </div>
+    <PlaygroundLayout
+      editors={
+        <JsEditors
+          inputCode={inputCode}
+          output={output}
+          error={error}
+          validationState={validation}
+          inputWarning={inputWarning}
+          onInputChange={setInputCode}
+          onClearInput={handleClearInput}
+          onLoadExample={handleLoadExample}
+          onCopyOutput={handleCopyOutput}
+          onDownloadInput={handleDownloadInput}
+          onDownloadOutput={handleDownloadOutput}
+        />
+      }
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}
+    />
   );
 }

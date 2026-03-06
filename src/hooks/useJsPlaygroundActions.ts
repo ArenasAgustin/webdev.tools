@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
-import { formatJsAsync, minifyJsAsync } from "@/services/js/worker";
+import { jsService } from "@/services/js/service";
 import { createValidatedHandler } from "@/utils/handlerFactory";
+import { compactTransformError } from "@/utils/transformError";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
@@ -132,7 +133,9 @@ export function useJsPlaygroundActions({
   const handleFormat = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await formatJsAsync(inputCode, formatConfig.indentSize);
+        const result = await jsService.format(inputCode, {
+          indentSize: formatConfig.indentSize,
+        });
 
         if (!result.ok) {
           throw new Error(result.error.message ?? "Error al formatear código");
@@ -150,7 +153,7 @@ export function useJsPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(message);
+        setError(compactTransformError(message));
       },
       successMessage: "Código formateado correctamente",
       errorMessage: "Error al formatear código",
@@ -163,7 +166,7 @@ export function useJsPlaygroundActions({
   const handleMinify = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await minifyJsAsync(inputCode, {
+        const result = await jsService.minify(inputCode, {
           removeComments: minifyConfig.removeComments,
           removeSpaces: minifyConfig.removeSpaces,
         });
@@ -184,7 +187,7 @@ export function useJsPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(message);
+        setError(compactTransformError(message));
       },
       successMessage: "Código minificado correctamente",
       errorMessage: "Error al minificar código",

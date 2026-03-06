@@ -2,7 +2,8 @@ import { useCallback } from "react";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import { cssPlaygroundConfig } from "@/playgrounds/css/css.config";
-import { formatCss, minifyCss } from "@/services/css/transform";
+import { cssService } from "@/services/css/service";
+import { compactTransformError } from "@/utils/transformError";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 
 interface UseCssPlaygroundActionsProps {
@@ -84,7 +85,7 @@ export function useCssPlaygroundActions({
   const handleFormat = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await formatCss(inputCss, formatConfig.indentSize);
+        const result = await cssService.format(inputCss, formatConfig.indentSize);
 
         if (!result.ok) {
           throw new Error(result.error || "Error al formatear CSS");
@@ -102,7 +103,7 @@ export function useCssPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(compactCssError(message));
+        setError(compactTransformError(message));
       },
       successMessage: "CSS formateado correctamente",
       errorMessage: "Error al formatear CSS",
@@ -112,7 +113,7 @@ export function useCssPlaygroundActions({
   const handleMinify = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await minifyCss(inputCss, {
+        const result = await cssService.minify(inputCss, {
           removeComments: minifyConfig.removeComments,
           removeSpaces: minifyConfig.removeSpaces,
         });
@@ -133,7 +134,7 @@ export function useCssPlaygroundActions({
         }
       },
       onError: (message) => {
-        setError(compactCssError(message));
+        setError(compactTransformError(message));
       },
       successMessage: "CSS minificado correctamente",
       errorMessage: "Error al minificar CSS",
@@ -149,14 +150,4 @@ export function useCssPlaygroundActions({
     handleFormat,
     handleMinify,
   };
-}
-
-function compactCssError(message: string): string {
-  const firstLine = message
-    .split("\n")
-    .map((line) => line.trim())
-    .find((line) => line.length > 0);
-
-  const compact = (firstLine ?? message).replace(/\s{2,}/g, " ").trim();
-  return compact.length > 140 ? `${compact.slice(0, 137)}...` : compact;
 }
