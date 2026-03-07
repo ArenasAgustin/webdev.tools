@@ -37,21 +37,38 @@
 
 ### Fase 3 — Migración Playground por Playground
 
-- [ ] Migrar en este orden: CSS → HTML → JS → JSON.
-- [ ] Aplicar plantilla estructural única por playground:
-  - [ ] `*.config.ts`
-  - [ ] `*Playground.tsx`
-  - [ ] `*Editors.tsx`
-  - [ ] `use*PlaygroundActions.ts`
-  - [ ] `services/*/transform.ts`
-  - [ ] tests unitarios + integración + e2e
-- [ ] Limitar diferencias a lógica de dominio (ejecución JS, JSONPath, preview HTML, etc.).
+- [x] Migrar en este orden: CSS → HTML → JS → JSON. ✅
+  - [x] CSS ✅
+  - [x] HTML ✅
+  - [x] JS ✅
+  - [x] JSON ✅
+- [x] Aplicar plantilla estructural única por playground: ✅
+  - [x] CSS (`*.config.ts`, `*Playground.tsx`, `*Playground.branches.test.tsx`, `*Editors.tsx`, `*Editors.test.tsx`, `use*PlaygroundActions.ts`, `services/*/transform.ts`, `services/*/transform.test.ts`, tests unitarios + integración + e2e) ✅
+  - [x] HTML (`*.config.ts`, `*Playground.tsx`, `*Playground.branches.test.tsx`, `*Editors.tsx`, `*Editors.test.tsx`, `use*PlaygroundActions.ts`, `services/*/transform.ts`, `services/*/transform.test.ts`, tests unitarios + integración + e2e) ✅
+  - [x] JS (`*.config.ts`, `*Playground.tsx`, `*Playground.branches.test.tsx`, `*Editors.tsx`, `*Editors.test.tsx`, `use*PlaygroundActions.ts`, `services/*/transform.ts`, `services/*/transform.test.ts`, tests unitarios + integración + e2e) ✅
+  - [x] JSON (`*.config.ts`, `*Playground.tsx`, `*Playground.branches.test.tsx`, `*Editors.tsx`, `*Editors.test.tsx`, `use*PlaygroundActions.ts`, `services/*/transform.ts`, `services/*/transform.test.ts`, tests unitarios + integración + e2e) ✅
+- [x] Limitar diferencias a lógica de dominio (ejecución JS, JSONPath, preview HTML, etc.). ✅
+
+### Fase 3.5 — Consolidación de Módulos
+
+- [x] Eliminar `formatter/formatter.ts` — cada `transform.ts` importa `formatter/prettier.ts` directamente. ✅
+- [x] Eliminar `minifier/minifier.ts` — minificación inlined en cada `transform.ts` (Terser para JS, JSON.stringify para JSON, CSS propio). ✅
+- [x] Consolidar archivos por playground en `transform.ts` único: ✅
+  - [x] JS: `format.test.ts` + `minify.test.ts` → `transform.test.ts` ✅
+  - [x] JSON: `format.test.ts` + `minify.test.ts` + `clean.ts` + `clean.test.ts` + `parse.ts` + `parse.test.ts` + `utils.ts` + `utils.test.ts` → `transform.ts` + `transform.test.ts` ✅
+- [x] Estructura final uniforme por playground: ✅
+  - `service.ts` — facade pública
+  - `transform.ts` — funciones puras (format, minify, parse, clean, utils)
+  - `transform.test.ts` — tests de todas las funciones puras
+  - `worker.ts` — orquestación async con fallback
+  - `worker.types.ts` — tipos del worker
+  - `workerClient.ts` — cliente del worker
 
 ### Fase 4 — Matriz de Testing Unificada
 
 - [ ] Definir mínimo obligatorio por playground:
   - [ ] Unit: services + hooks
-  - [ ] Integración: playground + toolbar/config
+  - [ ] Integración: playground + toolbar/config + branches (`*Playground.branches.test.tsx`) + editores (`*Editors.test.tsx`)
   - [ ] E2E: workflow feliz + persistencia de configuración
 - [ ] Homologar estructura de tests en:
   - [ ] `src/playgrounds/*`

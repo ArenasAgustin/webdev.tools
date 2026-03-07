@@ -1,6 +1,4 @@
-import { formatJson } from "@/services/formatter/formatter";
-import { minifyJson } from "@/services/minifier/minifier";
-import { cleanJson } from "@/services/json/clean";
+import { formatJson, minifyJson, cleanJson } from "@/services/json/transform";
 import { applyJsonPath } from "@/services/json/jsonPath";
 import type { Result, JsonError } from "@/types/common";
 import type { JsonWorkerRequest, JsonWorkerResponse } from "@/services/json/worker.types";
@@ -10,7 +8,15 @@ const ctx = self as unknown as {
   onmessage: (event: MessageEvent<JsonWorkerRequest>) => void;
 };
 
-const toResponse = (id: string, result: Result<string, JsonError>): JsonWorkerResponse => {
+const toResponse = (id: string, result: Result<string, string>): JsonWorkerResponse => {
+  if (result.ok) {
+    return { id, ok: true, value: result.value };
+  }
+
+  return { id, ok: false, error: { message: result.error } };
+};
+
+const toDomainResponse = (id: string, result: Result<string, JsonError>): JsonWorkerResponse => {
   if (result.ok) {
     return { id, ok: true, value: result.value };
   }
@@ -32,10 +38,10 @@ ctx.onmessage = (event: MessageEvent<JsonWorkerRequest>) => {
           ctx.postMessage(toResponse(id, minifyJson(input, request.options)));
           return;
         case "clean":
-          ctx.postMessage(toResponse(id, cleanJson(input, request.options)));
+          ctx.postMessage(toDomainResponse(id, cleanJson(input, request.options)));
           return;
         case "jsonPath":
-          ctx.postMessage(toResponse(id, applyJsonPath(input, request.path)));
+          ctx.postMessage(toDomainResponse(id, applyJsonPath(input, request.path)));
           return;
       }
     } catch (error) {

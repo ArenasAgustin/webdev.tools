@@ -54,8 +54,8 @@ export function JsonPlayground() {
   });
 
   useEffect(() => {
-    void import("@/services/formatter/formatter");
-    void import("@/services/minifier/minifier");
+    void import("@/services/formatter/prettier");
+    void import("@/services/json/transform");
   }, []);
 
   // Use custom hooks for logic encapsulation

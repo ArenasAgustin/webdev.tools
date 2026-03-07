@@ -138,7 +138,7 @@ export function useJsPlaygroundActions({
         });
 
         if (!result.ok) {
-          throw new Error(result.error.message ?? "Error al formatear código");
+          throw new Error(result.error ?? "Error al formatear código");
         }
 
         return result.value;
@@ -172,7 +172,7 @@ export function useJsPlaygroundActions({
         });
 
         if (!result.ok) {
-          throw new Error(result.error.message ?? "Error al minificar código");
+          throw new Error(result.error ?? "Error al minificar código");
         }
 
         return result.value;

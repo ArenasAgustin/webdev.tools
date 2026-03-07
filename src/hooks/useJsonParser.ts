@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { parseJson } from "@/services/json/parse";
+import { parseJson } from "@/services/json/transform";
 import type { JsonError } from "@/types/common";
 
 interface JsonValidation {
@@ -18,10 +18,9 @@ export function useJsonParser(input: string): JsonValidation {
     }
 
     const result = parseJson(input);
-    if (result.ok) {
-      return { isValid: true, error: null };
-    } else {
+    if (!result.ok) {
       return { isValid: false, error: result.error };
     }
+    return { isValid: true, error: null };
   }, [input]);
 }

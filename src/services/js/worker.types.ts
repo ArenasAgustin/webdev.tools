@@ -1,11 +1,6 @@
-import type { JsMinifyOptions } from "@/services/minifier/minifier";
-import type { IndentStyle } from "@/types/format";
 import type { JsonError } from "@/types/common";
 import type { WorkerRequest, WorkerResponse, WorkerPayloadBase } from "@/services/worker/types";
-
-export interface JsFormatOptions {
-  indentSize?: IndentStyle;
-}
+import type { JsFormatOptions, JsMinifyOptions } from "@/services/js/transform";
 
 export type JsWorkerPayload =
   | ({ action: "format"; options?: JsFormatOptions } & WorkerPayloadBase)

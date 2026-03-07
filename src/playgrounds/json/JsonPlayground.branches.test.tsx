@@ -4,8 +4,10 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 const {
   toastMocks,
   storageMocks,
-  formatHtmlMock,
-  minifyHtmlMock,
+  formatJsonMock,
+  minifyJsonMock,
+  cleanJsonMock,
+  applyJsonPathMock,
   downloadFileMock,
   clipboardWriteTextMock,
 } = vi.hoisted(() => ({
@@ -15,13 +17,22 @@ const {
     info: vi.fn(),
   },
   storageMocks: {
-    loadLastHtml: vi.fn(() => ""),
-    saveLastHtml: vi.fn(),
-    loadHtmlToolsConfig: vi.fn(() => null),
-    saveHtmlToolsConfig: vi.fn(),
+    loadLastJson: vi.fn(() => ""),
+    saveLastJson: vi.fn(),
+    loadToolsConfig: vi.fn(() => null),
+    saveToolsConfig: vi.fn(),
+    STORAGE_KEYS: {
+      TOOLS_CONFIG: "toolsConfig",
+      LAST_JSON: "lastJson",
+      JSONPATH_HISTORY: "jsonPathHistory",
+    },
+    getItem: vi.fn(() => null),
+    removeItem: vi.fn(),
   },
-  formatHtmlMock: vi.fn(),
-  minifyHtmlMock: vi.fn(),
+  formatJsonMock: vi.fn(),
+  minifyJsonMock: vi.fn(),
+  cleanJsonMock: vi.fn(),
+  applyJsonPathMock: vi.fn(),
   downloadFileMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
 }));
@@ -32,33 +43,38 @@ vi.mock("@/hooks/useToast", () => ({
 
 vi.mock("@/services/storage", () => storageMocks);
 
-vi.mock("@/hooks/useHtmlParser", () => ({
-  useHtmlParser: () => ({ isValid: true, error: null }),
+vi.mock("@/hooks/useJsonParser", () => ({
+  useJsonParser: () => ({ isValid: true, error: null }),
 }));
 
-vi.mock("@/services/html/service", () => ({
-  htmlService: {
-    format: formatHtmlMock as (
-      input: string,
-      options: unknown,
-    ) => Promise<{ ok: boolean; value?: string; error?: string }>,
-    minify: minifyHtmlMock as (
-      input: string,
-      options: unknown,
-    ) => Promise<{ ok: boolean; value?: string; error?: string }>,
-    validate: vi.fn(),
-  },
+vi.mock("@/services/json/worker", () => ({
+  formatJsonAsync: formatJsonMock as (
+    input: string,
+    options: unknown,
+  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
+  minifyJsonAsync: minifyJsonMock as (
+    input: string,
+    options: unknown,
+  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
+  cleanJsonAsync: cleanJsonMock as (
+    input: string,
+    options: unknown,
+  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
+  applyJsonPathAsync: applyJsonPathMock as (
+    input: string,
+    path: string,
+  ) => Promise<{ ok: boolean; value?: string; error?: { message: string } }>,
 }));
 
 vi.mock("@/utils/download", () => ({
   downloadFile: downloadFileMock as (content: string, filename: string, mimeType: string) => void,
 }));
 
-vi.mock("./HtmlEditors", () => ({
-  HtmlEditors: ({
-    inputHtml,
-    output,
-    error,
+vi.mock("./JsonEditors", () => ({
+  JsonEditors: ({
+    inputValue,
+    outputValue,
+    outputError,
     inputWarning,
     onInputChange,
     onClearInput,
@@ -67,9 +83,9 @@ vi.mock("./HtmlEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputHtml: string;
-    output: string;
-    error: string | null;
+    inputValue: string;
+    outputValue: string;
+    outputError: string | null;
     inputWarning?: string | null;
     onInputChange: (value: string) => void;
     onClearInput: () => void;
@@ -79,11 +95,11 @@ vi.mock("./HtmlEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-html">{inputHtml}</p>
-      <p data-testid="output-html">{output}</p>
-      <p data-testid="error-html">{error}</p>
+      <p data-testid="input-json">{inputValue}</p>
+      <p data-testid="output-json">{outputValue}</p>
+      <p data-testid="error-json">{outputError}</p>
       <p data-testid="warning">{inputWarning}</p>
-      <button onClick={() => onInputChange("<div>ok</div>")}>set-input</button>
+      <button onClick={() => onInputChange('{"key":"value"}')}>set-input</button>
       <button onClick={() => onInputChange("")}>set-empty</button>
       <button onClick={() => onInputChange("x".repeat(500_001))}>set-huge</button>
       <button onClick={onClearInput}>clear-input</button>
@@ -97,47 +113,47 @@ vi.mock("./HtmlEditors", () => ({
 
 vi.mock("@/components/layout/Toolbar", () => ({
   Toolbar: ({
-    tools,
+    actions,
     config,
   }: {
-    tools: {
-      actions: { label: string; onClick: () => void }[];
-      onOpenConfig?: () => void;
+    actions: {
+      onFormat: () => void;
+      onMinify: () => void;
+      onClean: () => void;
+      onFilter: () => void;
     };
     config?: {
       onOpenChange?: (isOpen: boolean) => void;
-      onFormatChange: (config: {
-        indentSize: number;
-        formatCss: boolean;
-        formatJs: boolean;
+      onFormatChange: (config: { indent: number; sortKeys: boolean; autoCopy: boolean }) => void;
+      onMinifyChange: (config: {
+        removeSpaces: boolean;
+        sortKeys: boolean;
         autoCopy: boolean;
       }) => void;
-      onMinifyChange: (config: {
-        removeComments: boolean;
-        collapseWhitespace: boolean;
-        minifyCss: boolean;
-        minifyJs: boolean;
+      onCleanChange: (config: {
+        removeNull: boolean;
+        removeUndefined: boolean;
+        removeEmptyString: boolean;
+        removeEmptyArray: boolean;
+        removeEmptyObject: boolean;
+        outputFormat: string;
         autoCopy: boolean;
       }) => void;
     };
   }) => (
     <div>
-      {tools.actions.map((action) => (
-        <button key={action.label} onClick={action.onClick}>
-          {action.label}
-        </button>
-      ))}
-      <button onClick={() => (config ? config.onOpenChange?.(true) : tools.onOpenConfig?.())}>
-        open-config
-      </button>
+      <button onClick={actions.onFormat}>Formatear</button>
+      <button onClick={actions.onMinify}>Minificar</button>
+      <button onClick={actions.onClean}>Limpiar</button>
+      <button onClick={actions.onFilter}>Filtrar</button>
+      <button onClick={() => config?.onOpenChange?.(true)}>open-config</button>
       {config && (
         <>
           <button
             onClick={() =>
               config.onFormatChange({
-                indentSize: 2,
-                formatCss: true,
-                formatJs: true,
+                indent: 2,
+                sortKeys: false,
                 autoCopy: true,
               })
             }
@@ -147,10 +163,8 @@ vi.mock("@/components/layout/Toolbar", () => ({
           <button
             onClick={() =>
               config.onMinifyChange({
-                removeComments: true,
-                collapseWhitespace: true,
-                minifyCss: true,
-                minifyJs: true,
+                removeSpaces: true,
+                sortKeys: false,
                 autoCopy: true,
               })
             }
@@ -163,13 +177,15 @@ vi.mock("@/components/layout/Toolbar", () => ({
   ),
 }));
 
-import { HtmlPlayground } from "./HtmlPlayground";
+import { JsonPlayground } from "./JsonPlayground";
 
-describe("HtmlPlayground branches", () => {
+describe("JsonPlayground branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    formatHtmlMock.mockResolvedValue({ ok: true, value: "<div>formatted</div>" });
-    minifyHtmlMock.mockResolvedValue({ ok: true, value: "<div>minified</div>" });
+    formatJsonMock.mockResolvedValue({ ok: true, value: '{\n  "formatted": true\n}' });
+    minifyJsonMock.mockResolvedValue({ ok: true, value: '{"minified":true}' });
+    cleanJsonMock.mockResolvedValue({ ok: true, value: '{"cleaned":true}' });
+    applyJsonPathMock.mockResolvedValue({ ok: true, value: '["result"]' });
     clipboardWriteTextMock.mockResolvedValue(undefined);
 
     Object.defineProperty(navigator, "clipboard", {
@@ -183,41 +199,45 @@ describe("HtmlPlayground branches", () => {
   });
 
   it("handles copy and download input and output branches", async () => {
-    render(<HtmlPlayground />);
+    render(<JsonPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-empty" }));
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("No hay HTML para descargar");
+    expect(toastMocks.error).toHaveBeenCalledWith("No hay contenido para descargar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para descargar");
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
-    expect(downloadFileMock).toHaveBeenCalledWith("<div>ok</div>", "index.html", "text/html");
+    expect(downloadFileMock).toHaveBeenCalledWith(
+      '{"key":"value"}',
+      "data.json",
+      "application/json",
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     await waitFor(() => {
-      expect(screen.getByTestId("output-html").textContent).toBe("<div>formatted</div>");
+      expect(screen.getByTestId("output-json").textContent).toBe('{\n  "formatted": true\n}');
     });
 
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
     await waitFor(() => {
-      expect(clipboardWriteTextMock).toHaveBeenCalledWith("<div>formatted</div>");
+      expect(clipboardWriteTextMock).toHaveBeenCalledWith('{\n  "formatted": true\n}');
     });
     expect(downloadFileMock).toHaveBeenCalledWith(
-      "<div>formatted</div>",
-      "result.html",
-      "text/html",
+      '{\n  "formatted": true\n}',
+      "result.json",
+      "application/json",
     );
   });
 
-  it("runs format and minify success and error flows", async () => {
-    render(<HtmlPlayground />);
+  it("runs format, minify and clean success and error flows", async () => {
+    render(<JsonPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
     fireEvent.click(screen.getByRole("button", { name: "open-config" }));
@@ -226,20 +246,27 @@ describe("HtmlPlayground branches", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     await waitFor(() => {
-      expect(formatHtmlMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("HTML formateado correctamente");
-      expect(screen.getByTestId("output-html").textContent).toBe("<div>formatted</div>");
+      expect(formatJsonMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("JSON formateado correctamente");
+      expect(screen.getByTestId("output-json").textContent).toBe('{\n  "formatted": true\n}');
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
     await waitFor(() => {
-      expect(minifyHtmlMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("HTML minificado correctamente");
-      expect(screen.getByTestId("output-html").textContent).toBe("<div>minified</div>");
+      expect(minifyJsonMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("JSON minificado correctamente");
+      expect(screen.getByTestId("output-json").textContent).toBe('{"minified":true}');
     });
 
-    formatHtmlMock.mockResolvedValueOnce({ ok: false, error: "format fail" });
-    minifyHtmlMock.mockResolvedValueOnce({ ok: false, error: "minify fail" });
+    fireEvent.click(screen.getByRole("button", { name: "Limpiar" }));
+    await waitFor(() => {
+      expect(cleanJsonMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("JSON limpiado correctamente");
+      expect(screen.getByTestId("output-json").textContent).toBe('{"cleaned":true}');
+    });
+
+    formatJsonMock.mockResolvedValueOnce({ ok: false, error: { message: "format fail" } });
+    minifyJsonMock.mockResolvedValueOnce({ ok: false, error: { message: "minify fail" } });
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
@@ -251,7 +278,7 @@ describe("HtmlPlayground branches", () => {
   });
 
   it("guards operations when input exceeds max size", async () => {
-    render(<HtmlPlayground />);
+    render(<JsonPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-huge" }));
 
@@ -261,8 +288,8 @@ describe("HtmlPlayground branches", () => {
       );
     });
 
-    const formatCallsBeforeGuard = formatHtmlMock.mock.calls.length;
-    const minifyCallsBeforeGuard = minifyHtmlMock.mock.calls.length;
+    const formatCallsBeforeGuard = formatJsonMock.mock.calls.length;
+    const minifyCallsBeforeGuard = minifyJsonMock.mock.calls.length;
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
@@ -270,7 +297,7 @@ describe("HtmlPlayground branches", () => {
     expect(toastMocks.error).toHaveBeenCalledWith(
       "El contenido supera 500 KB. Reduce el tamano para procesarlo.",
     );
-    expect(formatHtmlMock.mock.calls.length).toBe(formatCallsBeforeGuard);
-    expect(minifyHtmlMock.mock.calls.length).toBe(minifyCallsBeforeGuard);
+    expect(formatJsonMock.mock.calls.length).toBe(formatCallsBeforeGuard);
+    expect(minifyJsonMock.mock.calls.length).toBe(minifyCallsBeforeGuard);
   });
 });

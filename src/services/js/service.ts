@@ -1,16 +1,16 @@
-import type { JsonError } from "@/types/common";
-import type { JsMinifyOptions } from "@/services/minifier/minifier";
-import type { IndentStyle } from "@/types/format";
 import type { PlaygroundTransformService } from "@/services/transform";
 import { createNonEmptyValidator } from "@/services/transform";
+import type { JsFormatOptions, JsMinifyOptions } from "@/services/js/transform";
 import { formatJsAsync, minifyJsAsync } from "@/services/js/worker";
 
-export interface JsFormatOptions {
-  indentSize?: IndentStyle;
-}
-
-export const jsService: PlaygroundTransformService<JsFormatOptions, JsMinifyOptions, JsonError> = {
-  format: (input, options = {}) => formatJsAsync(input, options.indentSize ?? 2),
-  minify: (input, options = {}) => minifyJsAsync(input, options),
-  validate: createNonEmptyValidator<JsonError>(() => ({ message: "No hay código para procesar" })),
+export const jsService: PlaygroundTransformService<JsFormatOptions, JsMinifyOptions, string> = {
+  format: async (input, options = {}) => {
+    const result = await formatJsAsync(input, options.indentSize ?? 2);
+    return result.ok ? result : { ok: false, error: result.error.message };
+  },
+  minify: async (input, options = {}) => {
+    const result = await minifyJsAsync(input, options);
+    return result.ok ? result : { ok: false, error: result.error.message };
+  },
+  validate: createNonEmptyValidator(() => "No hay código para procesar"),
 };

@@ -37,9 +37,7 @@ Integración con Prettier aislada en:
 
 - `src/services/formatter/prettier.ts`
 
-Minificación centralizada en:
-
-- `src/services/minifier/minifier.ts`
+Minificación incluida en cada `transform.ts` de cada playground.
 
 Esto evita duplicación entre playgrounds y asegura comportamiento consistente (espacios/tabs, parser y normalización de output).
 

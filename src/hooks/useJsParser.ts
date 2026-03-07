@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { minifyJsAsync } from "@/services/js/worker";
+import { minifyJs } from "@/services/js/transform";
 
 interface JsValidation {
   isValid: boolean;
@@ -22,40 +22,27 @@ export function useJsParser(input: string): JsValidation {
 
     let cancelled = false;
 
-    void minifyJsAsync(source, {
-      removeComments: false,
-      removeSpaces: false,
-    })
-      .then((result) => {
-        if (cancelled) {
-          return;
-        }
+    void Promise.resolve(
+      minifyJs(source, {
+        removeComments: false,
+        removeSpaces: false,
+      }),
+    ).then((result) => {
+      if (cancelled) {
+        return;
+      }
 
-        if (result.ok) {
-          setValidation({ isValid: true, error: null });
-          return;
-        }
-
+      if (result.ok) {
+        setValidation({ isValid: true, error: null });
+      } else {
         setValidation({
           isValid: false,
           error: {
-            message: `Error de sintaxis: ${result.error.message ?? "Código inválido"}`,
+            message: `Error de sintaxis: ${result.error || "Código inválido"}`,
           },
         });
-      })
-      .catch((error: unknown) => {
-        if (cancelled) {
-          return;
-        }
-
-        const message = error instanceof Error ? error.message : String(error);
-        setValidation({
-          isValid: false,
-          error: {
-            message: `Error de sintaxis: ${message || "Código inválido"}`,
-          },
-        });
-      });
+      }
+    });
 
     return () => {
       cancelled = true;

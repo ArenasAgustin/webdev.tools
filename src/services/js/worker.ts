@@ -1,10 +1,10 @@
 import type { Result } from "@/types/common";
 import type { JsonError } from "@/types/common";
-import type { JsMinifyOptions } from "@/services/minifier/minifier";
 import { runJsWorker } from "@/services/js/workerClient";
 import type { JsWorkerPayload } from "@/services/js/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 import type { IndentStyle } from "@/types/format";
+import type { JsMinifyOptions } from "@/services/js/transform";
 
 const runJsOperation = (
   payload: JsWorkerPayload,
@@ -41,7 +41,7 @@ export const formatJsAsync = async (
       options: { indentSize },
     },
     async () => {
-      const { formatJs } = await import("@/services/formatter/formatter");
+      const { formatJs } = await import("@/services/js/transform");
       return formatJs(input, indentSize);
     },
   );
@@ -52,7 +52,7 @@ export const minifyJsAsync = async (
   options: JsMinifyOptions = {},
 ): Promise<Result<string, JsonError>> => {
   return runJsOperation({ action: "minify", input, options }, async () => {
-    const { minifyJs } = await import("@/services/minifier/minifier");
+    const { minifyJs } = await import("@/services/js/transform");
     return minifyJs(input, options);
   });
 };

@@ -54,8 +54,8 @@ export function JsPlayground() {
   });
 
   useEffect(() => {
-    void import("@/services/formatter/formatter");
-    void import("@/services/minifier/minifier");
+    void import("@/services/formatter/prettier");
+    void import("@/services/js/transform");
   }, []);
 
   const validation = useJsParser(debouncedInputCode);

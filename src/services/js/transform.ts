@@ -1,10 +1,11 @@
-import { type Result, type JsonValue, type JsonError } from "@/types/common";
-import type { TransformService } from "@/services/transform";
-import type { MinifyConfig } from "@/types/json";
-import { sortJsonKeys, JSON_ERROR_MESSAGES } from "@/services/json/utils";
+import type { Result } from "@/types/common";
+import type { IndentStyle } from "@/types/format";
+import { formatWithPrettier } from "@/services/formatter/prettier";
 import { minify_sync as terserMinifySync } from "terser";
 
-export type MinifyOptions = Partial<Pick<MinifyConfig, "removeSpaces" | "sortKeys">>;
+export interface JsFormatOptions {
+  indentSize?: IndentStyle;
+}
 
 export interface JsMinifyOptions {
   removeComments?: boolean;
@@ -27,38 +28,22 @@ type TerserSyncMinifyFn = (
   },
 ) => TerserSyncResult | null | undefined;
 
-export function minifyJson(input: string, options: MinifyOptions = {}): Result<string, JsonError> {
-  if (!input.trim()) {
-    return {
-      ok: false,
-      error: {
-        message: JSON_ERROR_MESSAGES.EMPTY_INPUT,
-      },
-    };
-  }
-
+export async function formatJs(
+  input: string,
+  indentSize: IndentStyle = 2,
+): Promise<Result<string, string>> {
   try {
-    const parsed = JSON.parse(input) as JsonValue;
-    const processed = options.sortKeys ? sortJsonKeys(parsed) : parsed;
-    const minified =
-      options.removeSpaces === false
-        ? JSON.stringify(processed, null, 1)
-        : JSON.stringify(processed);
-    return { ok: true, value: minified };
+    if (!input.trim()) {
+      return { ok: true, value: "" };
+    }
+
+    const formatted = await formatWithPrettier(input, "babel", indentSize);
+    return { ok: true, value: formatted };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    return {
-      ok: false,
-      error: {
-        message: errorMessage,
-      },
-    };
+    const message = error instanceof Error ? error.message : String(error);
+    return { ok: false, error: message || "Error al formatear código" };
   }
 }
-
-export const minifyJsonTransform: TransformService<MinifyOptions, JsonError> = {
-  transform: (input, options = {}) => minifyJson(input, options),
-};
 
 export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<string, string> {
   try {
@@ -91,7 +76,3 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
     return { ok: false, error: message };
   }
 }
-
-export const minifyJsTransform: TransformService<JsMinifyOptions, string> = {
-  transform: (input, options = {}) => minifyJs(input, options),
-};

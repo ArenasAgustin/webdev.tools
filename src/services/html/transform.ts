@@ -1,7 +1,7 @@
 import type { Result } from "@/types/common";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 import { minifyCss } from "@/services/css/transform";
-import { minifyJs } from "@/services/minifier/minifier";
+import { minifyJs } from "@/services/js/transform";
 import type { HtmlMinifyConfig } from "@/types/html";
 import type { IndentStyle } from "@/types/format";
 

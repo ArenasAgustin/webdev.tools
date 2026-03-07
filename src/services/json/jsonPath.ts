@@ -1,5 +1,5 @@
 import { JSONPath } from "jsonpath-plus";
-import { JSON_ERROR_MESSAGES } from "./utils";
+import { JSON_ERROR_MESSAGES } from "./transform";
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
 
 /**

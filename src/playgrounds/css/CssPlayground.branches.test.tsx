@@ -4,8 +4,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 const {
   toastMocks,
   storageMocks,
-  formatHtmlMock,
-  minifyHtmlMock,
+  formatCssMock,
+  minifyCssMock,
   downloadFileMock,
   clipboardWriteTextMock,
 } = vi.hoisted(() => ({
@@ -15,13 +15,13 @@ const {
     info: vi.fn(),
   },
   storageMocks: {
-    loadLastHtml: vi.fn(() => ""),
-    saveLastHtml: vi.fn(),
-    loadHtmlToolsConfig: vi.fn(() => null),
-    saveHtmlToolsConfig: vi.fn(),
+    loadLastCss: vi.fn(() => ""),
+    saveLastCss: vi.fn(),
+    loadCssToolsConfig: vi.fn(() => null),
+    saveCssToolsConfig: vi.fn(),
   },
-  formatHtmlMock: vi.fn(),
-  minifyHtmlMock: vi.fn(),
+  formatCssMock: vi.fn(),
+  minifyCssMock: vi.fn(),
   downloadFileMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
 }));
@@ -32,17 +32,17 @@ vi.mock("@/hooks/useToast", () => ({
 
 vi.mock("@/services/storage", () => storageMocks);
 
-vi.mock("@/hooks/useHtmlParser", () => ({
-  useHtmlParser: () => ({ isValid: true, error: null }),
+vi.mock("@/hooks/useCssParser", () => ({
+  useCssParser: () => ({ isValid: true, error: null }),
 }));
 
-vi.mock("@/services/html/service", () => ({
-  htmlService: {
-    format: formatHtmlMock as (
+vi.mock("@/services/css/service", () => ({
+  cssService: {
+    format: formatCssMock as (
       input: string,
       options: unknown,
     ) => Promise<{ ok: boolean; value?: string; error?: string }>,
-    minify: minifyHtmlMock as (
+    minify: minifyCssMock as (
       input: string,
       options: unknown,
     ) => Promise<{ ok: boolean; value?: string; error?: string }>,
@@ -54,9 +54,9 @@ vi.mock("@/utils/download", () => ({
   downloadFile: downloadFileMock as (content: string, filename: string, mimeType: string) => void,
 }));
 
-vi.mock("./HtmlEditors", () => ({
-  HtmlEditors: ({
-    inputHtml,
+vi.mock("./CssEditors", () => ({
+  CssEditors: ({
+    inputCss,
     output,
     error,
     inputWarning,
@@ -67,7 +67,7 @@ vi.mock("./HtmlEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputHtml: string;
+    inputCss: string;
     output: string;
     error: string | null;
     inputWarning?: string | null;
@@ -79,11 +79,11 @@ vi.mock("./HtmlEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-html">{inputHtml}</p>
-      <p data-testid="output-html">{output}</p>
-      <p data-testid="error-html">{error}</p>
+      <p data-testid="input-css">{inputCss}</p>
+      <p data-testid="output-css">{output}</p>
+      <p data-testid="error-css">{error}</p>
       <p data-testid="warning">{inputWarning}</p>
-      <button onClick={() => onInputChange("<div>ok</div>")}>set-input</button>
+      <button onClick={() => onInputChange(".card{color:red}")}>set-input</button>
       <button onClick={() => onInputChange("")}>set-empty</button>
       <button onClick={() => onInputChange("x".repeat(500_001))}>set-huge</button>
       <button onClick={onClearInput}>clear-input</button>
@@ -106,17 +106,10 @@ vi.mock("@/components/layout/Toolbar", () => ({
     };
     config?: {
       onOpenChange?: (isOpen: boolean) => void;
-      onFormatChange: (config: {
-        indentSize: number;
-        formatCss: boolean;
-        formatJs: boolean;
-        autoCopy: boolean;
-      }) => void;
+      onFormatChange: (config: { indentSize: number; autoCopy: boolean }) => void;
       onMinifyChange: (config: {
         removeComments: boolean;
-        collapseWhitespace: boolean;
-        minifyCss: boolean;
-        minifyJs: boolean;
+        removeSpaces: boolean;
         autoCopy: boolean;
       }) => void;
     };
@@ -136,8 +129,6 @@ vi.mock("@/components/layout/Toolbar", () => ({
             onClick={() =>
               config.onFormatChange({
                 indentSize: 2,
-                formatCss: true,
-                formatJs: true,
                 autoCopy: true,
               })
             }
@@ -148,9 +139,7 @@ vi.mock("@/components/layout/Toolbar", () => ({
             onClick={() =>
               config.onMinifyChange({
                 removeComments: true,
-                collapseWhitespace: true,
-                minifyCss: true,
-                minifyJs: true,
+                removeSpaces: true,
                 autoCopy: true,
               })
             }
@@ -163,13 +152,13 @@ vi.mock("@/components/layout/Toolbar", () => ({
   ),
 }));
 
-import { HtmlPlayground } from "./HtmlPlayground";
+import { CssPlayground } from "./CssPlayground";
 
-describe("HtmlPlayground branches", () => {
+describe("CssPlayground branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    formatHtmlMock.mockResolvedValue({ ok: true, value: "<div>formatted</div>" });
-    minifyHtmlMock.mockResolvedValue({ ok: true, value: "<div>minified</div>" });
+    formatCssMock.mockResolvedValue({ ok: true, value: ".card { color: red; }" });
+    minifyCssMock.mockResolvedValue({ ok: true, value: ".card{color:red}" });
     clipboardWriteTextMock.mockResolvedValue(undefined);
 
     Object.defineProperty(navigator, "clipboard", {
@@ -183,41 +172,41 @@ describe("HtmlPlayground branches", () => {
   });
 
   it("handles copy and download input and output branches", async () => {
-    render(<HtmlPlayground />);
+    render(<CssPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-empty" }));
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("No hay HTML para descargar");
+    expect(toastMocks.error).toHaveBeenCalledWith("No hay CSS para descargar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para descargar");
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
-    expect(downloadFileMock).toHaveBeenCalledWith("<div>ok</div>", "index.html", "text/html");
+    expect(downloadFileMock).toHaveBeenCalledWith(".card{color:red}", "styles.css", "text/css");
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     await waitFor(() => {
-      expect(screen.getByTestId("output-html").textContent).toBe("<div>formatted</div>");
+      expect(screen.getByTestId("output-css").textContent).toBe(".card { color: red; }");
     });
 
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
     await waitFor(() => {
-      expect(clipboardWriteTextMock).toHaveBeenCalledWith("<div>formatted</div>");
+      expect(clipboardWriteTextMock).toHaveBeenCalledWith(".card { color: red; }");
     });
     expect(downloadFileMock).toHaveBeenCalledWith(
-      "<div>formatted</div>",
-      "result.html",
-      "text/html",
+      ".card { color: red; }",
+      "result.css",
+      "text/css",
     );
   });
 
   it("runs format and minify success and error flows", async () => {
-    render(<HtmlPlayground />);
+    render(<CssPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
     fireEvent.click(screen.getByRole("button", { name: "open-config" }));
@@ -226,20 +215,20 @@ describe("HtmlPlayground branches", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     await waitFor(() => {
-      expect(formatHtmlMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("HTML formateado correctamente");
-      expect(screen.getByTestId("output-html").textContent).toBe("<div>formatted</div>");
+      expect(formatCssMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("CSS formateado correctamente");
+      expect(screen.getByTestId("output-css").textContent).toBe(".card { color: red; }");
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
     await waitFor(() => {
-      expect(minifyHtmlMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("HTML minificado correctamente");
-      expect(screen.getByTestId("output-html").textContent).toBe("<div>minified</div>");
+      expect(minifyCssMock).toHaveBeenCalled();
+      expect(toastMocks.success).toHaveBeenCalledWith("CSS minificado correctamente");
+      expect(screen.getByTestId("output-css").textContent).toBe(".card{color:red}");
     });
 
-    formatHtmlMock.mockResolvedValueOnce({ ok: false, error: "format fail" });
-    minifyHtmlMock.mockResolvedValueOnce({ ok: false, error: "minify fail" });
+    formatCssMock.mockResolvedValueOnce({ ok: false, error: "format fail" });
+    minifyCssMock.mockResolvedValueOnce({ ok: false, error: "minify fail" });
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
@@ -251,7 +240,7 @@ describe("HtmlPlayground branches", () => {
   });
 
   it("guards operations when input exceeds max size", async () => {
-    render(<HtmlPlayground />);
+    render(<CssPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-huge" }));
 
@@ -261,8 +250,8 @@ describe("HtmlPlayground branches", () => {
       );
     });
 
-    const formatCallsBeforeGuard = formatHtmlMock.mock.calls.length;
-    const minifyCallsBeforeGuard = minifyHtmlMock.mock.calls.length;
+    const formatCallsBeforeGuard = formatCssMock.mock.calls.length;
+    const minifyCallsBeforeGuard = minifyCssMock.mock.calls.length;
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
@@ -270,7 +259,7 @@ describe("HtmlPlayground branches", () => {
     expect(toastMocks.error).toHaveBeenCalledWith(
       "El contenido supera 500 KB. Reduce el tamano para procesarlo.",
     );
-    expect(formatHtmlMock.mock.calls.length).toBe(formatCallsBeforeGuard);
-    expect(minifyHtmlMock.mock.calls.length).toBe(minifyCallsBeforeGuard);
+    expect(formatCssMock.mock.calls.length).toBe(formatCallsBeforeGuard);
+    expect(minifyCssMock.mock.calls.length).toBe(minifyCallsBeforeGuard);
   });
 });

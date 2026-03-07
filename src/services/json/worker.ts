@@ -1,11 +1,34 @@
 import type { Result, JsonError } from "@/types/common";
-import type { FormatOptions } from "@/services/formatter/formatter";
-import type { MinifyOptions } from "@/services/minifier/minifier";
-import { cleanJson, type CleanOptions } from "@/services/json/clean";
+import type { JsonFormatOptions, JsonMinifyOptions } from "@/services/json/transform";
+import { cleanJson, formatJson, minifyJson, type CleanOptions } from "@/services/json/transform";
 import { applyJsonPath } from "@/services/json/jsonPath";
 import { runJsonWorker } from "@/services/json/workerClient";
 import type { JsonWorkerPayload } from "@/services/json/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
+
+const runJsonTransformOp = (
+  payload: JsonWorkerPayload,
+  runSync: () => Result<string, string> | Promise<Result<string, string>>,
+) =>
+  executeWorkerOperation({
+    input: payload.input,
+    payload,
+    runWorker: runJsonWorker,
+    runSync: async () => {
+      const result = await runSync();
+      if (result.ok) {
+        return result;
+      }
+
+      return {
+        ok: false,
+        error: {
+          message: result.error,
+        },
+      } satisfies Result<string, JsonError>;
+    },
+    toError: (message): JsonError => ({ message }),
+  });
 
 const runJsonOperation = (
   payload: JsonWorkerPayload,
@@ -21,22 +44,20 @@ const runJsonOperation = (
 
 export const formatJsonAsync = async (
   input: string,
-  options: FormatOptions = {},
+  options: JsonFormatOptions = {},
 ): Promise<Result<string, JsonError>> => {
-  return runJsonOperation({ action: "format", input, options }, async () => {
-    const { formatJson } = await import("@/services/formatter/formatter");
-    return formatJson(input, options);
-  });
+  return runJsonTransformOp({ action: "format", input, options }, () =>
+    formatJson(input, options),
+  );
 };
 
 export const minifyJsonAsync = async (
   input: string,
-  options: MinifyOptions = {},
+  options: JsonMinifyOptions = {},
 ): Promise<Result<string, JsonError>> => {
-  return runJsonOperation({ action: "minify", input, options }, async () => {
-    const { minifyJson } = await import("@/services/minifier/minifier");
-    return minifyJson(input, options);
-  });
+  return runJsonTransformOp({ action: "minify", input, options }, () =>
+    minifyJson(input, options),
+  );
 };
 
 export const cleanJsonAsync = async (

@@ -1,20 +1,25 @@
-import type { JsonError } from "@/types/common";
-import type { FormatConfig, MinifyConfig } from "@/types/json";
 import type { PlaygroundTransformService } from "@/services/transform";
-import { formatJson } from "@/services/formatter/formatter";
-import { minifyJson } from "@/services/minifier/minifier";
-import { parseJson } from "@/services/json/parse";
+import type { JsonFormatOptions, JsonMinifyOptions } from "@/services/json/transform";
+import { formatJsonAsync, minifyJsonAsync } from "@/services/json/worker";
+import { parseJson } from "@/services/json/transform";
 
-export type JsonFormatOptions = Partial<Pick<FormatConfig, "indent" | "sortKeys">>;
-export type JsonMinifyOptions = Partial<Pick<MinifyConfig, "removeSpaces" | "sortKeys">>;
-
-export const jsonService: PlaygroundTransformService<JsonFormatOptions, JsonMinifyOptions, JsonError> = {
-  format: (input, options = {}) => formatJson(input, options),
-  minify: (input, options = {}) => minifyJson(input, options),
+export const jsonService: PlaygroundTransformService<JsonFormatOptions, JsonMinifyOptions, string> = {
+  format: async (input, options = {}) => {
+    const result = await formatJsonAsync(input, options);
+    return result.ok ? result : { ok: false, error: result.error.message };
+  },
+  minify: async (input, options = {}) => {
+    const result = await minifyJsonAsync(input, options);
+    return result.ok ? result : { ok: false, error: result.error.message };
+  },
   validate: (input) => {
+    if (!input.trim()) {
+      return { ok: false, error: "No hay JSON para procesar" };
+    }
+
     const parsed = parseJson(input);
     if (!parsed.ok) {
-      return parsed;
+      return { ok: false, error: parsed.error.message };
     }
 
     return { ok: true, value: undefined };
