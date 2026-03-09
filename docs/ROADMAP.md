@@ -66,32 +66,38 @@
 
 ### Fase 4 — Matriz de Testing Unificada
 
-- [ ] Definir mínimo obligatorio por playground:
-  - [ ] Unit: services + hooks
-  - [ ] Integración: playground + toolbar/config + branches (`*Playground.branches.test.tsx`) + editores (`*Editors.test.tsx`)
-  - [ ] E2E: workflow feliz + persistencia de configuración
-- [ ] Homologar estructura de tests en:
-  - [ ] `src/playgrounds/*`
-  - [ ] `src/hooks/*`
-  - [ ] `e2e/*`
-- [ ] Agregar checklist en CI para evitar desvíos de arquitectura.
+- [x] Definir mínimo obligatorio por playground: ✅
+  - [x] Unit: services + hooks ✅
+  - [x] Integración: playground + toolbar/config + branches (`*Playground.branches.test.tsx`) + editores (`*Editors.test.tsx`) ✅
+  - [x] E2E: workflow feliz + persistencia de configuración ✅
+- [x] Homologar estructura de tests en: ✅
+  - [x] `src/playgrounds/*` ✅
+  - [x] `src/hooks/*` ✅
+  - [x] `e2e/*` ✅
+- [x] Agregar checklist en CI para evitar desvíos de arquitectura. ✅
+- [x] Completar gaps de testing: ✅
+  - [x] `src/playgrounds/json/JsonPlayground.test.tsx` (faltaba test principal del componente) ✅
+  - [x] `src/services/css/worker.test.ts` + `workerClient.test.ts` (faltaban tests de worker para CSS) ✅
+  - [x] `src/services/html/worker.test.ts` + `workerClient.test.ts` (faltaban tests de worker para HTML) ✅
+- [x] Documentar matriz de testing (`docs/TESTING_MATRIX.md`) ✅
+- [x] Script de verificación arquitectónica (`scripts/verify-architecture.js`, `pnpm verify:arch`) ✅
 
 ### Fase 5 — Gobernanza y Prevención de Deriva
 
 - [ ] Crear guía de contribución para nuevos playgrounds.
 - [ ] Definir plantilla oficial para alta de playgrounds.
 - [ ] Agregar reglas lint/estructura para detectar módulos incompletos.
-- [ ] Crear script de verificación arquitectónica:
-  - [ ] naming
-  - [ ] archivos requeridos
-  - [ ] cobertura mínima de tests
+- [x] Crear script de verificación arquitectónica: ✅
+  - [x] naming ✅
+  - [x] archivos requeridos ✅
+  - [x] cobertura mínima de tests ✅
 
 ### Criterios de Aceptación
 
-- [ ] Todos los playgrounds comparten el mismo esqueleto técnico.
-- [ ] Hooks y servicios principales implementan contratos comunes.
-- [ ] La matriz de tests es consistente entre playgrounds.
-- [ ] Las diferencias se limitan a lógica de lenguaje.
+- [x] Todos los playgrounds comparten el mismo esqueleto técnico. ✅
+- [x] Hooks y servicios principales implementan contratos comunes. ✅
+- [x] La matriz de tests es consistente entre playgrounds. ✅
+- [x] Las diferencias se limitan a lógica de lenguaje. ✅
 
 ## New Playground Implementations
 
