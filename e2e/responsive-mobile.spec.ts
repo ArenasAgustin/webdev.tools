@@ -63,7 +63,7 @@ test.describe("Responsive & Mobile", () => {
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAttribute("aria-modal", "true");
     await expect(
-      page.getByRole("heading", { name: "Configuración de Herramientas" }),
+      page.getByRole("heading", { name: "Configuración de Herramientas JSON" }),
     ).toBeVisible();
 
     await page.keyboard.press("Escape");

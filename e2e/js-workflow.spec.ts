@@ -65,7 +65,7 @@ test.describe("JS workflow", () => {
 
     await page.getByRole("button", { name: "Configurar herramientas" }).click();
     await expect(
-      page.getByRole("heading", { name: "Configuración de Herramientas JS" }),
+      page.getByRole("heading", { name: "Configuración de Herramientas JavaScript" }),
     ).toBeVisible();
 
     const indent4 = page.getByRole("button", { name: "4 espacios" });

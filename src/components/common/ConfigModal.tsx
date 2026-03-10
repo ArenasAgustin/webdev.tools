@@ -9,7 +9,11 @@ import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import { INDENT_OPTIONS } from "@/types/format";
-import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
+import {
+  DEFAULT_JSON_FORMAT_CONFIG,
+  DEFAULT_JSON_MINIFY_CONFIG,
+  DEFAULT_JSON_CLEAN_CONFIG,
+} from "@/types/json";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
@@ -72,87 +76,75 @@ type ConfigModalProps =
   | HtmlConfigModalProps
   | CssConfigModalProps;
 
+const MODE_LABELS: Record<string, string> = {
+  json: "JSON",
+  js: "JavaScript",
+  html: "HTML",
+  css: "CSS",
+};
+
 export function ConfigModal(props: ConfigModalProps) {
-  const isJsMode = props.mode === "js";
-  const isHtmlMode = props.mode === "html";
-  const isCssMode = props.mode === "css";
+  const mode = props.mode ?? "json";
+  const modeLabel = MODE_LABELS[mode];
+
+  // Narrowed accessors for mode-specific UI sections
+  const jsonProps = mode === "json" ? (props as JsonConfigModalProps) : null;
+  const htmlProps = mode === "html" ? (props as HtmlConfigModalProps) : null;
+  const jsCssProps =
+    mode === "js" || mode === "css" ? (props as JsConfigModalProps | CssConfigModalProps) : null;
+
+  // Helpers for fields shared by all config variants.
+  // Safe: spreading the current config with common-field patches
+  // preserves the original type shape at runtime.
+  const updateFormat = (patch: Record<string, unknown>) =>
+    // @ts-expect-error union-of-functions TS limitation
+    props.onFormatConfigChange({ ...props.formatConfig, ...patch });
+  const updateMinify = (patch: Record<string, unknown>) =>
+    // @ts-expect-error union-of-functions TS limitation
+    props.onMinifyConfigChange({ ...props.minifyConfig, ...patch });
 
   const handleReset = () => {
-    if (isJsMode) {
+    if (props.mode === "js") {
       props.onFormatConfigChange(DEFAULT_JS_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_JS_MINIFY_CONFIG);
       removeJsToolsConfig();
-      return;
-    }
-
-    if (isHtmlMode) {
+    } else if (props.mode === "html") {
       props.onFormatConfigChange(DEFAULT_HTML_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_HTML_MINIFY_CONFIG);
       removeHtmlToolsConfig();
-      return;
-    }
-
-    if (isCssMode) {
+    } else if (props.mode === "css") {
       props.onFormatConfigChange(DEFAULT_CSS_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_CSS_MINIFY_CONFIG);
       removeCssToolsConfig();
-      return;
+    } else {
+      props.onFormatConfigChange(DEFAULT_JSON_FORMAT_CONFIG);
+      props.onMinifyConfigChange(DEFAULT_JSON_MINIFY_CONFIG);
+      props.onCleanConfigChange(DEFAULT_JSON_CLEAN_CONFIG);
+      removeJsonToolsConfig();
     }
-
-    props.onFormatConfigChange(DEFAULT_JSON_FORMAT_CONFIG);
-    props.onMinifyConfigChange(DEFAULT_JSON_MINIFY_CONFIG);
-    props.onCleanConfigChange(DEFAULT_JSON_CLEAN_CONFIG);
-    removeJsonToolsConfig();
   };
 
   const handleClose = () => {
-    if (isJsMode) {
-      saveJsToolsConfig({
+    if (props.mode === "js") {
+      saveJsToolsConfig({ format: props.formatConfig, minify: props.minifyConfig });
+    } else if (props.mode === "html") {
+      saveHtmlToolsConfig({ format: props.formatConfig, minify: props.minifyConfig });
+    } else if (props.mode === "css") {
+      saveCssToolsConfig({ format: props.formatConfig, minify: props.minifyConfig });
+    } else {
+      saveJsonToolsConfig({
         format: props.formatConfig,
         minify: props.minifyConfig,
+        clean: props.cleanConfig,
       });
-      props.onClose();
-      return;
     }
-
-    if (isHtmlMode) {
-      saveHtmlToolsConfig({
-        format: props.formatConfig,
-        minify: props.minifyConfig,
-      });
-      props.onClose();
-      return;
-    }
-
-    if (isCssMode) {
-      saveCssToolsConfig({
-        format: props.formatConfig,
-        minify: props.minifyConfig,
-      });
-      props.onClose();
-      return;
-    }
-
-    saveJsonToolsConfig({
-      format: props.formatConfig,
-      minify: props.minifyConfig,
-      clean: props.cleanConfig,
-    });
     props.onClose();
   };
 
   return (
     <Modal
       isOpen={props.isOpen}
-      title={
-        isJsMode
-          ? "Configuración de Herramientas JS"
-          : isHtmlMode
-            ? "Configuración de Herramientas HTML"
-            : isCssMode
-              ? "Configuración de Herramientas CSS"
-            : "Configuración de Herramientas"
-      }
+      title={`Configuración de Herramientas ${modeLabel}`}
       icon="cog"
       iconColor="yellow-400"
       maxWidth="max-w-3xl"
@@ -168,15 +160,7 @@ export function ConfigModal(props: ConfigModalProps) {
       <div className="space-y-6 text-xs">
         {/* Formatear */}
         <Card
-          title={
-            isJsMode
-              ? "Formatear JavaScript"
-              : isHtmlMode
-                ? "Formatear HTML"
-                : isCssMode
-                  ? "Formatear CSS"
-                  : "Formatear JSON"
-          }
+          title={`Formatear ${modeLabel}`}
           icon="indent"
           className="bg-blue-500/10 border-blue-500/20"
           headerClassName="text-blue-400"
@@ -184,93 +168,38 @@ export function ConfigModal(props: ConfigModalProps) {
           <div className="space-y-3">
             <div>
               <label className="block text-gray-300 mb-1">Espaciado</label>
-              {isJsMode ? (
-                <ToggleButtonGroup
-                  options={INDENT_OPTIONS}
-                  value={props.formatConfig.indentSize}
-                  onChange={(indentSize) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      indentSize,
-                    })
-                  }
-                />
-              ) : isHtmlMode ? (
-                <ToggleButtonGroup
-                  options={INDENT_OPTIONS}
-                  value={props.formatConfig.indentSize}
-                  onChange={(indentSize) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      indentSize,
-                    })
-                  }
-                />
-              ) : isCssMode ? (
-                <ToggleButtonGroup
-                  options={INDENT_OPTIONS}
-                  value={props.formatConfig.indentSize}
-                  onChange={(indentSize) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      indentSize,
-                    })
-                  }
-                />
-              ) : (
-                <ToggleButtonGroup
-                  options={INDENT_OPTIONS}
-                  value={props.formatConfig.indentSize}
-                  onChange={(indentSize) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      indentSize,
-                    })
-                  }
-                />
-              )}
+              <ToggleButtonGroup
+                options={INDENT_OPTIONS}
+                value={props.formatConfig.indentSize}
+                onChange={(indentSize) => updateFormat({ indentSize })}
+              />
             </div>
 
-            {!isJsMode && !isHtmlMode && !isCssMode && (
+            {jsonProps && (
               <div>
                 <label className="block text-gray-300 mb-1">Ordenar claves alfabéticamente</label>
                 <Checkbox
-                  checked={props.formatConfig.sortKeys}
-                  onChange={(checked) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      sortKeys: checked,
-                    })
-                  }
+                  checked={jsonProps.formatConfig.sortKeys}
+                  onChange={(checked) => updateFormat({ sortKeys: checked })}
                   label="Habilitar ordenamiento"
                   color="blue"
                 />
               </div>
             )}
 
-            {isHtmlMode && (
+            {htmlProps && (
               <div>
                 <label className="block text-gray-300 mb-1">Formato embebido</label>
                 <div className="space-y-2">
                   <Checkbox
-                    checked={props.formatConfig.formatCss}
-                    onChange={(checked) =>
-                      props.onFormatConfigChange({
-                        ...props.formatConfig,
-                        formatCss: checked,
-                      })
-                    }
+                    checked={htmlProps.formatConfig.formatCss}
+                    onChange={(checked) => updateFormat({ formatCss: checked })}
                     label="Formatear CSS en &lt;style&gt;"
                     color="blue"
                   />
                   <Checkbox
-                    checked={props.formatConfig.formatJs}
-                    onChange={(checked) =>
-                      props.onFormatConfigChange({
-                        ...props.formatConfig,
-                        formatJs: checked,
-                      })
-                    }
+                    checked={htmlProps.formatConfig.formatJs}
+                    onChange={(checked) => updateFormat({ formatJs: checked })}
                     label="Formatear JS en &lt;script&gt;"
                     color="blue"
                   />
@@ -282,70 +211,19 @@ export function ConfigModal(props: ConfigModalProps) {
               <label className="block text-gray-300 mb-1">
                 Copiar automáticamente al formatear
               </label>
-              {isJsMode ? (
-                <Checkbox
-                  checked={props.formatConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="blue"
-                />
-              ) : isHtmlMode ? (
-                <Checkbox
-                  checked={props.formatConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="blue"
-                />
-              ) : isCssMode ? (
-                <Checkbox
-                  checked={props.formatConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="blue"
-                />
-              ) : (
-                <Checkbox
-                  checked={props.formatConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onFormatConfigChange({
-                      ...props.formatConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="blue"
-                />
-              )}
+              <Checkbox
+                checked={props.formatConfig.autoCopy}
+                onChange={(checked) => updateFormat({ autoCopy: checked })}
+                label="Habilitar auto-copia"
+                color="blue"
+              />
             </div>
           </div>
         </Card>
 
         {/* Minificar */}
         <Card
-          title={
-            isJsMode
-              ? "Minificar JavaScript"
-              : isHtmlMode
-                ? "Minificar HTML"
-                : isCssMode
-                  ? "Minificar CSS"
-                  : "Minificar JSON"
-          }
+          title={`Minificar ${modeLabel}`}
           icon="compress"
           className="bg-purple-500/10 border-purple-500/20"
           headerClassName="text-purple-400"
@@ -354,124 +232,63 @@ export function ConfigModal(props: ConfigModalProps) {
             <div>
               <label className="block text-gray-300 mb-1">Opciones de minificación</label>
               <div className="space-y-2">
-                {isJsMode ? (
+                {jsCssProps && (
                   <>
                     <Checkbox
-                      checked={props.minifyConfig.removeComments}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          removeComments: checked,
-                        })
-                      }
+                      checked={jsCssProps.minifyConfig.removeComments}
+                      onChange={(checked) => updateMinify({ removeComments: checked })}
                       label="Eliminar comentarios"
                       color="purple"
                     />
                     <Checkbox
-                      checked={props.minifyConfig.removeSpaces}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          removeSpaces: checked,
-                        })
-                      }
+                      checked={jsCssProps.minifyConfig.removeSpaces}
+                      onChange={(checked) => updateMinify({ removeSpaces: checked })}
                       label="Eliminar espacios"
                       color="purple"
                     />
                   </>
-                ) : isCssMode ? (
+                )}
+
+                {htmlProps && (
                   <>
                     <Checkbox
-                      checked={props.minifyConfig.removeComments}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          removeComments: checked,
-                        })
-                      }
+                      checked={htmlProps.minifyConfig.removeComments}
+                      onChange={(checked) => updateMinify({ removeComments: checked })}
                       label="Eliminar comentarios"
                       color="purple"
                     />
                     <Checkbox
-                      checked={props.minifyConfig.removeSpaces}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          removeSpaces: checked,
-                        })
-                      }
-                      label="Eliminar espacios"
-                      color="purple"
-                    />
-                  </>
-                ) : isHtmlMode ? (
-                  <>
-                    <Checkbox
-                      checked={props.minifyConfig.removeComments}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          removeComments: checked,
-                        })
-                      }
-                      label="Eliminar comentarios"
-                      color="purple"
-                    />
-                    <Checkbox
-                      checked={props.minifyConfig.collapseWhitespace}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          collapseWhitespace: checked,
-                        })
-                      }
+                      checked={htmlProps.minifyConfig.collapseWhitespace}
+                      onChange={(checked) => updateMinify({ collapseWhitespace: checked })}
                       label="Colapsar espacios"
                       color="purple"
                     />
                     <Checkbox
-                      checked={props.minifyConfig.minifyCss}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          minifyCss: checked,
-                        })
-                      }
+                      checked={htmlProps.minifyConfig.minifyCss}
+                      onChange={(checked) => updateMinify({ minifyCss: checked })}
                       label="Minificar CSS inline"
                       color="purple"
                     />
                     <Checkbox
-                      checked={props.minifyConfig.minifyJs}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          minifyJs: checked,
-                        })
-                      }
+                      checked={htmlProps.minifyConfig.minifyJs}
+                      onChange={(checked) => updateMinify({ minifyJs: checked })}
                       label="Minificar JS inline"
                       color="purple"
                     />
                   </>
-                ) : (
+                )}
+
+                {jsonProps && (
                   <>
                     <Checkbox
-                      checked={props.minifyConfig.removeSpaces}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          removeSpaces: checked,
-                        })
-                      }
+                      checked={jsonProps.minifyConfig.removeSpaces}
+                      onChange={(checked) => updateMinify({ removeSpaces: checked })}
                       label="Eliminar todos los espacios"
                       color="purple"
                     />
                     <Checkbox
-                      checked={props.minifyConfig.sortKeys}
-                      onChange={(checked) =>
-                        props.onMinifyConfigChange({
-                          ...props.minifyConfig,
-                          sortKeys: checked,
-                        })
-                      }
+                      checked={jsonProps.minifyConfig.sortKeys}
+                      onChange={(checked) => updateMinify({ sortKeys: checked })}
                       label="Ordenar claves alfabéticamente"
                       color="purple"
                     />
@@ -481,61 +298,18 @@ export function ConfigModal(props: ConfigModalProps) {
             </div>
             <div>
               <label className="block text-gray-300 mb-1">Copiar automáticamente</label>
-              {isJsMode ? (
-                <Checkbox
-                  checked={props.minifyConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onMinifyConfigChange({
-                      ...props.minifyConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="purple"
-                />
-              ) : isHtmlMode ? (
-                <Checkbox
-                  checked={props.minifyConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onMinifyConfigChange({
-                      ...props.minifyConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="purple"
-                />
-              ) : isCssMode ? (
-                <Checkbox
-                  checked={props.minifyConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onMinifyConfigChange({
-                      ...props.minifyConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="purple"
-                />
-              ) : (
-                <Checkbox
-                  checked={props.minifyConfig.autoCopy}
-                  onChange={(checked) =>
-                    props.onMinifyConfigChange({
-                      ...props.minifyConfig,
-                      autoCopy: checked,
-                    })
-                  }
-                  label="Habilitar auto-copia"
-                  color="purple"
-                />
-              )}
+              <Checkbox
+                checked={props.minifyConfig.autoCopy}
+                onChange={(checked) => updateMinify({ autoCopy: checked })}
+                label="Habilitar auto-copia"
+                color="purple"
+              />
             </div>
           </div>
         </Card>
 
         {/* Limpiar vacíos */}
-        {!isJsMode && !isHtmlMode && !isCssMode && (
+        {jsonProps && (
           <Card
             title="Limpiar Valores Vacíos"
             icon="broom"
@@ -547,19 +321,22 @@ export function ConfigModal(props: ConfigModalProps) {
                 <label className="block text-gray-300 mb-2">Valores a eliminar</label>
                 <div className="grid grid-cols-2 gap-2">
                   <Checkbox
-                    checked={props.cleanConfig.removeNull}
+                    checked={jsonProps.cleanConfig.removeNull}
                     onChange={(checked) =>
-                      props.onCleanConfigChange({ ...props.cleanConfig, removeNull: checked })
+                      jsonProps.onCleanConfigChange({
+                        ...jsonProps.cleanConfig,
+                        removeNull: checked,
+                      })
                     }
                     label="null"
                     color="orange"
                     containerClassName="p-2 bg-white/5 rounded"
                   />
                   <Checkbox
-                    checked={props.cleanConfig.removeUndefined}
+                    checked={jsonProps.cleanConfig.removeUndefined}
                     onChange={(checked) =>
-                      props.onCleanConfigChange({
-                        ...props.cleanConfig,
+                      jsonProps.onCleanConfigChange({
+                        ...jsonProps.cleanConfig,
                         removeUndefined: checked,
                       })
                     }
@@ -568,10 +345,10 @@ export function ConfigModal(props: ConfigModalProps) {
                     containerClassName="p-2 bg-white/5 rounded"
                   />
                   <Checkbox
-                    checked={props.cleanConfig.removeEmptyString}
+                    checked={jsonProps.cleanConfig.removeEmptyString}
                     onChange={(checked) =>
-                      props.onCleanConfigChange({
-                        ...props.cleanConfig,
+                      jsonProps.onCleanConfigChange({
+                        ...jsonProps.cleanConfig,
                         removeEmptyString: checked,
                       })
                     }
@@ -580,10 +357,10 @@ export function ConfigModal(props: ConfigModalProps) {
                     containerClassName="p-2 bg-white/5 rounded"
                   />
                   <Checkbox
-                    checked={props.cleanConfig.removeEmptyArray}
+                    checked={jsonProps.cleanConfig.removeEmptyArray}
                     onChange={(checked) =>
-                      props.onCleanConfigChange({
-                        ...props.cleanConfig,
+                      jsonProps.onCleanConfigChange({
+                        ...jsonProps.cleanConfig,
                         removeEmptyArray: checked,
                       })
                     }
@@ -592,10 +369,10 @@ export function ConfigModal(props: ConfigModalProps) {
                     containerClassName="p-2 bg-white/5 rounded"
                   />
                   <Checkbox
-                    checked={props.cleanConfig.removeEmptyObject}
+                    checked={jsonProps.cleanConfig.removeEmptyObject}
                     onChange={(checked) =>
-                      props.onCleanConfigChange({
-                        ...props.cleanConfig,
+                      jsonProps.onCleanConfigChange({
+                        ...jsonProps.cleanConfig,
                         removeEmptyObject: checked,
                       })
                     }
@@ -609,13 +386,13 @@ export function ConfigModal(props: ConfigModalProps) {
                 <label className="block text-gray-300 mb-2">Formato de salida</label>
                 <RadioGroup
                   name="cleanOutputMode"
-                  value={props.cleanConfig.outputFormat}
+                  value={jsonProps.cleanConfig.outputFormat}
                   options={[
                     { value: "format", label: "Formatear" },
                     { value: "minify", label: "Minificar" },
                   ]}
                   onChange={(value) =>
-                    props.onCleanConfigChange({ ...props.cleanConfig, outputFormat: value })
+                    jsonProps.onCleanConfigChange({ ...jsonProps.cleanConfig, outputFormat: value })
                   }
                   color="orange"
                 />
@@ -623,9 +400,9 @@ export function ConfigModal(props: ConfigModalProps) {
               <div>
                 <label className="block text-gray-300 mb-1">Copiar automáticamente</label>
                 <Checkbox
-                  checked={props.cleanConfig.autoCopy}
+                  checked={jsonProps.cleanConfig.autoCopy}
                   onChange={(checked) =>
-                    props.onCleanConfigChange({ ...props.cleanConfig, autoCopy: checked })
+                    jsonProps.onCleanConfigChange({ ...jsonProps.cleanConfig, autoCopy: checked })
                   }
                   label="Habilitar auto-copia"
                   color="orange"

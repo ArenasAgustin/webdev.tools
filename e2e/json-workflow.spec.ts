@@ -128,13 +128,13 @@ test.describe("JSON workflow", () => {
 
     // Verify modal is visible
     await expect(
-      page.getByRole("heading", { name: "Configuración de Herramientas" }),
+      page.getByRole("heading", { name: "Configuración de Herramientas JSON" }),
     ).toBeVisible();
 
     // Close modal with Escape key
     await page.keyboard.press("Escape");
     await expect(
-      page.getByRole("heading", { name: "Configuración de Herramientas" }),
+      page.getByRole("heading", { name: "Configuración de Herramientas JSON" }),
     ).not.toBeVisible();
   });
 
@@ -261,7 +261,7 @@ test.describe("JSON workflow", () => {
     // Test config shortcut (Ctrl+,)
     await page.keyboard.press("Control+Comma");
     await expect(
-      page.getByRole("heading", { name: "Configuración de Herramientas" }),
+      page.getByRole("heading", { name: "Configuración de Herramientas JSON" }),
     ).toBeVisible();
   });
 });

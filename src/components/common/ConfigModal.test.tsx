@@ -58,13 +58,13 @@ describe("ConfigModal", () => {
   it("should not render when closed", () => {
     render(<ConfigModal {...defaultProps} isOpen={false} />);
 
-    expect(screen.queryByText("Configuración de Herramientas")).not.toBeInTheDocument();
+    expect(screen.queryByText("Configuración de Herramientas JSON")).not.toBeInTheDocument();
   });
 
   it("should render when open", () => {
     render(<ConfigModal {...defaultProps} />);
 
-    expect(screen.getByText("Configuración de Herramientas")).toBeInTheDocument();
+    expect(screen.getByText("Configuración de Herramientas JSON")).toBeInTheDocument();
   });
 
   it("should render all three config sections", () => {
@@ -328,7 +328,7 @@ describe("ConfigModal", () => {
     it("renders JS sections and hides clean section", () => {
       render(<ConfigModal {...jsProps} />);
 
-      expect(screen.getByText("Configuración de Herramientas JS")).toBeInTheDocument();
+      expect(screen.getByText("Configuración de Herramientas JavaScript")).toBeInTheDocument();
       expect(screen.getByText("Formatear JavaScript")).toBeInTheDocument();
       expect(screen.getByText("Minificar JavaScript")).toBeInTheDocument();
       expect(screen.queryByText("Limpiar Valores Vacíos")).not.toBeInTheDocument();
