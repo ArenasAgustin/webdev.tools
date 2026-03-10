@@ -149,9 +149,9 @@ Eliminación de código duplicado entre los 4 playgrounds mediante factories, ho
 
 **Fase 7.1 — Factory para format/minify handlers (~240 líneas, riesgo bajo):**
 
-- [ ] Crear factory `createTransformHandler` en `utils/` que reciba: service fn, input, config, setOutput, setError, mensajes
-- [ ] Refactorizar `handleFormat` y `handleMinify` en los 4 actions hooks para usar la factory
-- [ ] Eliminar código duplicado de `onSuccess`/`onError`/`autoCopy` pattern
+- [x] Crear factory `createTransformHandler` en `utils/` que reciba: service fn, input, config, setOutput, setError, mensajes ✅
+- [x] Refactorizar `handleFormat` y `handleMinify` en los 4 actions hooks para usar la factory ✅
+- [x] Eliminar código duplicado de `onSuccess`/`onError`/`autoCopy` pattern ✅
 
 **Fase 7.2 — Componentes `InputFooter` / `OutputFooter` (~120 líneas, riesgo bajo):**
 

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
+import { createTransformHandler } from "@/utils/createTransformHandler";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import { compactTransformError } from "@/utils/transformError";
@@ -109,7 +110,8 @@ export function useJsonPlaygroundActions({
   }, [baseActions, output]);
 
   const handleFormat = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await formatJsonAsync(inputJson, {
           indentSize: formatConfig.indentSize,
@@ -118,23 +120,17 @@ export function useJsonPlaygroundActions({
         if (!result.ok) throw new Error(result.error.message);
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (formatConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch(() => undefined);
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: formatConfig.autoCopy,
       successMessage: "JSON formateado correctamente",
       errorMessage: "Error al formatear JSON",
     });
   }, [runTransformAction, inputJson, formatConfig, setError, setOutput]);
 
   const handleMinify = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await minifyJsonAsync(inputJson, {
           removeSpaces: minifyConfig.removeSpaces,
@@ -143,23 +139,17 @@ export function useJsonPlaygroundActions({
         if (!result.ok) throw new Error(result.error.message);
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (minifyConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch(() => undefined);
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: minifyConfig.autoCopy,
       successMessage: "JSON minificado correctamente",
       errorMessage: "Error al minificar JSON",
     });
   }, [runTransformAction, inputJson, minifyConfig, setError, setOutput]);
 
   const handleClean = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await cleanJsonAsync(inputJson, {
           removeNull: cleanConfig.removeNull,
@@ -173,16 +163,9 @@ export function useJsonPlaygroundActions({
         if (!result.value.trim()) throw new Error("El JSON estaba completamente vacío");
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (cleanConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch(() => undefined);
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: cleanConfig.autoCopy,
       successMessage: "JSON limpiado correctamente",
       errorMessage: "Error al limpiar JSON",
     });

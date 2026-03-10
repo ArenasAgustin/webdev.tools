@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { htmlPlaygroundConfig } from "@/playgrounds/html/html.config";
 import { htmlService } from "@/services/html/service";
-import { compactTransformError } from "@/utils/transformError";
+import { createTransformHandler } from "@/utils/createTransformHandler";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
@@ -83,39 +83,28 @@ export function useHtmlPlaygroundActions({
   }, [baseActions, output]);
 
   const handleFormat = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await htmlService.format(inputHtml, {
           indentSize: formatConfig.indentSize,
           formatCss: formatConfig.formatCss,
           formatJs: formatConfig.formatJs,
         });
-
-        if (!result.ok) {
-          throw new Error(result.error || "Error al formatear HTML");
-        }
-
+        if (!result.ok) throw new Error(result.error || "Error al formatear HTML");
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (formatConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch((err) => {
-            console.error("Error al copiar al portapapeles: ", err);
-          });
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: formatConfig.autoCopy,
       successMessage: "HTML formateado correctamente",
       errorMessage: "Error al formatear HTML",
     });
   }, [runTransformAction, inputHtml, formatConfig, setError, setOutput]);
 
   const handleMinify = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await htmlService.minify(inputHtml, {
           removeComments: minifyConfig.removeComments,
@@ -123,25 +112,12 @@ export function useHtmlPlaygroundActions({
           minifyCss: minifyConfig.minifyCss,
           minifyJs: minifyConfig.minifyJs,
         });
-
-        if (!result.ok) {
-          throw new Error(result.error || "Error al minificar HTML");
-        }
-
+        if (!result.ok) throw new Error(result.error || "Error al minificar HTML");
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (minifyConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch((err) => {
-            console.error("Error al copiar al portapapeles: ", err);
-          });
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: minifyConfig.autoCopy,
       successMessage: "HTML minificado correctamente",
       errorMessage: "Error al minificar HTML",
     });

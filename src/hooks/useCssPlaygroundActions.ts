@@ -3,7 +3,7 @@ import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import { cssPlaygroundConfig } from "@/playgrounds/css/css.config";
 import { cssService } from "@/services/css/service";
-import { compactTransformError } from "@/utils/transformError";
+import { createTransformHandler } from "@/utils/createTransformHandler";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 
 interface UseCssPlaygroundActionsProps {
@@ -83,59 +83,35 @@ export function useCssPlaygroundActions({
   }, [baseActions, output]);
 
   const handleFormat = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await cssService.format(inputCss, formatConfig.indentSize);
-
-        if (!result.ok) {
-          throw new Error(result.error || "Error al formatear CSS");
-        }
-
+        if (!result.ok) throw new Error(result.error || "Error al formatear CSS");
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (formatConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch((err) => {
-            console.error("Error al copiar al portapapeles: ", err);
-          });
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: formatConfig.autoCopy,
       successMessage: "CSS formateado correctamente",
       errorMessage: "Error al formatear CSS",
     });
   }, [runTransformAction, inputCss, formatConfig, setError, setOutput]);
 
   const handleMinify = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await cssService.minify(inputCss, {
           removeComments: minifyConfig.removeComments,
           removeSpaces: minifyConfig.removeSpaces,
         });
-
-        if (!result.ok) {
-          throw new Error(result.error || "Error al minificar CSS");
-        }
-
+        if (!result.ok) throw new Error(result.error || "Error al minificar CSS");
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (minifyConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch((err) => {
-            console.error("Error al copiar al portapapeles: ", err);
-          });
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: minifyConfig.autoCopy,
       successMessage: "CSS minificado correctamente",
       errorMessage: "Error al minificar CSS",
     });

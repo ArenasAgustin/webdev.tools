@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
 import { jsService } from "@/services/js/service";
 import { createValidatedHandler } from "@/utils/handlerFactory";
-import { compactTransformError } from "@/utils/transformError";
+import { createTransformHandler } from "@/utils/createTransformHandler";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
@@ -131,30 +131,18 @@ export function useJsPlaygroundActions({
    * Format JavaScript code
    */
   const handleFormat = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await jsService.format(inputJs, {
           indentSize: formatConfig.indentSize,
         });
-
-        if (!result.ok) {
-          throw new Error(result.error ?? "Error al formatear código");
-        }
-
+        if (!result.ok) throw new Error(result.error ?? "Error al formatear código");
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (formatConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch((err) => {
-            console.error("Error al copiar al portapapeles: ", err);
-          });
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: formatConfig.autoCopy,
       successMessage: "Código formateado correctamente",
       errorMessage: "Error al formatear código",
     });
@@ -164,31 +152,19 @@ export function useJsPlaygroundActions({
    * Minify JavaScript code
    */
   const handleMinify = useCallback(() => {
-    runTransformAction({
+    createTransformHandler({
+      runTransformAction,
       run: async () => {
         const result = await jsService.minify(inputJs, {
           removeComments: minifyConfig.removeComments,
           removeSpaces: minifyConfig.removeSpaces,
         });
-
-        if (!result.ok) {
-          throw new Error(result.error ?? "Error al minificar código");
-        }
-
+        if (!result.ok) throw new Error(result.error ?? "Error al minificar código");
         return result.value;
       },
-      onSuccess: (value) => {
-        setError(null);
-        setOutput(value);
-        if (minifyConfig.autoCopy && value) {
-          navigator.clipboard.writeText(value).catch((err) => {
-            console.error("Error al copiar al portapapeles: ", err);
-          });
-        }
-      },
-      onError: (message) => {
-        setError(compactTransformError(message));
-      },
+      setOutput,
+      setError,
+      autoCopy: minifyConfig.autoCopy,
       successMessage: "Código minificado correctamente",
       errorMessage: "Error al minificar código",
     });
