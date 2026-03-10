@@ -163,6 +163,12 @@
 
 ## Nuevas features por implementar
 
-- [ ] Transformación de JSON a TOON
+- [ ] Transformación de JSON a TOON, CSV, XML, YAML
 - [ ] Color transform
 - [ ] Unix timestamp transform
+- [ ] Convertidor de unidades de CSS
+- [ ] Generador de QR codes
+- [ ] Playground de Markdown con preview
+- [ ] Regex tester con visualización de grupos
+- [ ] Playground Typescript
+- [ ] Playground de SASS/SCSS/LESS

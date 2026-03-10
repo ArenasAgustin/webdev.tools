@@ -9,7 +9,7 @@ import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor } from "@/hooks/useExpandedEditor";
-import type { JsonValidationState } from "./json.types";
+import type { JsonValidationState } from "@/types/json";
 
 interface JsonEditorsProps {
   inputJson: string;

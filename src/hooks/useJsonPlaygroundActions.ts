@@ -3,41 +3,26 @@ import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
+import { compactTransformError } from "@/utils/transformError";
+import {
+  formatJsonAsync,
+  minifyJsonAsync,
+  cleanJsonAsync,
+  applyJsonPathAsync,
+} from "@/services/json/worker";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 
 interface UseJsonPlaygroundActionsProps {
   inputJson: string;
   setInputJson: (value: string) => void;
+  output: string;
+  setOutput: (value: string) => void;
+  setError: (error: string | null) => void;
   inputTooLarge?: boolean;
   inputTooLargeMessage?: string;
-  // Formatter functions (instead of the whole object)
-  formatterOutput: string;
-  clearFormatterOutput: () => void;
-  formatFn: (
-    input: string,
-    options?: Partial<JsonFormatConfig>,
-  ) => Promise<{ ok: boolean; error?: string }>;
-  minifyFn: (
-    input: string,
-    options?: Partial<JsonMinifyConfig>,
-  ) => Promise<{ ok: boolean; error?: string }>;
-  cleanFn: (
-    input: string,
-    options?: Partial<JsonCleanConfig>,
-  ) => Promise<{ ok: boolean; error?: string }>;
-  // JsonPath functions (instead of the whole object)
-  jsonPathOutput: string;
+  // JSONPath
   jsonPathExpression: string;
   setJsonPathExpression: (expr: string) => void;
-  clearJsonPathOutput: () => void;
-  filterJsonPath: (
-    input: string,
-    overrideExpression?: string,
-  ) => Promise<{
-    ok: boolean;
-    error?: string;
-  }>;
-  // JsonPathHistory function
   addToHistory: (expression: string) => Promise<void> | void;
   // Configs
   formatConfig: JsonFormatConfig;
@@ -50,18 +35,13 @@ interface UseJsonPlaygroundActionsProps {
 export function useJsonPlaygroundActions({
   inputJson,
   setInputJson,
+  output,
+  setOutput,
+  setError,
   inputTooLarge,
   inputTooLargeMessage,
-  formatterOutput,
-  clearFormatterOutput,
-  formatFn,
-  minifyFn,
-  cleanFn,
-  jsonPathOutput,
   jsonPathExpression,
   setJsonPathExpression,
-  clearJsonPathOutput,
-  filterJsonPath,
   addToHistory,
   formatConfig,
   minifyConfig,
@@ -83,9 +63,9 @@ export function useJsonPlaygroundActions({
     exampleContent,
     toast,
     onClearOutputs: useCallback(() => {
-      clearFormatterOutput();
-      clearJsonPathOutput();
-    }, [clearFormatterOutput, clearJsonPathOutput]),
+      setOutput("");
+      setError(null);
+    }, [setOutput, setError]),
     validateInput: useCallback(
       () =>
         inputTooLarge
@@ -101,13 +81,12 @@ export function useJsonPlaygroundActions({
   });
 
   const handleCopyOutput = useCallback(() => {
-    const textToCopy = jsonPathOutput || formatterOutput;
     baseActions.handleCopy({
-      text: textToCopy,
+      text: output,
       successMessage: "Resultado copiado al portapapeles",
-      validate: () => (!textToCopy ? "No hay resultado para copiar" : null),
+      validate: () => (!output ? "No hay resultado para copiar" : null),
     });
-  }, [formatterOutput, jsonPathOutput, baseActions]);
+  }, [baseActions, output]);
 
   const handleDownloadInput = useCallback(() => {
     baseActions.handleDownload({
@@ -120,74 +99,160 @@ export function useJsonPlaygroundActions({
   }, [baseActions, inputJson]);
 
   const handleDownloadOutput = useCallback(() => {
-    const textToDownload = jsonPathOutput || formatterOutput;
-
     baseActions.handleDownload({
-      content: textToDownload,
+      content: output,
       fileName: "result.json",
       mimeType: "application/json",
       successMessage: "Descargado como result.json",
-      validate: () => (!textToDownload ? "No hay resultado para descargar" : null),
+      validate: () => (!output ? "No hay resultado para descargar" : null),
     });
-  }, [baseActions, formatterOutput, jsonPathOutput]);
+  }, [baseActions, output]);
 
   const handleFormat = useCallback(() => {
     runTransformAction({
-      run: () => {
-        clearJsonPathOutput();
-        return formatFn(inputJson, formatConfig);
+      run: async () => {
+        const result = await formatJsonAsync(inputJson, {
+          indentSize: formatConfig.indentSize,
+          sortKeys: formatConfig.sortKeys,
+        });
+        if (!result.ok) throw new Error(result.error.message);
+        return result.value;
+      },
+      onSuccess: (value) => {
+        setError(null);
+        setOutput(value);
+        if (formatConfig.autoCopy && value) {
+          navigator.clipboard.writeText(value).catch(() => undefined);
+        }
+      },
+      onError: (message) => {
+        setError(compactTransformError(message));
       },
       successMessage: "JSON formateado correctamente",
       errorMessage: "Error al formatear JSON",
     });
-  }, [runTransformAction, clearJsonPathOutput, formatFn, inputJson, formatConfig]);
+  }, [runTransformAction, inputJson, formatConfig, setError, setOutput]);
 
   const handleMinify = useCallback(() => {
     runTransformAction({
-      run: () => {
-        clearJsonPathOutput();
-        return minifyFn(inputJson, minifyConfig);
+      run: async () => {
+        const result = await minifyJsonAsync(inputJson, {
+          removeSpaces: minifyConfig.removeSpaces,
+          sortKeys: minifyConfig.sortKeys,
+        });
+        if (!result.ok) throw new Error(result.error.message);
+        return result.value;
+      },
+      onSuccess: (value) => {
+        setError(null);
+        setOutput(value);
+        if (minifyConfig.autoCopy && value) {
+          navigator.clipboard.writeText(value).catch(() => undefined);
+        }
+      },
+      onError: (message) => {
+        setError(compactTransformError(message));
       },
       successMessage: "JSON minificado correctamente",
       errorMessage: "Error al minificar JSON",
     });
-  }, [runTransformAction, clearJsonPathOutput, minifyFn, inputJson, minifyConfig]);
+  }, [runTransformAction, inputJson, minifyConfig, setError, setOutput]);
 
   const handleClean = useCallback(() => {
     runTransformAction({
-      run: () => {
-        clearJsonPathOutput();
-        return cleanFn(inputJson, cleanConfig);
+      run: async () => {
+        const result = await cleanJsonAsync(inputJson, {
+          removeNull: cleanConfig.removeNull,
+          removeUndefined: cleanConfig.removeUndefined,
+          removeEmptyString: cleanConfig.removeEmptyString,
+          removeEmptyArray: cleanConfig.removeEmptyArray,
+          removeEmptyObject: cleanConfig.removeEmptyObject,
+          outputFormat: cleanConfig.outputFormat,
+        });
+        if (!result.ok) throw new Error(result.error.message);
+        if (!result.value.trim()) throw new Error("El JSON estaba completamente vacío");
+        return result.value;
+      },
+      onSuccess: (value) => {
+        setError(null);
+        setOutput(value);
+        if (cleanConfig.autoCopy && value) {
+          navigator.clipboard.writeText(value).catch(() => undefined);
+        }
+      },
+      onError: (message) => {
+        setError(compactTransformError(message));
       },
       successMessage: "JSON limpiado correctamente",
       errorMessage: "Error al limpiar JSON",
     });
-  }, [runTransformAction, clearJsonPathOutput, cleanFn, inputJson, cleanConfig]);
+  }, [runTransformAction, inputJson, cleanConfig, setError, setOutput]);
 
   const handleApplyJsonPath = useCallback(() => {
-    createValidatedHandler({
+    void createValidatedHandler({
       validate: baseActions.createInputValidator,
-      run: () => filterJsonPath(inputJson),
-      onSuccess: () => addToHistory(jsonPathExpression),
+      run: async () => {
+        if (!jsonPathExpression.trim()) {
+          throw new Error("Ingresa una expresión JSONPath");
+        }
+        const result = await applyJsonPathAsync(inputJson, jsonPathExpression);
+        if (!result.ok) throw new Error(result.error.message);
+        return result.value;
+      },
+      onSuccess: (value) => {
+        if (!value.trim() || value === "[]" || value === "{}") {
+          setOutput(value);
+          setError("El filtro no devolvió resultados");
+        } else {
+          setOutput(value);
+          setError(null);
+        }
+        void addToHistory(jsonPathExpression);
+      },
+      onError: (message) => {
+        setError(compactTransformError(message));
+      },
       toast,
       errorMessage: "Error al aplicar JSONPath",
     })();
-  }, [baseActions, filterJsonPath, inputJson, addToHistory, jsonPathExpression, toast]);
+  }, [
+    baseActions,
+    jsonPathExpression,
+    inputJson,
+    addToHistory,
+    setOutput,
+    setError,
+    toast,
+  ]);
 
   const handleReuseFromHistory = useCallback(
     (expression: string) => {
-      createValidatedHandler({
+      void createValidatedHandler({
         validate: baseActions.createInputValidator,
-        run: () => {
+        run: async () => {
           setJsonPathExpression(expression);
-          return filterJsonPath(inputJson, expression);
+          const result = await applyJsonPathAsync(inputJson, expression);
+          if (!result.ok) throw new Error(result.error.message);
+          return result.value;
         },
-        onSuccess: () => addToHistory(expression),
+        onSuccess: (value) => {
+          if (!value.trim() || value === "[]" || value === "{}") {
+            setOutput(value);
+            setError("El filtro no devolvió resultados");
+          } else {
+            setOutput(value);
+            setError(null);
+          }
+          void addToHistory(expression);
+        },
+        onError: (message) => {
+          setError(compactTransformError(message));
+        },
         toast,
         errorMessage: "Error al aplicar JSONPath",
       })();
     },
-    [baseActions, setJsonPathExpression, filterJsonPath, inputJson, addToHistory, toast],
+    [baseActions, setJsonPathExpression, inputJson, addToHistory, setOutput, setError, toast],
   );
 
   return {

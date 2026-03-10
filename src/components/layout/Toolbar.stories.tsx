@@ -1,33 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { Toolbar } from "./Toolbar";
-import type { JsonToolbarProps, GenericToolbarProps } from "./Toolbar";
+import type { ToolbarProps } from "./Toolbar";
 import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
-import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
-
-const mockHistory: JsonPathHistoryItem[] = [
-  {
-    id: "1",
-    expression: "$.store.book[*].author",
-    timestamp: Date.now() - 60000,
-    frequency: 5,
-  },
-];
-
-const mockTips = [
-  {
-    id: "selector",
-    category: "Selectores",
-    categoryIcon: "target",
-    categoryColor: "blue-400" as const,
-    items: [
-      {
-        code: "$.store.book[*].author",
-        description: "Obtiene todos los autores",
-      },
-    ],
-  },
-];
+import { Button } from "@/components/common/Button";
 
 const meta = {
   title: "Layout/Toolbar",
@@ -38,26 +14,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const JsonVariant: Story = {
+export const JsonWithExtraContent: Story = {
   args: {
-    variant: "json",
-    actions: {
-      onFormat: fn(),
-      onMinify: fn(),
-      onClean: fn(),
-      onFilter: fn(),
-    },
-    jsonPath: {
-      value: "$.store.book[*]",
-      onChange: fn(),
-    },
-    history: {
-      items: mockHistory,
-      onReuse: fn(),
-      onDelete: fn(),
-      onClear: fn(),
+    variant: "generic",
+    tools: {
+      actions: [
+        { label: "Formatear", icon: "indent", variant: "primary" as const, onClick: fn() },
+        { label: "Minificar", icon: "compress", variant: "purple" as const, onClick: fn() },
+        { label: "Limpiar vacíos", icon: "broom", variant: "orange" as const, onClick: fn() },
+      ],
+      configButtonTitle: "Configurar herramientas",
+      gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
     },
     config: {
+      mode: "json",
       format: DEFAULT_JSON_FORMAT_CONFIG,
       onFormatChange: fn(),
       minify: DEFAULT_JSON_MINIFY_CONFIG,
@@ -65,27 +35,41 @@ export const JsonVariant: Story = {
       clean: DEFAULT_JSON_CLEAN_CONFIG,
       onCleanChange: fn(),
     },
-    tips: {
-      config: { tips: mockTips },
-      onShow: fn(),
-    },
-  } as JsonToolbarProps,
+    extraContent: (
+      <div>
+        <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <i className="fas fa-filter text-cyan-400"></i> Filtro JSONPath
+        </h4>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            defaultValue="$.store.book[*]"
+            className="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
+            placeholder="Ej: $.users[0].name"
+          />
+          <Button variant="cyan" size="md" onClick={fn()}>
+            <i className="fas fa-search"></i>
+          </Button>
+        </div>
+      </div>
+    ),
+  } as ToolbarProps,
 };
 
-export const JsonWithoutTips: Story = {
+export const JsonMinimal: Story = {
   args: {
-    variant: "json",
-    actions: {
-      onFormat: fn(),
-      onMinify: fn(),
-      onClean: fn(),
-      onFilter: fn(),
-    },
-    jsonPath: {
-      value: "",
-      onChange: fn(),
+    variant: "generic",
+    tools: {
+      actions: [
+        { label: "Formatear", icon: "indent", variant: "primary" as const, onClick: fn() },
+        { label: "Minificar", icon: "compress", variant: "purple" as const, onClick: fn() },
+        { label: "Limpiar vacíos", icon: "broom", variant: "orange" as const, onClick: fn() },
+      ],
+      configButtonTitle: "Configurar herramientas",
+      gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
     },
     config: {
+      mode: "json",
       format: DEFAULT_JSON_FORMAT_CONFIG,
       onFormatChange: fn(),
       minify: DEFAULT_JSON_MINIFY_CONFIG,
@@ -93,7 +77,7 @@ export const JsonWithoutTips: Story = {
       clean: DEFAULT_JSON_CLEAN_CONFIG,
       onCleanChange: fn(),
     },
-  } as JsonToolbarProps,
+  } as ToolbarProps,
 };
 
 export const GenericVariant: Story = {
@@ -110,7 +94,7 @@ export const GenericVariant: Story = {
       configButtonTitle: "Configurar JS",
       gridClassName: "grid grid-cols-3 gap-2",
     },
-  } as GenericToolbarProps,
+  } as ToolbarProps,
 };
 
 export const GenericMinimal: Story = {
@@ -122,77 +106,7 @@ export const GenericMinimal: Story = {
         { label: "Acción 2", icon: "heart", variant: "danger" as const, onClick: fn() },
       ],
     },
-  } as GenericToolbarProps,
-};
-
-// Advanced Stories
-export const JsonWithLongPath: Story = {
-  args: {
-    variant: "json",
-    actions: {
-      onFormat: fn(),
-      onMinify: fn(),
-      onClean: fn(),
-      onFilter: fn(),
-    },
-    jsonPath: {
-      value:
-        "$.store.book[?(@.price < 10 && @.category == 'fiction' && @.author.name.length > 20)].title",
-      onChange: fn(),
-    },
-    config: {
-      format: DEFAULT_JSON_FORMAT_CONFIG,
-      onFormatChange: fn(),
-      minify: DEFAULT_JSON_MINIFY_CONFIG,
-      onMinifyChange: fn(),
-      clean: DEFAULT_JSON_CLEAN_CONFIG,
-      onCleanChange: fn(),
-    },
-  } as JsonToolbarProps,
-  parameters: {
-    docs: {
-      description: {
-        story: "Edge case: JSONPath muy largo que podría afectar el layout del input",
-      },
-    },
-  },
-};
-
-export const JsonEmptyHistory: Story = {
-  args: {
-    variant: "json",
-    actions: {
-      onFormat: fn(),
-      onMinify: fn(),
-      onClean: fn(),
-      onFilter: fn(),
-    },
-    jsonPath: {
-      value: "",
-      onChange: fn(),
-    },
-    history: {
-      items: [],
-      onReuse: fn(),
-      onDelete: fn(),
-      onClear: fn(),
-    },
-    config: {
-      format: DEFAULT_JSON_FORMAT_CONFIG,
-      onFormatChange: fn(),
-      minify: DEFAULT_JSON_MINIFY_CONFIG,
-      onMinifyChange: fn(),
-      clean: DEFAULT_JSON_CLEAN_CONFIG,
-      onCleanChange: fn(),
-    },
-  } as JsonToolbarProps,
-  parameters: {
-    docs: {
-      description: {
-        story: "Estado: historial vacío (sin items previos)",
-      },
-    },
-  },
+  } as ToolbarProps,
 };
 
 export const GenericManyActions: Story = {
@@ -211,7 +125,7 @@ export const GenericManyActions: Story = {
       onOpenConfig: fn(),
       gridClassName: "grid grid-cols-3 gap-2",
     },
-  } as GenericToolbarProps,
+  } as ToolbarProps,
   parameters: {
     docs: {
       description: {
@@ -242,7 +156,7 @@ export const GenericWithLongLabels: Story = {
       ],
       onOpenConfig: fn(),
     },
-  } as GenericToolbarProps,
+  } as ToolbarProps,
   parameters: {
     docs: {
       description: {
@@ -257,71 +171,14 @@ export const Documentation = {
   render: () => (
     <div className="space-y-6">
       <section>
-        <h2 className="text-xl font-bold mb-4">Variantes</h2>
-        <ul className="list-disc pl-5 space-y-2">
-          <li>
-            <strong>json</strong> - Barra de herramientas para JSON (Format, Minify, Clean, Filter)
-          </li>
-          <li>
-            <strong>js</strong> - Barra de herramientas para JavaScript (Format, Minify, Download)
-          </li>
-          <li>
-            <strong>generic</strong> - Barra de herramientas genérica personalizable
-          </li>
-        </ul>
+        <h2 className="text-xl font-bold mb-4">Variante</h2>
+        <p>
+          El Toolbar usa una sola variante <strong>generic</strong> para todos los playgrounds.
+          Contenido adicional (como JSONPath) se pasa via <code>extraContent</code>.
+        </p>
       </section>
       <section>
-        <h2 className="text-xl font-bold mb-4">Propiedades - JSON/JS</h2>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2 text-left">Propiedad</th>
-              <th className="border p-2 text-left">Tipo</th>
-              <th className="border p-2 text-left">Descripción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border p-2">
-                <code>variant</code>
-              </td>
-              <td className="border p-2">
-                <code>&quot;json&quot; | &quot;js&quot;</code>
-              </td>
-              <td className="border p-2">Tipo de barra de herramientas</td>
-            </tr>
-            <tr>
-              <td className="border p-2">
-                <code>actions</code>
-              </td>
-              <td className="border p-2">
-                <code>object</code>
-              </td>
-              <td className="border p-2">Callbacks de acciones (onFormat, onMinify, etc)</td>
-            </tr>
-            <tr>
-              <td className="border p-2">
-                <code>jsonPath</code>
-              </td>
-              <td className="border p-2">
-                <code>object</code>
-              </td>
-              <td className="border p-2">Configuración del filtro JSONPath</td>
-            </tr>
-            <tr>
-              <td className="border p-2">
-                <code>config</code>
-              </td>
-              <td className="border p-2">
-                <code>object</code>
-              </td>
-              <td className="border p-2">Estados de configuración abierto/cerrado</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-      <section>
-        <h2 className="text-xl font-bold mb-4">Propiedades - Generic</h2>
+        <h2 className="text-xl font-bold mb-4">Propiedades</h2>
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
@@ -338,34 +195,34 @@ export const Documentation = {
               <td className="border p-2">
                 <code>&quot;generic&quot;</code>
               </td>
-              <td className="border p-2">Tipo genérico</td>
+              <td className="border p-2">Tipo de barra de herramientas</td>
             </tr>
             <tr>
               <td className="border p-2">
                 <code>tools</code>
               </td>
               <td className="border p-2">
-                <code>GenericToolbarProps[&quot;tools&quot;]</code>
+                <code>ToolbarConfig</code>
               </td>
               <td className="border p-2">Configuración de herramientas personalizadas</td>
             </tr>
             <tr>
               <td className="border p-2">
-                <code>tools.actions</code>
+                <code>extraContent</code>
               </td>
               <td className="border p-2">
-                <code>array</code>
+                <code>React.ReactNode</code>
               </td>
-              <td className="border p-2">Array de acciones (label, icon, onClick)</td>
+              <td className="border p-2">Contenido adicional (ej: sección JSONPath)</td>
             </tr>
             <tr>
               <td className="border p-2">
-                <code>tools.title</code>
+                <code>config</code>
               </td>
               <td className="border p-2">
-                <code>string</code>
+                <code>object</code>
               </td>
-              <td className="border p-2">Título de la barra</td>
+              <td className="border p-2">Configuración del modal (json, js, html, css)</td>
             </tr>
           </tbody>
         </table>

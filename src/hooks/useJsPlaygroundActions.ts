@@ -13,8 +13,8 @@ const JS_EXEC_TIMEOUT_MS = 5000;
  * Props for JS playground actions hook
  */
 interface UseJsPlaygroundActionsProps {
-  inputCode: string;
-  setInputCode: (value: string) => void;
+  inputJs: string;
+  setInputJs: (value: string) => void;
   output: string;
   setOutput: (value: string) => void;
   setError: (error: string | null) => void;
@@ -30,8 +30,8 @@ interface UseJsPlaygroundActionsProps {
  * Provides all handlers for JS code manipulation (execute, format, minify, clear, etc.)
  */
 export function useJsPlaygroundActions({
-  inputCode,
-  setInputCode,
+  inputJs,
+  setInputJs,
   output,
   setOutput,
   setError,
@@ -43,8 +43,8 @@ export function useJsPlaygroundActions({
 }: UseJsPlaygroundActionsProps) {
   // Get base playground actions
   const baseActions = usePlaygroundActions({
-    input: inputCode,
-    setInput: setInputCode,
+    input: inputJs,
+    setInput: setInputJs,
     exampleContent: jsPlaygroundConfig.example,
     toast,
     onClearOutputs: useCallback(() => {
@@ -75,11 +75,11 @@ export function useJsPlaygroundActions({
         setError(null);
         setOutput("");
 
-        if (hasLikelyInfiniteLoop(inputCode)) {
+        if (hasLikelyInfiniteLoop(inputJs)) {
           throw new Error("La ejecución superó 5 segundos y fue cancelada");
         }
 
-        const outputText = await executeJavaScript(inputCode, JS_EXEC_TIMEOUT_MS);
+        const outputText = await executeJavaScript(inputJs, JS_EXEC_TIMEOUT_MS);
         setOutput(outputText);
       },
       toast,
@@ -88,7 +88,7 @@ export function useJsPlaygroundActions({
         setError(message.replace(/^Error:\s*/, ""));
       },
     })();
-  }, [baseActions, inputCode, setOutput, setError, toast]);
+  }, [baseActions, inputJs, setOutput, setError, toast]);
 
   /**
    * Copy output to clipboard
@@ -106,13 +106,13 @@ export function useJsPlaygroundActions({
    */
   const handleDownloadInput = useCallback(() => {
     baseActions.handleDownload({
-      content: inputCode,
+      content: inputJs,
       fileName: "code.js",
       mimeType: "application/javascript",
       successMessage: "Descargado como code.js",
-      validate: () => (!inputCode ? "No hay código para descargar" : null),
+      validate: () => (!inputJs ? "No hay código para descargar" : null),
     });
-  }, [baseActions, inputCode]);
+  }, [baseActions, inputJs]);
 
   /**
    * Download output as file
@@ -133,7 +133,7 @@ export function useJsPlaygroundActions({
   const handleFormat = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await jsService.format(inputCode, {
+        const result = await jsService.format(inputJs, {
           indentSize: formatConfig.indentSize,
         });
 
@@ -158,7 +158,7 @@ export function useJsPlaygroundActions({
       successMessage: "Código formateado correctamente",
       errorMessage: "Error al formatear código",
     });
-  }, [runTransformAction, inputCode, formatConfig, setError, setOutput]);
+  }, [runTransformAction, inputJs, formatConfig, setError, setOutput]);
 
   /**
    * Minify JavaScript code
@@ -166,7 +166,7 @@ export function useJsPlaygroundActions({
   const handleMinify = useCallback(() => {
     runTransformAction({
       run: async () => {
-        const result = await jsService.minify(inputCode, {
+        const result = await jsService.minify(inputJs, {
           removeComments: minifyConfig.removeComments,
           removeSpaces: minifyConfig.removeSpaces,
         });
@@ -192,7 +192,7 @@ export function useJsPlaygroundActions({
       successMessage: "Código minificado correctamente",
       errorMessage: "Error al minificar código",
     });
-  }, [runTransformAction, inputCode, minifyConfig, setError, setOutput]);
+  }, [runTransformAction, inputJs, minifyConfig, setError, setOutput]);
 
   return {
     handleClearInput: baseActions.handleClearInput,

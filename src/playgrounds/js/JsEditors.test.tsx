@@ -85,7 +85,7 @@ describe("JsEditors", () => {
   });
 
   const baseProps = {
-    inputCode: "const a = 1;",
+    inputJs: "const a = 1;",
     output: "1\n2",
     error: null,
     validationState: {

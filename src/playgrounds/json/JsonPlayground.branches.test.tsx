@@ -113,18 +113,19 @@ vi.mock("./JsonEditors", () => ({
 
 vi.mock("@/components/layout/Toolbar", () => ({
   Toolbar: ({
-    actions,
+    tools,
     config,
+    extraContent,
   }: {
-    actions: {
-      onFormat: () => void;
-      onMinify: () => void;
-      onClean: () => void;
-      onFilter: () => void;
+    tools: {
+      actions: {
+        label: string;
+        onClick: () => void;
+      }[];
     };
     config?: {
       onOpenChange?: (isOpen: boolean) => void;
-      onFormatChange: (config: { indent: number; sortKeys: boolean; autoCopy: boolean }) => void;
+      onFormatChange: (config: { indentSize: number; sortKeys: boolean; autoCopy: boolean }) => void;
       onMinifyChange: (config: {
         removeSpaces: boolean;
         sortKeys: boolean;
@@ -140,19 +141,21 @@ vi.mock("@/components/layout/Toolbar", () => ({
         autoCopy: boolean;
       }) => void;
     };
+    extraContent?: React.ReactNode;
   }) => (
     <div>
-      <button onClick={actions.onFormat}>Formatear</button>
-      <button onClick={actions.onMinify}>Minificar</button>
-      <button onClick={actions.onClean}>Limpiar</button>
-      <button onClick={actions.onFilter}>Filtrar</button>
+      {tools.actions.map((action) => (
+        <button key={action.label} onClick={action.onClick}>
+          {action.label}
+        </button>
+      ))}
       <button onClick={() => config?.onOpenChange?.(true)}>open-config</button>
       {config && (
         <>
           <button
             onClick={() =>
               config.onFormatChange({
-                indent: 2,
+                indentSize: 2,
                 sortKeys: false,
                 autoCopy: true,
               })
@@ -173,6 +176,7 @@ vi.mock("@/components/layout/Toolbar", () => ({
           </button>
         </>
       )}
+      {extraContent}
     </div>
   ),
 }));
@@ -258,7 +262,7 @@ describe("JsonPlayground branches", () => {
       expect(screen.getByTestId("output-json").textContent).toBe('{"minified":true}');
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Limpiar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Limpiar vacíos" }));
     await waitFor(() => {
       expect(cleanJsonMock).toHaveBeenCalled();
       expect(toastMocks.success).toHaveBeenCalledWith("JSON limpiado correctamente");

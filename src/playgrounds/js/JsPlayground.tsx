@@ -25,7 +25,7 @@ const savedConfig = loadJsToolsConfig();
  * JavaScript Playground - Execute and test JavaScript code
  */
 export function JsPlayground() {
-  const [inputCode, setInputCode] = useState<string>(
+  const [inputJs, setInputJs] = useState<string>(
     () => loadLastJs() || jsPlaygroundConfig.example,
   );
   const [output, setOutput] = useState<string>("");
@@ -44,11 +44,11 @@ export function JsPlayground() {
   const toast = useToast();
 
   const {
-    debouncedInput: debouncedInputCode,
+    debouncedInput: debouncedInputJs,
     inputTooLarge,
     inputWarning,
   } = usePlaygroundInputLifecycle({
-    input: inputCode,
+    input: inputJs,
     saveInput: saveLastJs,
     toast,
   });
@@ -58,7 +58,7 @@ export function JsPlayground() {
     void import("@/services/js/transform");
   }, []);
 
-  const validation = useJsParser(debouncedInputCode);
+  const validation = useJsParser(debouncedInputJs);
 
   // Use JS playground actions hook
   const {
@@ -71,8 +71,8 @@ export function JsPlayground() {
     handleFormat,
     handleMinify,
   } = useJsPlaygroundActions({
-    inputCode,
-    setInputCode,
+    inputJs,
+    setInputJs,
     output,
     setOutput,
     setError,
@@ -144,12 +144,12 @@ export function JsPlayground() {
     <PlaygroundLayout
       editors={
         <JsEditors
-          inputCode={inputCode}
+          inputJs={inputJs}
           output={output}
           error={error}
           validationState={validation}
           inputWarning={inputWarning}
-          onInputChange={setInputCode}
+          onInputChange={setInputJs}
           onClearInput={handleClearInput}
           onLoadExample={handleLoadExample}
           onCopyOutput={handleCopyOutput}

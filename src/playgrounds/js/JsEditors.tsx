@@ -11,7 +11,7 @@ import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor } from "@/hooks/useExpandedEditor";
 
 interface JsEditorsProps {
-  inputCode: string;
+  inputJs: string;
   output: string;
   error: string | null;
   validationState: {
@@ -30,7 +30,7 @@ interface JsEditorsProps {
 }
 
 export const JsEditors = memo(function JsEditors({
-  inputCode,
+  inputJs,
   output,
   error,
   validationState,
@@ -44,7 +44,7 @@ export const JsEditors = memo(function JsEditors({
 }: JsEditorsProps) {
   const editor = useExpandedEditor();
 
-  const inputStats = useTextStats(inputCode);
+  const inputStats = useTextStats(inputJs);
   const outputStats = useTextStats(output);
 
   return (
@@ -64,7 +64,7 @@ export const JsEditors = memo(function JsEditors({
           }
           footer={
             <ValidationStatus
-              inputValue={inputCode}
+              inputValue={inputJs}
               validationState={validationState}
               warning={inputWarning}
               waitingLabel="Esperando JavaScript..."
@@ -82,7 +82,7 @@ export const JsEditors = memo(function JsEditors({
               }
             />
           }
-          value={inputCode}
+          value={inputJs}
           language="javascript"
           onChange={onInputChange}
         />
@@ -139,7 +139,7 @@ export const JsEditors = memo(function JsEditors({
           }
           footer={
             <ValidationStatus
-              inputValue={inputCode}
+              inputValue={inputJs}
               validationState={validationState}
               warning={inputWarning}
               waitingLabel="Esperando JavaScript..."
@@ -159,7 +159,7 @@ export const JsEditors = memo(function JsEditors({
           }
         >
           <LazyCodeEditor
-            value={inputCode}
+            value={inputJs}
             language="javascript"
             onChange={onInputChange}
             placeholder="Escribe tu código JavaScript aquí..."

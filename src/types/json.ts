@@ -73,3 +73,13 @@ export const DEFAULT_JSON_TOOLS_CONFIG: JsonToolsConfig = {
   minify: DEFAULT_JSON_MINIFY_CONFIG,
   clean: DEFAULT_JSON_CLEAN_CONFIG,
 };
+
+/**
+ * Validation state for JSON input
+ */
+export interface JsonValidationState {
+  isValid: boolean;
+  error: {
+    message: string;
+  } | null;
+}

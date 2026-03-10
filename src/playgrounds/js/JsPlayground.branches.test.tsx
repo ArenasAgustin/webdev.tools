@@ -49,7 +49,7 @@ vi.mock("@/utils/download", () => ({
 
 vi.mock("./JsEditors", () => ({
   JsEditors: ({
-    inputCode,
+    inputJs,
     output,
     error,
     validationState,
@@ -61,7 +61,7 @@ vi.mock("./JsEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputCode: string;
+    inputJs: string;
     output: string;
     error: string | null;
     validationState: { isValid: boolean; error: { message: string } | null };
@@ -74,7 +74,7 @@ vi.mock("./JsEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-code">{inputCode}</p>
+      <p data-testid="input-code">{inputJs}</p>
       <p data-testid="output-code">{output}</p>
       <p data-testid="error-code">{error}</p>
       <p data-testid="validation-valid">{String(validationState.isValid)}</p>

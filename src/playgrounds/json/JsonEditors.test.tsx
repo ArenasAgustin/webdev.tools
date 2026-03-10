@@ -121,7 +121,7 @@ describe("JsonEditors", () => {
     expect(screen.getByText("JSON modal")).toBeInTheDocument();
 
     expandedState = "output";
-    rerender(<JsonEditors {...baseProps} outputJson="changed" />);
+    rerender(<JsonEditors {...baseProps} output="changed" />);
     expect(screen.getByText("Resultado modal")).toBeInTheDocument();
   });
 });
