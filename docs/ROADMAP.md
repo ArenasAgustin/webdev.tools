@@ -172,6 +172,171 @@ Eliminación de código duplicado entre los 4 playgrounds mediante factories, ho
 - [x] Soportar acciones extra vía parámetro (execute en JS, clean en JSON) ✅
 - [x] Reemplazar los 4 bloques `useMemo<ToolbarConfig>` + `useMemo(toolbarConfig)` en los playgrounds ✅
 
+## Refactorización y Optimización
+
+### Fase 8 — Generalización de Hooks Cross-Playground
+
+Eliminación de código duplicado en hooks y consolidación de patrones comunes.
+
+**Fase 8.1 — Hook genérico `usePlaygroundSetup` (~400 líneas eliminadas, riesgo alto):**
+
+- [ ] Crear hook `usePlaygroundSetup<TFormat, TMinify>(playgroundConfig)` que encapsule la inicialización común de los 4 playgrounds:
+  - `loadXToolsConfig()` + `useMergedConfigState` para format/minify
+  - `useState` para input/output/error
+  - `useModalState` para configModal
+  - `useToast` + `usePlaygroundInputLifecycle`
+  - `useParser` + `usePlaygroundActions` + `usePlaygroundShortcuts`
+  - `useToolbarConfig`
+- [ ] Reducir `CssPlayground.tsx` (116 LOC), `HtmlPlayground.tsx` (116 LOC), `JsPlayground.tsx` (124 LOC) a wrappers de ~30 LOC
+- [ ] `JsonPlayground.tsx` (254 LOC) mantiene extensiones propias (JSONPath, clean, history) pero usa el hook base
+- [ ] Tests: actualizar los 4 `*Playground.branches.test.tsx`
+
+**Fase 8.2 — Hook genérico de validación `useAsyncValidator` (~120 líneas eliminadas, riesgo medio):**
+
+- [ ] Crear `useAsyncValidator<T>(input, validateFn, errorFormatter)` que encapsule el patrón común de `useCssParser` y `useHtmlParser`
+  - `useEffect` con cancelled flag + async validation + error compacting
+  - Interfaz genérica `ValidationState { isValid: boolean; error: { message: string } | null }`
+- [ ] Refactorizar `useCssParser.ts` y `useHtmlParser.ts` para usar el hook genérico
+- [ ] Consolidar `compactCssError()` y `compactHtmlError()` en `compactTransformError()` (ya existente en `utils/transformError.ts`)
+- [ ] Mantener `useJsParser.ts` y `useJsonParser.ts` como están (tienen lógica específica)
+- [ ] Tests: actualizar `useHtmlParser.test.ts`, agregar `useCssParser.test.ts` si no existe
+
+**Fase 8.3 — Factory para playground actions `useGenericPlaygroundActions` (~500 líneas eliminadas, riesgo alto):**
+
+- [ ] Crear hook base `useGenericPlaygroundActions<TFormat, TMinify>(config)` que encapsule:
+  - `handleCopyOutput` con toast
+  - `handleDownloadInput` / `handleDownloadOutput`
+  - `handleFormat` / `handleMinify` vía `createTransformHandler`
+  - `handleClearInput`
+  - `handleLoadExample`
+- [ ] Parametrizar por: service, nombres de operación, configuraciones, extensiones de archivo
+- [ ] Refactorizar `useCssPlaygroundActions.ts` (129 LOC) y `useHtmlPlaygroundActions.ts` (135 LOC) a configuraciones mínimas
+- [ ] `useJsPlaygroundActions.ts` (342 LOC) y `useJsonPlaygroundActions.ts` (253 LOC) extienden el hook base con operaciones propias (execute, clean, JSONPath)
+- [ ] Tests: actualizar los 4 `*PlaygroundActions.test.ts`
+
+### Fase 9 — Generalización de Services y Workers
+
+**Fase 9.1 — Factory para worker clients `createWorkerClient` (~70 líneas eliminadas, riesgo bajo):**
+
+- [ ] Crear factory `createWorkerClient<TInput, TOutput>(workerUrl)` que encapsule el patrón idéntico de los 4 `workerClient.ts` (23 LOC c/u)
+- [ ] Refactorizar los 4 `workerClient.ts` a una sola línea de configuración
+- [ ] Tests: reutilizar tests existentes, agregar test del factory
+
+**Fase 9.2 — Tipos genéricos de worker (~40 líneas eliminadas, riesgo bajo):**
+
+- [ ] Crear `WorkerMessage<TData>` y `WorkerResult<TData>` genéricos en `src/types/worker.ts`
+- [ ] Reemplazar los 4 `worker.types.ts` idénticos por instancias tipadas del genérico
+- [ ] Verificar que los 4 `worker.ts` y `worker.test.ts` siguen pasando
+
+**Fase 9.3 — Factory para services `createPlaygroundService` (~50 líneas eliminadas, riesgo bajo):**
+
+- [ ] Crear factory `createPlaygroundService<TFormat, TMinify>(workerClient, formatFn, minifyFn, validator)` en `src/services/`
+- [ ] Refactorizar los 4 `service.ts` (16-35 LOC c/u) para usar el factory
+- [ ] Tests: reutilizar tests existentes
+
+### Fase 10 — Eliminación de Editores Wrapper Redundantes
+
+**Fase 10.1 — Eliminar alias `*Editors.tsx` innecesarios (~100 líneas eliminadas, riesgo bajo):**
+
+- [ ] `CssEditors.tsx` (36 LOC), `JsEditors.tsx` (36 LOC), `JsonEditors.tsx` (32 LOC) son wrappers triviales que solo pasan props a `GenericEditors`
+- [ ] Evaluar si eliminarlos y llamar a `GenericEditors` directamente desde `*Playground.tsx`
+- [ ] `HtmlEditors.tsx` (169 LOC) se mantiene — tiene lógica propia (preview HTML, inspectDom, tabs) (evaluar si se puede refactorizar para usar `GenericEditors` también, pero riesgo alto)
+- [ ] Actualizar imports en los playgrounds y tests afectados
+
+### Fase 11 — Refactoring de ConfigModal
+
+**Fase 11.1 — Eliminar `@ts-expect-error` en ConfigModal (~riesgo medio):**
+
+- [ ] Refactorizar el union type de ConfigModal para eliminar los 2 `@ts-expect-error` actuales (líneas 100, 103)
+- [ ] Opciones: extraer render por modo en componentes separados, o usar un mapa de renderers tipado
+- [ ] Mantener API pública intacta (mismo contrato de props desde PlaygroundLayout)
+
+### Fase 12 — Calidad y Robustez
+
+**Fase 12.1 — Error Boundaries (~riesgo medio):**
+
+- [ ] Crear componente `ErrorBoundary` con fallback UI amigable
+- [ ] Envolver cada playground en un Error Boundary para evitar crash cascada
+- [ ] Agregar Error Boundary a nivel de `App.tsx` como safety net global
+- [ ] Tests: verificar que errores en un playground no rompen la app
+
+**Fase 12.2 — Accesibilidad (`aria-live` en toasts, foco en modales) (~riesgo bajo):**
+
+- [ ] Agregar `role="status"` y `aria-live="polite"` al `ToastContainer`
+- [ ] Mejorar restauración de foco en `Modal.tsx`: guardar el elemento que abrió el modal y devolver foco al cerrar
+- [ ] Verificar contraste WCAG AA en textos con opacidad baja (`/20`, `/30`)
+- [ ] Asegurar que `PlaygroundSidebar` tiene landmarks ARIA correctos (`nav`, `aria-label`)
+
+**Fase 12.3 — Consolidación de utilidades de error (~riesgo bajo):**
+
+- [ ] Mover `compactCssError()` (useCssParser) y `compactHtmlError()` (useHtmlParser) a `utils/transformError.ts`
+- [ ] Unificar en `compactTransformError()` ya existente o crear variantes (si el formato difiere)
+- [ ] Eliminar funciones locales duplicadas en los hooks
+
+**Fase 12.4 — Tests compartidos y cobertura (~riesgo medio):**
+
+- [ ] Crear utilidades de test compartidas para mocks comunes (Monaco Editor, workers, localStorage, toast)
+- [ ] Agregar tests para componentes sin cobertura: `PlaygroundLoader`, `PlaygroundLayout`, `Panel`, `Header`
+- [ ] Agregar tests para `LazyCodeEditor` y `ExpandedEditorModal` (Suspense boundaries)
+- [ ] Parametrizar tests de `*Editors.test.tsx` que repiten el mismo patrón
+
+### Fase 13 — Optimización de Performance y Bundle
+
+**Fase 13.1 — Preloading inteligente (~riesgo bajo):**
+
+- [ ] Extraer `useIdleCallback(fn, opts)` hook para eliminar duplicación de `requestIdleCallback` fallback entre `Home.tsx` y `PlaygroundPage.tsx`
+- [ ] Hacer el preloading de workers específico por playground (solo precargar el worker del playground actual, no todos)
+- [ ] Consolidar el patrón de `useEffect(() => { void import(...) })` de preload de servicios en una utilidad
+
+**Fase 13.2 — Loading states en operaciones (~riesgo medio):**
+
+- [ ] Agregar estado `isProcessing` a las acciones de format/minify/execute
+- [ ] Deshabilitar botones de toolbar mientras una operación está en progreso
+- [ ] Mostrar indicador visual de progreso en el panel de output
+
+**Fase 13.3 — Build y configuración (~riesgo bajo):**
+
+- [ ] Agregar `autoprefixer` a `postcss.config.js` para compatibilidad cross-browser
+- [ ] Crear script `pnpm analyze` para visualización de bundle size (ya tiene `rollup-plugin-visualizer`)
+- [ ] Verificar que `strictNullChecks` está habilitado en `tsconfig.app.json`
+
+### Fase 14 — UX y Funcionalidades Transversales
+
+**Fase 14.1 — Modal de atajos de teclado (~riesgo bajo):**
+
+- [ ] Crear modal que muestre todos los atajos de teclado disponibles
+- [ ] Activar con `?` o `Ctrl+/`
+- [ ] Listar atajos por playground + atajos globales
+
+**Fase 14.2 — Transiciones entre páginas (~riesgo bajo):**
+
+- [ ] Agregar transiciones suaves al navegar entre playgrounds (CSS transitions o View Transitions API)
+- [ ] Fade-in del contenido del playground al cargar
+
+**Fase 14.3 — Vista diff input/output (~riesgo alto):**
+
+- [ ] Agregar toggle para ver diferencias entre input y output (formato vs minificado)
+- [ ] Evaluar Monaco diff editor o librería ligera
+
+**Fase 14.4 — SEO avanzado (~riesgo bajo):**
+
+- [ ] Agregar JSON-LD structured data (schema `SoftwareApplication`) por playground
+- [ ] Agregar `og:image` dinámico por playground en `useDocumentMeta`
+- [ ] Verificar canonical URLs consistentes en todas las rutas
+
+### Fase 15 — Design System y CSS
+
+**Fase 15.1 — Tema centralizado en Tailwind (~riesgo bajo):**
+
+- [ ] Extraer colores, spacing y animaciones recurrentes al `tailwind.config.js` (`theme.extend`)
+- [ ] Mover animación `fadeIn` y estilos de scrollbar de `index.css` a plugins de Tailwind
+- [ ] Unificar variantes de color en `Button`, `Checkbox`, `RadioGroup` vía configuración de tema
+
+**Fase 15.2 — Composición de clases CSS (~riesgo bajo):**
+
+- [ ] Evaluar adopción de `clsx` o `tailwind-merge` para composición segura de clases
+- [ ] Reemplazar concatenaciones manuales de `className` con template literals
+
 ## New Playground Implementations
 
 - [ ] **SQL Playground** (5-7 días)
@@ -199,8 +364,11 @@ Eliminación de código duplicado entre los 4 playgrounds mediante factories, ho
   - [ ] Tests de integración (playground + API client)
   - [ ] E2E workflow PHP (format/validate/execute API)
 
+---
+
 ## Nuevas features por implementar
 
+- [ ] Agregar limpiar vacios a JS (variables, funciones, objetos vacíos), html (etiquetas vacías) y css (reglas vacías)
 - [ ] Transformación de JSON a TOON, CSV, XML, YAML
 - [ ] Color transform
 - [ ] Unix timestamp transform
