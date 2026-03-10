@@ -1,0 +1,153 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { GenericEditors } from "./GenericEditors";
+
+interface PanelMockProps {
+  title: string;
+  actions?: ReactNode;
+  footer?: ReactNode;
+  children: ReactNode;
+}
+
+interface LazyCodeEditorMockProps {
+  value?: string;
+  placeholder?: string;
+}
+
+const mockExpand = vi.fn();
+const mockCollapse = vi.fn();
+let expandedState: "input" | "output" | null = null;
+
+vi.mock("@/hooks/useExpandedEditor", () => ({
+  useExpandedEditor: () => ({
+    expanded: expandedState,
+    isExpanded: (type: "input" | "output") => expandedState === type,
+    expand: mockExpand,
+    collapse: mockCollapse,
+    toggle: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/useTextStats", () => ({
+  useTextStats: () => ({ lines: 2, characters: 10, bytes: 10 }),
+}));
+
+vi.mock("@/components/layout/Panel", () => ({
+  Panel: ({ title, actions, footer, children }: PanelMockProps) => (
+    <section>
+      <h2>{title}</h2>
+      <div>{actions}</div>
+      <div>{children}</div>
+      <div>{footer}</div>
+    </section>
+  ),
+}));
+
+vi.mock("@/components/editor/LazyCodeEditor", () => ({
+  LazyCodeEditor: ({ value, placeholder }: LazyCodeEditorMockProps) => (
+    <div data-testid="lazy-editor">{value ?? placeholder}</div>
+  ),
+}));
+
+vi.mock("@/components/editor/ExpandedEditorModal", () => ({
+  ExpandedEditorModal: ({ title }: { title: string }) => <div>{title} modal</div>,
+}));
+
+vi.mock("@/components/editor/InputActions", () => ({
+  InputActions: ({ onExpand }: { onExpand: () => void }) => (
+    <button onClick={onExpand}>expand-input</button>
+  ),
+}));
+
+vi.mock("@/components/editor/OutputActions", () => ({
+  OutputActions: ({ onExpand }: { onExpand: () => void }) => (
+    <button onClick={onExpand}>expand-output</button>
+  ),
+}));
+
+vi.mock("@/components/common/InputFooter", () => ({
+  InputFooter: ({ inputWarning }: { inputWarning?: string | null }) => (
+    <div>input-footer {inputWarning}</div>
+  ),
+}));
+
+vi.mock("@/components/common/OutputFooter", () => ({
+  OutputFooter: () => <div>output-footer</div>,
+}));
+
+describe("GenericEditors", () => {
+  beforeEach(() => {
+    expandedState = null;
+    vi.clearAllMocks();
+  });
+
+  const baseProps = {
+    input: "some input",
+    output: "some output",
+    error: null,
+    validationState: { isValid: true, error: null },
+    inputWarning: "test-warning",
+    language: "css",
+    inputTitle: "CSS",
+    inputPlaceholder: "Write CSS...",
+    waitingLabel: "Waiting...",
+    validLabel: "Valid",
+    invalidLabel: "Invalid",
+    onInputChange: vi.fn(),
+    onClearInput: vi.fn(),
+    onLoadExample: vi.fn(),
+    onCopyOutput: vi.fn(),
+    onDownloadInput: vi.fn(),
+    onDownloadOutput: vi.fn(),
+  };
+
+  it("renders input and output panels with correct titles", () => {
+    render(<GenericEditors {...baseProps} />);
+
+    expect(screen.getAllByText("CSS").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
+  });
+
+  it("renders footers in panels", () => {
+    render(<GenericEditors {...baseProps} />);
+
+    expect(screen.getAllByText(/input-footer/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("output-footer").length).toBeGreaterThan(0);
+  });
+
+  it("triggers expand actions", () => {
+    render(<GenericEditors {...baseProps} />);
+
+    fireEvent.click(screen.getByText("expand-input"));
+    fireEvent.click(screen.getByText("expand-output"));
+
+    expect(mockExpand).toHaveBeenCalledWith("input");
+    expect(mockExpand).toHaveBeenCalledWith("output");
+  });
+
+  it("renders expanded input modal", () => {
+    expandedState = "input";
+    render(<GenericEditors {...baseProps} />);
+    expect(screen.getByText("CSS modal")).toBeInTheDocument();
+  });
+
+  it("renders expanded output modal", () => {
+    expandedState = "output";
+    render(<GenericEditors {...baseProps} />);
+    expect(screen.getByText("Resultado modal")).toBeInTheDocument();
+  });
+
+  it("renders extraOutputActions when provided", () => {
+    render(<GenericEditors {...baseProps} extraOutputActions={<button>extra-action</button>} />);
+
+    expect(screen.getAllByText("extra-action").length).toBeGreaterThan(0);
+  });
+
+  it("uses custom outputPanel when provided", () => {
+    render(<GenericEditors {...baseProps} outputPanel={() => <div>custom-output</div>} />);
+
+    expect(screen.getByText("custom-output")).toBeInTheDocument();
+    expect(screen.queryByText("Resultado")).not.toBeInTheDocument();
+  });
+});

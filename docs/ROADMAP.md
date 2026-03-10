@@ -161,10 +161,10 @@ Eliminación de código duplicado entre los 4 playgrounds mediante factories, ho
 
 **Fase 7.3 — `GenericEditors` component (~800 líneas, riesgo medio):**
 
-- [ ] Crear `<GenericEditors>` que encapsule: `useExpandedEditor` + `useTextStats` × 2 + grid de 2 Panels + 2 ExpandedEditorModals
-- [ ] Parametrizar por: `language`, labels, placeholders, validation state
-- [ ] Soportar extensiones vía slots: `extraOutputActions` (HTML preview), `extraContent`
-- [ ] Reemplazar los 4 `*Editors.tsx` por instancias configuradas de `GenericEditors`
+- [x] Crear `<GenericEditors>` que encapsule: `useExpandedEditor` + `useTextStats` × 2 + grid de 2 Panels + 2 ExpandedEditorModals ✅
+- [x] Parametrizar por: `language`, labels, placeholders, validation state ✅
+- [x] Soportar extensiones vía slots: `extraOutputActions` (HTML preview), `extraContent` ✅
+- [x] Reemplazar los 4 `*Editors.tsx` por instancias configuradas de `GenericEditors` ✅
 
 **Fase 7.4 — Hook `useToolbarConfig` (~120 líneas, riesgo bajo):**
 
