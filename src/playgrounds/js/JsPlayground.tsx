@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { JsEditors } from "./JsEditors";
@@ -10,10 +10,10 @@ import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
 import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
+import { useToolbarConfig } from "@/hooks/useToolbarConfig";
 import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
-import type { ToolbarConfig } from "@/types/toolbar";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 
 const savedConfig = loadJsToolsConfig();
@@ -25,9 +25,7 @@ const savedConfig = loadJsToolsConfig();
  * JavaScript Playground - Execute and test JavaScript code
  */
 export function JsPlayground() {
-  const [inputJs, setInputJs] = useState<string>(
-    () => loadLastJs() || jsPlaygroundConfig.example,
-  );
+  const [inputJs, setInputJs] = useState<string>(() => loadLastJs() || jsPlaygroundConfig.example);
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [formatConfig, setFormatConfig] = useMergedConfigState<JsFormatConfig>(
@@ -91,54 +89,17 @@ export function JsPlayground() {
     onOpenConfig: configModal.open,
   });
 
-  // Memoize complex toolbar configuration to prevent re-renders
-  const toolbarTools = useMemo<ToolbarConfig>(
-    () => ({
-      actions: [
-        {
-          label: "Ejecutar",
-          icon: "play",
-          variant: "orange",
-          onClick: handleExecute,
-        },
-        {
-          label: "Formatear",
-          icon: "indent",
-          variant: "primary",
-          onClick: handleFormat,
-        },
-        {
-          label: "Minificar",
-          icon: "compress",
-          variant: "purple",
-          onClick: handleMinify,
-        },
-      ],
-      configButtonTitle: "Configurar herramientas",
-      gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
-    }),
-    [handleExecute, handleFormat, handleMinify],
-  );
-
-  const toolbarConfig = useMemo(
-    () => ({
-      mode: "js" as const,
-      format: formatConfig,
-      onFormatChange: setFormatConfig,
-      minify: minifyConfig,
-      onMinifyChange: setMinifyConfig,
-      isOpen: configModal.isOpen,
-      onOpenChange: configModal.setIsOpen,
-    }),
-    [
-      formatConfig,
-      minifyConfig,
-      configModal.isOpen,
-      configModal.setIsOpen,
-      setFormatConfig,
-      setMinifyConfig,
-    ],
-  );
+  const { toolbarTools, toolbarConfig } = useToolbarConfig({
+    mode: "js",
+    handleFormat,
+    handleMinify,
+    handleExecute,
+    formatConfig,
+    setFormatConfig,
+    minifyConfig,
+    setMinifyConfig,
+    modal: configModal,
+  });
 
   return (
     <PlaygroundLayout

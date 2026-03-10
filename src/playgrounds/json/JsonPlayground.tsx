@@ -14,10 +14,14 @@ import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle
 import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
+import { useToolbarConfig } from "@/hooks/useToolbarConfig";
 import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
-import type { ToolbarConfig } from "@/types/toolbar";
-import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
+import {
+  DEFAULT_JSON_FORMAT_CONFIG,
+  DEFAULT_JSON_MINIFY_CONFIG,
+  DEFAULT_JSON_CLEAN_CONFIG,
+} from "@/types/json";
 import { loadJsonToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
 import { jsonPlaygroundConfig } from "./json.config";
 
@@ -28,7 +32,9 @@ const savedConfig = loadJsonToolsConfig();
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
-  const [inputJson, setInputJson] = useState<string>(() => loadLastJson() || jsonPlaygroundConfig.example);
+  const [inputJson, setInputJson] = useState<string>(
+    () => loadLastJson() || jsonPlaygroundConfig.example,
+  );
   const [output, setOutput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [jsonPathExpression, setJsonPathExpression] = useState("");
@@ -116,58 +122,20 @@ export function JsonPlayground() {
   const handleShowHistory = useCallback(() => setJsonPathModal("history"), []);
   const handleCloseJsonPathModal = useCallback(() => setJsonPathModal(null), []);
 
-  // Memoize toolbar tools (single memo like CSS/HTML/JS)
-  const toolbarTools = useMemo<ToolbarConfig>(
-    () => ({
-      actions: [
-        {
-          label: "Formatear",
-          icon: "indent",
-          variant: "primary",
-          onClick: handleFormat,
-        },
-        {
-          label: "Minificar",
-          icon: "compress",
-          variant: "purple",
-          onClick: handleMinify,
-        },
-        {
-          label: "Limpiar vacíos",
-          icon: "broom",
-          variant: "orange",
-          onClick: handleClean,
-        },
-      ],
-      configButtonTitle: "Configurar herramientas",
-      gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
-    }),
-    [handleFormat, handleMinify, handleClean],
-  );
-
-  const toolbarConfig = useMemo(
-    () => ({
-      mode: "json" as const,
-      format: formatConfig,
-      onFormatChange: setFormatConfig,
-      minify: minifyConfig,
-      onMinifyChange: setMinifyConfig,
-      clean: cleanConfig,
-      onCleanChange: setCleanConfig,
-      isOpen: configModal.isOpen,
-      onOpenChange: configModal.setIsOpen,
-    }),
-    [
-      formatConfig,
-      minifyConfig,
-      cleanConfig,
-      configModal.isOpen,
-      configModal.setIsOpen,
-      setFormatConfig,
-      setMinifyConfig,
-      setCleanConfig,
-    ],
-  );
+  const { toolbarTools, toolbarConfig } = useToolbarConfig({
+    mode: "json",
+    handleFormat,
+    handleMinify,
+    handleClean,
+    formatConfig,
+    setFormatConfig,
+    minifyConfig,
+    setMinifyConfig,
+    cleanConfig,
+    setCleanConfig,
+    modal: configModal,
+    gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
+  });
 
   // JSONPath extra content for Toolbar
   const jsonPathSection = useMemo(
@@ -217,7 +185,13 @@ export function JsonPlayground() {
         </div>
       </div>
     ),
-    [jsonPathExpression, setJsonPathExpression, handleApplyJsonPath, handleShowHistory, handleShowTips],
+    [
+      jsonPathExpression,
+      setJsonPathExpression,
+      handleApplyJsonPath,
+      handleShowHistory,
+      handleShowTips,
+    ],
   );
 
   return (

@@ -168,9 +168,9 @@ Eliminación de código duplicado entre los 4 playgrounds mediante factories, ho
 
 **Fase 7.4 — Hook `useToolbarConfig` (~120 líneas, riesgo bajo):**
 
-- [ ] Crear hook `useToolbarConfig(mode, configs, modal)` que retorne `toolbarTools` + `toolbarConfig` memoizados
-- [ ] Soportar acciones extra vía parámetro (execute en JS, clean en JSON)
-- [ ] Reemplazar los 4 bloques `useMemo<ToolbarConfig>` + `useMemo(toolbarConfig)` en los playgrounds
+- [x] Crear hook `useToolbarConfig(mode, configs, modal)` que retorne `toolbarTools` + `toolbarConfig` memoizados ✅
+- [x] Soportar acciones extra vía parámetro (execute en JS, clean en JSON) ✅
+- [x] Reemplazar los 4 bloques `useMemo<ToolbarConfig>` + `useMemo(toolbarConfig)` en los playgrounds ✅
 
 ## New Playground Implementations
 

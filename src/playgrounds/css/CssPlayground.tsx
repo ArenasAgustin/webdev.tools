@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { CssEditors } from "./CssEditors";
@@ -10,10 +10,10 @@ import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
 import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
+import { useToolbarConfig } from "@/hooks/useToolbarConfig";
 import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import { loadCssToolsConfig, loadLastCss, saveLastCss } from "@/services/storage";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
-import type { ToolbarConfig } from "@/types/toolbar";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
 
 const savedConfig = loadCssToolsConfig();
@@ -82,47 +82,16 @@ export function CssPlayground() {
     onOpenConfig: configModal.open,
   });
 
-  const toolbarTools = useMemo<ToolbarConfig>(
-    () => ({
-      actions: [
-        {
-          label: "Formatear",
-          icon: "indent",
-          variant: "primary",
-          onClick: handleFormat,
-        },
-        {
-          label: "Minificar",
-          icon: "compress",
-          variant: "purple",
-          onClick: handleMinify,
-        },
-      ],
-      configButtonTitle: "Configurar herramientas",
-      gridClassName: "grid grid-cols-2 lg:grid-cols-5 gap-2",
-    }),
-    [handleFormat, handleMinify],
-  );
-
-  const toolbarConfig = useMemo(
-    () => ({
-      mode: "css" as const,
-      format: formatConfig,
-      onFormatChange: setFormatConfig,
-      minify: minifyConfig,
-      onMinifyChange: setMinifyConfig,
-      isOpen: configModal.isOpen,
-      onOpenChange: configModal.setIsOpen,
-    }),
-    [
-      formatConfig,
-      minifyConfig,
-      configModal.isOpen,
-      configModal.setIsOpen,
-      setFormatConfig,
-      setMinifyConfig,
-    ],
-  );
+  const { toolbarTools, toolbarConfig } = useToolbarConfig({
+    mode: "css",
+    handleFormat,
+    handleMinify,
+    formatConfig,
+    setFormatConfig,
+    minifyConfig,
+    setMinifyConfig,
+    modal: configModal,
+  });
 
   return (
     <PlaygroundLayout
