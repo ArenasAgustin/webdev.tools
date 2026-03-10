@@ -310,7 +310,7 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 14.2 — Transiciones entre páginas (~riesgo bajo):**
 
-- [ ] Agregar transiciones suaves al navegar entre playgrounds (CSS transitions o View Transitions API)
+- [ ] Agregar transiciones suaves al navegar entre playgrounds (View Transitions API)
 - [ ] Fade-in del contenido del playground al cargar
 
 **Fase 14.3 — Vista diff input/output (~riesgo alto):**
@@ -336,6 +336,50 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 - [ ] Evaluar adopción de `clsx` o `tailwind-merge` para composición segura de clases
 - [ ] Reemplazar concatenaciones manuales de `className` con template literals
+
+### Fase 16 — PWA y Soporte Offline
+
+**Fase 16.1 — Progressive Web App (~riesgo medio):**
+
+- [ ] Crear `manifest.json` en `public/` con nombre, iconos, tema, start_url
+- [ ] Integrar `vite-plugin-pwa` para generación automática de service worker
+- [ ] Configurar estrategia de cache (app shell + lazy chunks + workers)
+- [ ] Agregar fallback offline UI cuando no hay conexión
+- [ ] Agregar botón "Instalar app" con prompt de instalación PWA
+- [ ] Tests: verificar que la app funciona sin conexión (formato/minificación local)
+
+### Fase 17 — CI/CD Completo
+
+**Fase 17.1 — Ampliar pipeline de GitHub Actions (~riesgo bajo):**
+
+- [ ] Agregar step de `pnpm lint` al workflow de CI
+- [ ] Agregar step de `pnpm test` (unit + integración) al workflow de CI
+- [ ] Agregar step de `pnpm verify:arch` al workflow de CI
+- [ ] Agregar step de type check (`tsc --noEmit`) explícito
+- [ ] Agregar reporte de cobertura (threshold mínimo configurable)
+- [ ] Agregar análisis de bundle size como comentario automático en PRs
+
+### Fase 18 — Importación de Archivos y Drag & Drop
+
+**Fase 18.1 — Importar archivos desde disco (~riesgo bajo):**
+
+- [ ] Agregar botón "Abrir archivo" en `InputActions` con `<input type="file" accept=".json,.js,.html,.css">`
+- [ ] Leer contenido con `FileReader.readAsText()` y cargar en el editor
+- [ ] Soportar drag & drop de archivos sobre el panel de input (`onDragOver` + `onDrop`)
+- [ ] Validar tipo de archivo vs playground actual
+- [ ] Tests: verificar carga de archivo y drag & drop en e2e
+
+### Fase 19 — Internacionalización (i18n)
+
+**Fase 19.1 — Infraestructura de traducciones (~riesgo alto):**
+
+- [ ] Integrar `react-i18next` + `i18next` como framework de i18n
+- [ ] Extraer todos los strings hardcodeados (español) a archivos de traducción (`locales/es.json`)
+- [ ] Crear traducción base al inglés (`locales/en.json`)
+- [ ] Agregar selector de idioma en sidebar o header
+- [ ] Persistir idioma en localStorage
+- [ ] Detectar idioma del navegador como default
+- [ ] Actualizar `og:locale` dinámicamente en `useDocumentMeta`
 
 ## New Playground Implementations
 

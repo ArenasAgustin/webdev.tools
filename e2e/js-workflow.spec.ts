@@ -101,6 +101,8 @@ test.describe("JS workflow", () => {
     await page.goto("/playground/js");
 
     await page.getByRole("button", { name: "Ejecutar" }).click();
+    await expect(page.getByText("Código ejecutado correctamente")).toBeVisible();
+
     const outputPanel = page
       .locator("section")
       .filter({ has: page.getByRole("heading", { name: "Resultado", exact: true }) });
