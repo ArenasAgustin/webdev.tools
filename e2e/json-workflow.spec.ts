@@ -15,7 +15,7 @@ test.describe("JSON workflow", () => {
 
     const inputPanel = page
       .locator("section")
-      .filter({ has: page.getByRole("heading", { name: "Entrada", exact: true }) });
+      .filter({ has: page.getByRole("heading", { name: "JSON", exact: true }) });
     await inputPanel.getByRole("button", { name: "Ejemplo" }).click();
     await page.getByRole("button", { name: "Minificar" }).click();
 

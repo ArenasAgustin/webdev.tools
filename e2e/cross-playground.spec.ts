@@ -41,8 +41,8 @@ test.describe("Cross-playground navigation", () => {
     await expect(jsonIndent4).toHaveAttribute("aria-pressed", "true");
     await page.keyboard.press("Escape");
     await expect
-      .poll(async () => page.evaluate(() => localStorage.getItem("toolsConfig") ?? ""))
-      .toContain('"indent":4');
+      .poll(async () => page.evaluate(() => localStorage.getItem("jsonToolsConfig") ?? ""))
+      .toContain('"indentSize":4');
 
     await page.getByRole("button", { name: /Open sidebar/i }).click();
     await page.getByRole("link", { name: /JavaScript tools/i }).click();
@@ -54,8 +54,8 @@ test.describe("Cross-playground navigation", () => {
 
     await expect(page).toHaveURL(/\/playground\/json$/);
     await expect
-      .poll(async () => page.evaluate(() => localStorage.getItem("toolsConfig") ?? ""))
-      .toContain('"indent":4');
+      .poll(async () => page.evaluate(() => localStorage.getItem("jsonToolsConfig") ?? ""))
+      .toContain('"indentSize":4');
 
     await page.getByRole("button", { name: /Open sidebar/i }).click();
     await page.getByRole("link", { name: /HTML tools/i }).click();

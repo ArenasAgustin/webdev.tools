@@ -8,7 +8,7 @@ defineWorkerClientTests({
   },
   initialPayload: { action: "minify", input: '{ "a": 1 }' },
   reusePayloads: [
-    { action: "format", input: "{}", options: { indent: 2 } },
+    { action: "format", input: "{}", options: { indentSize: 2 } },
     { action: "clean", input: "{}", options: { removeNull: true } },
   ],
   successValues: {

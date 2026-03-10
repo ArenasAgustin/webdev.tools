@@ -125,14 +125,52 @@
 - [x] Renombrar `indent` → `indentSize` en `JsonFormatConfig` y toda la cadena (types, transform, hooks, ConfigModal, tests) ✅
 - [x] Renombrar storage genérico JSON: `loadToolsConfig` → `loadJsonToolsConfig`, `saveToolsConfig` → `saveJsonToolsConfig`, `removeToolsConfig` → `removeJsonToolsConfig`, `TOOLS_CONFIG` → `JSON_TOOLS_CONFIG` ✅
 
-**Pendientes (requieren refactor mayor — futura fase):**
+**Refactors estructurales:**
 
-- [ ] Unificar output state pattern de JSON (computed vs `useState` directo)
-- [ ] Unificar Toolbar configuration pattern de JSON (3 memos + variant `"json"` vs `"generic"`)
-- [ ] Unificar actions hook pattern de JSON (callback injection vs direct params)
-- [ ] Unificar error handling de JSON (`compactTransformError`)
-- [ ] Mover types locales de JS/JSON (`*.types.ts`) a types globales
-- [ ] Renombrar `inputCode` → `inputJs` en JS playground
+- [x] Unificar output state pattern de JSON (computed vs `useState` directo) ✅
+- [x] Unificar Toolbar configuration pattern de JSON (3 memos + variant `"json"` vs `"generic"`) ✅
+- [x] Unificar actions hook pattern de JSON (callback injection vs direct params) ✅
+- [x] Unificar error handling de JSON (`compactTransformError`) ✅
+- [x] Mover types locales de JS/JSON (`*.types.ts`) a types globales ✅
+- [x] Renombrar `inputCode` → `inputJs` en JS playground ✅
+
+### Fase 7 — Generalización de Componentes Cross-Playground
+
+Eliminación de código duplicado entre los 4 playgrounds mediante factories, hooks y componentes genéricos.
+
+**Features que NO se generalizan** (extensiones playground-specific vía props/slots):
+
+| Feature único                                  | Playground |
+| ---------------------------------------------- | ---------- |
+| `handleExecute` + detección de loops infinitos | JS         |
+| Preview HTML + `inspectDom`                    | HTML       |
+| JSONPath + history + tips modals               | JSON       |
+| `handleClean` (3er config)                     | JSON       |
+
+**Fase 7.1 — Factory para format/minify handlers (~240 líneas, riesgo bajo):**
+
+- [ ] Crear factory `createTransformHandler` en `utils/` que reciba: service fn, input, config, setOutput, setError, mensajes
+- [ ] Refactorizar `handleFormat` y `handleMinify` en los 4 actions hooks para usar la factory
+- [ ] Eliminar código duplicado de `onSuccess`/`onError`/`autoCopy` pattern
+
+**Fase 7.2 — Componentes `InputFooter` / `OutputFooter` (~120 líneas, riesgo bajo):**
+
+- [ ] Crear `<InputFooter>` que encapsule `ValidationStatus` + `Stats` (input)
+- [ ] Crear `<OutputFooter>` que encapsule `OutputStatus` + `Stats` (output)
+- [ ] Reemplazar las 16 instancias repetidas en los 4 `*Editors.tsx` (panel normal + modal expandido)
+
+**Fase 7.3 — `GenericEditors` component (~800 líneas, riesgo medio):**
+
+- [ ] Crear `<GenericEditors>` que encapsule: `useExpandedEditor` + `useTextStats` × 2 + grid de 2 Panels + 2 ExpandedEditorModals
+- [ ] Parametrizar por: `language`, labels, placeholders, validation state
+- [ ] Soportar extensiones vía slots: `extraOutputActions` (HTML preview), `extraContent`
+- [ ] Reemplazar los 4 `*Editors.tsx` por instancias configuradas de `GenericEditors`
+
+**Fase 7.4 — Hook `useToolbarConfig` (~120 líneas, riesgo bajo):**
+
+- [ ] Crear hook `useToolbarConfig(mode, configs, modal)` que retorne `toolbarTools` + `toolbarConfig` memoizados
+- [ ] Soportar acciones extra vía parámetro (execute en JS, clean en JSON)
+- [ ] Reemplazar los 4 bloques `useMemo<ToolbarConfig>` + `useMemo(toolbarConfig)` en los playgrounds
 
 ## New Playground Implementations
 

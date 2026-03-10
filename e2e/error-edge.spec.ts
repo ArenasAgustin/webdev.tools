@@ -11,9 +11,7 @@ test.describe("Error handling & Edge cases", () => {
     await page.goto("/playground/json");
     await page.getByRole("button", { name: "Formatear" }).click();
 
-    await expect(
-      page.getByText("El contenido supera 500 KB. Reduce el tamano para procesarlo."),
-    ).toBeVisible();
+    await expect(page.getByText(/El contenido supera 500 KB/).first()).toBeVisible();
   });
 
   test("suspicious JS loop is handled without freezing the UI", async ({ page }) => {

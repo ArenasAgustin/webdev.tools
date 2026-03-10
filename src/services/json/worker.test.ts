@@ -13,7 +13,7 @@ defineWorkerServiceTests({
     mockResolvedValue: (value: unknown) => void;
     mockRejectedValue: (value: unknown) => void;
   },
-  formatAsync: (input) => formatJsonAsync(input, { indent: 2 }),
+  formatAsync: (input) => formatJsonAsync(input, { indentSize: 2 }),
   minifyAsync: (input) => minifyJsonAsync(input),
   largeInput: '{"data":"' + "x".repeat(100_000) + '"}',
   formatSuccessValue: "formatted",

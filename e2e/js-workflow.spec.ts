@@ -86,7 +86,7 @@ test.describe("JS workflow", () => {
     const downloadPromise = page.waitForEvent("download");
     const inputPanel = page
       .locator("section")
-      .filter({ has: page.getByRole("heading", { name: "Código", exact: true }) });
+      .filter({ has: page.getByRole("heading", { name: "JavaScript", exact: true }) });
     await inputPanel.getByRole("button", { name: "Descargar" }).click();
 
     const download = await downloadPromise;
