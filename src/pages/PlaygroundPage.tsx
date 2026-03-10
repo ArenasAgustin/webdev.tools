@@ -102,7 +102,7 @@ export function PlaygroundPage() {
           </header>
 
           <div className="flex-1 min-h-0 flex flex-col gap-4">
-            <Suspense fallback={<PlaygroundLoader />}>
+            <Suspense fallback={<PlaygroundLoader name={playground.name} />}>
               <PlaygroundComponent />
             </Suspense>
           </div>

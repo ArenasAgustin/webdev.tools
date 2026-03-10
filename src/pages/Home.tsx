@@ -54,14 +54,14 @@ export function Home() {
         <div className="relative container mx-auto px-4 py-14 sm:py-20 h-full">
           <header className="mx-auto max-w-3xl text-center">
             <p className="text-xs uppercase tracking-[0.35em] text-cyan-200/70">
-              Zona de pruebas de código
+              Herramientas para desarrolladores web
             </p>
             <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              Crea, formatea y valida rápido.
+              Formatea, valida y transforma tu código al instante.
             </h1>
             <p className="mt-4 text-base text-white/70 sm:text-lg">
-              Elige una zona de pruebas para empezar a editar. Cada herramienta está optimizada para
-              velocidad, claridad y flujos de trabajo rápidos.
+              Herramientas optimizadas para JSON, JavaScript, HTML y CSS. Sin instalación, 100% en
+              el navegador.
             </p>
           </header>
 
