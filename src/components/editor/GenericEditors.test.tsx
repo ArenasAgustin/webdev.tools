@@ -66,14 +66,10 @@ vi.mock("@/components/editor/OutputActions", () => ({
   ),
 }));
 
-vi.mock("@/components/common/InputFooter", () => ({
-  InputFooter: ({ inputWarning }: { inputWarning?: string | null }) => (
-    <div>input-footer {inputWarning}</div>
+vi.mock("@/components/common/EditorFooter", () => ({
+  EditorFooter: ({ variant, warning }: { variant: string; warning?: string | null }) => (
+    <div>{variant}-footer {warning}</div>
   ),
-}));
-
-vi.mock("@/components/common/OutputFooter", () => ({
-  OutputFooter: () => <div>output-footer</div>,
 }));
 
 describe("GenericEditors", () => {

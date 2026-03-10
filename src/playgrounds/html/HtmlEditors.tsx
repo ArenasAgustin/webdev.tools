@@ -3,7 +3,7 @@ import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { OutputActions } from "@/components/editor/OutputActions";
 import { Button } from "@/components/common/Button";
-import { OutputFooter } from "@/components/common/OutputFooter";
+import { EditorFooter } from "@/components/common/EditorFooter";
 import { GenericEditors } from "@/components/editor/GenericEditors";
 
 interface HtmlEditorsProps {
@@ -121,10 +121,11 @@ export const HtmlEditors = memo(function HtmlEditors({
                   </>
                 }
                 footer={
-                  <OutputFooter
-                    output={outputValue}
+                  <EditorFooter
+                    variant="output"
+                    value={outputValue}
                     error={outputError}
-                    outputStats={outputStats}
+                    stats={outputStats}
                     comparisonBytes={comparisonBytes}
                   />
                 }

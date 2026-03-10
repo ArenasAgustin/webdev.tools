@@ -66,16 +66,10 @@ vi.mock("@/components/editor/OutputActions", () => ({
   ),
 }));
 
-vi.mock("@/components/common/Stats", () => ({
-  Stats: () => <div>stats</div>,
-}));
-
-vi.mock("@/components/common/ValidationStatus", () => ({
-  ValidationStatus: ({ warning }: { warning?: string | null }) => <div>{warning}</div>,
-}));
-
-vi.mock("@/components/common/OutputStatus", () => ({
-  OutputStatus: ({ validExtra }: { validExtra?: ReactNode }) => <div>{validExtra}</div>,
+vi.mock("@/components/common/EditorFooter", () => ({
+  EditorFooter: ({ variant, warning }: { variant: string; warning?: string | null }) => (
+    <div>{variant}-footer{warning && <span>{warning}</span>}</div>
+  ),
 }));
 
 describe("JsEditors", () => {

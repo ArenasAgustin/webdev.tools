@@ -66,16 +66,8 @@ vi.mock("@/components/editor/OutputActions", () => ({
   ),
 }));
 
-vi.mock("@/components/common/Stats", () => ({
-  Stats: () => <div>stats</div>,
-}));
-
-vi.mock("@/components/common/ValidationStatus", () => ({
-  ValidationStatus: () => <div>validation</div>,
-}));
-
-vi.mock("@/components/common/OutputStatus", () => ({
-  OutputStatus: ({ validExtra }: { validExtra?: ReactNode }) => <div>{validExtra}</div>,
+vi.mock("@/components/common/EditorFooter", () => ({
+  EditorFooter: ({ variant }: { variant: string }) => <div>{variant}-footer</div>,
 }));
 
 describe("CssEditors", () => {
@@ -106,7 +98,7 @@ describe("CssEditors", () => {
 
     expect(screen.getAllByText("CSS").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
-    expect(screen.getByText("validation")).toBeInTheDocument();
+    expect(screen.getAllByText(/input-footer/).length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByText("expand-input"));
     fireEvent.click(screen.getByText("expand-output"));

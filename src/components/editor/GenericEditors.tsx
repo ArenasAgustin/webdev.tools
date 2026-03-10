@@ -4,8 +4,7 @@ import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
 import { InputActions } from "@/components/editor/InputActions";
 import { OutputActions } from "@/components/editor/OutputActions";
-import { InputFooter } from "@/components/common/InputFooter";
-import { OutputFooter } from "@/components/common/OutputFooter";
+import { EditorFooter } from "@/components/common/EditorFooter";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor } from "@/hooks/useExpandedEditor";
 
@@ -70,10 +69,11 @@ export const GenericEditors = memo(function GenericEditors({
   const outputStats = useTextStats(output);
 
   const inputFooter = (
-    <InputFooter
-      inputValue={input}
+    <EditorFooter
+      variant="input"
+      value={input}
       validationState={validationState}
-      inputWarning={inputWarning}
+      warning={inputWarning}
       waitingLabel={waitingLabel}
       validLabel={validLabel}
       invalidLabel={invalidLabel}
@@ -82,10 +82,11 @@ export const GenericEditors = memo(function GenericEditors({
   );
 
   const outputFooter = (
-    <OutputFooter
-      output={output}
+    <EditorFooter
+      variant="output"
+      value={output}
       error={error}
-      outputStats={outputStats}
+      stats={outputStats}
       comparisonBytes={inputStats.bytes}
     />
   );
