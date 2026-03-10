@@ -5,7 +5,7 @@ import { TipsModal } from "@/components/common/TipsModal";
 import type { TipItem, QuickExample } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
-import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
@@ -32,12 +32,12 @@ export interface JsonToolbarProps {
     onClear: () => void | Promise<void>;
   };
   config: {
-    format: FormatConfig;
-    onFormatChange: (config: FormatConfig) => void;
-    minify: MinifyConfig;
-    onMinifyChange: (config: MinifyConfig) => void;
-    clean: CleanConfig;
-    onCleanChange: (config: CleanConfig) => void;
+    format: JsonFormatConfig;
+    onFormatChange: (config: JsonFormatConfig) => void;
+    minify: JsonMinifyConfig;
+    onMinifyChange: (config: JsonMinifyConfig) => void;
+    clean: JsonCleanConfig;
+    onCleanChange: (config: JsonCleanConfig) => void;
     isOpen?: boolean;
     onOpenChange?: (isOpen: boolean) => void;
   };

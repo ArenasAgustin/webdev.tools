@@ -2,8 +2,8 @@ import { memo } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
-import { JsInputActions } from "@/components/editor/JsInputActions";
-import { JsOutputActions } from "@/components/editor/JsOutputActions";
+import { InputActions } from "@/components/editor/InputActions";
+import { OutputActions } from "@/components/editor/OutputActions";
 import { Stats } from "@/components/common/Stats";
 import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
@@ -54,7 +54,7 @@ export const CssEditors = memo(function CssEditors({
           icon="code"
           iconColor="blue-400"
           actions={
-            <JsInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -62,25 +62,24 @@ export const CssEditors = memo(function CssEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 min-w-0 overflow-hidden flex items-center gap-1">
-              <ValidationStatus
-                inputValue={inputCss}
-                validationState={validationState}
-                warning={inputWarning}
-                waitingLabel="Esperando CSS..."
-                validLabel="CSS válido"
-                invalidLabel="CSS inválido"
-                truncateError
-              />
-              {validationState.isValid ? (
+            <ValidationStatus
+              inputValue={inputCss}
+              validationState={validationState}
+              warning={inputWarning}
+              waitingLabel="Esperando CSS..."
+              validLabel="CSS válido"
+              invalidLabel="CSS inválido"
+              withWrapper
+              withFlex
+              validExtra={
                 <Stats
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
                   leadingSeparator
                 />
-              ) : null}
-            </div>
+              }
+            />
           }
           value={inputCss}
           language="css"
@@ -94,7 +93,7 @@ export const CssEditors = memo(function CssEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <JsOutputActions
+            <OutputActions
               onCopyOutput={onCopyOutput}
               onDownloadOutput={onDownloadOutput}
               onExpand={editor.collapse}
@@ -129,7 +128,7 @@ export const CssEditors = memo(function CssEditors({
           icon="code"
           iconColor="blue-400"
           actions={
-            <JsInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -137,25 +136,24 @@ export const CssEditors = memo(function CssEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 min-w-0 overflow-hidden flex items-center gap-1">
-              <ValidationStatus
-                inputValue={inputCss}
-                validationState={validationState}
-                warning={inputWarning}
-                waitingLabel="Esperando CSS..."
-                validLabel="CSS válido"
-                invalidLabel="CSS inválido"
-                truncateError
-              />
-              {validationState.isValid ? (
+            <ValidationStatus
+              inputValue={inputCss}
+              validationState={validationState}
+              warning={inputWarning}
+              waitingLabel="Esperando CSS..."
+              validLabel="CSS válido"
+              invalidLabel="CSS inválido"
+              withWrapper
+              withFlex
+              validExtra={
                 <Stats
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
                   leadingSeparator
                 />
-              ) : null}
-            </div>
+              }
+            />
           }
         >
           <LazyCodeEditor
@@ -171,7 +169,7 @@ export const CssEditors = memo(function CssEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <JsOutputActions
+            <OutputActions
               onCopyOutput={onCopyOutput}
               onDownloadOutput={onDownloadOutput}
               onExpand={() => editor.expand("output")}

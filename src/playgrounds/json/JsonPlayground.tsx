@@ -14,9 +14,10 @@ import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useToast } from "@/hooks/useToast";
 import { useModalState } from "@/hooks/useModalState";
 import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
-import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
-import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
+import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
+import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
 import { loadToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
+import { jsonPlaygroundConfig } from "./json.config";
 
 const savedConfig = loadToolsConfig();
 
@@ -25,17 +26,17 @@ const savedConfig = loadToolsConfig();
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
-  const [inputJson, setInputJson] = useState<string>(() => loadLastJson());
-  const [formatConfig, setFormatConfig] = useMergedConfigState<FormatConfig>(
-    DEFAULT_FORMAT_CONFIG,
+  const [inputJson, setInputJson] = useState<string>(() => loadLastJson() || jsonPlaygroundConfig.example);
+  const [formatConfig, setFormatConfig] = useMergedConfigState<JsonFormatConfig>(
+    DEFAULT_JSON_FORMAT_CONFIG,
     savedConfig?.format,
   );
-  const [minifyConfig, setMinifyConfig] = useMergedConfigState<MinifyConfig>(
-    DEFAULT_MINIFY_CONFIG,
+  const [minifyConfig, setMinifyConfig] = useMergedConfigState<JsonMinifyConfig>(
+    DEFAULT_JSON_MINIFY_CONFIG,
     savedConfig?.minify,
   );
-  const [cleanConfig, setCleanConfig] = useMergedConfigState<CleanConfig>(
-    DEFAULT_CLEAN_CONFIG,
+  const [cleanConfig, setCleanConfig] = useMergedConfigState<JsonCleanConfig>(
+    DEFAULT_JSON_CLEAN_CONFIG,
     savedConfig?.clean,
   );
 
@@ -189,8 +190,8 @@ export function JsonPlayground() {
     <PlaygroundLayout
       editors={
         <JsonEditors
-          inputValue={inputJson}
-          outputValue={outputJson}
+          inputJson={inputJson}
+          outputJson={outputJson}
           validationState={validation}
           outputError={outputError}
           inputWarning={inputWarning}

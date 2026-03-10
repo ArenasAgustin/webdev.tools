@@ -4,12 +4,12 @@ import { Button } from "./Button";
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
 import { Checkbox } from "./Checkbox";
 import { RadioGroup } from "./RadioGroup";
-import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import { INDENT_OPTIONS } from "@/types/format";
-import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
+import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
@@ -28,12 +28,12 @@ interface JsonConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode?: "json";
-  formatConfig: FormatConfig;
-  onFormatConfigChange: (config: FormatConfig) => void;
-  minifyConfig: MinifyConfig;
-  onMinifyConfigChange: (config: MinifyConfig) => void;
-  cleanConfig: CleanConfig;
-  onCleanConfigChange: (config: CleanConfig) => void;
+  formatConfig: JsonFormatConfig;
+  onFormatConfigChange: (config: JsonFormatConfig) => void;
+  minifyConfig: JsonMinifyConfig;
+  onMinifyConfigChange: (config: JsonMinifyConfig) => void;
+  cleanConfig: JsonCleanConfig;
+  onCleanConfigChange: (config: JsonCleanConfig) => void;
 }
 
 interface JsConfigModalProps {
@@ -99,9 +99,9 @@ export function ConfigModal(props: ConfigModalProps) {
       return;
     }
 
-    props.onFormatConfigChange(DEFAULT_FORMAT_CONFIG);
-    props.onMinifyConfigChange(DEFAULT_MINIFY_CONFIG);
-    props.onCleanConfigChange(DEFAULT_CLEAN_CONFIG);
+    props.onFormatConfigChange(DEFAULT_JSON_FORMAT_CONFIG);
+    props.onMinifyConfigChange(DEFAULT_JSON_MINIFY_CONFIG);
+    props.onCleanConfigChange(DEFAULT_JSON_CLEAN_CONFIG);
     removeToolsConfig();
   };
 

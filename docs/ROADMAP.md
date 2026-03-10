@@ -4,9 +4,9 @@
 
 ### Objetivo
 
-- [ ] Unificar la arquitectura de todos los playgrounds para que compartan la misma base técnica.
-- [ ] Mantener diferencias únicamente en lógica de lenguaje (features específicas).
-- [ ] Cubrir de forma consistente: hooks, servicios, componentes, workers, funciones y testing.
+- [x] Unificar la arquitectura de todos los playgrounds para que compartan la misma base técnica. ✅
+- [x] Mantener diferencias únicamente en lógica de lenguaje (features específicas). ✅
+- [x] Cubrir de forma consistente: hooks, servicios, componentes, workers, funciones y testing. ✅
 
 ### Fase 1 — Contrato Arquitectónico Único
 
@@ -84,9 +84,12 @@
 
 ### Fase 5 — Gobernanza y Prevención de Deriva
 
-- [ ] Crear guía de contribución para nuevos playgrounds.
-- [ ] Definir plantilla oficial para alta de playgrounds.
-- [ ] Agregar reglas lint/estructura para detectar módulos incompletos.
+- [x] Crear guía de contribución para nuevos playgrounds (`docs/CONTRIBUTING_PLAYGROUND.md`). ✅
+- [x] Definir plantilla oficial para alta de playgrounds (incluida en la guía con checklist paso a paso). ✅
+- [x] Agregar reglas lint/estructura para detectar módulos incompletos. ✅
+  - [x] Validación de naming conventions (config export, config id, component export) ✅
+  - [x] Validación de registro en `src/playgrounds/registry.ts` ✅
+  - [x] Integrado en `pnpm verify:arch` ✅
 - [x] Crear script de verificación arquitectónica: ✅
   - [x] naming ✅
   - [x] archivos requeridos ✅
@@ -98,6 +101,18 @@
 - [x] Hooks y servicios principales implementan contratos comunes. ✅
 - [x] La matriz de tests es consistente entre playgrounds. ✅
 - [x] Las diferencias se limitan a lógica de lenguaje. ✅
+
+### Fase 6 — Homogenización Cross-Playground
+
+- [x] Consolidar `JsInputActions`/`JsonInputActions`/`JsOutputActions`/`JsonOutputActions` en componentes unificados `InputActions`/`OutputActions` ✅
+- [x] Renombrar tipos JSON con prefijo (`FormatConfig` → `JsonFormatConfig`, `MinifyConfig` → `JsonMinifyConfig`, `CleanConfig` → `JsonCleanConfig`, `ToolsConfig` → `JsonToolsConfig`) ✅
+- [x] Renombrar constantes JSON con prefijo (`DEFAULT_FORMAT_CONFIG` → `DEFAULT_JSON_FORMAT_CONFIG`, etc.) ✅
+- [x] Unificar estado inicial de JSON con fallback a ejemplo (`loadLastJson() || jsonPlaygroundConfig.example`) ✅
+- [x] Agregar preloading de servicios a CSS y HTML (`useEffect` con imports dinámicos) ✅
+- [x] Unificar footer del panel de entrada: CSS/HTML ahora usan `ValidationStatus` con `withWrapper`/`withFlex`/`validExtra` (como JS/JSON) ✅
+- [x] Renombrar props de `JsonEditors` (`inputValue` → `inputJson`, `outputValue` → `outputJson`) ✅
+- [x] Unificar títulos de paneles con nombres de lenguaje (JS: "Código" → "JavaScript", JSON: "Entrada" → "JSON") ✅
+- [x] Unificar íconos de paneles (JSON: "edit" → "code") ✅
 
 ## New Playground Implementations
 
@@ -125,3 +140,7 @@
   - [ ] Tests unitarios (services + adapters)
   - [ ] Tests de integración (playground + API client)
   - [ ] E2E workflow PHP (format/validate/execute API)
+
+## Nuevas features por implementar
+
+- [ ] Transformación de JSON a TOON

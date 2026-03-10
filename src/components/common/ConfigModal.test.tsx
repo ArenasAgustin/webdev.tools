@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ConfigModal } from "./ConfigModal";
-import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import {
   DEFAULT_JS_FORMAT_CONFIG,
   DEFAULT_JS_MINIFY_CONFIG,
@@ -18,19 +18,19 @@ vi.mock("@/services/storage", () => ({
 }));
 
 describe("ConfigModal", () => {
-  const mockFormatConfig: FormatConfig = {
+  const mockFormatConfig: JsonFormatConfig = {
     indent: 2,
     sortKeys: false,
     autoCopy: false,
   };
 
-  const mockMinifyConfig: MinifyConfig = {
+  const mockMinifyConfig: JsonMinifyConfig = {
     removeSpaces: true,
     sortKeys: false,
     autoCopy: false,
   };
 
-  const mockCleanConfig: CleanConfig = {
+  const mockCleanConfig: JsonCleanConfig = {
     removeNull: true,
     removeUndefined: true,
     removeEmptyString: false,

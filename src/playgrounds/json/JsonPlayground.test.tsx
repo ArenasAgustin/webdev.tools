@@ -70,13 +70,13 @@ describe("JsonPlayground", () => {
     return render(<ToastProvider>{component}</ToastProvider>);
   };
 
-  it("renders with empty input by default", () => {
+  it("renders with example input by default", () => {
     renderWithProviders(<JsonPlayground />);
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
 
-    expect(input.value).toBe("");
+    expect(input.value).toContain("users");
   });
 
   it("renders with saved JSON from localStorage", () => {

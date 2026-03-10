@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { CssEditors } from "./CssEditors";
@@ -47,6 +47,11 @@ export function CssPlayground() {
   });
 
   const validation = useCssParser(debouncedInputCss);
+
+  useEffect(() => {
+    void import("@/services/formatter/prettier");
+    void import("@/services/css/transform");
+  }, []);
 
   const {
     handleClearInput,

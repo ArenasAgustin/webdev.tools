@@ -2,8 +2,8 @@ import { memo, useMemo, useState } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
-import { JsInputActions } from "@/components/editor/JsInputActions";
-import { JsOutputActions } from "@/components/editor/JsOutputActions";
+import { InputActions } from "@/components/editor/InputActions";
+import { OutputActions } from "@/components/editor/OutputActions";
 import { Button } from "@/components/common/Button";
 import { Stats } from "@/components/common/Stats";
 import { ValidationStatus } from "@/components/common/ValidationStatus";
@@ -58,7 +58,7 @@ export const HtmlEditors = memo(function HtmlEditors({
           icon="code"
           iconColor="blue-400"
           actions={
-            <JsInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -66,25 +66,24 @@ export const HtmlEditors = memo(function HtmlEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 min-w-0 overflow-hidden flex items-center gap-1">
-              <ValidationStatus
-                inputValue={inputHtml}
-                validationState={validationState}
-                warning={inputWarning}
-                waitingLabel="Esperando HTML..."
-                validLabel="HTML válido"
-                invalidLabel="HTML inválido"
-                truncateError
-              />
-              {validationState.isValid ? (
+            <ValidationStatus
+              inputValue={inputHtml}
+              validationState={validationState}
+              warning={inputWarning}
+              waitingLabel="Esperando HTML..."
+              validLabel="HTML válido"
+              invalidLabel="HTML inválido"
+              withWrapper
+              withFlex
+              validExtra={
                 <Stats
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
                   leadingSeparator
                 />
-              ) : null}
-            </div>
+              }
+            />
           }
           value={inputHtml}
           language="html"
@@ -98,7 +97,7 @@ export const HtmlEditors = memo(function HtmlEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <JsOutputActions
+            <OutputActions
               onCopyOutput={onCopyOutput}
               onDownloadOutput={onDownloadOutput}
               onExpand={editor.collapse}
@@ -133,7 +132,7 @@ export const HtmlEditors = memo(function HtmlEditors({
           icon="code"
           iconColor="blue-400"
           actions={
-            <JsInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -141,25 +140,24 @@ export const HtmlEditors = memo(function HtmlEditors({
             />
           }
           footer={
-            <div className="text-xs h-4 min-w-0 overflow-hidden flex items-center gap-1">
-              <ValidationStatus
-                inputValue={inputHtml}
-                validationState={validationState}
-                warning={inputWarning}
-                waitingLabel="Esperando HTML..."
-                validLabel="HTML válido"
-                invalidLabel="HTML inválido"
-                truncateError
-              />
-              {validationState.isValid ? (
+            <ValidationStatus
+              inputValue={inputHtml}
+              validationState={validationState}
+              warning={inputWarning}
+              waitingLabel="Esperando HTML..."
+              validLabel="HTML válido"
+              invalidLabel="HTML inválido"
+              withWrapper
+              withFlex
+              validExtra={
                 <Stats
                   lines={inputStats.lines}
                   characters={inputStats.characters}
                   bytes={inputStats.bytes}
                   leadingSeparator
                 />
-              ) : null}
-            </div>
+              }
+            />
           }
         >
           <LazyCodeEditor
@@ -177,7 +175,7 @@ export const HtmlEditors = memo(function HtmlEditors({
             iconColor="green-400"
             actions={
               <>
-                <JsOutputActions
+                <OutputActions
                   onCopyOutput={onCopyOutput}
                   onDownloadOutput={onDownloadOutput}
                   onExpand={() => editor.expand("output")}

@@ -1,18 +1,18 @@
 import { Button } from "@/components/common/Button";
 
-interface JsInputActionsProps {
+interface InputActionsProps {
   onClearInput: () => void;
   onLoadExample: () => void;
   onDownloadInput: () => void;
   onExpand: () => void;
 }
 
-export function JsInputActions({
+export function InputActions({
   onClearInput,
   onLoadExample,
   onDownloadInput,
   onExpand,
-}: JsInputActionsProps) {
+}: InputActionsProps) {
   return (
     <>
       <Button variant="danger" onClick={onClearInput}>

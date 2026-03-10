@@ -2,8 +2,8 @@ import { memo } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
-import { JsonInputActions } from "@/components/editor/JsonInputActions";
-import { JsonOutputActions } from "@/components/editor/JsonOutputActions";
+import { InputActions } from "@/components/editor/InputActions";
+import { OutputActions } from "@/components/editor/OutputActions";
 import { Stats } from "@/components/common/Stats";
 import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
@@ -12,8 +12,8 @@ import { useExpandedEditor } from "@/hooks/useExpandedEditor";
 import type { JsonValidationState } from "./json.types";
 
 interface JsonEditorsProps {
-  inputValue: string;
-  outputValue: string;
+  inputJson: string;
+  outputJson: string;
   validationState: JsonValidationState;
   outputError: string | null;
   inputWarning?: string | null;
@@ -26,8 +26,8 @@ interface JsonEditorsProps {
 }
 
 export const JsonEditors = memo(function JsonEditors({
-  inputValue,
-  outputValue,
+  inputJson,
+  outputJson,
   validationState,
   outputError,
   inputWarning,
@@ -40,18 +40,18 @@ export const JsonEditors = memo(function JsonEditors({
 }: JsonEditorsProps) {
   const editor = useExpandedEditor();
 
-  const inputStats = useTextStats(inputValue);
-  const outputStats = useTextStats(outputValue);
+  const inputStats = useTextStats(inputJson);
+  const outputStats = useTextStats(outputJson);
 
   return (
     <>
       {editor.isExpanded("input") && (
         <ExpandedEditorModal
-          title="Entrada"
-          icon="edit"
+          title="JSON"
+          icon="code"
           iconColor="blue-400"
           actions={
-            <JsonInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -60,7 +60,7 @@ export const JsonEditors = memo(function JsonEditors({
           }
           footer={
             <ValidationStatus
-              inputValue={inputValue}
+              inputValue={inputJson}
               validationState={validationState}
               warning={inputWarning}
               withWrapper
@@ -75,7 +75,7 @@ export const JsonEditors = memo(function JsonEditors({
               }
             />
           }
-          value={inputValue}
+          value={inputJson}
           language="json"
           onChange={onInputChange}
         />
@@ -87,7 +87,7 @@ export const JsonEditors = memo(function JsonEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <JsonOutputActions
+            <OutputActions
               onCopyOutput={onCopyOutput}
               onDownloadOutput={onDownloadOutput}
               onExpand={editor.collapse}
@@ -95,7 +95,7 @@ export const JsonEditors = memo(function JsonEditors({
           }
           footer={
             <OutputStatus
-              outputValue={outputValue}
+              outputValue={outputJson}
               outputError={outputError}
               showValidLabel={false}
               withWrapper
@@ -109,7 +109,7 @@ export const JsonEditors = memo(function JsonEditors({
               }
             />
           }
-          value={outputValue}
+          value={outputJson}
           language="json"
           readOnly={true}
         />
@@ -118,11 +118,11 @@ export const JsonEditors = memo(function JsonEditors({
       <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
         {/* Input Panel */}
         <Panel
-          title="Entrada"
-          icon="edit"
+          title="JSON"
+          icon="code"
           iconColor="blue-400"
           actions={
-            <JsonInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -131,7 +131,7 @@ export const JsonEditors = memo(function JsonEditors({
           }
           footer={
             <ValidationStatus
-              inputValue={inputValue}
+              inputValue={inputJson}
               validationState={validationState}
               warning={inputWarning}
               withWrapper
@@ -148,7 +148,7 @@ export const JsonEditors = memo(function JsonEditors({
           }
         >
           <LazyCodeEditor
-            value={inputValue}
+            value={inputJson}
             language="json"
             onChange={onInputChange}
             placeholder="Pega tu JSON aquí..."
@@ -161,7 +161,7 @@ export const JsonEditors = memo(function JsonEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <JsonOutputActions
+            <OutputActions
               onCopyOutput={onCopyOutput}
               onDownloadOutput={onDownloadOutput}
               onExpand={() => editor.expand("output")}
@@ -169,7 +169,7 @@ export const JsonEditors = memo(function JsonEditors({
           }
           footer={
             <OutputStatus
-              outputValue={outputValue}
+              outputValue={outputJson}
               outputError={outputError}
               showValidLabel={false}
               withWrapper
@@ -186,7 +186,7 @@ export const JsonEditors = memo(function JsonEditors({
           }
         >
           <LazyCodeEditor
-            value={outputValue}
+            value={outputJson}
             language="json"
             readOnly={true}
             placeholder="El resultado se mostrará aquí..."

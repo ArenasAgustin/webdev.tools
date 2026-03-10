@@ -13,7 +13,7 @@ import {
   loadLastJs,
   saveLastJs,
 } from "./storage";
-import type { ToolsConfig } from "@/types/json";
+import type { JsonToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
 
 // Mock localStorage
@@ -141,7 +141,7 @@ describe("Storage Service", () => {
 
   describe("loadToolsConfig/saveToolsConfig", () => {
     it("should load tools config", () => {
-      const config: Partial<ToolsConfig> = {
+      const config: Partial<JsonToolsConfig> = {
         format: { indent: 2, sortKeys: true, autoCopy: false },
       };
       saveToolsConfig(config);
@@ -157,10 +157,10 @@ describe("Storage Service", () => {
     });
 
     it("should overwrite existing config", () => {
-      const config1: Partial<ToolsConfig> = {
+      const config1: Partial<JsonToolsConfig> = {
         format: { indent: 2, sortKeys: false, autoCopy: false },
       };
-      const config2: Partial<ToolsConfig> = {
+      const config2: Partial<JsonToolsConfig> = {
         format: { indent: 4, sortKeys: false, autoCopy: false },
       };
 
@@ -307,7 +307,7 @@ describe("Storage Service", () => {
 
   describe("Integration tests", () => {
     it("should maintain data integrity through multiple operations", () => {
-      const config1: Partial<ToolsConfig> = {
+      const config1: Partial<JsonToolsConfig> = {
         format: { indent: 2, sortKeys: false, autoCopy: false },
       };
       const json1 = '{"test": 1}';

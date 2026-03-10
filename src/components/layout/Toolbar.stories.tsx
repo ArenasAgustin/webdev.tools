@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { Toolbar } from "./Toolbar";
 import type { JsonToolbarProps, GenericToolbarProps } from "./Toolbar";
-import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
+import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 
 const mockHistory: JsonPathHistoryItem[] = [
@@ -58,11 +58,11 @@ export const JsonVariant: Story = {
       onClear: fn(),
     },
     config: {
-      format: DEFAULT_FORMAT_CONFIG,
+      format: DEFAULT_JSON_FORMAT_CONFIG,
       onFormatChange: fn(),
-      minify: DEFAULT_MINIFY_CONFIG,
+      minify: DEFAULT_JSON_MINIFY_CONFIG,
       onMinifyChange: fn(),
-      clean: DEFAULT_CLEAN_CONFIG,
+      clean: DEFAULT_JSON_CLEAN_CONFIG,
       onCleanChange: fn(),
     },
     tips: {
@@ -86,11 +86,11 @@ export const JsonWithoutTips: Story = {
       onChange: fn(),
     },
     config: {
-      format: DEFAULT_FORMAT_CONFIG,
+      format: DEFAULT_JSON_FORMAT_CONFIG,
       onFormatChange: fn(),
-      minify: DEFAULT_MINIFY_CONFIG,
+      minify: DEFAULT_JSON_MINIFY_CONFIG,
       onMinifyChange: fn(),
-      clean: DEFAULT_CLEAN_CONFIG,
+      clean: DEFAULT_JSON_CLEAN_CONFIG,
       onCleanChange: fn(),
     },
   } as JsonToolbarProps,
@@ -141,11 +141,11 @@ export const JsonWithLongPath: Story = {
       onChange: fn(),
     },
     config: {
-      format: DEFAULT_FORMAT_CONFIG,
+      format: DEFAULT_JSON_FORMAT_CONFIG,
       onFormatChange: fn(),
-      minify: DEFAULT_MINIFY_CONFIG,
+      minify: DEFAULT_JSON_MINIFY_CONFIG,
       onMinifyChange: fn(),
-      clean: DEFAULT_CLEAN_CONFIG,
+      clean: DEFAULT_JSON_CLEAN_CONFIG,
       onCleanChange: fn(),
     },
   } as JsonToolbarProps,
@@ -178,11 +178,11 @@ export const JsonEmptyHistory: Story = {
       onClear: fn(),
     },
     config: {
-      format: DEFAULT_FORMAT_CONFIG,
+      format: DEFAULT_JSON_FORMAT_CONFIG,
       onFormatChange: fn(),
-      minify: DEFAULT_MINIFY_CONFIG,
+      minify: DEFAULT_JSON_MINIFY_CONFIG,
       onMinifyChange: fn(),
-      clean: DEFAULT_CLEAN_CONFIG,
+      clean: DEFAULT_JSON_CLEAN_CONFIG,
       onCleanChange: fn(),
     },
   } as JsonToolbarProps,

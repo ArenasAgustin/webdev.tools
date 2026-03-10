@@ -3,7 +3,7 @@
  * Centralized service for persistent storage operations
  */
 
-import type { ToolsConfig } from "@/types/json";
+import type { JsonToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
 import type { HtmlToolsConfig } from "@/types/html";
 import type { CssToolsConfig } from "@/types/css";
@@ -130,14 +130,14 @@ export function isAvailable(): boolean {
 /**
  * Load tools configuration from localStorage
  */
-export function loadToolsConfig(): Partial<ToolsConfig> | null {
-  return getItem<Partial<ToolsConfig>>(STORAGE_KEYS.TOOLS_CONFIG);
+export function loadToolsConfig(): Partial<JsonToolsConfig> | null {
+  return getItem<Partial<JsonToolsConfig>>(STORAGE_KEYS.TOOLS_CONFIG);
 }
 
 /**
  * Save tools configuration to localStorage
  */
-export function saveToolsConfig(config: Partial<ToolsConfig>): boolean {
+export function saveToolsConfig(config: Partial<JsonToolsConfig>): boolean {
   return setItem(STORAGE_KEYS.TOOLS_CONFIG, config);
 }
 

@@ -72,8 +72,8 @@ vi.mock("@/utils/download", () => ({
 
 vi.mock("./JsonEditors", () => ({
   JsonEditors: ({
-    inputValue,
-    outputValue,
+    inputJson,
+    outputJson,
     outputError,
     inputWarning,
     onInputChange,
@@ -83,8 +83,8 @@ vi.mock("./JsonEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputValue: string;
-    outputValue: string;
+    inputJson: string;
+    outputJson: string;
     outputError: string | null;
     inputWarning?: string | null;
     onInputChange: (value: string) => void;
@@ -95,8 +95,8 @@ vi.mock("./JsonEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-json">{inputValue}</p>
-      <p data-testid="output-json">{outputValue}</p>
+      <p data-testid="input-json">{inputJson}</p>
+      <p data-testid="output-json">{outputJson}</p>
       <p data-testid="error-json">{outputError}</p>
       <p data-testid="warning">{inputWarning}</p>
       <button onClick={() => onInputChange('{"key":"value"}')}>set-input</button>

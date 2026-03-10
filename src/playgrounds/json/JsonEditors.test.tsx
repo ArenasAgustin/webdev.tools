@@ -54,14 +54,14 @@ vi.mock("@/components/editor/ExpandedEditorModal", () => ({
   ExpandedEditorModal: ({ title }: { title: string }) => <div>{title} modal</div>,
 }));
 
-vi.mock("@/components/editor/JsonInputActions", () => ({
-  JsonInputActions: ({ onExpand }: { onExpand: () => void }) => (
+vi.mock("@/components/editor/InputActions", () => ({
+  InputActions: ({ onExpand }: { onExpand: () => void }) => (
     <button onClick={onExpand}>expand-input</button>
   ),
 }));
 
-vi.mock("@/components/editor/JsonOutputActions", () => ({
-  JsonOutputActions: ({ onExpand }: { onExpand: () => void }) => (
+vi.mock("@/components/editor/OutputActions", () => ({
+  OutputActions: ({ onExpand }: { onExpand: () => void }) => (
     <button onClick={onExpand}>expand-output</button>
   ),
 }));
@@ -85,8 +85,8 @@ describe("JsonEditors", () => {
   });
 
   const baseProps = {
-    inputValue: '{"ok":true}',
-    outputValue: '{"ok": true}',
+    inputJson: '{"ok":true}',
+    outputJson: '{"ok": true}',
     validationState: {
       isValid: true,
       error: null,
@@ -104,7 +104,7 @@ describe("JsonEditors", () => {
   it("renders both panels and triggers expand actions", () => {
     render(<JsonEditors {...baseProps} />);
 
-    expect(screen.getAllByText("Entrada").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("JSON").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
     expect(screen.getByText("warning")).toBeInTheDocument();
 
@@ -118,10 +118,10 @@ describe("JsonEditors", () => {
   it("renders expanded modals for input and output states", () => {
     expandedState = "input";
     const { rerender } = render(<JsonEditors {...baseProps} />);
-    expect(screen.getByText("Entrada modal")).toBeInTheDocument();
+    expect(screen.getByText("JSON modal")).toBeInTheDocument();
 
     expandedState = "output";
-    rerender(<JsonEditors {...baseProps} outputValue="changed" />);
+    rerender(<JsonEditors {...baseProps} outputJson="changed" />);
     expect(screen.getByText("Resultado modal")).toBeInTheDocument();
   });
 });

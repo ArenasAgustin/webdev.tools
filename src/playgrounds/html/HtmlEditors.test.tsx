@@ -54,14 +54,14 @@ vi.mock("@/components/editor/ExpandedEditorModal", () => ({
   ExpandedEditorModal: ({ title }: { title: string }) => <div>{title} modal</div>,
 }));
 
-vi.mock("@/components/editor/JsInputActions", () => ({
-  JsInputActions: ({ onExpand }: { onExpand: () => void }) => (
+vi.mock("@/components/editor/InputActions", () => ({
+  InputActions: ({ onExpand }: { onExpand: () => void }) => (
     <button onClick={onExpand}>expand-input</button>
   ),
 }));
 
-vi.mock("@/components/editor/JsOutputActions", () => ({
-  JsOutputActions: ({ onExpand }: { onExpand: () => void }) => (
+vi.mock("@/components/editor/OutputActions", () => ({
+  OutputActions: ({ onExpand }: { onExpand: () => void }) => (
     <button onClick={onExpand}>expand-output</button>
   ),
 }));

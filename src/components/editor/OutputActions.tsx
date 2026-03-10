@@ -1,16 +1,12 @@
 import { Button } from "@/components/common/Button";
 
-interface JsOutputActionsProps {
+interface OutputActionsProps {
   onCopyOutput: () => void;
   onDownloadOutput: () => void;
   onExpand: () => void;
 }
 
-export function JsOutputActions({
-  onCopyOutput,
-  onDownloadOutput,
-  onExpand,
-}: JsOutputActionsProps) {
+export function OutputActions({ onCopyOutput, onDownloadOutput, onExpand }: OutputActionsProps) {
   return (
     <>
       <Button variant="primary" onClick={onCopyOutput}>

@@ -54,14 +54,14 @@ vi.mock("@/components/editor/ExpandedEditorModal", () => ({
   ExpandedEditorModal: ({ title }: { title: string }) => <div>{title} modal</div>,
 }));
 
-vi.mock("@/components/editor/JsInputActions", () => ({
-  JsInputActions: ({ onExpand }: { onExpand: () => void }) => (
+vi.mock("@/components/editor/InputActions", () => ({
+  InputActions: ({ onExpand }: { onExpand: () => void }) => (
     <button onClick={onExpand}>expand-input</button>
   ),
 }));
 
-vi.mock("@/components/editor/JsOutputActions", () => ({
-  JsOutputActions: ({ onExpand }: { onExpand: () => void }) => (
+vi.mock("@/components/editor/OutputActions", () => ({
+  OutputActions: ({ onExpand }: { onExpand: () => void }) => (
     <button onClick={onExpand}>expand-output</button>
   ),
 }));
@@ -104,7 +104,7 @@ describe("JsEditors", () => {
   it("renders both panels and triggers expand actions", () => {
     render(<JsEditors {...baseProps} />);
 
-    expect(screen.getAllByText("Código").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("JavaScript").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
     expect(screen.getByText("warning")).toBeInTheDocument();
 
@@ -118,7 +118,7 @@ describe("JsEditors", () => {
   it("renders expanded modals for input and output states", () => {
     expandedState = "input";
     const { rerender } = render(<JsEditors {...baseProps} />);
-    expect(screen.getByText("Código modal")).toBeInTheDocument();
+    expect(screen.getByText("JavaScript modal")).toBeInTheDocument();
 
     expandedState = "output";
     rerender(<JsEditors {...baseProps} output="changed" />);

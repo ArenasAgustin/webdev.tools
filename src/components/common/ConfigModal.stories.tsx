@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite";
 import { fn, userEvent, within, expect } from "storybook/test";
 import { ConfigModal } from "./ConfigModal";
-import { DEFAULT_FORMAT_CONFIG, DEFAULT_MINIFY_CONFIG, DEFAULT_CLEAN_CONFIG } from "@/types/json";
+import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
 
@@ -13,11 +13,11 @@ const meta = {
     mode: "json",
     isOpen: true,
     onClose: fn(),
-    formatConfig: DEFAULT_FORMAT_CONFIG,
+    formatConfig: DEFAULT_JSON_FORMAT_CONFIG,
     onFormatConfigChange: fn(),
-    minifyConfig: DEFAULT_MINIFY_CONFIG,
+    minifyConfig: DEFAULT_JSON_MINIFY_CONFIG,
     onMinifyConfigChange: fn(),
-    cleanConfig: DEFAULT_CLEAN_CONFIG,
+    cleanConfig: DEFAULT_JSON_CLEAN_CONFIG,
     onCleanConfigChange: fn(),
   },
 } satisfies Meta<typeof ConfigModal>;
@@ -41,12 +41,12 @@ export const CustomConfig = {
   args: {
     mode: "json",
     formatConfig: {
-      ...DEFAULT_FORMAT_CONFIG,
+      ...DEFAULT_JSON_FORMAT_CONFIG,
       indent: 4,
       autoCopy: true,
     },
     minifyConfig: {
-      ...DEFAULT_MINIFY_CONFIG,
+      ...DEFAULT_JSON_MINIFY_CONFIG,
       autoCopy: true,
     },
   },

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { formatJsonAsync, minifyJsonAsync, cleanJsonAsync } from "@/services/json/worker";
-import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 
 interface FormatterResult {
   output: string;
@@ -12,15 +12,15 @@ interface FormatterHook {
   error: string | null;
   format: (
     input: string,
-    options?: Partial<FormatConfig>,
+    options?: Partial<JsonFormatConfig>,
   ) => Promise<{ ok: boolean; error?: string }>;
   minify: (
     input: string,
-    options?: Partial<MinifyConfig>,
+    options?: Partial<JsonMinifyConfig>,
   ) => Promise<{ ok: boolean; error?: string }>;
   clean: (
     input: string,
-    options?: Partial<CleanConfig>,
+    options?: Partial<JsonCleanConfig>,
   ) => Promise<{ ok: boolean; error?: string }>;
   clearOutput: () => void;
 }
@@ -35,7 +35,7 @@ export function useJsonFormatter(): FormatterHook {
     error: null,
   });
 
-  const format = useCallback(async (input: string, options?: Partial<FormatConfig>) => {
+  const format = useCallback(async (input: string, options?: Partial<JsonFormatConfig>) => {
     if (!input.trim()) {
       const errorMsg = "No hay JSON para formatear";
       setResult({ output: "", error: errorMsg });
@@ -59,7 +59,7 @@ export function useJsonFormatter(): FormatterHook {
     }
   }, []);
 
-  const minify = useCallback(async (input: string, options?: Partial<MinifyConfig>) => {
+  const minify = useCallback(async (input: string, options?: Partial<JsonMinifyConfig>) => {
     if (!input.trim()) {
       const errorMsg = "No hay JSON para minificar";
       setResult({ output: "", error: errorMsg });
@@ -83,7 +83,7 @@ export function useJsonFormatter(): FormatterHook {
     }
   }, []);
 
-  const clean = useCallback(async (input: string, options?: Partial<CleanConfig>) => {
+  const clean = useCallback(async (input: string, options?: Partial<JsonCleanConfig>) => {
     if (!input.trim()) {
       const errorMsg = "No hay JSON para limpiar";
       setResult({ output: "", error: errorMsg });

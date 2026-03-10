@@ -1,6 +1,6 @@
 import type { Result, JsonValue, JsonError } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
-import type { CleanConfig } from "@/types/json";
+import type { JsonCleanConfig } from "@/types/json";
 import type { TransformService } from "@/services/transform";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 
@@ -74,7 +74,7 @@ export interface JsonMinifyOptions {
   sortKeys?: boolean;
 }
 
-export type CleanOptions = Partial<CleanConfig>;
+export type CleanOptions = Partial<JsonCleanConfig>;
 
 export async function formatJson(
   input: string,

@@ -8,7 +8,7 @@
  * Exit code 0 = all checks pass, 1 = violations found
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -174,6 +174,7 @@ console.log(bold("\nTest infrastructure\n"));
 const infra = [
   { path: "src/test/workerHarness.ts", label: "worker test harness" },
   { path: "docs/TESTING_MATRIX.md", label: "testing matrix documentation" },
+  { path: "docs/CONTRIBUTING_PLAYGROUND.md", label: "playground contribution guide" },
 ];
 
 for (const { path, label } of infra) {
@@ -182,6 +183,78 @@ for (const { path, label } of infra) {
   } else {
     console.log(yellow(`  ⚠ ${label} — missing: ${path}`));
   }
+}
+
+// Naming convention checks
+console.log(bold("\nNaming conventions\n"));
+
+for (const lang of PLAYGROUNDS) {
+  const cap = capitalize(lang);
+  const configPath = resolve(root, `src/playgrounds/${lang}/${lang}.config.ts`);
+
+  if (existsSync(configPath)) {
+    const content = readFileSync(configPath, "utf-8");
+
+    // Check config export name follows convention: <lang>PlaygroundConfig
+    const expectedExport = `${lang}PlaygroundConfig`;
+    if (content.includes(expectedExport)) {
+      console.log(green(`  ✓ ${lang.toUpperCase()} config export: ${expectedExport}`));
+    } else {
+      console.log(red(`  ✗ ${lang.toUpperCase()} config should export "${expectedExport}"`));
+      violations++;
+    }
+
+    // Check id matches lang
+    const idMatch = content.match(/id:\s*["']([^"']+)["']/);
+    if (idMatch && idMatch[1] === lang) {
+      console.log(green(`  ✓ ${lang.toUpperCase()} config id: "${lang}"`));
+    } else {
+      console.log(
+        red(
+          `  ✗ ${lang.toUpperCase()} config id should be "${lang}", found "${idMatch?.[1] ?? "none"}"`,
+        ),
+      );
+      violations++;
+    }
+  }
+
+  // Check playground component export name
+  const playgroundPath = resolve(root, `src/playgrounds/${lang}/${cap}Playground.tsx`);
+  if (existsSync(playgroundPath)) {
+    const content = readFileSync(playgroundPath, "utf-8");
+    const expectedComponent = `${cap}Playground`;
+    if (
+      content.includes(`function ${expectedComponent}`) ||
+      content.includes(`const ${expectedComponent}`)
+    ) {
+      console.log(green(`  ✓ ${lang.toUpperCase()} component export: ${expectedComponent}`));
+    } else {
+      console.log(red(`  ✗ ${lang.toUpperCase()} component should export "${expectedComponent}"`));
+      violations++;
+    }
+  }
+}
+
+// Registry check
+console.log(bold("\nPlayground registry\n"));
+const registryPath = resolve(root, "src/playgrounds/registry.ts");
+if (existsSync(registryPath)) {
+  const registryContent = readFileSync(registryPath, "utf-8");
+
+  for (const lang of PLAYGROUNDS) {
+    const configImport = `${lang}PlaygroundConfig`;
+    if (registryContent.includes(configImport)) {
+      console.log(green(`  ✓ ${lang.toUpperCase()} registered in registry`));
+    } else {
+      console.log(
+        red(`  ✗ ${lang.toUpperCase()} not found in registry — add config import and entry`),
+      );
+      violations++;
+    }
+  }
+} else {
+  console.log(red("  ✗ src/playgrounds/registry.ts — missing"));
+  violations++;
 }
 
 // Summary

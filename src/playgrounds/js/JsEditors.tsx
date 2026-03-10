@@ -2,8 +2,8 @@ import { memo } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
-import { JsInputActions } from "@/components/editor/JsInputActions";
-import { JsOutputActions } from "@/components/editor/JsOutputActions";
+import { InputActions } from "@/components/editor/InputActions";
+import { OutputActions } from "@/components/editor/OutputActions";
 import { Stats } from "@/components/common/Stats";
 import { ValidationStatus } from "@/components/common/ValidationStatus";
 import { OutputStatus } from "@/components/common/OutputStatus";
@@ -51,11 +51,11 @@ export const JsEditors = memo(function JsEditors({
     <>
       {editor.isExpanded("input") && (
         <ExpandedEditorModal
-          title="Código"
+          title="JavaScript"
           icon="code"
           iconColor="blue-400"
           actions={
-            <JsInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -94,7 +94,7 @@ export const JsEditors = memo(function JsEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <JsOutputActions
+            <OutputActions
               onCopyOutput={onCopyOutput}
               onDownloadOutput={onDownloadOutput}
               onExpand={editor.collapse}
@@ -125,11 +125,11 @@ export const JsEditors = memo(function JsEditors({
       <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
         {/* Input Panel */}
         <Panel
-          title="Código"
+          title="JavaScript"
           icon="code"
           iconColor="blue-400"
           actions={
-            <JsInputActions
+            <InputActions
               onClearInput={onClearInput}
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
@@ -171,7 +171,7 @@ export const JsEditors = memo(function JsEditors({
           icon="terminal"
           iconColor="green-400"
           actions={
-            <JsOutputActions
+            <OutputActions
               onCopyOutput={onCopyOutput}
               onDownloadOutput={onDownloadOutput}
               onExpand={() => editor.expand("output")}

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Toolbar } from "./Toolbar";
-import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 
 vi.mock("@/components/common/ConfigModal", () => ({
@@ -44,17 +44,17 @@ vi.mock("@/components/common/JsonPathHistoryModal", () => ({
 }));
 
 describe("Toolbar", () => {
-  const formatConfig: FormatConfig = {
+  const formatConfig: JsonFormatConfig = {
     indent: 2,
     sortKeys: false,
     autoCopy: false,
   };
-  const minifyConfig: MinifyConfig = {
+  const minifyConfig: JsonMinifyConfig = {
     removeSpaces: true,
     sortKeys: false,
     autoCopy: false,
   };
-  const cleanConfig: CleanConfig = {
+  const cleanConfig: JsonCleanConfig = {
     removeNull: true,
     removeUndefined: true,
     removeEmptyString: false,

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { HtmlEditors } from "./HtmlEditors";
@@ -47,6 +47,11 @@ export function HtmlPlayground() {
   });
 
   const validation = useHtmlParser(debouncedInputHtml);
+
+  useEffect(() => {
+    void import("@/services/formatter/prettier");
+    void import("@/services/html/transform");
+  }, []);
 
   const {
     handleClearInput,

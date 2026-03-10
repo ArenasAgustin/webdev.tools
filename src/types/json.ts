@@ -9,7 +9,7 @@ import type { IndentStyle } from "@/types/format";
 /**
  * Format configuration options
  */
-export type FormatConfig = ConfigWithAutoCopy<{
+export type JsonFormatConfig = ConfigWithAutoCopy<{
   indent: IndentStyle;
   sortKeys: boolean;
 }>;
@@ -17,7 +17,7 @@ export type FormatConfig = ConfigWithAutoCopy<{
 /**
  * Minify configuration options
  */
-export type MinifyConfig = ConfigWithAutoCopy<{
+export type JsonMinifyConfig = ConfigWithAutoCopy<{
   removeSpaces: boolean;
   sortKeys: boolean;
 }>;
@@ -25,7 +25,7 @@ export type MinifyConfig = ConfigWithAutoCopy<{
 /**
  * Clean configuration options
  */
-export type CleanConfig = ConfigWithAutoCopy<{
+export type JsonCleanConfig = ConfigWithAutoCopy<{
   removeNull: boolean;
   removeUndefined: boolean;
   removeEmptyString: boolean;
@@ -37,28 +37,28 @@ export type CleanConfig = ConfigWithAutoCopy<{
 /**
  * All tool configurations combined
  */
-export type ToolsConfig = PlaygroundToolsConfig<{
-  format: FormatConfig;
-  minify: MinifyConfig;
-  clean: CleanConfig;
+export type JsonToolsConfig = PlaygroundToolsConfig<{
+  format: JsonFormatConfig;
+  minify: JsonMinifyConfig;
+  clean: JsonCleanConfig;
 }>;
 
 /**
  * Default configuration values
  */
-export const DEFAULT_FORMAT_CONFIG: FormatConfig = {
+export const DEFAULT_JSON_FORMAT_CONFIG: JsonFormatConfig = {
   indent: 2,
   sortKeys: false,
   autoCopy: false,
 };
 
-export const DEFAULT_MINIFY_CONFIG: MinifyConfig = {
+export const DEFAULT_JSON_MINIFY_CONFIG: JsonMinifyConfig = {
   removeSpaces: true,
   sortKeys: false,
   autoCopy: false,
 };
 
-export const DEFAULT_CLEAN_CONFIG: CleanConfig = {
+export const DEFAULT_JSON_CLEAN_CONFIG: JsonCleanConfig = {
   removeNull: true,
   removeUndefined: true,
   removeEmptyString: true,
@@ -68,8 +68,8 @@ export const DEFAULT_CLEAN_CONFIG: CleanConfig = {
   autoCopy: false,
 };
 
-export const DEFAULT_TOOLS_CONFIG: ToolsConfig = {
-  format: DEFAULT_FORMAT_CONFIG,
-  minify: DEFAULT_MINIFY_CONFIG,
-  clean: DEFAULT_CLEAN_CONFIG,
+export const DEFAULT_JSON_TOOLS_CONFIG: JsonToolsConfig = {
+  format: DEFAULT_JSON_FORMAT_CONFIG,
+  minify: DEFAULT_JSON_MINIFY_CONFIG,
+  clean: DEFAULT_JSON_CLEAN_CONFIG,
 };

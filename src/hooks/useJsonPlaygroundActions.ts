@@ -3,7 +3,7 @@ import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
-import type { FormatConfig, MinifyConfig, CleanConfig } from "@/types/json";
+import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 
 interface UseJsonPlaygroundActionsProps {
   inputJson: string;
@@ -15,15 +15,15 @@ interface UseJsonPlaygroundActionsProps {
   clearFormatterOutput: () => void;
   formatFn: (
     input: string,
-    options?: Partial<FormatConfig>,
+    options?: Partial<JsonFormatConfig>,
   ) => Promise<{ ok: boolean; error?: string }>;
   minifyFn: (
     input: string,
-    options?: Partial<MinifyConfig>,
+    options?: Partial<JsonMinifyConfig>,
   ) => Promise<{ ok: boolean; error?: string }>;
   cleanFn: (
     input: string,
-    options?: Partial<CleanConfig>,
+    options?: Partial<JsonCleanConfig>,
   ) => Promise<{ ok: boolean; error?: string }>;
   // JsonPath functions (instead of the whole object)
   jsonPathOutput: string;
@@ -40,9 +40,9 @@ interface UseJsonPlaygroundActionsProps {
   // JsonPathHistory function
   addToHistory: (expression: string) => Promise<void> | void;
   // Configs
-  formatConfig: FormatConfig;
-  minifyConfig: MinifyConfig;
-  cleanConfig: CleanConfig;
+  formatConfig: JsonFormatConfig;
+  minifyConfig: JsonMinifyConfig;
+  cleanConfig: JsonCleanConfig;
   // Toast API
   toast?: ToastApi;
 }
