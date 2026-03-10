@@ -19,10 +19,10 @@ const {
   storageMocks: {
     loadLastJson: vi.fn(() => ""),
     saveLastJson: vi.fn(),
-    loadToolsConfig: vi.fn(() => null),
-    saveToolsConfig: vi.fn(),
+    loadJsonToolsConfig: vi.fn(() => null),
+    saveJsonToolsConfig: vi.fn(),
     STORAGE_KEYS: {
-      TOOLS_CONFIG: "toolsConfig",
+      JSON_TOOLS_CONFIG: "jsonToolsConfig",
       LAST_JSON: "lastJson",
       JSONPATH_HISTORY: "jsonPathHistory",
     },
@@ -73,8 +73,8 @@ vi.mock("@/utils/download", () => ({
 vi.mock("./JsonEditors", () => ({
   JsonEditors: ({
     inputJson,
-    outputJson,
-    outputError,
+    output,
+    error,
     inputWarning,
     onInputChange,
     onClearInput,
@@ -84,8 +84,8 @@ vi.mock("./JsonEditors", () => ({
     onDownloadOutput,
   }: {
     inputJson: string;
-    outputJson: string;
-    outputError: string | null;
+    output: string;
+    error: string | null;
     inputWarning?: string | null;
     onInputChange: (value: string) => void;
     onClearInput: () => void;
@@ -96,8 +96,8 @@ vi.mock("./JsonEditors", () => ({
   }) => (
     <div>
       <p data-testid="input-json">{inputJson}</p>
-      <p data-testid="output-json">{outputJson}</p>
-      <p data-testid="error-json">{outputError}</p>
+      <p data-testid="output-json">{output}</p>
+      <p data-testid="error-json">{error}</p>
       <p data-testid="warning">{inputWarning}</p>
       <button onClick={() => onInputChange('{"key":"value"}')}>set-input</button>
       <button onClick={() => onInputChange("")}>set-empty</button>

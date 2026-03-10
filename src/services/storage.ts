@@ -28,7 +28,7 @@ const getStorage = (): Storage | null => {
  * Storage keys constants
  */
 export const STORAGE_KEYS = {
-  TOOLS_CONFIG: "toolsConfig",
+  JSON_TOOLS_CONFIG: "jsonToolsConfig",
   JS_TOOLS_CONFIG: "jsToolsConfig",
   HTML_TOOLS_CONFIG: "htmlToolsConfig",
   CSS_TOOLS_CONFIG: "cssToolsConfig",
@@ -130,22 +130,22 @@ export function isAvailable(): boolean {
 /**
  * Load tools configuration from localStorage
  */
-export function loadToolsConfig(): Partial<JsonToolsConfig> | null {
-  return getItem<Partial<JsonToolsConfig>>(STORAGE_KEYS.TOOLS_CONFIG);
+export function loadJsonToolsConfig(): Partial<JsonToolsConfig> | null {
+  return getItem<Partial<JsonToolsConfig>>(STORAGE_KEYS.JSON_TOOLS_CONFIG);
 }
 
 /**
  * Save tools configuration to localStorage
  */
-export function saveToolsConfig(config: Partial<JsonToolsConfig>): boolean {
-  return setItem(STORAGE_KEYS.TOOLS_CONFIG, config);
+export function saveJsonToolsConfig(config: Partial<JsonToolsConfig>): boolean {
+  return setItem(STORAGE_KEYS.JSON_TOOLS_CONFIG, config);
 }
 
 /**
  * Remove tools configuration from localStorage
  */
-export function removeToolsConfig(): boolean {
-  return removeItem(STORAGE_KEYS.TOOLS_CONFIG);
+export function removeJsonToolsConfig(): boolean {
+  return removeItem(STORAGE_KEYS.JSON_TOOLS_CONFIG);
 }
 
 /**

@@ -4,8 +4,8 @@ import {
   setItem,
   removeItem,
   clearAll,
-  loadToolsConfig,
-  saveToolsConfig,
+  loadJsonToolsConfig,
+  saveJsonToolsConfig,
   loadLastJson,
   saveLastJson,
   loadJsToolsConfig,
@@ -139,36 +139,36 @@ describe("Storage Service", () => {
     });
   });
 
-  describe("loadToolsConfig/saveToolsConfig", () => {
+  describe("loadJsonToolsConfig/saveJsonToolsConfig", () => {
     it("should load tools config", () => {
       const config: Partial<JsonToolsConfig> = {
-        format: { indent: 2, sortKeys: true, autoCopy: false },
+        format: { indentSize: 2, sortKeys: true, autoCopy: false },
       };
-      saveToolsConfig(config);
+      saveJsonToolsConfig(config);
 
-      const loaded = loadToolsConfig();
-      expect(loaded?.format?.indent).toBe(2);
+      const loaded = loadJsonToolsConfig();
+      expect(loaded?.format?.indentSize).toBe(2);
       expect(loaded?.format?.sortKeys).toBe(true);
     });
 
     it("should return null when config doesn't exist", () => {
-      const loaded = loadToolsConfig();
+      const loaded = loadJsonToolsConfig();
       expect(loaded).toBeNull();
     });
 
     it("should overwrite existing config", () => {
       const config1: Partial<JsonToolsConfig> = {
-        format: { indent: 2, sortKeys: false, autoCopy: false },
+        format: { indentSize: 2, sortKeys: false, autoCopy: false },
       };
       const config2: Partial<JsonToolsConfig> = {
-        format: { indent: 4, sortKeys: false, autoCopy: false },
+        format: { indentSize: 4, sortKeys: false, autoCopy: false },
       };
 
-      saveToolsConfig(config1);
-      saveToolsConfig(config2);
+      saveJsonToolsConfig(config1);
+      saveJsonToolsConfig(config2);
 
-      const loaded = loadToolsConfig();
-      expect(loaded?.format?.indent).toBe(4);
+      const loaded = loadJsonToolsConfig();
+      expect(loaded?.format?.indentSize).toBe(4);
     });
   });
 
@@ -308,16 +308,16 @@ describe("Storage Service", () => {
   describe("Integration tests", () => {
     it("should maintain data integrity through multiple operations", () => {
       const config1: Partial<JsonToolsConfig> = {
-        format: { indent: 2, sortKeys: false, autoCopy: false },
+        format: { indentSize: 2, sortKeys: false, autoCopy: false },
       };
       const json1 = '{"test": 1}';
       const jsConfig1: Partial<JsToolsConfig> = { format: { indentSize: 2, autoCopy: false } };
 
-      saveToolsConfig(config1);
+      saveJsonToolsConfig(config1);
       saveLastJson(json1);
       saveJsToolsConfig(jsConfig1);
 
-      expect(loadToolsConfig()).toEqual(config1);
+      expect(loadJsonToolsConfig()).toEqual(config1);
       expect(loadLastJson()).toBe(json1);
       expect(loadJsToolsConfig()).toEqual(jsConfig1);
 
@@ -325,7 +325,7 @@ describe("Storage Service", () => {
       const json2 = '{"test": 2}';
       saveLastJson(json2);
 
-      expect(loadToolsConfig()).toEqual(config1);
+      expect(loadJsonToolsConfig()).toEqual(config1);
       expect(loadLastJson()).toBe(json2);
       expect(loadJsToolsConfig()).toEqual(jsConfig1);
     });

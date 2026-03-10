@@ -65,7 +65,7 @@ export function sortJsonKeys(value: JsonValue): JsonValue {
 }
 
 export interface JsonFormatOptions {
-  indent?: IndentStyle;
+  indentSize?: IndentStyle;
   sortKeys?: boolean;
 }
 
@@ -87,7 +87,7 @@ export async function formatJson(
 
     const parsed = JSON.parse(input) as JsonValue;
     const processed = options.sortKeys ? sortJsonKeys(parsed) : parsed;
-    const indent = options.indent ?? 2;
+    const indent = options.indentSize ?? 2;
     const formatted = await formatWithPrettier(JSON.stringify(processed), "json-stringify", indent);
     return { ok: true, value: formatted };
   } catch (error) {

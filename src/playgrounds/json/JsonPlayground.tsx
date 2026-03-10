@@ -16,10 +16,10 @@ import { useModalState } from "@/hooks/useModalState";
 import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
-import { loadToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
+import { loadJsonToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
 import { jsonPlaygroundConfig } from "./json.config";
 
-const savedConfig = loadToolsConfig();
+const savedConfig = loadJsonToolsConfig();
 
 /**
  * JSON Playground - Encapsulated JSON tools
@@ -191,9 +191,9 @@ export function JsonPlayground() {
       editors={
         <JsonEditors
           inputJson={inputJson}
-          outputJson={outputJson}
+          output={outputJson}
+          error={outputError}
           validationState={validation}
-          outputError={outputError}
           inputWarning={inputWarning}
           onInputChange={setInputJson}
           onClearInput={handleClearInput}

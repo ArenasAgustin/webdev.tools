@@ -43,7 +43,7 @@ export function useJsonFormatter(): FormatterHook {
     }
 
     const formatResult = await formatJsonAsync(input, {
-      indent: options?.indent,
+      indentSize: options?.indentSize,
       sortKeys: options?.sortKeys,
     });
     if (formatResult.ok) {

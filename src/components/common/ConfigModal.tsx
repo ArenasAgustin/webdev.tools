@@ -14,8 +14,8 @@ import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
 import {
-  saveToolsConfig,
-  removeToolsConfig,
+  saveJsonToolsConfig,
+  removeJsonToolsConfig,
   saveJsToolsConfig,
   removeJsToolsConfig,
   saveHtmlToolsConfig,
@@ -102,7 +102,7 @@ export function ConfigModal(props: ConfigModalProps) {
     props.onFormatConfigChange(DEFAULT_JSON_FORMAT_CONFIG);
     props.onMinifyConfigChange(DEFAULT_JSON_MINIFY_CONFIG);
     props.onCleanConfigChange(DEFAULT_JSON_CLEAN_CONFIG);
-    removeToolsConfig();
+    removeJsonToolsConfig();
   };
 
   const handleClose = () => {
@@ -133,7 +133,7 @@ export function ConfigModal(props: ConfigModalProps) {
       return;
     }
 
-    saveToolsConfig({
+    saveJsonToolsConfig({
       format: props.formatConfig,
       minify: props.minifyConfig,
       clean: props.cleanConfig,
@@ -220,11 +220,11 @@ export function ConfigModal(props: ConfigModalProps) {
               ) : (
                 <ToggleButtonGroup
                   options={INDENT_OPTIONS}
-                  value={props.formatConfig.indent}
-                  onChange={(indent) =>
+                  value={props.formatConfig.indentSize}
+                  onChange={(indentSize) =>
                     props.onFormatConfigChange({
                       ...props.formatConfig,
-                      indent,
+                      indentSize,
                     })
                   }
                 />

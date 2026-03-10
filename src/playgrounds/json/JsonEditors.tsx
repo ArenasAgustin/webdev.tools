@@ -13,9 +13,9 @@ import type { JsonValidationState } from "./json.types";
 
 interface JsonEditorsProps {
   inputJson: string;
-  outputJson: string;
+  output: string;
+  error: string | null;
   validationState: JsonValidationState;
-  outputError: string | null;
   inputWarning?: string | null;
   onInputChange: (value: string) => void;
   onClearInput: () => void;
@@ -27,9 +27,9 @@ interface JsonEditorsProps {
 
 export const JsonEditors = memo(function JsonEditors({
   inputJson,
-  outputJson,
+  output,
+  error,
   validationState,
-  outputError,
   inputWarning,
   onInputChange,
   onClearInput,
@@ -41,7 +41,7 @@ export const JsonEditors = memo(function JsonEditors({
   const editor = useExpandedEditor();
 
   const inputStats = useTextStats(inputJson);
-  const outputStats = useTextStats(outputJson);
+  const outputStats = useTextStats(output);
 
   return (
     <>
@@ -63,6 +63,9 @@ export const JsonEditors = memo(function JsonEditors({
               inputValue={inputJson}
               validationState={validationState}
               warning={inputWarning}
+              waitingLabel="Esperando JSON..."
+              validLabel="JSON válido"
+              invalidLabel="JSON inválido"
               withWrapper
               withFlex
               validExtra={
@@ -95,10 +98,11 @@ export const JsonEditors = memo(function JsonEditors({
           }
           footer={
             <OutputStatus
-              outputValue={outputJson}
-              outputError={outputError}
+              outputValue={output}
+              outputError={error}
               showValidLabel={false}
               withWrapper
+              className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
               validExtra={
                 <Stats
                   lines={outputStats.lines}
@@ -109,7 +113,7 @@ export const JsonEditors = memo(function JsonEditors({
               }
             />
           }
-          value={outputJson}
+          value={output}
           language="json"
           readOnly={true}
         />
@@ -134,6 +138,9 @@ export const JsonEditors = memo(function JsonEditors({
               inputValue={inputJson}
               validationState={validationState}
               warning={inputWarning}
+              waitingLabel="Esperando JSON..."
+              validLabel="JSON válido"
+              invalidLabel="JSON inválido"
               withWrapper
               withFlex
               validExtra={
@@ -169,11 +176,11 @@ export const JsonEditors = memo(function JsonEditors({
           }
           footer={
             <OutputStatus
-              outputValue={outputJson}
-              outputError={outputError}
+              outputValue={output}
+              outputError={error}
               showValidLabel={false}
               withWrapper
-              withFlex
+              className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
               validExtra={
                 <Stats
                   lines={outputStats.lines}
@@ -186,7 +193,7 @@ export const JsonEditors = memo(function JsonEditors({
           }
         >
           <LazyCodeEditor
-            value={outputJson}
+            value={output}
             language="json"
             readOnly={true}
             placeholder="El resultado se mostrará aquí..."

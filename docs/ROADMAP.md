@@ -114,6 +114,26 @@
 - [x] Unificar títulos de paneles con nombres de lenguaje (JS: "Código" → "JavaScript", JSON: "Entrada" → "JSON") ✅
 - [x] Unificar íconos de paneles (JSON: "edit" → "code") ✅
 
+### Fase 6.2 — Homogenización Cross-Playground (segunda pasada)
+
+**Fixes fáciles (bajo riesgo):**
+
+- [x] Unificar orden de imports de React hooks (`useState, useEffect, useMemo`) en todos los Playgrounds ✅
+- [x] Renombrar props de `JsonEditors` (`outputJson` → `output`, `outputError` → `error`) para coincidir con CSS/HTML/JS ✅
+- [x] Agregar labels a `ValidationStatus` en JSON (`waitingLabel`, `validLabel`, `invalidLabel`) ✅
+- [x] Agregar `className` de truncado a `OutputStatus` en JS y JSON (como CSS/HTML) ✅
+- [x] Renombrar `indent` → `indentSize` en `JsonFormatConfig` y toda la cadena (types, transform, hooks, ConfigModal, tests) ✅
+- [x] Renombrar storage genérico JSON: `loadToolsConfig` → `loadJsonToolsConfig`, `saveToolsConfig` → `saveJsonToolsConfig`, `removeToolsConfig` → `removeJsonToolsConfig`, `TOOLS_CONFIG` → `JSON_TOOLS_CONFIG` ✅
+
+**Pendientes (requieren refactor mayor — futura fase):**
+
+- [ ] Unificar output state pattern de JSON (computed vs `useState` directo)
+- [ ] Unificar Toolbar configuration pattern de JSON (3 memos + variant `"json"` vs `"generic"`)
+- [ ] Unificar actions hook pattern de JSON (callback injection vs direct params)
+- [ ] Unificar error handling de JSON (`compactTransformError`)
+- [ ] Mover types locales de JS/JSON (`*.types.ts`) a types globales
+- [ ] Renombrar `inputCode` → `inputJs` en JS playground
+
 ## New Playground Implementations
 
 - [ ] **SQL Playground** (5-7 días)
@@ -144,3 +164,5 @@
 ## Nuevas features por implementar
 
 - [ ] Transformación de JSON a TOON
+- [ ] Color transform
+- [ ] Unix timestamp transform

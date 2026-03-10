@@ -10,7 +10,7 @@ import type { IndentStyle } from "@/types/format";
  * Format configuration options
  */
 export type JsonFormatConfig = ConfigWithAutoCopy<{
-  indent: IndentStyle;
+  indentSize: IndentStyle;
   sortKeys: boolean;
 }>;
 
@@ -47,7 +47,7 @@ export type JsonToolsConfig = PlaygroundToolsConfig<{
  * Default configuration values
  */
 export const DEFAULT_JSON_FORMAT_CONFIG: JsonFormatConfig = {
-  indent: 2,
+  indentSize: 2,
   sortKeys: false,
   autoCopy: false,
 };

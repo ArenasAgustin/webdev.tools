@@ -73,7 +73,7 @@ describe("useJsonFormatter", () => {
       const { result } = renderHook(() => useJsonFormatter());
 
       await act(async () => {
-        await result.current.format('{"name":"John"}', { indent: 4 });
+        await result.current.format('{"name":"John"}', { indentSize: 4 });
       });
 
       await vi.waitFor(() => {

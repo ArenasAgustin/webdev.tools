@@ -86,12 +86,12 @@ describe("JsonEditors", () => {
 
   const baseProps = {
     inputJson: '{"ok":true}',
-    outputJson: '{"ok": true}',
+    output: '{"ok": true}',
     validationState: {
       isValid: true,
       error: null,
     },
-    outputError: null,
+    error: null,
     inputWarning: "warning",
     onInputChange: vi.fn(),
     onClearInput: vi.fn(),

@@ -106,6 +106,7 @@ export const JsEditors = memo(function JsEditors({
               outputError={error}
               showValidLabel={false}
               withWrapper
+              className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
               validExtra={
                 <Stats
                   lines={outputStats.lines}
@@ -183,6 +184,7 @@ export const JsEditors = memo(function JsEditors({
               outputError={error}
               showValidLabel={false}
               withWrapper
+              className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
               validExtra={
                 <Stats
                   lines={outputStats.lines}

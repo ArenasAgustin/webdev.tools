@@ -22,7 +22,7 @@ describe("formatJson", () => {
 
   it("should format with custom indent", async () => {
     const input = '{"name":"John"}';
-    const result = await formatJson(input, { indent: 4 });
+    const result = await formatJson(input, { indentSize: 4 });
 
     expect(result.ok).toBe(true);
     if (result.ok) {

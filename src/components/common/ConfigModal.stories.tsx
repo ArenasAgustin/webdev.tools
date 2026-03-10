@@ -42,7 +42,7 @@ export const CustomConfig = {
     mode: "json",
     formatConfig: {
       ...DEFAULT_JSON_FORMAT_CONFIG,
-      indent: 4,
+      indentSize: 4,
       autoCopy: true,
     },
     minifyConfig: {
@@ -205,7 +205,7 @@ export const EdgeCaseAllOptionsEnabled = {
   args: {
     mode: "json",
     formatConfig: {
-      indent: "\t",
+      indentSize: "\t",
       autoCopy: true,
       preserveEmptyArrays: true,
       preserveEmptyObjects: true,
@@ -236,7 +236,7 @@ export const EdgeCaseAllOptionsDisabled = {
   args: {
     mode: "json",
     formatConfig: {
-      indent: 2,
+      indentSize: 2,
       autoCopy: false,
       preserveEmptyArrays: false,
       preserveEmptyObjects: false,

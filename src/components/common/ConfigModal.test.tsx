@@ -11,15 +11,15 @@ import {
 
 // Mock storage functions
 vi.mock("@/services/storage", () => ({
-  saveToolsConfig: vi.fn(),
-  removeToolsConfig: vi.fn(),
+  saveJsonToolsConfig: vi.fn(),
+  removeJsonToolsConfig: vi.fn(),
   saveJsToolsConfig: vi.fn(),
   removeJsToolsConfig: vi.fn(),
 }));
 
 describe("ConfigModal", () => {
   const mockFormatConfig: JsonFormatConfig = {
-    indent: 2,
+    indentSize: 2,
     sortKeys: false,
     autoCopy: false,
   };
@@ -85,7 +85,7 @@ describe("ConfigModal", () => {
 
       expect(onFormatConfigChange).toHaveBeenCalledWith({
         ...mockFormatConfig,
-        indent: 4,
+        indentSize: 4,
       });
     });
 
@@ -262,7 +262,7 @@ describe("ConfigModal", () => {
     });
 
     it("should reset all configs to default when reset button is clicked", async () => {
-      const { removeToolsConfig } = await import("@/services/storage");
+      const { removeJsonToolsConfig } = await import("@/services/storage");
       const onFormatConfigChange = vi.fn();
       const onMinifyConfigChange = vi.fn();
       const onCleanConfigChange = vi.fn();
@@ -282,11 +282,11 @@ describe("ConfigModal", () => {
       expect(onFormatConfigChange).toHaveBeenCalled();
       expect(onMinifyConfigChange).toHaveBeenCalled();
       expect(onCleanConfigChange).toHaveBeenCalled();
-      expect(removeToolsConfig).toHaveBeenCalled();
+      expect(removeJsonToolsConfig).toHaveBeenCalled();
     });
 
     it("should save config when modal is closed", async () => {
-      const { saveToolsConfig } = await import("@/services/storage");
+      const { saveJsonToolsConfig } = await import("@/services/storage");
       const onClose = vi.fn();
 
       render(<ConfigModal {...defaultProps} onClose={onClose} />);
@@ -294,7 +294,7 @@ describe("ConfigModal", () => {
       const closeButton = screen.getByLabelText("Cerrar modal");
       fireEvent.click(closeButton);
 
-      expect(saveToolsConfig).toHaveBeenCalledWith({
+      expect(saveJsonToolsConfig).toHaveBeenCalledWith({
         format: mockFormatConfig,
         minify: mockMinifyConfig,
         clean: mockCleanConfig,
