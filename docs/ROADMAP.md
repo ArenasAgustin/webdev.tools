@@ -155,9 +155,9 @@ Eliminación de código duplicado entre los 4 playgrounds mediante factories, ho
 
 **Fase 7.2 — Componentes `InputFooter` / `OutputFooter` (~120 líneas, riesgo bajo):**
 
-- [ ] Crear `<InputFooter>` que encapsule `ValidationStatus` + `Stats` (input)
-- [ ] Crear `<OutputFooter>` que encapsule `OutputStatus` + `Stats` (output)
-- [ ] Reemplazar las 16 instancias repetidas en los 4 `*Editors.tsx` (panel normal + modal expandido)
+- [x] Crear `<InputFooter>` que encapsule `ValidationStatus` + `Stats` (input) ✅
+- [x] Crear `<OutputFooter>` que encapsule `OutputStatus` + `Stats` (output) ✅
+- [x] Reemplazar las 16 instancias repetidas en los 4 `*Editors.tsx` (panel normal + modal expandido) ✅
 
 **Fase 7.3 — `GenericEditors` component (~800 líneas, riesgo medio):**
 

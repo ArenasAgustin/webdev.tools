@@ -4,9 +4,8 @@ import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
 import { InputActions } from "@/components/editor/InputActions";
 import { OutputActions } from "@/components/editor/OutputActions";
-import { Stats } from "@/components/common/Stats";
-import { ValidationStatus } from "@/components/common/ValidationStatus";
-import { OutputStatus } from "@/components/common/OutputStatus";
+import { InputFooter } from "@/components/common/InputFooter";
+import { OutputFooter } from "@/components/common/OutputFooter";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor } from "@/hooks/useExpandedEditor";
 
@@ -62,23 +61,14 @@ export const CssEditors = memo(function CssEditors({
             />
           }
           footer={
-            <ValidationStatus
+            <InputFooter
               inputValue={inputCss}
               validationState={validationState}
-              warning={inputWarning}
+              inputWarning={inputWarning}
               waitingLabel="Esperando CSS..."
               validLabel="CSS válido"
               invalidLabel="CSS inválido"
-              withWrapper
-              withFlex
-              validExtra={
-                <Stats
-                  lines={inputStats.lines}
-                  characters={inputStats.characters}
-                  bytes={inputStats.bytes}
-                  leadingSeparator
-                />
-              }
+              stats={inputStats}
             />
           }
           value={inputCss}
@@ -100,20 +90,11 @@ export const CssEditors = memo(function CssEditors({
             />
           }
           footer={
-            <OutputStatus
-              outputValue={output}
-              outputError={error}
-              showValidLabel={false}
-              withWrapper
-              className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
-              validExtra={
-                <Stats
-                  lines={outputStats.lines}
-                  characters={outputStats.characters}
-                  bytes={outputStats.bytes}
-                  comparisonBytes={inputStats.bytes}
-                />
-              }
+            <OutputFooter
+              output={output}
+              error={error}
+              outputStats={outputStats}
+              comparisonBytes={inputStats.bytes}
             />
           }
           value={output}
@@ -136,23 +117,14 @@ export const CssEditors = memo(function CssEditors({
             />
           }
           footer={
-            <ValidationStatus
+            <InputFooter
               inputValue={inputCss}
               validationState={validationState}
-              warning={inputWarning}
+              inputWarning={inputWarning}
               waitingLabel="Esperando CSS..."
               validLabel="CSS válido"
               invalidLabel="CSS inválido"
-              withWrapper
-              withFlex
-              validExtra={
-                <Stats
-                  lines={inputStats.lines}
-                  characters={inputStats.characters}
-                  bytes={inputStats.bytes}
-                  leadingSeparator
-                />
-              }
+              stats={inputStats}
             />
           }
         >
@@ -176,20 +148,11 @@ export const CssEditors = memo(function CssEditors({
             />
           }
           footer={
-            <OutputStatus
-              outputValue={output}
-              outputError={error}
-              showValidLabel={false}
-              withWrapper
-              className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
-              validExtra={
-                <Stats
-                  lines={outputStats.lines}
-                  characters={outputStats.characters}
-                  bytes={outputStats.bytes}
-                  comparisonBytes={inputStats.bytes}
-                />
-              }
+            <OutputFooter
+              output={output}
+              error={error}
+              outputStats={outputStats}
+              comparisonBytes={inputStats.bytes}
             />
           }
         >
