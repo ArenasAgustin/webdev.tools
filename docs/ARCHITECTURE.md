@@ -1,8 +1,8 @@
 # 🏗️ Arquitectura & Stack Tecnológico
 
 Este documento describe la arquitectura, las decisiones técnicas y las tecnologías
-utilizadas en el proyecto **JSON Tools / Code Playground**, una aplicación web
-100% client-side orientada a desarrolladores.
+utilizadas en el proyecto **webdev.tools**, una aplicación web 100% client-side
+orientada a desarrolladores con playgrounds para CSS, HTML, JavaScript y JSON.
 
 ---
 
@@ -92,18 +92,26 @@ src/
 ├── components/             # UI reusable (common/editor/layout)
 ├── hooks/                  # hooks de estado y acciones
 ├── pages/                  # Home / PlaygroundPage
-├── playgrounds/            # JSON y JS playgrounds + registry
-├── services/               # lógica framework-agnostic
-│   ├── formatter/          # formatter.ts (JSON/JS) + prettier.ts
-│   ├── minifier/           # minifier.ts (JSON/JS)
-│   ├── json/               # parse/minify/clean/jsonPath
-│   ├── js/                 # minify + worker adapters
-│   ├── worker/             # runtime/shared worker infra
-│   └── storage.ts
-├── workers/                # web workers (jsonWorker/jsWorker)
+├── playgrounds/            # CSS, HTML, JS, JSON playgrounds + registry
+│   ├── css/                # css.config.ts, CssPlayground.tsx, CssEditors.tsx, tests
+│   ├── html/               # html.config.ts, HtmlPlayground.tsx, HtmlEditors.tsx, tests
+│   ├── js/                 # js.config.ts, JsPlayground.tsx, JsEditors.tsx, tests
+│   ├── json/               # json.config.ts, JsonPlayground.tsx, JsonEditors.tsx, tests
+│   └── registry.ts         # registro central de playgrounds
+├── services/
+│   ├── css/                # service.ts, transform.ts, worker.ts, workerClient.ts, worker.types.ts
+│   ├── html/               # (misma estructura)
+│   ├── js/                 # (misma estructura)
+│   ├── json/               # (misma estructura) + jsonPath.ts
+│   ├── formatter/          # prettier.ts (integración compartida con Prettier)
+│   ├── worker/             # adapter.ts, clientFactory.ts, runtime.ts, types.ts
+│   ├── storage.ts          # persistencia en localStorage
+│   └── transform.ts        # contratos compartidos de transformación
+├── workers/                # web workers (cssWorker, htmlWorker, jsWorker, jsonWorker)
+├── test/                   # harnesses compartidos (workerHarness.ts)
 ├── context/                # Toast context
-├── types/                  # contratos compartidos (json/js/format/toolbar)
-└── utils/                  # helpers utilitarios
+├── types/                  # contratos compartidos (common, config, css, html, js, json, format, toolbar, playground)
+└── utils/                  # helpers (handlerFactory, transformError, download, constants)
 ```
 
 ---
@@ -146,11 +154,20 @@ Los servicios:
 parseJson(input: string): Result<JsonValue, JsonError>
 ```
 
-### Actualización (2026-02)
+### Estructura uniforme por playground
 
-- El formateo de JSON/JS está centralizado en `src/services/formatter/formatter.ts`.
-- `src/services/formatter/prettier.ts` encapsula integración con Prettier (parser/plugins/indentación tabs/espacios).
-- Workers y servicios de playground consumen el módulo compartido para evitar duplicación y asegurar comportamiento consistente.
+Cada playground en `src/services/<lang>/` sigue esta estructura:
+
+| Archivo           | Responsabilidad                                  |
+| ----------------- | ------------------------------------------------ |
+| `transform.ts`    | Funciones puras: format, minify, parse, validate |
+| `worker.ts`       | Orquestación async con fallback a sync           |
+| `workerClient.ts` | Cliente del web worker                           |
+| `worker.types.ts` | Tipos del worker                                 |
+| `service.ts`      | Facade pública (PlaygroundTransformService)      |
+
+El formateo usa `src/services/formatter/prettier.ts` — cada `transform.ts` lo importa directamente.
+La infraestructura de workers está compartida en `src/services/worker/` (adapter, runtime, types).
 
 ---
 
@@ -194,17 +211,19 @@ export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 Para agregar un nuevo playground:
 
 ```txt
-playgrounds/js/
-playgrounds/html/
-playgrounds/css/
-playgrounds/php/
+playgrounds/sql/
+playgrounds/markdown/
 ```
+
+Ver `docs/CONTRIBUTING_PLAYGROUND.md` para guía paso a paso.
+
+**Playgrounds implementados:** CSS, HTML, JavaScript, JSON.
 
 **Ventajas:**
 
-- Se reutiliza UI
-- Se reutiliza CodeEditor
-- Se reutilizan hooks base
+- Se reutiliza UI (PlaygroundLayout, Panel, Toolbar, InputActions, OutputActions)
+- Se reutiliza CodeEditor (LazyCodeEditor sobre Monaco)
+- Se reutilizan hooks base (usePlaygroundActions, useTransformActions, usePlaygroundInputLifecycle, usePlaygroundShortcuts)
 - No se refactoriza código existente
 
 ---
@@ -217,10 +236,13 @@ playgrounds/php/
 
 ## 📌 Decisiones clave
 
-- Monaco Editor como editor central
+- Monaco Editor como editor central (cargado lazy via LazyCodeEditor)
 - TypeScript estricto
 - Client-side only
 - Arquitectura modular y escalable
+- Workers con fallback a sync para inputs grandes
+- Prettier compartido para format (CSS/HTML/JS); JSON usa JSON.stringify nativo
+- `compactTransformError` unificado para manejo de errores en todos los playgrounds
 
 ---
 
@@ -228,17 +250,37 @@ playgrounds/php/
 
 El contrato técnico obligatorio para todos los playgrounds está definido en:
 
-- `docs/PLAYGROUND_CONTRACT.md`
-
-Ese documento es la referencia para estado mínimo, hooks obligatorios, acciones estándar,
-persistencia, atajos, estructura de archivos y matriz mínima de testing.
+- `docs/PLAYGROUND_CONTRACT.md` — Estado mínimo, hooks, acciones, persistencia, atajos
+- `docs/TESTING_MATRIX.md` — Matriz mínima de testing por playground
+- `docs/CONTRIBUTING_PLAYGROUND.md` — Guía paso a paso para nuevos playgrounds
 
 ---
 
-## 📈 Futuro (no implementado aún)
+## ✅ Checklist de verificación post-cambios
 
-- JSON Schema validation
-- jq via WebAssembly
-- Export / share por URL
-- PWA
-- Playground multi-tab
+Después de **cualquier cambio** al proyecto (bug fix, refactor, nueva feature), ejecutar en este orden:
+
+```bash
+# 1. Lint — estilo y reglas de código
+pnpm lint
+
+# 2. TypeScript — compilación sin errores
+pnpm build
+
+# 3. Tests unitarios e integración
+pnpm test
+
+# 4. Tests e2e (requiere build previo)
+pnpm e2e
+
+# 5. Verificación arquitectónica (archivos requeridos, naming, registro)
+pnpm verify:arch
+```
+
+> **Regla:** ningún cambio se considera completo hasta que los 5 pasos pasen sin errores.
+
+---
+
+## 📈 Futuro
+
+Ver `docs/ROADMAP.md` para el plan de desarrollo completo

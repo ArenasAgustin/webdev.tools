@@ -13,11 +13,11 @@ If a suggestion conflicts with this document, it MUST be discarded.
 **Project type:** Web application  
 **Execution:** 100% client-side  
 **Target users:** Developers  
-**Primary purpose:** Provide tools to work with JSON and, in the future, other
-languages (JavaScript, HTML, CSS, PHP).
+**Primary purpose:** Provide developer tools for multiple languages: JSON, JavaScript, HTML and CSS.
+Future languages (SQL, PHP, etc.) follow the same playground architecture.
 
 This project is NOT a demo or tutorial. It is designed as a maintainable,
-scalable developer tool.
+scalable developer tool with 4 fully implemented playgrounds.
 
 ---
 
@@ -62,20 +62,24 @@ Do NOT suggest or introduce:
 ```txt
 src/
 ├── app/
-├── components/
-├── context/
-├── hooks/
-├── pages/
-├── playgrounds/
+├── components/              # UI reusable (common/editor/layout)
+├── context/                 # Toast context
+├── hooks/                   # hooks de estado y acciones
+├── pages/                   # Home / PlaygroundPage
+├── playgrounds/             # css/ html/ js/ json/ + registry.ts
 ├── services/
-│   ├── format/             # formatter.ts + prettier.ts
-│   ├── json/
-│   ├── js/
-│   └── worker/
-├── workers/
-├── test/
-├── types/
-├── utils/
+│   ├── css/                 # service + transform + worker
+│   ├── html/                # service + transform + worker
+│   ├── js/                  # service + transform + worker
+│   ├── json/                # service + transform + worker + jsonPath
+│   ├── formatter/           # prettier.ts (shared Prettier integration)
+│   ├── worker/              # shared runtime/adapter/types
+│   ├── storage.ts           # localStorage persistence
+│   └── transform.ts         # shared transform contracts
+├── workers/                 # web workers (cssWorker/htmlWorker/jsWorker/jsonWorker)
+├── test/                    # shared test harnesses
+├── types/                   # shared types (common/config/css/html/js/json/format/toolbar)
+├── utils/                   # helpers (handlerFactory, transformError, download, constants)
 ├── App.tsx
 └── main.tsx
 ```
@@ -84,14 +88,23 @@ This structure MUST be preserved.
 
 ---
 
-## 5. JSON Playground – Current Scope
+## 5. Implemented Playgrounds
 
-### Allowed functionality
+### CSS Playground
 
-- JSON validation
-- JSON formatting
-- JSON minification
-- JSONPath filtering
+- CSS validation, formatting (Prettier), minification
+
+### HTML Playground
+
+- HTML validation, formatting (Prettier), minification, live preview
+
+### JavaScript Playground
+
+- JS validation, formatting (Prettier), minification (Terser), in-browser execution with timeout
+
+### JSON Playground
+
+- JSON validation, formatting, minification, cleaning (empty/null removal), JSONPath filtering with history
 
 ### Out of scope (do NOT implement)
 
@@ -105,8 +118,10 @@ This structure MUST be preserved.
 
 ## 6. Business Logic Rules
 
-JSON operations must live in `services/json/`.
-Formatting operations for JSON/JS must be centralized in `services/formatter/formatter.ts`.
+Each playground's operations live in `services/<lang>/` with a unified structure:
+`transform.ts` (pure functions), `worker.ts` (async orchestration), `workerClient.ts` (worker communication), `service.ts` (facade).
+
+Formatting uses `services/formatter/prettier.ts` — each `transform.ts` imports it directly.
 
 Services must:
 
@@ -165,8 +180,11 @@ type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 ## 10. Reference Files
 
 - `docs/ROADMAP.md` → Development plan
-- `docs/ARCHITECTURE.md` → Detailed architecture
+- `docs/ARCHITECTURE.md` → Detailed architecture & post-change checklist
 - `docs/AI_CONTEXT.md` → This document
+- `docs/PLAYGROUND_CONTRACT.md` → Mandatory contract per playground
+- `docs/TESTING_MATRIX.md` → Minimum testing requirements
+- `docs/CONTRIBUTING_PLAYGROUND.md` → Step-by-step guide for new playgrounds
 
 ---
 

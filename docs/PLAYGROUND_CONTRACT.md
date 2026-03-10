@@ -6,18 +6,17 @@ Este documento define el contrato obligatorio que debe cumplir cualquier playgro
 
 Cada playground debe manejar como mínimo:
 
-- `input`
-- `output`
-- `error`
-- `formatConfig`
-- `minifyConfig`
+- `input` (ej. `inputCss`, `inputJson`)
+- `output` (`useState<string>("")` explícito)
+- `error` (`useState<string | null>(null)` explícito)
+- `formatConfig` (via `useMergedConfigState`)
+- `minifyConfig` (via `useMergedConfigState`)
 
 Además, debe incluir:
 
 - `useModalState` para configuración
-- `useDebouncedValue` para persistencia/validación
-- `useTextStats` para límite de tamaño
-- warning de tamaño con `MAX_INPUT_BYTES`
+- `usePlaygroundInputLifecycle` para debounce, persistencia y warning de tamaño
+- `useToast` para notificaciones
 
 ## 2) Validación
 
@@ -32,7 +31,14 @@ El estado de validación debe ser mostrado por el editor correspondiente (`*Edit
 
 ## 3) Acciones de toolbar
 
-Cada playground debe usar un hook `use*PlaygroundActions` que exponga como mínimo:
+Cada playground debe usar un hook `use*PlaygroundActions` que:
+
+- Usa `usePlaygroundActions` para acciones base
+- Usa `useTransformActions` para format/minify
+- Usa `compactTransformError` para manejo de errores
+- Recibe `setOutput` y `setError` directamente (sin callbacks indirectas)
+
+Debe exponer como mínimo:
 
 - `handleClearInput`
 - `handleLoadExample`
@@ -49,13 +55,14 @@ Si el dominio lo requiere (ej. JSON/JS), puede agregar acciones específicas.
 Cada playground debe persistir:
 
 - último input (`loadLast*` / `saveLast*`)
-- configuración de herramientas (`load*ToolsConfig`)
+- configuración de herramientas (`load<Lang>ToolsConfig` / `save<Lang>ToolsConfig`)
 
+Las funciones de storage deben tener prefijo del lenguaje (ej. `loadJsonToolsConfig`, `saveCssToolsConfig`).
 No se permite persistencia fuera de almacenamiento local del navegador.
 
 ## 5) Atajos de teclado
 
-Debe integrarse `useKeyboardShortcuts` con, como mínimo:
+Debe integrarse `usePlaygroundShortcuts` (wrapper de `useKeyboardShortcuts`) con, como mínimo:
 
 - `onFormat`
 - `onMinify`
@@ -65,16 +72,27 @@ Debe integrarse `useKeyboardShortcuts` con, como mínimo:
 
 ## 6) Estructura de archivos por playground
 
-Cada playground debe mantener esta estructura:
+Cada playground debe mantener esta estructura en `src/playgrounds/<lang>/`:
 
-- `*.config.ts`
-- `*Playground.tsx`
-- `*Editors.tsx`
-- `index.ts`
+- `<lang>.config.ts` — configuración del playground
+- `<Lang>Playground.tsx` — componente principal
+- `<Lang>Editors.tsx` — paneles de editor
+- `index.ts` — exports públicos
 
-Y su hook de acciones en `src/hooks`:
+Tests obligatorios:
 
-- `use*PlaygroundActions.ts`
+- `<Lang>Playground.test.tsx` — render + flujo feliz
+- `<Lang>Playground.branches.test.tsx` — branches de error/config/size
+- `<Lang>Editors.test.tsx` — editores
+
+Y su hook de acciones en `src/hooks/`:
+
+- `use<Lang>PlaygroundActions.ts`
+- `use<Lang>Parser.ts` (+ test)
+
+Servicios en `src/services/<lang>/`:
+
+- `service.ts`, `transform.ts`, `worker.ts`, `workerClient.ts`, `worker.types.ts`
 
 ## 7) Contratos compartidos obligatorios
 
@@ -94,9 +112,12 @@ Todos los playgrounds deben alinearse con estos contratos y extenderlos sin romp
 
 Se permiten diferencias solo por lógica de dominio, por ejemplo:
 
-- JSONPath / historial (JSON)
-- ejecución controlada con `new Function` (JS)
-- preview (HTML)
+- JSONPath / historial / tips modals (JSON)
+- `handleClean` + cleanConfig (JSON)
+- ejecución controlada con `new Function` + detección de loops (JS)
+- preview HTML + `inspectDom` (HTML)
+
+Estas extensiones se deben manejar como props opcionales, slots (`extraContent` en Toolbar), o lógica adicional en el actions hook.
 
 No se permite cambiar la arquitectura base por playground.
 

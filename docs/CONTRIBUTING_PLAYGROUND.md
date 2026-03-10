@@ -186,7 +186,9 @@ Sigue el patrón de `useCssPlaygroundActions`:
 
 1. Usa `usePlaygroundActions` para acciones base (clear, load example, copy, download)
 2. Usa `useTransformActions` para format/minify
-3. Expone handlers memoizados con `useCallback`
+3. Usa `compactTransformError` en los `onError` callbacks
+4. Recibe `setOutput` y `setError` directamente como props
+5. Expone handlers memoizados con `useCallback`
 
 ---
 
@@ -222,7 +224,7 @@ Sigue el patrón de `CssPlayground.tsx`:
 
 - Estado: input, output, error, formatConfig, minifyConfig
 - Hooks: `useModalState`, `usePlaygroundInputLifecycle`, `use<Lang>Parser`, `use<Lang>PlaygroundActions`, `usePlaygroundShortcuts`
-- Layout: `PlaygroundLayout` con `<Lang>Editors` + `Toolbar`
+- Layout: `PlaygroundLayout` con `<Lang>Editors` + `Toolbar` (variant `\"generic\"`, con `extraContent` si necesita UI adicional)
 
 ### 6d. Index (`src/playgrounds/<lang>/index.ts`)
 
