@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { Button } from "@/components/common/Button";
@@ -8,14 +8,9 @@ import { JsonEditors } from "./JsonEditors";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
-import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
 import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
-import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
 import { useMergedConfigState } from "@/hooks/useMergedConfigState";
-import { useToast } from "@/hooks/useToast";
-import { useModalState } from "@/hooks/useModalState";
-import { useToolbarConfig } from "@/hooks/useToolbarConfig";
-import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import {
   DEFAULT_JSON_FORMAT_CONFIG,
@@ -25,94 +20,70 @@ import {
 import { loadJsonToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
 import { jsonPlaygroundConfig } from "./json.config";
 
-const savedConfig = loadJsonToolsConfig();
+const savedCleanConfig = loadJsonToolsConfig()?.clean;
+
+const preload = () => {
+  void import("@/services/formatter/prettier");
+  void import("@/services/json/transform");
+};
 
 /**
  * JSON Playground - Encapsulated JSON tools
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
-  const [inputJson, setInputJson] = useState<string>(
-    () => loadLastJson() || jsonPlaygroundConfig.example,
-  );
-  const [output, setOutput] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  // JSON-specific state
   const [jsonPathExpression, setJsonPathExpression] = useState("");
-  const [formatConfig, setFormatConfig] = useMergedConfigState<JsonFormatConfig>(
-    DEFAULT_JSON_FORMAT_CONFIG,
-    savedConfig?.format,
-  );
-  const [minifyConfig, setMinifyConfig] = useMergedConfigState<JsonMinifyConfig>(
-    DEFAULT_JSON_MINIFY_CONFIG,
-    savedConfig?.minify,
-  );
   const [cleanConfig, setCleanConfig] = useMergedConfigState<JsonCleanConfig>(
     DEFAULT_JSON_CLEAN_CONFIG,
-    savedConfig?.clean,
+    savedCleanConfig,
   );
-
-  // Modal state management
-  const configModal = useModalState();
-  const toast = useToast();
-
-  const {
-    debouncedInput: debouncedInputJson,
-    inputTooLarge,
-    inputWarning,
-  } = usePlaygroundInputLifecycle({
-    input: inputJson,
-    saveInput: saveLastJson,
-    toast,
-  });
-
-  useEffect(() => {
-    void import("@/services/formatter/prettier");
-    void import("@/services/json/transform");
-  }, []);
-
-  // Use custom hooks for logic encapsulation
-  const validation = useJsonParser(debouncedInputJson);
   const jsonPathHistory = useJsonPathHistory();
 
-  // Encapsulate all handlers
-  const {
-    handleClearInput,
-    handleLoadExample,
-    handleCopyOutput,
-    handleDownloadInput,
-    handleDownloadOutput,
-    handleFormat,
-    handleMinify,
-    handleClean,
-    handleApplyJsonPath,
-    handleReuseFromHistory,
-  } = useJsonPlaygroundActions({
-    inputJson,
-    setInputJson,
-    output,
-    setOutput,
-    setError,
-    // JSONPath
+  const ctx = usePlaygroundSetup<JsonFormatConfig, JsonMinifyConfig>({
+    playgroundConfig: jsonPlaygroundConfig,
+    loadToolsConfig: loadJsonToolsConfig,
+    loadLastInput: loadLastJson,
+    saveLastInput: saveLastJson,
+    defaultFormatConfig: DEFAULT_JSON_FORMAT_CONFIG,
+    defaultMinifyConfig: DEFAULT_JSON_MINIFY_CONFIG,
+    preload,
+  });
+
+  const validation = useJsonParser(ctx.debouncedInput);
+
+  const actions = useJsonPlaygroundActions({
+    inputJson: ctx.input,
+    setInputJson: ctx.setInput,
+    output: ctx.output,
+    setOutput: ctx.setOutput,
+    setError: ctx.setError,
     jsonPathExpression,
     setJsonPathExpression,
     addToHistory: jsonPathHistory.addToHistory,
-    // Configs
-    formatConfig,
-    minifyConfig,
+    formatConfig: ctx.formatConfig,
+    minifyConfig: ctx.minifyConfig,
     cleanConfig,
-    // Toast
-    toast,
-    inputTooLarge,
-    inputTooLargeMessage: `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`,
+    toast: ctx.toast,
+    inputTooLarge: ctx.inputTooLarge,
+    inputTooLargeMessage: ctx.inputTooLargeMessage,
   });
 
-  usePlaygroundShortcuts({
-    onFormat: handleFormat,
-    onMinify: handleMinify,
-    onClean: handleClean,
-    onCopyOutput: handleCopyOutput,
-    onClearInput: handleClearInput,
-    onOpenConfig: configModal.open,
+  const { toolbarTools, toolbarConfig } = usePlaygroundToolbar({
+    handleFormat: actions.handleFormat,
+    handleMinify: actions.handleMinify,
+    handleClean: actions.handleClean,
+    handleCopyOutput: actions.handleCopyOutput,
+    handleClearInput: actions.handleClearInput,
+    configModal: ctx.configModal,
+    mode: "json" as const,
+    formatConfig: ctx.formatConfig,
+    setFormatConfig: ctx.setFormatConfig,
+    minifyConfig: ctx.minifyConfig,
+    setMinifyConfig: ctx.setMinifyConfig,
+    cleanConfig,
+    setCleanConfig,
+    gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
   });
 
   // Modal state for tips/history (managed locally, not in Toolbar)
@@ -121,21 +92,6 @@ export function JsonPlayground() {
   const handleShowTips = useCallback(() => setJsonPathModal("tips"), []);
   const handleShowHistory = useCallback(() => setJsonPathModal("history"), []);
   const handleCloseJsonPathModal = useCallback(() => setJsonPathModal(null), []);
-
-  const { toolbarTools, toolbarConfig } = useToolbarConfig({
-    mode: "json",
-    handleFormat,
-    handleMinify,
-    handleClean,
-    formatConfig,
-    setFormatConfig,
-    minifyConfig,
-    setMinifyConfig,
-    cleanConfig,
-    setCleanConfig,
-    modal: configModal,
-    gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
-  });
 
   // JSONPath extra content for Toolbar
   const jsonPathSection = useMemo(
@@ -176,7 +132,7 @@ export function JsonPlayground() {
           <Button
             variant="cyan"
             size="md"
-            onClick={handleApplyJsonPath}
+            onClick={actions.handleApplyJsonPath}
             aria-label="Aplicar filtro JSONPath"
             title="Aplicar filtro JSONPath"
           >
@@ -188,7 +144,7 @@ export function JsonPlayground() {
     [
       jsonPathExpression,
       setJsonPathExpression,
-      handleApplyJsonPath,
+      actions.handleApplyJsonPath,
       handleShowHistory,
       handleShowTips,
     ],
@@ -199,17 +155,17 @@ export function JsonPlayground() {
       <PlaygroundLayout
         editors={
           <JsonEditors
-            inputJson={inputJson}
-            output={output}
-            error={error}
+            inputJson={ctx.input}
+            output={ctx.output}
+            error={ctx.error}
             validationState={validation}
-            inputWarning={inputWarning}
-            onInputChange={setInputJson}
-            onClearInput={handleClearInput}
-            onLoadExample={handleLoadExample}
-            onCopyOutput={handleCopyOutput}
-            onDownloadInput={handleDownloadInput}
-            onDownloadOutput={handleDownloadOutput}
+            inputWarning={ctx.inputWarning}
+            onInputChange={ctx.setInput}
+            onClearInput={actions.handleClearInput}
+            onLoadExample={actions.handleLoadExample}
+            onCopyOutput={actions.handleCopyOutput}
+            onDownloadInput={actions.handleDownloadInput}
+            onDownloadOutput={actions.handleDownloadOutput}
           />
         }
         toolbar={
@@ -243,7 +199,7 @@ export function JsonPlayground() {
         history={jsonPathHistory.history}
         onClose={handleCloseJsonPathModal}
         onReuse={(expression) => {
-          handleReuseFromHistory(expression);
+          actions.handleReuseFromHistory(expression);
           setJsonPathModal(null);
         }}
         onDelete={jsonPathHistory.removeFromHistory}

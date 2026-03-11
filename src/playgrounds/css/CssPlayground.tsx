@@ -1,113 +1,73 @@
-import { useState, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { CssEditors } from "./CssEditors";
 import { cssPlaygroundConfig } from "./css.config";
-import { useToast } from "@/hooks/useToast";
-import { useModalState } from "@/hooks/useModalState";
-import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
-import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
-import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
-import { useToolbarConfig } from "@/hooks/useToolbarConfig";
-import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
 import { loadCssToolsConfig, loadLastCss, saveLastCss } from "@/services/storage";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
 
-const savedConfig = loadCssToolsConfig();
+const preload = () => {
+  void import("@/services/formatter/prettier");
+  void import("@/services/css/transform");
+};
 
 export function CssPlayground() {
-  const [inputCss, setInputCss] = useState<string>(
-    () => loadLastCss() || cssPlaygroundConfig.example,
-  );
-  const [output, setOutput] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const [formatConfig, setFormatConfig] = useMergedConfigState<CssFormatConfig>(
-    DEFAULT_CSS_FORMAT_CONFIG,
-    savedConfig?.format,
-  );
-  const [minifyConfig, setMinifyConfig] = useMergedConfigState<CssMinifyConfig>(
-    DEFAULT_CSS_MINIFY_CONFIG,
-    savedConfig?.minify,
-  );
-
-  const configModal = useModalState();
-  const toast = useToast();
-
-  const {
-    debouncedInput: debouncedInputCss,
-    inputTooLarge,
-    inputWarning,
-  } = usePlaygroundInputLifecycle({
-    input: inputCss,
-    saveInput: saveLastCss,
-    toast,
+  const ctx = usePlaygroundSetup<CssFormatConfig, CssMinifyConfig>({
+    playgroundConfig: cssPlaygroundConfig,
+    loadToolsConfig: loadCssToolsConfig,
+    loadLastInput: loadLastCss,
+    saveLastInput: saveLastCss,
+    defaultFormatConfig: DEFAULT_CSS_FORMAT_CONFIG,
+    defaultMinifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
+    preload,
   });
 
-  const validation = useCssParser(debouncedInputCss);
+  const validation = useCssParser(ctx.debouncedInput);
 
-  useEffect(() => {
-    void import("@/services/formatter/prettier");
-    void import("@/services/css/transform");
-  }, []);
-
-  const {
-    handleClearInput,
-    handleLoadExample,
-    handleCopyOutput,
-    handleDownloadInput,
-    handleDownloadOutput,
-    handleFormat,
-    handleMinify,
-  } = useCssPlaygroundActions({
-    inputCss,
-    setInputCss,
-    output,
-    setOutput,
-    setError,
-    inputTooLarge,
-    inputTooLargeMessage: `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`,
-    formatConfig,
-    minifyConfig,
-    toast,
+  const actions = useCssPlaygroundActions({
+    inputCss: ctx.input,
+    setInputCss: ctx.setInput,
+    output: ctx.output,
+    setOutput: ctx.setOutput,
+    setError: ctx.setError,
+    inputTooLarge: ctx.inputTooLarge,
+    inputTooLargeMessage: ctx.inputTooLargeMessage,
+    formatConfig: ctx.formatConfig,
+    minifyConfig: ctx.minifyConfig,
+    toast: ctx.toast,
   });
 
-  usePlaygroundShortcuts({
-    onFormat: handleFormat,
-    onMinify: handleMinify,
-    onCopyOutput: handleCopyOutput,
-    onClearInput: handleClearInput,
-    onOpenConfig: configModal.open,
-  });
-
-  const { toolbarTools, toolbarConfig } = useToolbarConfig({
-    mode: "css",
-    handleFormat,
-    handleMinify,
-    formatConfig,
-    setFormatConfig,
-    minifyConfig,
-    setMinifyConfig,
-    modal: configModal,
+  const { toolbarTools, toolbarConfig } = usePlaygroundToolbar({
+    handleFormat: actions.handleFormat,
+    handleMinify: actions.handleMinify,
+    handleCopyOutput: actions.handleCopyOutput,
+    handleClearInput: actions.handleClearInput,
+    configModal: ctx.configModal,
+    mode: "css" as const,
+    formatConfig: ctx.formatConfig,
+    setFormatConfig: ctx.setFormatConfig,
+    minifyConfig: ctx.minifyConfig,
+    setMinifyConfig: ctx.setMinifyConfig,
   });
 
   return (
     <PlaygroundLayout
       editors={
         <CssEditors
-          inputCss={inputCss}
-          output={output}
-          error={error}
+          inputCss={ctx.input}
+          output={ctx.output}
+          error={ctx.error}
           validationState={validation}
-          inputWarning={inputWarning}
-          onInputChange={setInputCss}
-          onClearInput={handleClearInput}
-          onLoadExample={handleLoadExample}
-          onCopyOutput={handleCopyOutput}
-          onDownloadInput={handleDownloadInput}
-          onDownloadOutput={handleDownloadOutput}
+          inputWarning={ctx.inputWarning}
+          onInputChange={ctx.setInput}
+          onClearInput={actions.handleClearInput}
+          onLoadExample={actions.handleLoadExample}
+          onCopyOutput={actions.handleCopyOutput}
+          onDownloadInput={actions.handleDownloadInput}
+          onDownloadOutput={actions.handleDownloadOutput}
         />
       }
       toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}

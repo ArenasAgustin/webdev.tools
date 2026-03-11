@@ -1,22 +1,18 @@
-import { useState, useEffect } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { JsEditors } from "./JsEditors";
 import { jsPlaygroundConfig } from "./js.config";
-import { useToast } from "@/hooks/useToast";
-import { useModalState } from "@/hooks/useModalState";
-import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
-import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
-import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
-import { useToolbarConfig } from "@/hooks/useToolbarConfig";
-import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 
-const savedConfig = loadJsToolsConfig();
+const preload = () => {
+  void import("@/services/formatter/prettier");
+  void import("@/services/js/transform");
+};
 
 // Disable React Compiler optimization for this component due to dynamic code execution
 /** @react-compiler-skip */
@@ -25,97 +21,60 @@ const savedConfig = loadJsToolsConfig();
  * JavaScript Playground - Execute and test JavaScript code
  */
 export function JsPlayground() {
-  const [inputJs, setInputJs] = useState<string>(() => loadLastJs() || jsPlaygroundConfig.example);
-  const [output, setOutput] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const [formatConfig, setFormatConfig] = useMergedConfigState<JsFormatConfig>(
-    DEFAULT_JS_FORMAT_CONFIG,
-    savedConfig?.format,
-  );
-  const [minifyConfig, setMinifyConfig] = useMergedConfigState<JsMinifyConfig>(
-    DEFAULT_JS_MINIFY_CONFIG,
-    savedConfig?.minify,
-  );
-
-  // Modal state management
-  const configModal = useModalState();
-  const toast = useToast();
-
-  const {
-    debouncedInput: debouncedInputJs,
-    inputTooLarge,
-    inputWarning,
-  } = usePlaygroundInputLifecycle({
-    input: inputJs,
-    saveInput: saveLastJs,
-    toast,
+  const ctx = usePlaygroundSetup<JsFormatConfig, JsMinifyConfig>({
+    playgroundConfig: jsPlaygroundConfig,
+    loadToolsConfig: loadJsToolsConfig,
+    loadLastInput: loadLastJs,
+    saveLastInput: saveLastJs,
+    defaultFormatConfig: DEFAULT_JS_FORMAT_CONFIG,
+    defaultMinifyConfig: DEFAULT_JS_MINIFY_CONFIG,
+    preload,
   });
 
-  useEffect(() => {
-    void import("@/services/formatter/prettier");
-    void import("@/services/js/transform");
-  }, []);
+  const validation = useJsParser(ctx.debouncedInput);
 
-  const validation = useJsParser(debouncedInputJs);
-
-  // Use JS playground actions hook
-  const {
-    handleClearInput,
-    handleLoadExample,
-    handleExecute,
-    handleCopyOutput,
-    handleDownloadInput,
-    handleDownloadOutput,
-    handleFormat,
-    handleMinify,
-  } = useJsPlaygroundActions({
-    inputJs,
-    setInputJs,
-    output,
-    setOutput,
-    setError,
-    inputTooLarge,
-    inputTooLargeMessage: `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`,
-    formatConfig,
-    minifyConfig,
-    toast,
+  const actions = useJsPlaygroundActions({
+    inputJs: ctx.input,
+    setInputJs: ctx.setInput,
+    output: ctx.output,
+    setOutput: ctx.setOutput,
+    setError: ctx.setError,
+    inputTooLarge: ctx.inputTooLarge,
+    inputTooLargeMessage: ctx.inputTooLargeMessage,
+    formatConfig: ctx.formatConfig,
+    minifyConfig: ctx.minifyConfig,
+    toast: ctx.toast,
   });
 
-  usePlaygroundShortcuts({
-    onFormat: handleFormat,
-    onMinify: handleMinify,
-    onCopyOutput: handleCopyOutput,
-    onClearInput: handleClearInput,
-    onOpenConfig: configModal.open,
-  });
-
-  const { toolbarTools, toolbarConfig } = useToolbarConfig({
-    mode: "js",
-    handleFormat,
-    handleMinify,
-    handleExecute,
-    formatConfig,
-    setFormatConfig,
-    minifyConfig,
-    setMinifyConfig,
-    modal: configModal,
+  const { toolbarTools, toolbarConfig } = usePlaygroundToolbar({
+    handleFormat: actions.handleFormat,
+    handleMinify: actions.handleMinify,
+    handleExecute: actions.handleExecute,
+    handleCopyOutput: actions.handleCopyOutput,
+    handleClearInput: actions.handleClearInput,
+    configModal: ctx.configModal,
+    mode: "js" as const,
+    formatConfig: ctx.formatConfig,
+    setFormatConfig: ctx.setFormatConfig,
+    minifyConfig: ctx.minifyConfig,
+    setMinifyConfig: ctx.setMinifyConfig,
   });
 
   return (
     <PlaygroundLayout
       editors={
         <JsEditors
-          inputJs={inputJs}
-          output={output}
-          error={error}
+          inputJs={ctx.input}
+          output={ctx.output}
+          error={ctx.error}
           validationState={validation}
-          inputWarning={inputWarning}
-          onInputChange={setInputJs}
-          onClearInput={handleClearInput}
-          onLoadExample={handleLoadExample}
-          onCopyOutput={handleCopyOutput}
-          onDownloadInput={handleDownloadInput}
-          onDownloadOutput={handleDownloadOutput}
+          inputWarning={ctx.inputWarning}
+          onInputChange={ctx.setInput}
+          onClearInput={actions.handleClearInput}
+          onLoadExample={actions.handleLoadExample}
+          onCopyOutput={actions.handleCopyOutput}
+          onDownloadInput={actions.handleDownloadInput}
+          onDownloadOutput={actions.handleDownloadOutput}
         />
       }
       toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}

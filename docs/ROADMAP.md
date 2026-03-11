@@ -180,16 +180,15 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 8.1 — Hook genérico `usePlaygroundSetup` (~400 líneas eliminadas, riesgo alto):**
 
-- [ ] Crear hook `usePlaygroundSetup<TFormat, TMinify>(playgroundConfig)` que encapsule la inicialización común de los 4 playgrounds:
+- [x] Crear hook `usePlaygroundSetup<TFormat, TMinify>(playgroundConfig)` que encapsule la inicialización común de los 4 playgrounds:
   - `loadXToolsConfig()` + `useMergedConfigState` para format/minify
   - `useState` para input/output/error
   - `useModalState` para configModal
   - `useToast` + `usePlaygroundInputLifecycle`
-  - `useParser` + `usePlaygroundActions` + `usePlaygroundShortcuts`
-  - `useToolbarConfig`
-- [ ] Reducir `CssPlayground.tsx` (116 LOC), `HtmlPlayground.tsx` (116 LOC), `JsPlayground.tsx` (124 LOC) a wrappers de ~30 LOC
-- [ ] `JsonPlayground.tsx` (254 LOC) mantiene extensiones propias (JSONPath, clean, history) pero usa el hook base
-- [ ] Tests: actualizar los 4 `*Playground.branches.test.tsx`
+- [x] Crear hook `usePlaygroundToolbar` que encapsule `usePlaygroundShortcuts` + `useToolbarConfig` con overloads para clean/no-clean
+- [x] Reducir `CssPlayground.tsx`, `HtmlPlayground.tsx`, `JsPlayground.tsx` a wrappers compactos usando `usePlaygroundSetup` + `usePlaygroundToolbar`
+- [x] `JsonPlayground.tsx` mantiene extensiones propias (JSONPath, clean, history) pero usa el hook base
+- [x] Tests: los 4 `*Playground.branches.test.tsx` pasan sin cambios (mocks a nivel de módulo)
 
 **Fase 8.2 — Hook genérico de validación `useAsyncValidator` (~120 líneas eliminadas, riesgo medio):**
 
