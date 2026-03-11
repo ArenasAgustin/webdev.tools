@@ -192,13 +192,13 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 8.2 — Hook genérico de validación `useAsyncValidator` (~120 líneas eliminadas, riesgo medio):**
 
-- [ ] Crear `useAsyncValidator<T>(input, validateFn, errorFormatter)` que encapsule el patrón común de `useCssParser` y `useHtmlParser`
+- [x] Crear `useAsyncValidator<T>(input, validateFn, errorFormatter)` que encapsule el patrón común de `useCssParser` y `useHtmlParser`
   - `useEffect` con cancelled flag + async validation + error compacting
   - Interfaz genérica `ValidationState { isValid: boolean; error: { message: string } | null }`
-- [ ] Refactorizar `useCssParser.ts` y `useHtmlParser.ts` para usar el hook genérico
-- [ ] Consolidar `compactCssError()` y `compactHtmlError()` en `compactTransformError()` (ya existente en `utils/transformError.ts`)
-- [ ] Mantener `useJsParser.ts` y `useJsonParser.ts` como están (tienen lógica específica)
-- [ ] Tests: actualizar `useHtmlParser.test.ts`, agregar `useCssParser.test.ts` si no existe
+- [x] Refactorizar `useCssParser.ts` y `useHtmlParser.ts` para usar el hook genérico
+- [x] Consolidar `compactCssError()` y `compactHtmlError()` en `compactTransformError()` (ya existente en `utils/transformError.ts`)
+- [x] Refactorizar también `useJsParser.ts` y `useJsonParser.ts` para usar `useAsyncValidator` (wrappers con `Promise.resolve`)
+- [x] Tests: `useHtmlParser.test.ts` pasa sin cambios; `useJsonParser.test.ts` actualizado a async (`waitFor`)
 
 **Fase 8.3 — Factory para playground actions `useGenericPlaygroundActions` (~500 líneas eliminadas, riesgo alto):**
 

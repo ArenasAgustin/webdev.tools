@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useJsonParser } from "./useJsonParser";
 
 describe("useJsonParser", () => {
@@ -17,67 +17,86 @@ describe("useJsonParser", () => {
     expect(result.current.error).toBeNull();
   });
 
-  it("should return valid for simple object", () => {
+  it("should return valid for simple object", async () => {
     const { result } = renderHook(() => useJsonParser('{"name": "John"}'));
 
-    expect(result.current.isValid).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isValid).toBe(true);
+    });
     expect(result.current.error).toBeNull();
   });
 
-  it("should return valid for array", () => {
+  it("should return valid for array", async () => {
     const { result } = renderHook(() => useJsonParser("[1, 2, 3]"));
 
-    expect(result.current.isValid).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isValid).toBe(true);
+    });
     expect(result.current.error).toBeNull();
   });
 
-  it("should return invalid for malformed JSON", () => {
+  it("should return invalid for malformed JSON", async () => {
     const { result } = renderHook(() => useJsonParser("{invalid}"));
 
+    await waitFor(() => {
+      expect(result.current.error).not.toBeNull();
+    });
     expect(result.current.isValid).toBe(false);
-    expect(result.current.error).not.toBeNull();
     expect(result.current.error?.message).toBeDefined();
   });
 
-  it("should return invalid for unclosed bracket", () => {
+  it("should return invalid for unclosed bracket", async () => {
     const { result } = renderHook(() => useJsonParser('{"name": "John"'));
 
+    await waitFor(() => {
+      expect(result.current.error).not.toBeNull();
+    });
     expect(result.current.isValid).toBe(false);
-    expect(result.current.error).not.toBeNull();
   });
 
-  it("should return valid for nested object", () => {
+  it("should return valid for nested object", async () => {
     const input = '{"user": {"name": "Jane", "age": 25}}';
     const { result } = renderHook(() => useJsonParser(input));
 
-    expect(result.current.isValid).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isValid).toBe(true);
+    });
     expect(result.current.error).toBeNull();
   });
 
-  it("should update when input changes", () => {
+  it("should update when input changes", async () => {
     const { result, rerender } = renderHook(({ input }) => useJsonParser(input), {
       initialProps: { input: "{invalid}" },
     });
 
-    expect(result.current.isValid).toBe(false);
+    await waitFor(() => {
+      expect(result.current.isValid).toBe(false);
+      expect(result.current.error).not.toBeNull();
+    });
 
     rerender({ input: '{"valid": true}' });
 
-    expect(result.current.isValid).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isValid).toBe(true);
+    });
     expect(result.current.error).toBeNull();
   });
 
-  it("should return valid for primitive values", () => {
+  it("should return valid for primitive values", async () => {
     const { result } = renderHook(() => useJsonParser("123"));
 
-    expect(result.current.isValid).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isValid).toBe(true);
+    });
     expect(result.current.error).toBeNull();
   });
 
-  it("should return valid for null", () => {
+  it("should return valid for null", async () => {
     const { result } = renderHook(() => useJsonParser("null"));
 
-    expect(result.current.isValid).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isValid).toBe(true);
+    });
     expect(result.current.error).toBeNull();
   });
 });
