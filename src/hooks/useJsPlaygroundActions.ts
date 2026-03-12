@@ -33,9 +33,6 @@ async function minifyRunner(input: string, config: JsMinifyConfig) {
   return result.value;
 }
 
-/**
- * Props for JS playground actions hook
- */
 interface UseJsPlaygroundActionsProps {
   inputJs: string;
   setInputJs: (value: string) => void;
@@ -49,10 +46,6 @@ interface UseJsPlaygroundActionsProps {
   toast?: ToastApi;
 }
 
-/**
- * Hook for JavaScript playground actions
- * Provides all handlers for JS code manipulation (execute, format, minify, clear, etc.)
- */
 export function useJsPlaygroundActions({
   inputJs,
   setInputJs,
@@ -82,9 +75,7 @@ export function useJsPlaygroundActions({
     minifyRunner,
   });
 
-  /**
-   * Execute JavaScript code
-   */
+  // Extensión: ejecutar código JS
   const handleExecute = useCallback(() => {
     createValidatedHandler({
       validate: generic.baseActions.createInputValidator,
@@ -113,11 +104,19 @@ export function useJsPlaygroundActions({
   };
 }
 
+function hasLikelyInfiniteLoop(code: string): boolean {
+  const patterns = [
+    /while\s*\(\s*true\s*\)/,
+    /for\s*\(\s*;\s*;\s*\)/,
+    /do\s*\{[\s\S]*\}\s*while\s*\(\s*true\s*\)/,
+  ];
+  return patterns.some((pattern) => pattern.test(code));
+}
+
 async function executeJavaScript(code: string, timeoutMs: number): Promise<string> {
   if (typeof Worker === "undefined") {
     return executeJavaScriptSync(code);
   }
-
   const workerSource = `
     const formatValue = (value) => {
       if (value === null) return "null";
@@ -134,11 +133,9 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
       if (typeof value === "boolean") return String(value);
       return Object.prototype.toString.call(value);
     };
-
     self.onmessage = (event) => {
       const { code } = event.data;
       const logs = [];
-
       self.console.log = (...args) => {
         logs.push(args.map((arg) => formatValue(arg)).join(" "));
       };
@@ -148,17 +145,14 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
       self.console.warn = (...args) => {
         logs.push("WARN: " + args.map((arg) => formatValue(arg)).join(" "));
       };
-
       try {
         const executeUserCode = new Function(code);
         const result = executeUserCode();
-        const outputText = logs.length > 0 ? logs.join("\\n") : "";
-
+        const outputText = logs.length > 0 ? logs.join("\n") : "";
         if (result !== undefined && result !== null && logs.length === 0) {
           self.postMessage({ ok: true, output: formatValue(result) });
           return;
         }
-
         self.postMessage({ ok: true, output: outputText });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -166,41 +160,33 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
       }
     };
   `;
-
   return new Promise((resolve, reject) => {
     const blob = new Blob([workerSource], { type: "application/javascript" });
     const workerUrl = URL.createObjectURL(blob);
     const worker = new Worker(workerUrl);
-
     const cleanup = () => {
       worker.terminate();
       URL.revokeObjectURL(workerUrl);
     };
-
     const timeout = window.setTimeout(() => {
       cleanup();
       reject(new Error("La ejecución superó 5 segundos y fue cancelada"));
     }, timeoutMs);
-
     worker.onmessage = (event: MessageEvent<{ ok: boolean; output?: string; error?: string }>) => {
       clearTimeout(timeout);
       const data = event.data;
       cleanup();
-
       if (!data.ok) {
         reject(new Error(data.error ?? "Error desconocido al ejecutar código"));
         return;
       }
-
       resolve(data.output ?? "");
     };
-
-    worker.onerror = (event) => {
+    worker.onerror = (event: ErrorEvent) => {
       clearTimeout(timeout);
       cleanup();
       reject(new Error(event.message || "Error en el worker de ejecución"));
     };
-
     worker.postMessage({ code });
   });
 }
@@ -210,31 +196,25 @@ function executeJavaScriptSync(code: string): string {
   const originalLog = console.log;
   const originalError = console.error;
   const originalWarn = console.warn;
-
   try {
     console.log = (...args: unknown[]) => {
       logs.push(args.map((arg) => formatValue(arg)).join(" "));
       originalLog(...args);
     };
-
     console.error = (...args: unknown[]) => {
       logs.push(`ERROR: ${args.map((arg) => formatValue(arg)).join(" ")}`);
       originalError(...args);
     };
-
     console.warn = (...args: unknown[]) => {
       logs.push(`WARN: ${args.map((arg) => formatValue(arg)).join(" ")}`);
       originalWarn(...args);
     };
-
     const executeUserCode = new Function(code) as () => unknown;
     const result = executeUserCode();
-
     const outputText = logs.length > 0 ? logs.join("\n") : "";
     if (result !== undefined && result !== null && logs.length === 0) {
       return formatValue(result);
     }
-
     return outputText;
   } finally {
     console.log = originalLog;
@@ -243,19 +223,6 @@ function executeJavaScriptSync(code: string): string {
   }
 }
 
-function hasLikelyInfiniteLoop(code: string): boolean {
-  const patterns = [
-    /while\s*\(\s*true\s*\)/,
-    /for\s*\(\s*;\s*;\s*\)/,
-    /do\s*\{[\s\S]*\}\s*while\s*\(\s*true\s*\)/,
-  ];
-
-  return patterns.some((pattern) => pattern.test(code));
-}
-
-/**
- * Format values for display in console
- */
 function formatValue(value: unknown): string {
   if (value === null) return "null";
   if (value === undefined) return "undefined";

@@ -102,6 +102,7 @@ export function useJsonPlaygroundActions({
     minifyRunner,
   });
 
+  // Extensión: limpiar JSON
   const handleClean = useCallback(() => {
     createTransformHandler({
       runTransformAction: generic.runTransformAction,
@@ -126,6 +127,7 @@ export function useJsonPlaygroundActions({
     });
   }, [generic.runTransformAction, inputJson, cleanConfig, setError, setOutput]);
 
+  // Extensión: aplicar JSONPath
   const handleApplyJsonPath = useCallback(() => {
     void createValidatedHandler({
       validate: generic.baseActions.createInputValidator,
@@ -163,6 +165,7 @@ export function useJsonPlaygroundActions({
     toast,
   ]);
 
+  // Extensión: reutilizar expresión de historial
   const handleReuseFromHistory = useCallback(
     (expression: string) => {
       void createValidatedHandler({
