@@ -2,12 +2,36 @@ import { useCallback } from "react";
 import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
 import { jsService } from "@/services/js/service";
 import { createValidatedHandler } from "@/utils/handlerFactory";
-import { createTransformHandler } from "@/utils/createTransformHandler";
-import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
-import { useTransformActions } from "./useTransformActions";
+import {
+  useGenericPlaygroundActions,
+  type PlaygroundFileConfig,
+} from "./useGenericPlaygroundActions";
+import type { ToastApi } from "./usePlaygroundActions";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 
 const JS_EXEC_TIMEOUT_MS = 5000;
+
+const FILE_CONFIG: PlaygroundFileConfig = {
+  inputFileName: "code.js",
+  outputFileName: "output.txt",
+  mimeType: "application/javascript",
+  language: "Código",
+};
+
+async function formatRunner(input: string, config: JsFormatConfig) {
+  const result = await jsService.format(input, { indentSize: config.indentSize });
+  if (!result.ok) throw new Error(result.error ?? "Error al formatear código");
+  return result.value;
+}
+
+async function minifyRunner(input: string, config: JsMinifyConfig) {
+  const result = await jsService.minify(input, {
+    removeComments: config.removeComments,
+    removeSpaces: config.removeSpaces,
+  });
+  if (!result.ok) throw new Error(result.error ?? "Error al minificar código");
+  return result.value;
+}
 
 /**
  * Props for JS playground actions hook
@@ -41,28 +65,21 @@ export function useJsPlaygroundActions({
   minifyConfig,
   toast,
 }: UseJsPlaygroundActionsProps) {
-  // Get base playground actions
-  const baseActions = usePlaygroundActions({
+  const generic = useGenericPlaygroundActions({
     input: inputJs,
     setInput: setInputJs,
+    output,
+    setOutput,
+    setError,
+    inputTooLarge,
+    inputTooLargeMessage,
+    formatConfig,
+    minifyConfig,
+    toast,
     exampleContent: jsPlaygroundConfig.example,
-    toast,
-    onClearOutputs: useCallback(() => {
-      setOutput("");
-      setError(null);
-    }, [setOutput, setError]),
-    validateInput: useCallback(
-      () =>
-        inputTooLarge
-          ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
-          : null,
-      [inputTooLarge, inputTooLargeMessage],
-    ),
-  });
-
-  const { runTransformAction } = useTransformActions({
-    createInputValidator: baseActions.createInputValidator,
-    toast,
+    fileConfig: FILE_CONFIG,
+    formatRunner,
+    minifyRunner,
   });
 
   /**
@@ -70,7 +87,7 @@ export function useJsPlaygroundActions({
    */
   const handleExecute = useCallback(() => {
     createValidatedHandler({
-      validate: baseActions.createInputValidator,
+      validate: generic.baseActions.createInputValidator,
       run: async () => {
         setError(null);
         setOutput("");
@@ -88,97 +105,11 @@ export function useJsPlaygroundActions({
         setError(message.replace(/^Error:\s*/, ""));
       },
     })();
-  }, [baseActions, inputJs, setOutput, setError, toast]);
-
-  /**
-   * Copy output to clipboard
-   */
-  const handleCopyOutput = useCallback(() => {
-    baseActions.handleCopy({
-      text: output,
-      successMessage: "Resultado copiado al portapapeles",
-      validate: () => (!output ? "No hay resultado para copiar" : null),
-    });
-  }, [baseActions, output]);
-
-  /**
-   * Download input code as file
-   */
-  const handleDownloadInput = useCallback(() => {
-    baseActions.handleDownload({
-      content: inputJs,
-      fileName: "code.js",
-      mimeType: "application/javascript",
-      successMessage: "Descargado como code.js",
-      validate: () => (!inputJs ? "No hay código para descargar" : null),
-    });
-  }, [baseActions, inputJs]);
-
-  /**
-   * Download output as file
-   */
-  const handleDownloadOutput = useCallback(() => {
-    baseActions.handleDownload({
-      content: output,
-      fileName: "output.txt",
-      mimeType: "text/plain",
-      successMessage: "Descargado como output.txt",
-      validate: () => (!output ? "No hay resultado para descargar" : null),
-    });
-  }, [baseActions, output]);
-
-  /**
-   * Format JavaScript code
-   */
-  const handleFormat = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await jsService.format(inputJs, {
-          indentSize: formatConfig.indentSize,
-        });
-        if (!result.ok) throw new Error(result.error ?? "Error al formatear código");
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: formatConfig.autoCopy,
-      successMessage: "Código formateado correctamente",
-      errorMessage: "Error al formatear código",
-    });
-  }, [runTransformAction, inputJs, formatConfig, setError, setOutput]);
-
-  /**
-   * Minify JavaScript code
-   */
-  const handleMinify = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await jsService.minify(inputJs, {
-          removeComments: minifyConfig.removeComments,
-          removeSpaces: minifyConfig.removeSpaces,
-        });
-        if (!result.ok) throw new Error(result.error ?? "Error al minificar código");
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: minifyConfig.autoCopy,
-      successMessage: "Código minificado correctamente",
-      errorMessage: "Error al minificar código",
-    });
-  }, [runTransformAction, inputJs, minifyConfig, setError, setOutput]);
+  }, [generic.baseActions, inputJs, setOutput, setError, toast]);
 
   return {
-    handleClearInput: baseActions.handleClearInput,
-    handleLoadExample: baseActions.handleLoadExample,
+    ...generic,
     handleExecute,
-    handleCopyOutput,
-    handleDownloadInput,
-    handleDownloadOutput,
-    handleFormat,
-    handleMinify,
   };
 }
 

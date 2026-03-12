@@ -2,9 +2,12 @@ import { useCallback } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { createTransformHandler } from "@/utils/createTransformHandler";
-import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
-import { useTransformActions } from "./useTransformActions";
 import { compactTransformError } from "@/utils/transformError";
+import {
+  useGenericPlaygroundActions,
+  type PlaygroundFileConfig,
+} from "./useGenericPlaygroundActions";
+import type { ToastApi } from "./usePlaygroundActions";
 import {
   formatJsonAsync,
   minifyJsonAsync,
@@ -12,6 +15,39 @@ import {
   applyJsonPathAsync,
 } from "@/services/json/worker";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
+
+const FILE_CONFIG: PlaygroundFileConfig = {
+  inputFileName: "data.json",
+  outputFileName: "result.json",
+  mimeType: "application/json",
+  language: "JSON",
+};
+
+const exampleContent = (() => {
+  try {
+    return JSON.stringify(JSON.parse(jsonPlaygroundConfig.example), null, 2);
+  } catch {
+    return jsonPlaygroundConfig.example;
+  }
+})();
+
+async function formatRunner(input: string, config: JsonFormatConfig) {
+  const result = await formatJsonAsync(input, {
+    indentSize: config.indentSize,
+    sortKeys: config.sortKeys,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.value;
+}
+
+async function minifyRunner(input: string, config: JsonMinifyConfig) {
+  const result = await minifyJsonAsync(input, {
+    removeSpaces: config.removeSpaces,
+    sortKeys: config.sortKeys,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.value;
+}
 
 interface UseJsonPlaygroundActionsProps {
   inputJson: string;
@@ -49,107 +85,26 @@ export function useJsonPlaygroundActions({
   cleanConfig,
   toast,
 }: UseJsonPlaygroundActionsProps) {
-  // Get base playground actions
-  const exampleContent = useCallback(() => {
-    try {
-      return JSON.stringify(JSON.parse(jsonPlaygroundConfig.example), null, 2);
-    } catch {
-      return jsonPlaygroundConfig.example;
-    }
-  }, [])();
-
-  const baseActions = usePlaygroundActions({
+  const generic = useGenericPlaygroundActions({
     input: inputJson,
     setInput: setInputJson,
+    output,
+    setOutput,
+    setError,
+    inputTooLarge,
+    inputTooLargeMessage,
+    formatConfig,
+    minifyConfig,
+    toast,
     exampleContent,
-    toast,
-    onClearOutputs: useCallback(() => {
-      setOutput("");
-      setError(null);
-    }, [setOutput, setError]),
-    validateInput: useCallback(
-      () =>
-        inputTooLarge
-          ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
-          : null,
-      [inputTooLarge, inputTooLargeMessage],
-    ),
+    fileConfig: FILE_CONFIG,
+    formatRunner,
+    minifyRunner,
   });
-
-  const { runTransformAction } = useTransformActions({
-    createInputValidator: baseActions.createInputValidator,
-    toast,
-  });
-
-  const handleCopyOutput = useCallback(() => {
-    baseActions.handleCopy({
-      text: output,
-      successMessage: "Resultado copiado al portapapeles",
-      validate: () => (!output ? "No hay resultado para copiar" : null),
-    });
-  }, [baseActions, output]);
-
-  const handleDownloadInput = useCallback(() => {
-    baseActions.handleDownload({
-      content: inputJson,
-      fileName: "data.json",
-      mimeType: "application/json",
-      successMessage: "Descargado como data.json",
-      validate: () => (!inputJson ? "No hay contenido para descargar" : null),
-    });
-  }, [baseActions, inputJson]);
-
-  const handleDownloadOutput = useCallback(() => {
-    baseActions.handleDownload({
-      content: output,
-      fileName: "result.json",
-      mimeType: "application/json",
-      successMessage: "Descargado como result.json",
-      validate: () => (!output ? "No hay resultado para descargar" : null),
-    });
-  }, [baseActions, output]);
-
-  const handleFormat = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await formatJsonAsync(inputJson, {
-          indentSize: formatConfig.indentSize,
-          sortKeys: formatConfig.sortKeys,
-        });
-        if (!result.ok) throw new Error(result.error.message);
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: formatConfig.autoCopy,
-      successMessage: "JSON formateado correctamente",
-      errorMessage: "Error al formatear JSON",
-    });
-  }, [runTransformAction, inputJson, formatConfig, setError, setOutput]);
-
-  const handleMinify = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await minifyJsonAsync(inputJson, {
-          removeSpaces: minifyConfig.removeSpaces,
-          sortKeys: minifyConfig.sortKeys,
-        });
-        if (!result.ok) throw new Error(result.error.message);
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: minifyConfig.autoCopy,
-      successMessage: "JSON minificado correctamente",
-      errorMessage: "Error al minificar JSON",
-    });
-  }, [runTransformAction, inputJson, minifyConfig, setError, setOutput]);
 
   const handleClean = useCallback(() => {
     createTransformHandler({
-      runTransformAction,
+      runTransformAction: generic.runTransformAction,
       run: async () => {
         const result = await cleanJsonAsync(inputJson, {
           removeNull: cleanConfig.removeNull,
@@ -169,11 +124,11 @@ export function useJsonPlaygroundActions({
       successMessage: "JSON limpiado correctamente",
       errorMessage: "Error al limpiar JSON",
     });
-  }, [runTransformAction, inputJson, cleanConfig, setError, setOutput]);
+  }, [generic.runTransformAction, inputJson, cleanConfig, setError, setOutput]);
 
   const handleApplyJsonPath = useCallback(() => {
     void createValidatedHandler({
-      validate: baseActions.createInputValidator,
+      validate: generic.baseActions.createInputValidator,
       run: async () => {
         if (!jsonPathExpression.trim()) {
           throw new Error("Ingresa una expresión JSONPath");
@@ -199,7 +154,7 @@ export function useJsonPlaygroundActions({
       errorMessage: "Error al aplicar JSONPath",
     })();
   }, [
-    baseActions,
+    generic.baseActions,
     jsonPathExpression,
     inputJson,
     addToHistory,
@@ -211,7 +166,7 @@ export function useJsonPlaygroundActions({
   const handleReuseFromHistory = useCallback(
     (expression: string) => {
       void createValidatedHandler({
-        validate: baseActions.createInputValidator,
+        validate: generic.baseActions.createInputValidator,
         run: async () => {
           setJsonPathExpression(expression);
           const result = await applyJsonPathAsync(inputJson, expression);
@@ -235,17 +190,11 @@ export function useJsonPlaygroundActions({
         errorMessage: "Error al aplicar JSONPath",
       })();
     },
-    [baseActions, setJsonPathExpression, inputJson, addToHistory, setOutput, setError, toast],
+    [generic.baseActions, setJsonPathExpression, inputJson, addToHistory, setOutput, setError, toast],
   );
 
   return {
-    handleClearInput: baseActions.handleClearInput,
-    handleLoadExample: baseActions.handleLoadExample,
-    handleCopyOutput,
-    handleDownloadInput,
-    handleDownloadOutput,
-    handleFormat,
-    handleMinify,
+    ...generic,
     handleClean,
     handleApplyJsonPath,
     handleReuseFromHistory,

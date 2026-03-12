@@ -70,6 +70,15 @@ vi.mock("@/utils/download", () => ({
   downloadFile: downloadFileMock as (content: string, filename: string, mimeType: string) => void,
 }));
 
+vi.mock("@/hooks/useJsonPathHistory", () => ({
+  useJsonPathHistory: () => ({
+    history: [],
+    addToHistory: vi.fn(),
+    removeFromHistory: vi.fn(),
+    clearHistory: vi.fn(),
+  }),
+}));
+
 vi.mock("./JsonEditors", () => ({
   JsonEditors: ({
     inputJson,
@@ -125,7 +134,11 @@ vi.mock("@/components/layout/Toolbar", () => ({
     };
     config?: {
       onOpenChange?: (isOpen: boolean) => void;
-      onFormatChange: (config: { indentSize: number; sortKeys: boolean; autoCopy: boolean }) => void;
+      onFormatChange: (config: {
+        indentSize: number;
+        sortKeys: boolean;
+        autoCopy: boolean;
+      }) => void;
       onMinifyChange: (config: {
         removeSpaces: boolean;
         sortKeys: boolean;
@@ -210,7 +223,7 @@ describe("JsonPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("No hay contenido para descargar");
+    expect(toastMocks.error).toHaveBeenCalledWith("No hay JSON para descargar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para descargar");
 
@@ -228,11 +241,12 @@ describe("JsonPlayground branches", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
-    fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
     await waitFor(() => {
       expect(clipboardWriteTextMock).toHaveBeenCalledWith('{\n  "formatted": true\n}');
     });
+
+    fireEvent.click(screen.getByRole("button", { name: "download-output" }));
     expect(downloadFileMock).toHaveBeenCalledWith(
       '{\n  "formatted": true\n}',
       "result.json",

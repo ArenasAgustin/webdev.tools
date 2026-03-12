@@ -1,10 +1,36 @@
-import { useCallback } from "react";
+import { useGenericPlaygroundActions, type PlaygroundFileConfig } from "./useGenericPlaygroundActions";
 import { htmlPlaygroundConfig } from "@/playgrounds/html/html.config";
 import { htmlService } from "@/services/html/service";
-import { createTransformHandler } from "@/utils/createTransformHandler";
-import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
-import { useTransformActions } from "./useTransformActions";
+import type { ToastApi } from "./usePlaygroundActions";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
+
+const FILE_CONFIG: PlaygroundFileConfig = {
+  inputFileName: "index.html",
+  outputFileName: "result.html",
+  mimeType: "text/html",
+  language: "HTML",
+};
+
+async function formatRunner(input: string, config: HtmlFormatConfig) {
+  const result = await htmlService.format(input, {
+    indentSize: config.indentSize,
+    formatCss: config.formatCss,
+    formatJs: config.formatJs,
+  });
+  if (!result.ok) throw new Error(result.error || "Error al formatear HTML");
+  return result.value;
+}
+
+async function minifyRunner(input: string, config: HtmlMinifyConfig) {
+  const result = await htmlService.minify(input, {
+    removeComments: config.removeComments,
+    collapseWhitespace: config.collapseWhitespace,
+    minifyCss: config.minifyCss,
+    minifyJs: config.minifyJs,
+  });
+  if (!result.ok) throw new Error(result.error || "Error al minificar HTML");
+  return result.value;
+}
 
 interface UseHtmlPlaygroundActionsProps {
   inputHtml: string;
@@ -31,105 +57,20 @@ export function useHtmlPlaygroundActions({
   minifyConfig,
   toast,
 }: UseHtmlPlaygroundActionsProps) {
-  const baseActions = usePlaygroundActions({
+  return useGenericPlaygroundActions({
     input: inputHtml,
     setInput: setInputHtml,
+    output,
+    setOutput,
+    setError,
+    inputTooLarge,
+    inputTooLargeMessage,
+    formatConfig,
+    minifyConfig,
+    toast,
     exampleContent: htmlPlaygroundConfig.example,
-    toast,
-    onClearOutputs: useCallback(() => {
-      setOutput("");
-      setError(null);
-    }, [setOutput, setError]),
-    validateInput: useCallback(
-      () =>
-        inputTooLarge
-          ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
-          : null,
-      [inputTooLarge, inputTooLargeMessage],
-    ),
+    fileConfig: FILE_CONFIG,
+    formatRunner,
+    minifyRunner,
   });
-
-  const { runTransformAction } = useTransformActions({
-    createInputValidator: baseActions.createInputValidator,
-    toast,
-  });
-
-  const handleCopyOutput = useCallback(() => {
-    baseActions.handleCopy({
-      text: output,
-      successMessage: "Resultado copiado al portapapeles",
-      validate: () => (!output ? "No hay resultado para copiar" : null),
-    });
-  }, [baseActions, output]);
-
-  const handleDownloadInput = useCallback(() => {
-    baseActions.handleDownload({
-      content: inputHtml,
-      fileName: "index.html",
-      mimeType: "text/html",
-      successMessage: "Descargado como index.html",
-      validate: () => (!inputHtml ? "No hay HTML para descargar" : null),
-    });
-  }, [baseActions, inputHtml]);
-
-  const handleDownloadOutput = useCallback(() => {
-    baseActions.handleDownload({
-      content: output,
-      fileName: "result.html",
-      mimeType: "text/html",
-      successMessage: "Descargado como result.html",
-      validate: () => (!output ? "No hay resultado para descargar" : null),
-    });
-  }, [baseActions, output]);
-
-  const handleFormat = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await htmlService.format(inputHtml, {
-          indentSize: formatConfig.indentSize,
-          formatCss: formatConfig.formatCss,
-          formatJs: formatConfig.formatJs,
-        });
-        if (!result.ok) throw new Error(result.error || "Error al formatear HTML");
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: formatConfig.autoCopy,
-      successMessage: "HTML formateado correctamente",
-      errorMessage: "Error al formatear HTML",
-    });
-  }, [runTransformAction, inputHtml, formatConfig, setError, setOutput]);
-
-  const handleMinify = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await htmlService.minify(inputHtml, {
-          removeComments: minifyConfig.removeComments,
-          collapseWhitespace: minifyConfig.collapseWhitespace,
-          minifyCss: minifyConfig.minifyCss,
-          minifyJs: minifyConfig.minifyJs,
-        });
-        if (!result.ok) throw new Error(result.error || "Error al minificar HTML");
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: minifyConfig.autoCopy,
-      successMessage: "HTML minificado correctamente",
-      errorMessage: "Error al minificar HTML",
-    });
-  }, [runTransformAction, inputHtml, minifyConfig, setError, setOutput]);
-
-  return {
-    handleClearInput: baseActions.handleClearInput,
-    handleLoadExample: baseActions.handleLoadExample,
-    handleCopyOutput,
-    handleDownloadInput,
-    handleDownloadOutput,
-    handleFormat,
-    handleMinify,
-  };
 }

@@ -1,10 +1,30 @@
-import { useCallback } from "react";
-import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
-import { useTransformActions } from "./useTransformActions";
+import { useGenericPlaygroundActions, type PlaygroundFileConfig } from "./useGenericPlaygroundActions";
 import { cssPlaygroundConfig } from "@/playgrounds/css/css.config";
 import { cssService } from "@/services/css/service";
-import { createTransformHandler } from "@/utils/createTransformHandler";
+import type { ToastApi } from "./usePlaygroundActions";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
+
+const FILE_CONFIG: PlaygroundFileConfig = {
+  inputFileName: "styles.css",
+  outputFileName: "result.css",
+  mimeType: "text/css",
+  language: "CSS",
+};
+
+async function formatRunner(input: string, config: CssFormatConfig) {
+  const result = await cssService.format(input, config.indentSize);
+  if (!result.ok) throw new Error(result.error || "Error al formatear CSS");
+  return result.value;
+}
+
+async function minifyRunner(input: string, config: CssMinifyConfig) {
+  const result = await cssService.minify(input, {
+    removeComments: config.removeComments,
+    removeSpaces: config.removeSpaces,
+  });
+  if (!result.ok) throw new Error(result.error || "Error al minificar CSS");
+  return result.value;
+}
 
 interface UseCssPlaygroundActionsProps {
   inputCss: string;
@@ -31,99 +51,20 @@ export function useCssPlaygroundActions({
   minifyConfig,
   toast,
 }: UseCssPlaygroundActionsProps) {
-  const baseActions = usePlaygroundActions({
+  return useGenericPlaygroundActions({
     input: inputCss,
     setInput: setInputCss,
+    output,
+    setOutput,
+    setError,
+    inputTooLarge,
+    inputTooLargeMessage,
+    formatConfig,
+    minifyConfig,
+    toast,
     exampleContent: cssPlaygroundConfig.example,
-    toast,
-    onClearOutputs: useCallback(() => {
-      setOutput("");
-      setError(null);
-    }, [setOutput, setError]),
-    validateInput: useCallback(
-      () =>
-        inputTooLarge
-          ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
-          : null,
-      [inputTooLarge, inputTooLargeMessage],
-    ),
+    fileConfig: FILE_CONFIG,
+    formatRunner,
+    minifyRunner,
   });
-
-  const { runTransformAction } = useTransformActions({
-    createInputValidator: baseActions.createInputValidator,
-    toast,
-  });
-
-  const handleCopyOutput = useCallback(() => {
-    baseActions.handleCopy({
-      text: output,
-      successMessage: "Resultado copiado al portapapeles",
-      validate: () => (!output ? "No hay resultado para copiar" : null),
-    });
-  }, [baseActions, output]);
-
-  const handleDownloadInput = useCallback(() => {
-    baseActions.handleDownload({
-      content: inputCss,
-      fileName: "styles.css",
-      mimeType: "text/css",
-      successMessage: "Descargado como styles.css",
-      validate: () => (!inputCss ? "No hay CSS para descargar" : null),
-    });
-  }, [baseActions, inputCss]);
-
-  const handleDownloadOutput = useCallback(() => {
-    baseActions.handleDownload({
-      content: output,
-      fileName: "result.css",
-      mimeType: "text/css",
-      successMessage: "Descargado como result.css",
-      validate: () => (!output ? "No hay resultado para descargar" : null),
-    });
-  }, [baseActions, output]);
-
-  const handleFormat = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await cssService.format(inputCss, formatConfig.indentSize);
-        if (!result.ok) throw new Error(result.error || "Error al formatear CSS");
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: formatConfig.autoCopy,
-      successMessage: "CSS formateado correctamente",
-      errorMessage: "Error al formatear CSS",
-    });
-  }, [runTransformAction, inputCss, formatConfig, setError, setOutput]);
-
-  const handleMinify = useCallback(() => {
-    createTransformHandler({
-      runTransformAction,
-      run: async () => {
-        const result = await cssService.minify(inputCss, {
-          removeComments: minifyConfig.removeComments,
-          removeSpaces: minifyConfig.removeSpaces,
-        });
-        if (!result.ok) throw new Error(result.error || "Error al minificar CSS");
-        return result.value;
-      },
-      setOutput,
-      setError,
-      autoCopy: minifyConfig.autoCopy,
-      successMessage: "CSS minificado correctamente",
-      errorMessage: "Error al minificar CSS",
-    });
-  }, [runTransformAction, inputCss, minifyConfig, setError, setOutput]);
-
-  return {
-    handleClearInput: baseActions.handleClearInput,
-    handleLoadExample: baseActions.handleLoadExample,
-    handleCopyOutput,
-    handleDownloadInput,
-    handleDownloadOutput,
-    handleFormat,
-    handleMinify,
-  };
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 
 const {
   toastMocks,
@@ -188,7 +188,7 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("No hay código para descargar");
+    expect(toastMocks.error).toHaveBeenCalledWith("No hay Código para descargar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para descargar");
 
@@ -206,14 +206,21 @@ describe("JsPlayground branches", () => {
     await waitFor(() => {
       expect(screen.getByTestId("output-code").textContent).toBe("2");
     });
+    await waitFor(() => {
+      expect(toastMocks.success).toHaveBeenCalledWith("Código ejecutado correctamente");
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
-    fireEvent.click(screen.getByRole("button", { name: "download-output" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
+      await Promise.resolve();
+    });
 
     await waitFor(() => {
       expect(clipboardWriteTextMock).toHaveBeenCalledWith("2");
     });
-    expect(downloadFileMock).toHaveBeenCalledWith("2", "output.txt", "text/plain");
+
+    fireEvent.click(screen.getByRole("button", { name: "download-output" }));
+    expect(downloadFileMock).toHaveBeenCalledWith("2", "output.txt", "application/javascript");
   });
 
   it("runs format and minify success and error flows", async () => {
