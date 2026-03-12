@@ -5,8 +5,9 @@ test.describe("Smoke", () => {
     await page.goto("/");
 
     await expect(
-      page.getByRole("heading", { name: "Herramientas para desarrolladores web" }),
+      page.getByRole("heading", { name: "Formatea, valida y transforma tu código al instante." }),
     ).toBeVisible();
+    await expect(page.getByText("Herramientas para desarrolladores web")).toBeVisible();
 
     await expect(page.locator('a[href="/playground/json"]')).toBeVisible();
     await expect(page.locator('a[href="/playground/js"]')).toBeVisible();

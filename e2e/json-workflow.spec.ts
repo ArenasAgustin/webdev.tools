@@ -211,6 +211,7 @@ test.describe("JSON workflow", () => {
     await page.waitForTimeout(200);
 
     const inputEditor = page.locator(".monaco-editor").first();
+    await inputEditor.waitFor({ state: "visible", timeout: 10000 });
     await inputEditor.click();
     await page.keyboard.type("invalid json");
 
