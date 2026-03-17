@@ -202,16 +202,16 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 8.3 — Factory para playground actions `useGenericPlaygroundActions` (~500 líneas eliminadas, riesgo alto):**
 
-- [ ] Crear hook base `useGenericPlaygroundActions<TFormat, TMinify>(config)` que encapsule:
+- [x] Crear hook base `useGenericPlaygroundActions<TFormat, TMinify>(config)` que encapsule:
   - `handleCopyOutput` con toast
   - `handleDownloadInput` / `handleDownloadOutput`
   - `handleFormat` / `handleMinify` vía `createTransformHandler`
   - `handleClearInput`
   - `handleLoadExample`
-- [ ] Parametrizar por: service, nombres de operación, configuraciones, extensiones de archivo
-- [ ] Refactorizar `useCssPlaygroundActions.ts` (129 LOC) y `useHtmlPlaygroundActions.ts` (135 LOC) a configuraciones mínimas
-- [ ] `useJsPlaygroundActions.ts` (342 LOC) y `useJsonPlaygroundActions.ts` (253 LOC) extienden el hook base con operaciones propias (execute, clean, JSONPath)
-- [ ] Tests: actualizar los 4 `*PlaygroundActions.test.ts`
+- [x] Parametrizar por: service, nombres de operación, configuraciones, extensiones de archivo
+- [x] Refactorizar `useCssPlaygroundActions.ts` (129 LOC) y `useHtmlPlaygroundActions.ts` (135 LOC) a configuraciones mínimas
+- [x] `useJsPlaygroundActions.ts` (342 LOC) y `useJsonPlaygroundActions.ts` (253 LOC) extienden el hook base con operaciones propias (execute, clean, JSONPath)
+- [x] Tests: actualizar los 4 `*PlaygroundActions.test.ts` y agregar test dedicado para el hook base
 
 ### Fase 9 — Generalización de Services y Workers
 
