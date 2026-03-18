@@ -1,6 +1,6 @@
 import type { Result, JsonError } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
-import { runCssWorker } from "@/services/css/workerClient";
+import { cssWorkerAdapter } from "@/services/css/workerClient";
 import type { CssMinifyOptions, CssWorkerPayload } from "@/services/css/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 
@@ -11,7 +11,7 @@ const runCssOperation = (
   executeWorkerOperation({
     input: payload.input,
     payload,
-    runWorker: runCssWorker,
+    runWorker: cssWorkerAdapter.run,
     runSync: async () => {
       const result = await runSync();
       if (result.ok) {

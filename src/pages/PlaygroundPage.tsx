@@ -4,8 +4,6 @@ import { PlaygroundLoader } from "@/components/common/PlaygroundLoader";
 import { PlaygroundSidebar } from "@/components/layout/PlaygroundSidebar";
 import { getPlaygroundById } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
-import { preloadJsonWorker } from "@/services/json/workerClient";
-import { preloadJsWorker } from "@/services/js/workerClient";
 
 export function PlaygroundPage() {
   const { playgroundId } = useParams();
@@ -18,8 +16,6 @@ export function PlaygroundPage() {
 
     const preloadMonaco = () => {
       void import("@monaco-editor/react");
-      preloadJsonWorker();
-      preloadJsWorker();
     };
 
     const requestIdle = globalThis.requestIdleCallback;

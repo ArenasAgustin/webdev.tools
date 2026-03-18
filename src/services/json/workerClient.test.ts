@@ -3,8 +3,8 @@ import { defineWorkerClientTests } from "@/test/workerHarness";
 defineWorkerClientTests({
   name: "workerClient",
   loadClient: async () => {
-    const { runJsonWorker } = await import("./workerClient");
-    return runJsonWorker;
+    const { jsonWorkerAdapter } = await import("./workerClient");
+    return jsonWorkerAdapter.run;
   },
   initialPayload: { action: "minify", input: '{ "a": 1 }' },
   reusePayloads: [

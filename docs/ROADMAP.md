@@ -217,19 +217,22 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 9.1 — Factory para worker clients `createWorkerClient` (~70 líneas eliminadas, riesgo bajo):**
 
-- [ ] Crear factory `createWorkerClient<TInput, TOutput>(workerUrl)` que encapsule el patrón idéntico de los 4 `workerClient.ts` (23 LOC c/u)
-- [ ] Refactorizar los 4 `workerClient.ts` a una sola línea de configuración
-- [ ] Tests: reutilizar tests existentes, agregar test del factory
+- [x] Crear factory `createWorkerClient` que encapsule el patrón idéntico de los 4 `workerClient.ts` — implementado en `src/services/worker/clientFactory.ts` (worker persistente con mapa de pending) y `src/services/worker/adapter.ts` (`createPlaygroundWorkerAdapter`) ✅
+- [x] Crear `createWorkerAdapter<TPayload, TResponse>` — wrapper simplificado de 2 type params que elimina la necesidad de exponer `TRequest` en los `workerClient.ts` ✅
+- [x] Refactorizar los 4 `workerClient.ts` a 7 líneas usando `createWorkerAdapter` (sin `buildRequest`, sin `unavailableMessage`, sin import de `XWorkerRequest`) ✅
+- [x] Tests: reutilizar tests existentes, agregar test del factory (`adapter.test.ts`) ✅
 
 **Fase 9.2 — Tipos genéricos de worker (~40 líneas eliminadas, riesgo bajo):**
 
-- [ ] Crear `WorkerMessage<TData>` y `WorkerResult<TData>` genéricos en `src/types/worker.ts`
-- [ ] Reemplazar los 4 `worker.types.ts` idénticos por instancias tipadas del genérico
-- [ ] Verificar que los 4 `worker.ts` y `worker.test.ts` siguen pasando
+- [x] Crear tipos genéricos `WorkerPayloadBase`, `WorkerRequest<TPayload>` y `WorkerResponse<TError>` en `src/services/worker/types.ts` ✅
+- [x] Refactorizar los 4 `worker.types.ts` para usar los tipos genéricos como base (cada uno define su payload específico y alias `WorkerRequest<payload>` / `WorkerResponse<error>`) ✅
+- [x] Verificar que los 4 `worker.ts` y `worker.test.ts` siguen pasando ✅
 
 **Fase 9.3 — Factory para services `createPlaygroundService` (~50 líneas eliminadas, riesgo bajo):**
 
-- [ ] Crear factory `createPlaygroundService<TFormat, TMinify>(workerClient, formatFn, minifyFn, validator)` en `src/services/`
+- [x] Definir interfaz `PlaygroundTransformService<TFormat, TMinify, TError>` en `src/services/transform.ts` con contrato `format/minify/validate` ✅
+- [x] Crear helper `createNonEmptyValidator` para validación compartida ✅
+- [ ] Crear factory `createPlaygroundService<TFormat, TMinify>(workerClient, formatFn, minifyFn, validator)` en `src/services/` para reducir boilerplate en los 4 `service.ts`
 - [ ] Refactorizar los 4 `service.ts` (16-35 LOC c/u) para usar el factory
 - [ ] Tests: reutilizar tests existentes
 

@@ -2,7 +2,7 @@ import type { Result, JsonError } from "@/types/common";
 import type { JsonFormatOptions, JsonMinifyOptions } from "@/services/json/transform";
 import { cleanJson, formatJson, minifyJson, type CleanOptions } from "@/services/json/transform";
 import { applyJsonPath } from "@/services/json/jsonPath";
-import { runJsonWorker } from "@/services/json/workerClient";
+import { jsonWorkerAdapter } from "@/services/json/workerClient";
 import type { JsonWorkerPayload } from "@/services/json/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 
@@ -13,7 +13,7 @@ const runJsonTransformOp = (
   executeWorkerOperation({
     input: payload.input,
     payload,
-    runWorker: runJsonWorker,
+    runWorker: jsonWorkerAdapter.run,
     runSync: async () => {
       const result = await runSync();
       if (result.ok) {
@@ -37,7 +37,7 @@ const runJsonOperation = (
   executeWorkerOperation({
     input: payload.input,
     payload,
-    runWorker: runJsonWorker,
+    runWorker: jsonWorkerAdapter.run,
     runSync,
     toError: (message): JsonError => ({ message }),
   });

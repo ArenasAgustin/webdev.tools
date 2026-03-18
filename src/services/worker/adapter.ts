@@ -42,3 +42,20 @@ export function createPlaygroundWorkerAdapter<
     terminate: () => run.terminate(),
   };
 }
+
+/**
+ * Crea un adapter de worker para playgrounds que usan el patrón estándar
+ * (buildRequest = `{ id, ...payload }`, sin customizaciones).
+ *
+ * Versión simplificada de `createPlaygroundWorkerAdapter` que solo requiere
+ * los tipos de payload y respuesta, sin necesidad de exponer el tipo de request.
+ */
+export function createWorkerAdapter<
+  TPayload extends WorkerPayloadBase,
+  TResponse extends WorkerResponse,
+>(options: {
+  workerUrl: URL;
+  idPrefix: string;
+}): PlaygroundWorkerAdapter<TPayload, TResponse> {
+  return createPlaygroundWorkerAdapter<TPayload, WorkerRequest<TPayload>, TResponse>(options);
+}

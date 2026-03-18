@@ -1,6 +1,6 @@
 import type { Result, JsonError } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
-import { runHtmlWorker } from "@/services/html/workerClient";
+import { htmlWorkerAdapter } from "@/services/html/workerClient";
 import type { HtmlMinifyOptions, HtmlWorkerPayload } from "@/services/html/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 
@@ -11,7 +11,7 @@ const runHtmlOperation = (
   executeWorkerOperation({
     input: payload.input,
     payload,
-    runWorker: runHtmlWorker,
+    runWorker: htmlWorkerAdapter.run,
     runSync: async () => {
       const result = await runSync();
       if (result.ok) {

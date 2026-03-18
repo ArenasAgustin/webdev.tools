@@ -3,8 +3,8 @@ import { defineWorkerClientTests } from "@/test/workerHarness";
 defineWorkerClientTests({
   name: "css workerClient",
   loadClient: async () => {
-    const { runCssWorker } = await import("./workerClient");
-    return runCssWorker;
+    const { cssWorkerAdapter } = await import("./workerClient");
+    return cssWorkerAdapter.run;
   },
   initialPayload: { action: "minify", input: ".card { color: red; }" },
   reusePayloads: [

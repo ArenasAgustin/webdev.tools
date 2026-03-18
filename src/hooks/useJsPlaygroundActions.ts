@@ -148,7 +148,7 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
       try {
         const executeUserCode = new Function(code);
         const result = executeUserCode();
-        const outputText = logs.length > 0 ? logs.join("\n") : "";
+        const outputText = logs.length > 0 ? logs.join("\\n") : "";
         if (result !== undefined && result !== null && logs.length === 0) {
           self.postMessage({ ok: true, output: formatValue(result) });
           return;

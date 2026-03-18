@@ -1,6 +1,6 @@
 import type { Result } from "@/types/common";
 import type { JsonError } from "@/types/common";
-import { runJsWorker } from "@/services/js/workerClient";
+import { jsWorkerAdapter } from "@/services/js/workerClient";
 import type { JsWorkerPayload } from "@/services/js/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 import type { IndentStyle } from "@/types/format";
@@ -13,7 +13,7 @@ const runJsOperation = (
   executeWorkerOperation({
     input: payload.input,
     payload,
-    runWorker: runJsWorker,
+    runWorker: jsWorkerAdapter.run,
     runSync: async () => {
       const result = await runSync();
       if (result.ok) {

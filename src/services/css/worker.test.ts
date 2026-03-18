@@ -1,15 +1,17 @@
 import { vi } from "vitest";
 import { defineWorkerServiceTests } from "@/test/workerHarness";
 import { formatCssAsync, minifyCssAsync } from "./worker";
-import * as workerClient from "./workerClient";
 
+import * as workerClient from "./workerClient";
 vi.mock("./workerClient", () => ({
-  runCssWorker: vi.fn(),
+  cssWorkerAdapter: {
+    run: vi.fn(),
+  },
 }));
 
 defineWorkerServiceTests({
   name: "css worker async services",
-  runWorkerMock: vi.mocked(workerClient.runCssWorker) as unknown as {
+  runWorkerMock: vi.mocked(workerClient.cssWorkerAdapter.run) as unknown as {
     mockResolvedValue: (value: unknown) => void;
     mockRejectedValue: (value: unknown) => void;
   },
