@@ -32,6 +32,32 @@ export interface PlaygroundTransformService<
   validate: ValidateFn<TValidateError>;
 }
 
+/**
+ * Factory para crear un PlaygroundTransformService estándar a partir de funciones
+ * de worker async que devuelven `Result<string, { message: string }>`.
+ *
+ * Elimina el boilerplate de `result.ok ? result : { ok: false, error: result.error.message }`
+ * repetido en cada service.ts.
+ */
+export function createPlaygroundService<TFormat, TMinify>(config: {
+  format: (input: string, options?: TFormat) => Promise<Result<string, { message: string }>>;
+  minify: (input: string, options?: TMinify) => Promise<Result<string, { message: string }>>;
+  emptyMessage: string;
+  validate?: ValidateFn<string>;
+}): PlaygroundTransformService<TFormat, TMinify, string> {
+  return {
+    format: async (input, options) => {
+      const result = await config.format(input, options);
+      return result.ok ? result : { ok: false, error: result.error.message };
+    },
+    minify: async (input, options) => {
+      const result = await config.minify(input, options);
+      return result.ok ? result : { ok: false, error: result.error.message };
+    },
+    validate: config.validate ?? createNonEmptyValidator(() => config.emptyMessage),
+  };
+}
+
 export function createNonEmptyValidator<TError>(errorFactory: () => TError): ValidateFn<TError> {
   return (input: string) => {
     if (!input.trim()) {

@@ -1,7 +1,6 @@
 import type { HtmlMinifyConfig } from "@/types/html";
 import type { IndentStyle } from "@/types/format";
-import type { PlaygroundTransformService } from "@/services/transform";
-import { createNonEmptyValidator } from "@/services/transform";
+import { createPlaygroundService } from "@/services/transform";
 import { formatHtmlAsync, minifyHtmlAsync } from "@/services/html/worker";
 
 export interface HtmlFormatOptions {
@@ -15,22 +14,15 @@ export type HtmlMinifyOptions = Pick<
   "removeComments" | "collapseWhitespace" | "minifyCss" | "minifyJs"
 >;
 
-export const htmlService: PlaygroundTransformService<HtmlFormatOptions, HtmlMinifyOptions, string> = {
-  format: async (input, options = {}) => {
-    const result = await formatHtmlAsync(input, {
-      indentSize: options.indentSize,
-      formatCss: options.formatCss,
-      formatJs: options.formatJs,
-    });
-
-    return result.ok ? result : { ok: false, error: result.error.message };
-  },
-  minify: async (
-    input,
-    options = { removeComments: true, collapseWhitespace: true, minifyCss: true, minifyJs: true },
-  ) => {
-    const result = await minifyHtmlAsync(input, options);
-    return result.ok ? result : { ok: false, error: result.error.message };
-  },
-  validate: createNonEmptyValidator(() => "No hay HTML para procesar"),
+const DEFAULT_HTML_MINIFY_OPTIONS: HtmlMinifyOptions = {
+  removeComments: true,
+  collapseWhitespace: true,
+  minifyCss: true,
+  minifyJs: true,
 };
+
+export const htmlService = createPlaygroundService<HtmlFormatOptions, HtmlMinifyOptions>({
+  format: (input, options) => formatHtmlAsync(input, options ?? {}),
+  minify: (input, options) => minifyHtmlAsync(input, options ?? DEFAULT_HTML_MINIFY_OPTIONS),
+  emptyMessage: "No hay HTML para procesar",
+});
