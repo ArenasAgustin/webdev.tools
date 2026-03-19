@@ -276,20 +276,20 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] `compactTransformError()` en `utils/transformError.ts` es la única función — usada por `useAsyncValidator`, `createTransformHandler` y `useJsonPlaygroundActions` ✅
 - [x] Sin funciones locales duplicadas en los hooks ✅
 
-**Fase 12.4 — Tests compartidos y cobertura (~riesgo medio):**
+**Fase 12.4 — Tests compartidos y cobertura (~riesgo medio):** ✅
 
-- [ ] Crear utilidades de test compartidas para mocks comunes (Monaco Editor, workers, localStorage, toast)
-- [ ] Agregar tests para componentes sin cobertura: `PlaygroundLoader`, `PlaygroundLayout`, `Panel`, `Header`
-- [ ] Agregar tests para `LazyCodeEditor` y `ExpandedEditorModal` (Suspense boundaries)
-- [ ] Parametrizar tests de `*Editors.test.tsx` que repiten el mismo patrón
+- [x] Crear utilidades de test compartidas para mocks comunes (`src/test-utils/editorMocks.ts`) ✅
+- [x] Agregar tests para componentes sin cobertura: `PlaygroundLoader`, `PlaygroundLayout`, `Panel` ✅
+- [x] Agregar tests para `LazyCodeEditor` y `ExpandedEditorModal` (Suspense boundaries) ✅
+- [x] Parametrizar `GenericEditors.test.tsx` con `describe.each` para los 4 lenguajes ✅
 
 ### Fase 13 — Optimización de Performance y Bundle
 
-**Fase 13.1 — Preloading inteligente (~riesgo bajo):**
+**Fase 13.1 — Preloading inteligente (~riesgo bajo):** ✅
 
-- [ ] Extraer `useIdleCallback(fn, opts)` hook para eliminar duplicación de `requestIdleCallback` fallback entre `Home.tsx` y `PlaygroundPage.tsx`
-- [ ] Hacer el preloading de workers específico por playground (solo precargar el worker del playground actual, no todos)
-- [ ] Consolidar el patrón de `useEffect(() => { void import(...) })` de preload de servicios en una utilidad
+- [x] Extraer `useIdleCallback(fn, opts)` hook — elimina la duplicación de `requestIdleCallback` + fallback `setTimeout` entre `Home.tsx` y `PlaygroundPage.tsx` ✅
+- [x] Preloading de workers específico por playground — cada `preload()` ahora incluye `import("@/services/*/workerClient")` del playground actual ✅
+- [x] Consolidar el patrón de preload vía `useIdleCallback` en `usePlaygroundSetup` — el preload de servicios se ejecuta durante idle time en lugar de inmediatamente ✅
 
 **Fase 13.2 — Loading states en operaciones (~riesgo medio):**
 

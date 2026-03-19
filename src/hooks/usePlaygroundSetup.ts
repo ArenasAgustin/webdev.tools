@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useModalState } from "@/hooks/useModalState";
 import { useToast } from "@/hooks/useToast";
 import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
 import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
+import { useIdleCallback } from "@/hooks/useIdleCallback";
 import { useToolbarConfig } from "@/hooks/useToolbarConfig";
 import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
 import type { PlaygroundConfig } from "@/types/playground";
@@ -55,9 +56,7 @@ export function usePlaygroundSetup<TFormat extends object, TMinify extends objec
     toast,
   });
 
-  useEffect(() => {
-    preload();
-  }, [preload]);
+  useIdleCallback(preload, { timeout: 2000 });
 
   return {
     input,

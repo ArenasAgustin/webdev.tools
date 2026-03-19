@@ -12,6 +12,7 @@ import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/cs
 const preload = () => {
   void import("@/services/formatter/prettier");
   void import("@/services/css/transform");
+  void import("@/services/css/workerClient");
 };
 
 export function CssPlayground() {

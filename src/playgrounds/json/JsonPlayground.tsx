@@ -25,6 +25,7 @@ const savedCleanConfig = loadJsonToolsConfig()?.clean;
 const preload = () => {
   void import("@/services/formatter/prettier");
   void import("@/services/json/transform");
+  void import("@/services/json/workerClient");
 };
 
 /**

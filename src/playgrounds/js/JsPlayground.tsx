@@ -12,6 +12,7 @@ import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
 const preload = () => {
   void import("@/services/formatter/prettier");
   void import("@/services/js/transform");
+  void import("@/services/js/workerClient");
 };
 
 // Disable React Compiler optimization for this component due to dynamic code execution

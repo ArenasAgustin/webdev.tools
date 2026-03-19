@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PlaygroundCard } from "@/components/layout/PlaygroundCard";
 import {
@@ -7,6 +6,7 @@ import {
   preloadPlaygroundById,
 } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { useIdleCallback } from "@/hooks/useIdleCallback";
 
 export function Home() {
   useDocumentMeta({
@@ -18,32 +18,9 @@ export function Home() {
     ogUrl: "https://webdev.tools/",
   });
 
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    let idleId: number | null = null;
-
-    const preload = () => {
-      void preloadAllPlaygrounds();
-    };
-
-    const requestIdle = globalThis.requestIdleCallback;
-    const cancelIdle = globalThis.cancelIdleCallback;
-
-    if (typeof requestIdle === "function") {
-      idleId = requestIdle(preload, { timeout: 1500 });
-    } else {
-      timeoutId = globalThis.setTimeout(preload, 1200);
-    }
-
-    return () => {
-      if (idleId !== null && typeof cancelIdle === "function") {
-        cancelIdle(idleId);
-      }
-      if (timeoutId !== null) {
-        globalThis.clearTimeout(timeoutId);
-      }
-    };
-  }, []);
+  useIdleCallback(() => {
+    void preloadAllPlaygrounds();
+  }, { timeout: 1500 });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white">

@@ -18,6 +18,7 @@ import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/
 const preload = () => {
   void import("@/services/formatter/prettier");
   void import("@/services/html/transform");
+  void import("@/services/html/workerClient");
 };
 
 function inspectDom(source: string): string | null {
