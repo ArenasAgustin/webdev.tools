@@ -263,12 +263,12 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Agregar `ErrorBoundary` global en `App.tsx` como safety net ✅
 - [x] Tests: 5 casos cubriendo render normal, fallback, nombre, reset y logging ✅
 
-**Fase 12.2 — Accesibilidad (`aria-live` en toasts, foco en modales) (~riesgo bajo):**
+**Fase 12.2 — Accesibilidad (`aria-live` en toasts, foco en modales) (~riesgo bajo):** ✅
 
-- [ ] Agregar `role="status"` y `aria-live="polite"` al `ToastContainer`
-- [ ] Mejorar restauración de foco en `Modal.tsx`: guardar el elemento que abrió el modal y devolver foco al cerrar
-- [ ] Verificar contraste WCAG AA en textos con opacidad baja (`/20`, `/30`)
-- [ ] Asegurar que `PlaygroundSidebar` tiene landmarks ARIA correctos (`nav`, `aria-label`)
+- [x] `ToastContainer`: `role="status"`, `aria-live="polite"`, `aria-label="Notificaciones"` ✅
+- [x] `Modal.tsx`: captura `document.activeElement` al abrir y restaura foco al cerrar (cleanup del `useEffect`) ✅
+- [ ] Contraste WCAG AA en textos con opacidad baja — verificación visual manual pendiente
+- [x] `PlaygroundSidebar`: `<aside aria-label="Panel de navegación" aria-hidden={!isOpen}>` + `<nav aria-label="Playgrounds disponibles">` ✅
 
 **Fase 12.3 — Consolidación de utilidades de error (~riesgo bajo):**
 

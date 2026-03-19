@@ -14,6 +14,8 @@ export function PlaygroundSidebar({
 }: PlaygroundSidebarProps) {
   return (
     <aside
+      aria-label="Panel de navegación"
+      aria-hidden={!isOpen}
       className={`fixed inset-y-0 right-0 z-40 w-64 transform border-l border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur-xl transition duration-300 lg:rounded-l-2xl ${
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
@@ -43,7 +45,7 @@ export function PlaygroundSidebar({
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-4 py-6">
+        <nav aria-label="Playgrounds disponibles" className="flex-1 overflow-y-auto px-4 py-6">
           <p className="px-2 text-xs uppercase tracking-[0.25em] text-white/50">Playgrounds</p>
           <ul className="mt-4 space-y-2">
             {playgroundRegistry.map((playground) => {

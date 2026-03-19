@@ -27,6 +27,16 @@ export function Modal({
   const titleId = useId();
   const focusTrapRef = useFocusTrap(isOpen);
 
+  // Return focus to the element that opened the modal when it closes
+  useEffect(() => {
+    if (isOpen) {
+      const opener = document.activeElement as HTMLElement | null;
+      return () => {
+        opener?.focus();
+      };
+    }
+  }, [isOpen]);
+
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
