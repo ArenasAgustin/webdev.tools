@@ -232,9 +232,9 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 - [x] Definir interfaz `PlaygroundTransformService<TFormat, TMinify, TError>` en `src/services/transform.ts` con contrato `format/minify/validate` ✅
 - [x] Crear helper `createNonEmptyValidator` para validación compartida ✅
-- [ ] Crear factory `createPlaygroundService<TFormat, TMinify>(workerClient, formatFn, minifyFn, validator)` en `src/services/` para reducir boilerplate en los 4 `service.ts`
-- [ ] Refactorizar los 4 `service.ts` (16-35 LOC c/u) para usar el factory
-- [ ] Tests: reutilizar tests existentes
+- [x] Crear factory `createPlaygroundService<TFormat, TMinify>` en `src/services/transform.ts` — elimina el boilerplate `result.ok ? result : { ok: false, error: result.error.message }` repetido en los 4 services ✅
+- [x] Refactorizar los 4 `service.ts` para usar el factory (CSS: 14 LOC, JS: 9 LOC, HTML: 29 LOC, JSON: 20 LOC) ✅
+- [x] Tests: 381 tests pasando sin cambios ✅
 
 ### Fase 10 — Eliminación de Editores Wrapper Redundantes
 
