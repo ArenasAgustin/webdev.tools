@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { PlaygroundLoader } from "@/components/common/PlaygroundLoader";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { PlaygroundSidebar } from "@/components/layout/PlaygroundSidebar";
 import { getPlaygroundById } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
@@ -98,9 +99,11 @@ export function PlaygroundPage() {
           </header>
 
           <div className="flex-1 min-h-0 flex flex-col gap-4">
-            <Suspense fallback={<PlaygroundLoader name={playground.name} />}>
-              <PlaygroundComponent />
-            </Suspense>
+            <ErrorBoundary name={playground.name}>
+              <Suspense fallback={<PlaygroundLoader name={playground.name} />}>
+                <PlaygroundComponent />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </div>
       </div>

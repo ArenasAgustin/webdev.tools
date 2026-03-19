@@ -256,12 +256,12 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 ### Fase 12 — Calidad y Robustez
 
-**Fase 12.1 — Error Boundaries (~riesgo medio):**
+**Fase 12.1 — Error Boundaries (~riesgo medio):** ✅
 
-- [ ] Crear componente `ErrorBoundary` con fallback UI amigable
-- [ ] Envolver cada playground en un Error Boundary para evitar crash cascada
-- [ ] Agregar Error Boundary a nivel de `App.tsx` como safety net global
-- [ ] Tests: verificar que errores en un playground no rompen la app
+- [x] Crear componente `ErrorBoundary` con fallback UI amigable (reintentar + link a inicio) ✅
+- [x] Envolver `<PlaygroundComponent>` en `PlaygroundPage.tsx` para aislar crashes por playground ✅
+- [x] Agregar `ErrorBoundary` global en `App.tsx` como safety net ✅
+- [x] Tests: 5 casos cubriendo render normal, fallback, nombre, reset y logging ✅
 
 **Fase 12.2 — Accesibilidad (`aria-live` en toasts, foco en modales) (~riesgo bajo):**
 
