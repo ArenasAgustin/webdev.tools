@@ -1,6 +1,6 @@
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
-import { CssEditors } from "./CssEditors";
+import { GenericEditors } from "@/components/editor/GenericEditors";
 import { cssPlaygroundConfig } from "./css.config";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
@@ -56,12 +56,18 @@ export function CssPlayground() {
   return (
     <PlaygroundLayout
       editors={
-        <CssEditors
-          inputCss={ctx.input}
+        <GenericEditors
+          input={ctx.input}
           output={ctx.output}
           error={ctx.error}
           validationState={validation}
           inputWarning={ctx.inputWarning}
+          language="css"
+          inputTitle="CSS"
+          inputPlaceholder="Escribe tu CSS aquí..."
+          waitingLabel="Esperando CSS..."
+          validLabel="CSS válido"
+          invalidLabel="CSS inválido"
           onInputChange={ctx.setInput}
           onClearInput={actions.handleClearInput}
           onLoadExample={actions.handleLoadExample}

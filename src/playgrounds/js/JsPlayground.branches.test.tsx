@@ -47,9 +47,9 @@ vi.mock("@/utils/download", () => ({
   downloadFile: downloadFileMock as (content: string, filename: string, mimeType: string) => void,
 }));
 
-vi.mock("./JsEditors", () => ({
-  JsEditors: ({
-    inputJs,
+vi.mock("@/components/editor/GenericEditors", () => ({
+  GenericEditors: ({
+    input,
     output,
     error,
     validationState,
@@ -61,7 +61,7 @@ vi.mock("./JsEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputJs: string;
+    input: string;
     output: string;
     error: string | null;
     validationState: { isValid: boolean; error: { message: string } | null };
@@ -74,7 +74,7 @@ vi.mock("./JsEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-code">{inputJs}</p>
+      <p data-testid="input-code">{input}</p>
       <p data-testid="output-code">{output}</p>
       <p data-testid="error-code">{error}</p>
       <p data-testid="validation-valid">{String(validationState.isValid)}</p>

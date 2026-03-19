@@ -1,6 +1,6 @@
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
-import { JsEditors } from "./JsEditors";
+import { GenericEditors } from "@/components/editor/GenericEditors";
 import { jsPlaygroundConfig } from "./js.config";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
@@ -63,12 +63,18 @@ export function JsPlayground() {
   return (
     <PlaygroundLayout
       editors={
-        <JsEditors
-          inputJs={ctx.input}
+        <GenericEditors
+          input={ctx.input}
           output={ctx.output}
           error={ctx.error}
           validationState={validation}
           inputWarning={ctx.inputWarning}
+          language="javascript"
+          inputTitle="JavaScript"
+          inputPlaceholder="Escribe tu código JavaScript aquí..."
+          waitingLabel="Esperando JavaScript..."
+          validLabel="JavaScript válido"
+          invalidLabel="JavaScript inválido"
           onInputChange={ctx.setInput}
           onClearInput={actions.handleClearInput}
           onLoadExample={actions.handleLoadExample}

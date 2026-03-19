@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { CssEditors } from "./CssEditors";
+import { GenericEditors } from "@/components/editor/GenericEditors";
 
 interface PanelMockProps {
   title: string;
@@ -70,14 +70,14 @@ vi.mock("@/components/common/EditorFooter", () => ({
   EditorFooter: ({ variant }: { variant: string }) => <div>{variant}-footer</div>,
 }));
 
-describe("CssEditors", () => {
+describe("CssEditors (via GenericEditors)", () => {
   beforeEach(() => {
     expandedState = null;
     vi.clearAllMocks();
   });
 
   const baseProps = {
-    inputCss: ".card { color: red; }",
+    input: ".card { color: red; }",
     output: ".card{color:red}",
     error: null,
     validationState: {
@@ -85,6 +85,12 @@ describe("CssEditors", () => {
       error: null,
     },
     inputWarning: "warning",
+    language: "css",
+    inputTitle: "CSS",
+    inputPlaceholder: "Escribe tu CSS aquí...",
+    waitingLabel: "Esperando CSS...",
+    validLabel: "CSS válido",
+    invalidLabel: "CSS inválido",
     onInputChange: vi.fn(),
     onClearInput: vi.fn(),
     onLoadExample: vi.fn(),
@@ -94,7 +100,7 @@ describe("CssEditors", () => {
   };
 
   it("renders both panels and triggers expand actions", () => {
-    render(<CssEditors {...baseProps} />);
+    render(<GenericEditors {...baseProps} />);
 
     expect(screen.getAllByText("CSS").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
@@ -109,11 +115,11 @@ describe("CssEditors", () => {
 
   it("renders expanded modals for input and output states", () => {
     expandedState = "input";
-    const { rerender } = render(<CssEditors {...baseProps} />);
+    const { rerender } = render(<GenericEditors {...baseProps} />);
     expect(screen.getByText("CSS modal")).toBeInTheDocument();
 
     expandedState = "output";
-    rerender(<CssEditors {...baseProps} output="changed" />);
+    rerender(<GenericEditors {...baseProps} output="changed" />);
     expect(screen.getByText("Resultado modal")).toBeInTheDocument();
   });
 });

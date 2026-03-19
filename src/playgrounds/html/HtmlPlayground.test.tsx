@@ -79,6 +79,20 @@ describe("HtmlPlayground", () => {
     expect(input.value).toContain("<!doctype html>");
   });
 
+  it("toggles HTML preview and shows DOM inspection", () => {
+    renderWithProviders(<HtmlPlayground />);
+
+    expect(screen.queryByText("Vista previa")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Ver vista previa"));
+    expect(screen.getByText("Vista previa")).toBeInTheDocument();
+    expect(screen.getByTitle("Vista previa HTML")).toBeInTheDocument();
+    expect(screen.getByTestId("dom-inspection-summary").textContent).toContain("html");
+
+    fireEvent.click(screen.getByLabelText("Ver resultado"));
+    expect(screen.getByText("Resultado")).toBeInTheDocument();
+  });
+
   it("formats and minifies input HTML", async () => {
     renderWithProviders(<HtmlPlayground />);
 

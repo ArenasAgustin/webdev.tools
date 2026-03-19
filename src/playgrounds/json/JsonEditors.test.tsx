@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { JsonEditors } from "./JsonEditors";
+import { GenericEditors } from "@/components/editor/GenericEditors";
 
 interface PanelMockProps {
   title: string;
@@ -72,14 +72,14 @@ vi.mock("@/components/common/EditorFooter", () => ({
   ),
 }));
 
-describe("JsonEditors", () => {
+describe("JsonEditors (via GenericEditors)", () => {
   beforeEach(() => {
     expandedState = null;
     vi.clearAllMocks();
   });
 
   const baseProps = {
-    inputJson: '{"ok":true}',
+    input: '{"ok":true}',
     output: '{"ok": true}',
     validationState: {
       isValid: true,
@@ -87,6 +87,12 @@ describe("JsonEditors", () => {
     },
     error: null,
     inputWarning: "warning",
+    language: "json",
+    inputTitle: "JSON",
+    inputPlaceholder: "Pega tu JSON aquí...",
+    waitingLabel: "Esperando JSON...",
+    validLabel: "JSON válido",
+    invalidLabel: "JSON inválido",
     onInputChange: vi.fn(),
     onClearInput: vi.fn(),
     onLoadExample: vi.fn(),
@@ -96,7 +102,7 @@ describe("JsonEditors", () => {
   };
 
   it("renders both panels and triggers expand actions", () => {
-    render(<JsonEditors {...baseProps} />);
+    render(<GenericEditors {...baseProps} />);
 
     expect(screen.getAllByText("JSON").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
@@ -111,11 +117,11 @@ describe("JsonEditors", () => {
 
   it("renders expanded modals for input and output states", () => {
     expandedState = "input";
-    const { rerender } = render(<JsonEditors {...baseProps} />);
+    const { rerender } = render(<GenericEditors {...baseProps} />);
     expect(screen.getByText("JSON modal")).toBeInTheDocument();
 
     expandedState = "output";
-    rerender(<JsonEditors {...baseProps} output="changed" />);
+    rerender(<GenericEditors {...baseProps} output="changed" />);
     expect(screen.getByText("Resultado modal")).toBeInTheDocument();
   });
 });

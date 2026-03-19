@@ -79,9 +79,9 @@ vi.mock("@/hooks/useJsonPathHistory", () => ({
   }),
 }));
 
-vi.mock("./JsonEditors", () => ({
-  JsonEditors: ({
-    inputJson,
+vi.mock("@/components/editor/GenericEditors", () => ({
+  GenericEditors: ({
+    input,
     output,
     error,
     inputWarning,
@@ -92,7 +92,7 @@ vi.mock("./JsonEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputJson: string;
+    input: string;
     output: string;
     error: string | null;
     inputWarning?: string | null;
@@ -104,7 +104,7 @@ vi.mock("./JsonEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-json">{inputJson}</p>
+      <p data-testid="input-json">{input}</p>
       <p data-testid="output-json">{output}</p>
       <p data-testid="error-json">{error}</p>
       <p data-testid="warning">{inputWarning}</p>

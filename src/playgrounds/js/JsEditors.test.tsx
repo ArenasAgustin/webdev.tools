@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { JsEditors } from "./JsEditors";
+import { GenericEditors } from "@/components/editor/GenericEditors";
 
 interface PanelMockProps {
   title: string;
@@ -72,14 +72,14 @@ vi.mock("@/components/common/EditorFooter", () => ({
   ),
 }));
 
-describe("JsEditors", () => {
+describe("JsEditors (via GenericEditors)", () => {
   beforeEach(() => {
     expandedState = null;
     vi.clearAllMocks();
   });
 
   const baseProps = {
-    inputJs: "const a = 1;",
+    input: "const a = 1;",
     output: "1\n2",
     error: null,
     validationState: {
@@ -87,6 +87,12 @@ describe("JsEditors", () => {
       error: null,
     },
     inputWarning: "warning",
+    language: "javascript",
+    inputTitle: "JavaScript",
+    inputPlaceholder: "Escribe tu código JavaScript aquí...",
+    waitingLabel: "Esperando JavaScript...",
+    validLabel: "JavaScript válido",
+    invalidLabel: "JavaScript inválido",
     onInputChange: vi.fn(),
     onClearInput: vi.fn(),
     onLoadExample: vi.fn(),
@@ -96,7 +102,7 @@ describe("JsEditors", () => {
   };
 
   it("renders both panels and triggers expand actions", () => {
-    render(<JsEditors {...baseProps} />);
+    render(<GenericEditors {...baseProps} />);
 
     expect(screen.getAllByText("JavaScript").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
@@ -111,11 +117,11 @@ describe("JsEditors", () => {
 
   it("renders expanded modals for input and output states", () => {
     expandedState = "input";
-    const { rerender } = render(<JsEditors {...baseProps} />);
+    const { rerender } = render(<GenericEditors {...baseProps} />);
     expect(screen.getByText("JavaScript modal")).toBeInTheDocument();
 
     expandedState = "output";
-    rerender(<JsEditors {...baseProps} output="changed" />);
+    rerender(<GenericEditors {...baseProps} output="changed" />);
     expect(screen.getByText("Resultado modal")).toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { HtmlEditors } from "./HtmlEditors";
+import { GenericEditors } from "@/components/editor/GenericEditors";
 
 interface PanelMockProps {
   title: string;
@@ -72,14 +72,14 @@ vi.mock("@/components/common/EditorFooter", () => ({
   ),
 }));
 
-describe("HtmlEditors", () => {
+describe("HtmlEditors (via GenericEditors)", () => {
   beforeEach(() => {
     expandedState = null;
     vi.clearAllMocks();
   });
 
   const baseProps = {
-    inputHtml: "<div>ok</div>",
+    input: "<div>ok</div>",
     output: "<div>ok</div>",
     error: null,
     validationState: {
@@ -87,6 +87,12 @@ describe("HtmlEditors", () => {
       error: null,
     },
     inputWarning: "warning",
+    language: "html",
+    inputTitle: "HTML",
+    inputPlaceholder: "Escribe tu HTML aquí...",
+    waitingLabel: "Esperando HTML...",
+    validLabel: "HTML válido",
+    invalidLabel: "HTML inválido",
     onInputChange: vi.fn(),
     onClearInput: vi.fn(),
     onLoadExample: vi.fn(),
@@ -96,19 +102,10 @@ describe("HtmlEditors", () => {
   };
 
   it("renders both panels and triggers expand actions", () => {
-    render(<HtmlEditors {...baseProps} />);
+    render(<GenericEditors {...baseProps} />);
 
     expect(screen.getAllByText("HTML").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
-    expect(screen.queryByText("Vista previa")).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByLabelText("Ver vista previa"));
-    expect(screen.getByText("Vista previa")).toBeInTheDocument();
-    expect(screen.getByTitle("Vista previa HTML")).toBeInTheDocument();
-    expect(screen.getByTestId("dom-inspection-summary").textContent).toContain("html");
-
-    fireEvent.click(screen.getByLabelText("Ver resultado"));
-    expect(screen.getByText("Resultado")).toBeInTheDocument();
     expect(screen.getByText("warning")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("expand-input"));
@@ -120,11 +117,11 @@ describe("HtmlEditors", () => {
 
   it("renders expanded modals for input and output states", () => {
     expandedState = "input";
-    const { rerender } = render(<HtmlEditors {...baseProps} />);
+    const { rerender } = render(<GenericEditors {...baseProps} />);
     expect(screen.getByText("HTML modal")).toBeInTheDocument();
 
     expandedState = "output";
-    rerender(<HtmlEditors {...baseProps} output="changed" />);
+    rerender(<GenericEditors {...baseProps} output="changed" />);
     expect(screen.getByText("Resultado modal")).toBeInTheDocument();
   });
 });

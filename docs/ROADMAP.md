@@ -236,14 +236,15 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Refactorizar los 4 `service.ts` para usar el factory (CSS: 14 LOC, JS: 9 LOC, HTML: 29 LOC, JSON: 20 LOC) ✅
 - [x] Tests: 381 tests pasando sin cambios ✅
 
-### Fase 10 — Eliminación de Editores Wrapper Redundantes
+### Fase 10 — Eliminación de Editores Wrapper Redundantes ✅
 
-**Fase 10.1 — Eliminar alias `*Editors.tsx` innecesarios (~100 líneas eliminadas, riesgo bajo):**
+**Fase 10.1 — Eliminar alias `*Editors.tsx` innecesarios (~270 líneas eliminadas, riesgo bajo):** ✅
 
-- [ ] `CssEditors.tsx` (36 LOC), `JsEditors.tsx` (36 LOC), `JsonEditors.tsx` (32 LOC) son wrappers triviales que solo pasan props a `GenericEditors`
-- [ ] Evaluar si eliminarlos y llamar a `GenericEditors` directamente desde `*Playground.tsx`
-- [ ] `HtmlEditors.tsx` (169 LOC) se mantiene — tiene lógica propia (preview HTML, inspectDom, tabs) (evaluar si se puede refactorizar para usar `GenericEditors` también, pero riesgo alto)
-- [ ] Actualizar imports en los playgrounds y tests afectados
+- [x] `CssEditors.tsx` (36 LOC), `JsEditors.tsx` (36 LOC), `JsonEditors.tsx` (32 LOC) eliminados — eran wrappers triviales que solo pasaban props a `GenericEditors` ✅
+- [x] `HtmlEditors.tsx` (169 LOC) eliminado — lógica de preview/inspectDom movida a `HtmlPlayground.tsx` ✅
+- [x] Los 4 playgrounds usan `GenericEditors` directamente ✅
+- [x] Imports y mocks actualizados en todos los `*.branches.test.tsx` y `*Editors.test.tsx` ✅
+- [x] Test de preview toggle añadido a `HtmlPlayground.test.tsx` ✅
 
 ### Fase 11 — Refactoring de ConfigModal
 

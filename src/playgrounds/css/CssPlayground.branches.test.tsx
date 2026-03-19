@@ -54,9 +54,9 @@ vi.mock("@/utils/download", () => ({
   downloadFile: downloadFileMock as (content: string, filename: string, mimeType: string) => void,
 }));
 
-vi.mock("./CssEditors", () => ({
-  CssEditors: ({
-    inputCss,
+vi.mock("@/components/editor/GenericEditors", () => ({
+  GenericEditors: ({
+    input,
     output,
     error,
     inputWarning,
@@ -67,7 +67,7 @@ vi.mock("./CssEditors", () => ({
     onDownloadInput,
     onDownloadOutput,
   }: {
-    inputCss: string;
+    input: string;
     output: string;
     error: string | null;
     inputWarning?: string | null;
@@ -79,7 +79,7 @@ vi.mock("./CssEditors", () => ({
     onDownloadOutput: () => void;
   }) => (
     <div>
-      <p data-testid="input-css">{inputCss}</p>
+      <p data-testid="input-css">{input}</p>
       <p data-testid="output-css">{output}</p>
       <p data-testid="error-css">{error}</p>
       <p data-testid="warning">{inputWarning}</p>

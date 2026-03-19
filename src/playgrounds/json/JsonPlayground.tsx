@@ -4,7 +4,7 @@ import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { Button } from "@/components/common/Button";
 import { TipsModal } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
-import { JsonEditors } from "./JsonEditors";
+import { GenericEditors } from "@/components/editor/GenericEditors";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
 import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
@@ -154,12 +154,18 @@ export function JsonPlayground() {
     <>
       <PlaygroundLayout
         editors={
-          <JsonEditors
-            inputJson={ctx.input}
+          <GenericEditors
+            input={ctx.input}
             output={ctx.output}
             error={ctx.error}
             validationState={validation}
             inputWarning={ctx.inputWarning}
+            language="json"
+            inputTitle="JSON"
+            inputPlaceholder="Pega tu JSON aquí..."
+            waitingLabel="Esperando JSON..."
+            validLabel="JSON válido"
+            invalidLabel="JSON inválido"
             onInputChange={ctx.setInput}
             onClearInput={actions.handleClearInput}
             onLoadExample={actions.handleLoadExample}
