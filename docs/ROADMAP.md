@@ -270,11 +270,11 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [ ] Contraste WCAG AA en textos con opacidad baja — verificación visual manual pendiente
 - [x] `PlaygroundSidebar`: `<aside aria-label="Panel de navegación" aria-hidden={!isOpen}>` + `<nav aria-label="Playgrounds disponibles">` ✅
 
-**Fase 12.3 — Consolidación de utilidades de error (~riesgo bajo):**
+**Fase 12.3 — Consolidación de utilidades de error (~riesgo bajo):** ✅
 
-- [ ] Mover `compactCssError()` (useCssParser) y `compactHtmlError()` (useHtmlParser) a `utils/transformError.ts`
-- [ ] Unificar en `compactTransformError()` ya existente o crear variantes (si el formato difiere)
-- [ ] Eliminar funciones locales duplicadas en los hooks
+- [x] `compactCssError()` y `compactHtmlError()` ya eliminadas en Fase 8.2 ✅
+- [x] `compactTransformError()` en `utils/transformError.ts` es la única función — usada por `useAsyncValidator`, `createTransformHandler` y `useJsonPlaygroundActions` ✅
+- [x] Sin funciones locales duplicadas en los hooks ✅
 
 **Fase 12.4 — Tests compartidos y cobertura (~riesgo medio):**
 

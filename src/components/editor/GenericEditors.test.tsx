@@ -68,35 +68,38 @@ vi.mock("@/components/editor/OutputActions", () => ({
 
 vi.mock("@/components/common/EditorFooter", () => ({
   EditorFooter: ({ variant, warning }: { variant: string; warning?: string | null }) => (
-    <div>{variant}-footer {warning}</div>
+    <div>
+      {variant}-footer{warning && <span>{warning}</span>}
+    </div>
   ),
 }));
 
-describe("GenericEditors", () => {
+// Base props (CSS) for feature-specific tests
+const baseProps = {
+  input: "some input",
+  output: "some output",
+  error: null,
+  validationState: { isValid: true, error: null },
+  inputWarning: "test-warning",
+  language: "css",
+  inputTitle: "CSS",
+  inputPlaceholder: "Write CSS...",
+  waitingLabel: "Waiting...",
+  validLabel: "Valid",
+  invalidLabel: "Invalid",
+  onInputChange: vi.fn(),
+  onClearInput: vi.fn(),
+  onLoadExample: vi.fn(),
+  onCopyOutput: vi.fn(),
+  onDownloadInput: vi.fn(),
+  onDownloadOutput: vi.fn(),
+};
+
+describe("GenericEditors — features", () => {
   beforeEach(() => {
     expandedState = null;
     vi.clearAllMocks();
   });
-
-  const baseProps = {
-    input: "some input",
-    output: "some output",
-    error: null,
-    validationState: { isValid: true, error: null },
-    inputWarning: "test-warning",
-    language: "css",
-    inputTitle: "CSS",
-    inputPlaceholder: "Write CSS...",
-    waitingLabel: "Waiting...",
-    validLabel: "Valid",
-    invalidLabel: "Invalid",
-    onInputChange: vi.fn(),
-    onClearInput: vi.fn(),
-    onLoadExample: vi.fn(),
-    onCopyOutput: vi.fn(),
-    onDownloadInput: vi.fn(),
-    onDownloadOutput: vi.fn(),
-  };
 
   it("renders input and output panels with correct titles", () => {
     render(<GenericEditors {...baseProps} />);
@@ -147,3 +150,97 @@ describe("GenericEditors", () => {
     expect(screen.queryByText("Resultado")).not.toBeInTheDocument();
   });
 });
+
+// --- Parametrized tests: each playground language config ---
+const LANGUAGE_CONFIGS = [
+  {
+    language: "css",
+    inputTitle: "CSS",
+    inputPlaceholder: "Escribe tu CSS aquí...",
+    waitingLabel: "Esperando CSS...",
+    validLabel: "CSS válido",
+    invalidLabel: "CSS inválido",
+    input: ".card { color: red; }",
+  },
+  {
+    language: "javascript",
+    inputTitle: "JavaScript",
+    inputPlaceholder: "Escribe tu código JavaScript aquí...",
+    waitingLabel: "Esperando JavaScript...",
+    validLabel: "JavaScript válido",
+    invalidLabel: "JavaScript inválido",
+    input: "const a = 1;",
+  },
+  {
+    language: "json",
+    inputTitle: "JSON",
+    inputPlaceholder: "Pega tu JSON aquí...",
+    waitingLabel: "Esperando JSON...",
+    validLabel: "JSON válido",
+    invalidLabel: "JSON inválido",
+    input: '{"ok":true}',
+  },
+  {
+    language: "html",
+    inputTitle: "HTML",
+    inputPlaceholder: "Escribe tu HTML aquí...",
+    waitingLabel: "Esperando HTML...",
+    validLabel: "HTML válido",
+    invalidLabel: "HTML inválido",
+    input: "<div>ok</div>",
+  },
+] as const;
+
+describe.each(LANGUAGE_CONFIGS)(
+  "GenericEditors — $inputTitle",
+  ({ language, inputTitle, inputPlaceholder, waitingLabel, validLabel, invalidLabel, input }) => {
+    beforeEach(() => {
+      expandedState = null;
+      vi.clearAllMocks();
+    });
+
+    const makeProps = () => ({
+      input,
+      output: "output text",
+      error: null,
+      validationState: { isValid: true, error: null },
+      inputWarning: "warning",
+      language,
+      inputTitle,
+      inputPlaceholder,
+      waitingLabel,
+      validLabel,
+      invalidLabel,
+      onInputChange: vi.fn(),
+      onClearInput: vi.fn(),
+      onLoadExample: vi.fn(),
+      onCopyOutput: vi.fn(),
+      onDownloadInput: vi.fn(),
+      onDownloadOutput: vi.fn(),
+    });
+
+    it("renders both panels and triggers expand actions", () => {
+      render(<GenericEditors {...makeProps()} />);
+
+      expect(screen.getAllByText(inputTitle).length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
+      expect(screen.getByText("warning")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("expand-input"));
+      fireEvent.click(screen.getByText("expand-output"));
+
+      expect(mockExpand).toHaveBeenCalledWith("input");
+      expect(mockExpand).toHaveBeenCalledWith("output");
+    });
+
+    it("renders expanded modals for input and output states", () => {
+      expandedState = "input";
+      const { rerender } = render(<GenericEditors {...makeProps()} />);
+      expect(screen.getByText(`${inputTitle} modal`)).toBeInTheDocument();
+
+      expandedState = "output";
+      rerender(<GenericEditors {...makeProps()} output="changed" />);
+      expect(screen.getByText("Resultado modal")).toBeInTheDocument();
+    });
+  },
+);
