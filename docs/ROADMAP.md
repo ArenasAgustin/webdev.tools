@@ -248,11 +248,11 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 ### Fase 11 — Refactoring de ConfigModal
 
-**Fase 11.1 — Eliminar `@ts-expect-error` en ConfigModal (~riesgo medio):**
+**Fase 11.1 — Eliminar `@ts-expect-error` en ConfigModal (~riesgo medio):** ✅
 
-- [ ] Refactorizar el union type de ConfigModal para eliminar los 2 `@ts-expect-error` actuales (líneas 100, 103)
-- [ ] Opciones: extraer render por modo en componentes separados, o usar un mapa de renderers tipado
-- [ ] Mantener API pública intacta (mismo contrato de props desde PlaygroundLayout)
+- [x] Eliminados los 2 `@ts-expect-error` en `updateFormat` / `updateMinify` ✅
+- [x] Solución: dispatch por `props.mode` dentro de cada helper → cada rama llama al setter con el tipo exacto (`as JsFormatConfig`, `as HtmlFormatConfig`, etc.) ✅
+- [x] API pública intacta (mismo contrato de props desde PlaygroundLayout) ✅
 
 ### Fase 12 — Calidad y Robustez
 

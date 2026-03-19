@@ -94,14 +94,21 @@ export function ConfigModal(props: ConfigModalProps) {
     mode === "js" || mode === "css" ? (props as JsConfigModalProps | CssConfigModalProps) : null;
 
   // Helpers for fields shared by all config variants.
-  // Safe: spreading the current config with common-field patches
-  // preserves the original type shape at runtime.
-  const updateFormat = (patch: Record<string, unknown>) =>
-    // @ts-expect-error union-of-functions TS limitation
-    props.onFormatConfigChange({ ...props.formatConfig, ...patch });
-  const updateMinify = (patch: Record<string, unknown>) =>
-    // @ts-expect-error union-of-functions TS limitation
-    props.onMinifyConfigChange({ ...props.minifyConfig, ...patch });
+  // Narrow by mode so each branch calls the correctly-typed setter.
+  const updateFormat = (patch: Record<string, unknown>) => {
+    const updated = { ...props.formatConfig, ...patch };
+    if (props.mode === "js") props.onFormatConfigChange(updated as JsFormatConfig);
+    else if (props.mode === "html") props.onFormatConfigChange(updated as HtmlFormatConfig);
+    else if (props.mode === "css") props.onFormatConfigChange(updated as CssFormatConfig);
+    else props.onFormatConfigChange(updated as JsonFormatConfig);
+  };
+  const updateMinify = (patch: Record<string, unknown>) => {
+    const updated = { ...props.minifyConfig, ...patch };
+    if (props.mode === "js") props.onMinifyConfigChange(updated as JsMinifyConfig);
+    else if (props.mode === "html") props.onMinifyConfigChange(updated as HtmlMinifyConfig);
+    else if (props.mode === "css") props.onMinifyConfigChange(updated as CssMinifyConfig);
+    else props.onMinifyConfigChange(updated as JsonMinifyConfig);
+  };
 
   const handleReset = () => {
     if (props.mode === "js") {
