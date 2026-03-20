@@ -53,6 +53,8 @@ export interface ToolbarConfig {
   configButtonTitle?: string;
   /** Custom grid classes for layout */
   gridClassName?: string;
+  /** Optional handler to open the keyboard shortcuts modal */
+  onOpenShortcuts?: ToolbarActionHandler;
 }
 
 /**

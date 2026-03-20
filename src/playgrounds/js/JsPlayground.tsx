@@ -5,6 +5,7 @@ import { jsPlaygroundConfig } from "./js.config";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
+import { useModalState } from "@/hooks/useModalState";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
@@ -22,6 +23,7 @@ const preload = () => {
  * JavaScript Playground - Execute and test JavaScript code
  */
 export function JsPlayground() {
+  const shortcutsModal = useModalState();
   const ctx = usePlaygroundSetup<JsFormatConfig, JsMinifyConfig>({
     playgroundConfig: jsPlaygroundConfig,
     loadToolsConfig: loadJsToolsConfig,
@@ -60,6 +62,7 @@ export function JsPlayground() {
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
+    onOpenShortcuts: shortcutsModal.open,
   });
 
   return (
@@ -86,7 +89,7 @@ export function JsPlayground() {
           isProcessing={actions.isProcessing}
         />
       }
-      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}
     />
   );
 }

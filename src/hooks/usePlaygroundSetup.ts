@@ -93,6 +93,8 @@ interface PlaygroundToolbarBase<M extends string, TFormat, TMinify> {
   gridClassName?: string;
   /** Disables and shows spinner on all transform buttons while an operation is running */
   isProcessing?: boolean;
+  /** Handler to open the keyboard shortcuts modal */
+  onOpenShortcuts?: () => void;
 }
 
 interface PlaygroundToolbarWithClean<
@@ -143,6 +145,7 @@ export function usePlaygroundToolbar<
   setMinifyConfig,
   gridClassName,
   isProcessing,
+  onOpenShortcuts,
   ...cleanParams
 }: PlaygroundToolbarBase<M, TFormat, TMinify> &
   Partial<
@@ -160,6 +163,7 @@ export function usePlaygroundToolbar<
     onCopyOutput: handleCopyOutput,
     onClearInput: handleClearInput,
     onOpenConfig: configModal.open,
+    onOpenShortcuts,
   });
 
   const toolbarParams = {
@@ -174,6 +178,7 @@ export function usePlaygroundToolbar<
     modal: configModal,
     gridClassName,
     isProcessing,
+    onOpenShortcuts,
     ...(handleClean
       ? {
           handleClean,

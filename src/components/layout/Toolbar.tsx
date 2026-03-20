@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { ConfigModal } from "@/components/common/ConfigModal";
+import { ShortcutsModal } from "@/components/common/ShortcutsModal";
+import type { ModalState } from "@/hooks/useModalState";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
@@ -11,6 +13,8 @@ export interface ToolbarProps {
   variant: "generic";
   tools: ToolbarConfig;
   extraContent?: React.ReactNode;
+  /** State for the keyboard shortcuts modal */
+  shortcuts?: ModalState;
   config?:
     | {
         mode: "json";
@@ -54,6 +58,7 @@ export interface ToolbarProps {
 
 export function Toolbar(props: ToolbarProps) {
   const [openModal, setOpenModal] = useState<"config" | null>(null);
+  const hasClean = props.config?.mode === "json";
 
   const toolsTitle = props.tools.title ?? "Herramientas";
   const toolsGridClass = props.tools.gridClassName ?? "grid grid-cols-2 sm:grid-cols-3 gap-2";
@@ -85,17 +90,30 @@ export function Toolbar(props: ToolbarProps) {
           <div>
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <i className="fas fa-tools text-yellow-400"></i> {toolsTitle}
-              {(props.tools.onOpenConfig ?? genericConfig) && (
-                <button
-                  type="button"
-                  onClick={() => setShowGenericConfigState(true)}
-                  className="ml-auto text-gray-300 hover:text-yellow-300 transition-colors"
-                  title={props.tools.configButtonTitle ?? "Configurar herramientas"}
-                  aria-label={props.tools.configButtonTitle ?? "Configurar herramientas"}
-                >
-                  <i className="fas fa-cog" aria-hidden="true"></i>
-                </button>
-              )}
+              <span className="ml-auto flex items-center gap-2">
+                {props.tools.onOpenShortcuts && (
+                  <button
+                    type="button"
+                    onClick={props.tools.onOpenShortcuts}
+                    className="text-gray-300 hover:text-yellow-300 transition-colors"
+                    title="Atajos de teclado (?)"
+                    aria-label="Ver atajos de teclado"
+                  >
+                    <i className="fas fa-keyboard" aria-hidden="true"></i>
+                  </button>
+                )}
+                {(props.tools.onOpenConfig ?? genericConfig) && (
+                  <button
+                    type="button"
+                    onClick={() => setShowGenericConfigState(true)}
+                    className="text-gray-300 hover:text-yellow-300 transition-colors"
+                    title={props.tools.configButtonTitle ?? "Configurar herramientas"}
+                    aria-label={props.tools.configButtonTitle ?? "Configurar herramientas"}
+                  >
+                    <i className="fas fa-cog" aria-hidden="true"></i>
+                  </button>
+                )}
+              </span>
             </h3>
             <div className={toolsGridClass}>
               {props.tools.actions.map((action) => (
@@ -168,6 +186,14 @@ export function Toolbar(props: ToolbarProps) {
           onFormatConfigChange={genericConfig.onFormatChange}
           minifyConfig={genericConfig.minify}
           onMinifyConfigChange={genericConfig.onMinifyChange}
+        />
+      )}
+
+      {props.shortcuts && (
+        <ShortcutsModal
+          isOpen={props.shortcuts.isOpen}
+          onClose={props.shortcuts.close}
+          hasClean={hasClean}
         />
       )}
     </>

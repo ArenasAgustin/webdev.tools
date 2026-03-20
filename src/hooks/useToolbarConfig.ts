@@ -16,6 +16,8 @@ export interface UseToolbarConfigParams<M extends string, TFormat, TMinify> {
   gridClassName?: string;
   /** Disables and shows spinner on all transform buttons while an operation is running */
   isProcessing?: boolean;
+  /** Handler to open the keyboard shortcuts modal */
+  onOpenShortcuts?: () => void;
 }
 
 interface CleanParams<TClean> {
@@ -72,6 +74,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
   setCleanConfig,
   gridClassName = "grid grid-cols-2 lg:grid-cols-5 gap-2",
   isProcessing = false,
+  onOpenShortcuts,
 }: UseToolbarConfigParams<M, TFormat, TMinify> & Partial<CleanParams<TClean>>) {
   const toolbarTools = useMemo<ToolbarConfig>(() => {
     const actions: ToolbarAction[] = [];
@@ -117,8 +120,9 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
       actions,
       configButtonTitle: "Configurar herramientas",
       gridClassName,
+      onOpenShortcuts,
     };
-  }, [handleFormat, handleMinify, handleExecute, handleClean, gridClassName, isProcessing]);
+  }, [handleFormat, handleMinify, handleExecute, handleClean, gridClassName, isProcessing, onOpenShortcuts]);
 
   const toolbarConfig = useMemo(() => {
     const base = {

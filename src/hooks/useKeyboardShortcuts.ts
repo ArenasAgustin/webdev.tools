@@ -7,6 +7,7 @@ interface KeyboardShortcutsConfig {
   onCopyOutput?: () => void;
   onClearInput?: () => void;
   onOpenConfig?: () => void;
+  onOpenShortcuts?: () => void;
 }
 
 /**
@@ -69,6 +70,12 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
       if (ctrlKey && (event.key === "," || event.key === "Comma")) {
         event.preventDefault();
         config.onOpenConfig?.();
+      }
+
+      // ?: Open shortcuts modal
+      if (!ctrlKey && !event.shiftKey && !event.altKey && event.key === "?") {
+        event.preventDefault();
+        config.onOpenShortcuts?.();
       }
     };
 

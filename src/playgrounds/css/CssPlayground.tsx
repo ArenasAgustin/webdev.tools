@@ -5,6 +5,7 @@ import { cssPlaygroundConfig } from "./css.config";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
+import { useModalState } from "@/hooks/useModalState";
 import { loadCssToolsConfig, loadLastCss, saveLastCss } from "@/services/storage";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
@@ -16,6 +17,7 @@ const preload = () => {
 };
 
 export function CssPlayground() {
+  const shortcutsModal = useModalState();
   const ctx = usePlaygroundSetup<CssFormatConfig, CssMinifyConfig>({
     playgroundConfig: cssPlaygroundConfig,
     loadToolsConfig: loadCssToolsConfig,
@@ -53,6 +55,7 @@ export function CssPlayground() {
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
+    onOpenShortcuts: shortcutsModal.open,
   });
 
   return (
@@ -79,7 +82,7 @@ export function CssPlayground() {
           isProcessing={actions.isProcessing}
         />
       }
-      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}
     />
   );
 }

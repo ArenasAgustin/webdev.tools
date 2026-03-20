@@ -11,6 +11,7 @@ import { htmlPlaygroundConfig } from "./html.config";
 import { useHtmlParser } from "@/hooks/useHtmlParser";
 import { useHtmlPlaygroundActions } from "@/hooks/useHtmlPlaygroundActions";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
+import { useModalState } from "@/hooks/useModalState";
 import { loadLastHtml, saveLastHtml, loadHtmlToolsConfig } from "@/services/storage";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
 import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
@@ -46,6 +47,7 @@ function inspectDom(source: string): string | null {
 }
 
 export function HtmlPlayground() {
+  const shortcutsModal = useModalState();
   const [showPreview, setShowPreview] = useState(false);
 
   const ctx = usePlaygroundSetup<HtmlFormatConfig, HtmlMinifyConfig>({
@@ -91,6 +93,7 @@ export function HtmlPlayground() {
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
+    onOpenShortcuts: shortcutsModal.open,
   });
 
   return (
@@ -213,7 +216,7 @@ export function HtmlPlayground() {
           }
         />
       }
-      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}
     />
   );
 }

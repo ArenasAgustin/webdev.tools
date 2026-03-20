@@ -305,11 +305,11 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 ### Fase 14 — UX y Funcionalidades Transversales
 
-**Fase 14.1 — Modal de atajos de teclado (~riesgo bajo):**
+**Fase 14.1 — Modal de atajos de teclado (~riesgo bajo):** ✅
 
-- [ ] Crear modal que muestre todos los atajos de teclado disponibles
-- [ ] Activar con `?` o `Ctrl+/`
-- [ ] Listar atajos por playground + atajos globales
+- [x] Crear modal que muestre todos los atajos de teclado disponibles ✅
+- [x] Activar con `?` o `Ctrl+/` ✅ (tecla `?` implementada)
+- [x] Listar atajos por playground + atajos globales ✅ (sección Clean solo en JSON)
 
 **Fase 14.2 — Transiciones entre páginas (~riesgo bajo):**
 

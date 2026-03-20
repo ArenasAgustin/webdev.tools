@@ -7,6 +7,7 @@ interface PlaygroundShortcutsHandlers {
   onCopyOutput: () => void;
   onClearInput: () => void;
   onOpenConfig: () => void;
+  onOpenShortcuts?: () => void;
 }
 
 export function usePlaygroundShortcuts(handlers: PlaygroundShortcutsHandlers) {
@@ -17,5 +18,6 @@ export function usePlaygroundShortcuts(handlers: PlaygroundShortcutsHandlers) {
     onCopyOutput: handlers.onCopyOutput,
     onClearInput: handlers.onClearInput,
     onOpenConfig: handlers.onOpenConfig,
+    onOpenShortcuts: handlers.onOpenShortcuts,
   });
 }

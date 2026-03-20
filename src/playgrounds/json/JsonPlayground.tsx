@@ -11,6 +11,7 @@ import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
 import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
+import { useModalState } from "@/hooks/useModalState";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import {
   DEFAULT_JSON_FORMAT_CONFIG,
@@ -33,6 +34,7 @@ const preload = () => {
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
+  const shortcutsModal = useModalState();
   // JSON-specific state
   const [jsonPathExpression, setJsonPathExpression] = useState("");
   const [cleanConfig, setCleanConfig] = useMergedConfigState<JsonCleanConfig>(
@@ -86,6 +88,7 @@ export function JsonPlayground() {
     setCleanConfig,
     gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
     isProcessing: actions.isProcessing,
+    onOpenShortcuts: shortcutsModal.open,
   });
 
   // Modal state for tips/history (managed locally, not in Toolbar)
@@ -182,6 +185,7 @@ export function JsonPlayground() {
             variant="generic"
             tools={toolbarTools}
             config={toolbarConfig}
+            shortcuts={shortcutsModal}
             extraContent={jsonPathSection}
           />
         }
