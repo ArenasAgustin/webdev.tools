@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import type { ToastApi } from "./usePlaygroundActions";
 
@@ -16,6 +16,8 @@ interface UseTransformActionsProps {
 }
 
 export function useTransformActions({ createInputValidator, toast }: UseTransformActionsProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const runTransformAction = useCallback(
     <TResult>({
       run,
@@ -26,9 +28,18 @@ export function useTransformActions({ createInputValidator, toast }: UseTransfor
     }: TransformActionOptions<TResult>) => {
       createValidatedHandler({
         validate: createInputValidator,
-        run,
-        onSuccess,
-        onError,
+        run: async () => {
+          setIsProcessing(true);
+          return run();
+        },
+        onSuccess: (result) => {
+          setIsProcessing(false);
+          void onSuccess?.(result);
+        },
+        onError: (message) => {
+          setIsProcessing(false);
+          void onError?.(message);
+        },
         toast,
         successMessage,
         errorMessage,
@@ -39,5 +50,7 @@ export function useTransformActions({ createInputValidator, toast }: UseTransfor
 
   return {
     runTransformAction,
+    isProcessing,
+    setIsProcessing,
   };
 }

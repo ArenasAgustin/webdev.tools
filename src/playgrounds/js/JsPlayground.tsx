@@ -59,6 +59,7 @@ export function JsPlayground() {
     setFormatConfig: ctx.setFormatConfig,
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
+    isProcessing: actions.isProcessing,
   });
 
   return (
@@ -82,6 +83,7 @@ export function JsPlayground() {
           onCopyOutput={actions.handleCopyOutput}
           onDownloadInput={actions.handleDownloadInput}
           onDownloadOutput={actions.handleDownloadOutput}
+          isProcessing={actions.isProcessing}
         />
       }
       toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} />}

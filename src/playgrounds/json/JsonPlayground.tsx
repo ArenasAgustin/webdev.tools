@@ -85,6 +85,7 @@ export function JsonPlayground() {
     cleanConfig,
     setCleanConfig,
     gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
+    isProcessing: actions.isProcessing,
   });
 
   // Modal state for tips/history (managed locally, not in Toolbar)
@@ -173,6 +174,7 @@ export function JsonPlayground() {
             onCopyOutput={actions.handleCopyOutput}
             onDownloadInput={actions.handleDownloadInput}
             onDownloadOutput={actions.handleDownloadOutput}
+            isProcessing={actions.isProcessing}
           />
         }
         toolbar={

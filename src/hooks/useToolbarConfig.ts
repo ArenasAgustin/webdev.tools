@@ -14,6 +14,8 @@ export interface UseToolbarConfigParams<M extends string, TFormat, TMinify> {
   handleExecute?: () => void;
   /** Override default grid class for toolbar layout */
   gridClassName?: string;
+  /** Disables and shows spinner on all transform buttons while an operation is running */
+  isProcessing?: boolean;
 }
 
 interface CleanParams<TClean> {
@@ -69,6 +71,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
   cleanConfig,
   setCleanConfig,
   gridClassName = "grid grid-cols-2 lg:grid-cols-5 gap-2",
+  isProcessing = false,
 }: UseToolbarConfigParams<M, TFormat, TMinify> & Partial<CleanParams<TClean>>) {
   const toolbarTools = useMemo<ToolbarConfig>(() => {
     const actions: ToolbarAction[] = [];
@@ -78,6 +81,8 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
         icon: "play",
         variant: "orange",
         onClick: handleExecute,
+        disabled: isProcessing,
+        loading: isProcessing,
       });
     }
     actions.push(
@@ -86,12 +91,16 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
         icon: "indent",
         variant: "primary",
         onClick: handleFormat,
+        disabled: isProcessing,
+        loading: isProcessing,
       },
       {
         label: "Minificar",
         icon: "compress",
         variant: "purple",
         onClick: handleMinify,
+        disabled: isProcessing,
+        loading: isProcessing,
       },
     );
     if (handleClean) {
@@ -100,6 +109,8 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
         icon: "broom",
         variant: "orange",
         onClick: handleClean,
+        disabled: isProcessing,
+        loading: isProcessing,
       });
     }
     return {
@@ -107,7 +118,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
       configButtonTitle: "Configurar herramientas",
       gridClassName,
     };
-  }, [handleFormat, handleMinify, handleExecute, handleClean, gridClassName]);
+  }, [handleFormat, handleMinify, handleExecute, handleClean, gridClassName, isProcessing]);
 
   const toolbarConfig = useMemo(() => {
     const base = {

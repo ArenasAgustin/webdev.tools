@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     react(),
     visualizer({
-      open: false,
+      open: process.env.npm_lifecycle_event === "analyze",
       gzipSize: true,
       brotliSize: true,
       filename: "dist/stats.html",

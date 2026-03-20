@@ -20,6 +20,7 @@ interface OutputEditorFooterProps {
   variant: "output";
   value: string;
   error: string | null;
+  isProcessing?: boolean;
   stats: { lines: number; characters: number; bytes: number };
   comparisonBytes: number;
 }
@@ -48,6 +49,16 @@ export const EditorFooter = memo(function EditorFooter(props: EditorFooterProps)
           />
         }
       />
+    );
+  }
+
+  if (props.isProcessing) {
+    return (
+      <div className="text-xs h-4 flex items-center gap-1">
+        <span className="text-yellow-400 flex items-center gap-1">
+          <i className="fas fa-spinner fa-spin" aria-hidden="true"></i> Procesando...
+        </span>
+      </div>
     );
   }
 

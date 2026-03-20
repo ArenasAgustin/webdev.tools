@@ -291,17 +291,17 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Preloading de workers específico por playground — cada `preload()` ahora incluye `import("@/services/*/workerClient")` del playground actual ✅
 - [x] Consolidar el patrón de preload vía `useIdleCallback` en `usePlaygroundSetup` — el preload de servicios se ejecuta durante idle time en lugar de inmediatamente ✅
 
-**Fase 13.2 — Loading states en operaciones (~riesgo medio):**
+**Fase 13.2 — Loading states en operaciones (~riesgo medio):** ✅
 
-- [ ] Agregar estado `isProcessing` a las acciones de format/minify/execute
-- [ ] Deshabilitar botones de toolbar mientras una operación está en progreso
-- [ ] Mostrar indicador visual de progreso en el panel de output
+- [x] Agregar estado `isProcessing` a las acciones de format/minify/execute ✅
+- [x] Deshabilitar botones de toolbar mientras una operación está en progreso ✅
+- [x] Mostrar indicador visual de progreso en el panel de output ✅
 
-**Fase 13.3 — Build y configuración (~riesgo bajo):**
+**Fase 13.3 — Build y configuración (~riesgo bajo):** ✅
 
-- [ ] Agregar `autoprefixer` a `postcss.config.js` para compatibilidad cross-browser
-- [ ] Crear script `pnpm analyze` para visualización de bundle size (ya tiene `rollup-plugin-visualizer`)
-- [ ] Verificar que `strictNullChecks` está habilitado en `tsconfig.app.json`
+- [x] Agregar `autoprefixer` a `postcss.config.js` para compatibilidad cross-browser ✅ (ya estaba)
+- [x] Crear script `pnpm analyze` para visualización de bundle size (ya tiene `rollup-plugin-visualizer`) ✅
+- [x] Verificar que `strictNullChecks` está habilitado en `tsconfig.app.json` ✅ (cubierto por `"strict": true`)
 
 ### Fase 14 — UX y Funcionalidades Transversales
 

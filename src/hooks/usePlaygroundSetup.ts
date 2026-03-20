@@ -91,6 +91,8 @@ interface PlaygroundToolbarBase<M extends string, TFormat, TMinify> {
   minifyConfig: TMinify;
   setMinifyConfig: (config: TMinify) => void;
   gridClassName?: string;
+  /** Disables and shows spinner on all transform buttons while an operation is running */
+  isProcessing?: boolean;
 }
 
 interface PlaygroundToolbarWithClean<
@@ -140,6 +142,7 @@ export function usePlaygroundToolbar<
   minifyConfig,
   setMinifyConfig,
   gridClassName,
+  isProcessing,
   ...cleanParams
 }: PlaygroundToolbarBase<M, TFormat, TMinify> &
   Partial<
@@ -170,6 +173,7 @@ export function usePlaygroundToolbar<
     setMinifyConfig,
     modal: configModal,
     gridClassName,
+    isProcessing,
     ...(handleClean
       ? {
           handleClean,

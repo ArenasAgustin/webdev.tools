@@ -90,6 +90,7 @@ export function HtmlPlayground() {
     setFormatConfig: ctx.setFormatConfig,
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
+    isProcessing: actions.isProcessing,
   });
 
   return (
@@ -113,6 +114,7 @@ export function HtmlPlayground() {
           onCopyOutput={actions.handleCopyOutput}
           onDownloadInput={actions.handleDownloadInput}
           onDownloadOutput={actions.handleDownloadOutput}
+          isProcessing={actions.isProcessing}
           extraOutputActions={
             <Button
               variant="cyan"
@@ -194,6 +196,7 @@ export function HtmlPlayground() {
                         variant="output"
                         value={outputValue}
                         error={outputError}
+                        isProcessing={actions.isProcessing}
                         stats={outputStats}
                         comparisonBytes={comparisonBytes}
                       />

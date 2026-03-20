@@ -30,6 +30,7 @@ interface GenericEditorsProps {
   onCopyOutput: () => void;
   onDownloadInput: () => void;
   onDownloadOutput: () => void;
+  isProcessing?: boolean;
   extraOutputActions?: ReactNode;
   outputPanel?: (props: {
     output: string;
@@ -61,6 +62,7 @@ export const GenericEditors = memo(function GenericEditors({
   onCopyOutput,
   onDownloadInput,
   onDownloadOutput,
+  isProcessing,
   extraOutputActions,
   outputPanel,
 }: GenericEditorsProps) {
@@ -86,6 +88,7 @@ export const GenericEditors = memo(function GenericEditors({
       variant="output"
       value={output}
       error={error}
+      isProcessing={isProcessing}
       stats={outputStats}
       comparisonBytes={inputStats.bytes}
     />

@@ -80,6 +80,7 @@ export function useJsPlaygroundActions({
     createValidatedHandler({
       validate: generic.baseActions.createInputValidator,
       run: async () => {
+        generic.setIsProcessing(true);
         setError(null);
         setOutput("");
 
@@ -92,11 +93,15 @@ export function useJsPlaygroundActions({
       },
       toast,
       successMessage: "Código ejecutado correctamente",
+      onSuccess: () => {
+        generic.setIsProcessing(false);
+      },
       onError: (message) => {
+        generic.setIsProcessing(false);
         setError(message.replace(/^Error:\s*/, ""));
       },
     })();
-  }, [generic.baseActions, inputJs, setOutput, setError, toast]);
+  }, [generic, inputJs, setOutput, setError, toast]);
 
   return {
     ...generic,

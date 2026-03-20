@@ -67,7 +67,7 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     ),
   });
 
-  const { runTransformAction } = useTransformActions({
+  const { runTransformAction, isProcessing, setIsProcessing } = useTransformActions({
     createInputValidator: baseActions.createInputValidator,
     toast,
   });
@@ -132,6 +132,10 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     handleDownloadOutput,
     handleFormat,
     handleMinify,
+    /** True while a format/minify transform is in progress */
+    isProcessing,
+    /** Exposed for extended hooks that need to share the processing state */
+    setIsProcessing,
     /** Exposed for extended hooks that need custom validated actions */
     baseActions,
     runTransformAction,
