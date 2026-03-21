@@ -76,7 +76,7 @@ export function PlaygroundPage() {
             </div>
           </header>
 
-          <div className="flex-1 min-h-0 flex flex-col gap-4">
+          <div key={playgroundId} className="flex-1 min-h-0 flex flex-col gap-4 fade-in">
             <ErrorBoundary name={playground.name}>
               <Suspense fallback={<PlaygroundLoader name={playground.name} />}>
                 <PlaygroundComponent />

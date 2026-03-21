@@ -311,10 +311,10 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Activar con `?` o `Ctrl+/` ✅ (tecla `?` implementada)
 - [x] Listar atajos por playground + atajos globales ✅ (sección Clean solo en JSON)
 
-**Fase 14.2 — Transiciones entre páginas (~riesgo bajo):**
+**Fase 14.2 — Transiciones entre páginas (~riesgo bajo):** ✅
 
-- [ ] Agregar transiciones suaves al navegar entre playgrounds (View Transitions API)
-- [ ] Fade-in del contenido del playground al cargar
+- [x] Agregar transiciones suaves al navegar entre playgrounds (View Transitions API) ✅
+- [x] Fade-in del contenido del playground al cargar ✅
 
 **Fase 14.3 — Vista diff input/output (~riesgo alto):**
 

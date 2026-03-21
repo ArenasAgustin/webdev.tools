@@ -47,6 +47,7 @@ export function Home() {
               <Link
                 key={playground.id}
                 to={`/playground/${playground.id}`}
+                viewTransition
                 className="h-full"
                 onMouseEnter={() => {
                   void preloadPlaygroundById(playground.id);
