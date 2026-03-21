@@ -72,6 +72,25 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     toast,
   });
 
+  const handleUseOutputAsInput = useCallback(() => {
+    if (!output) {
+      toast?.error("No hay resultado para usar como entrada");
+      return;
+    }
+    setInput(output);
+    toast?.success("Resultado cargado como entrada");
+  }, [output, setInput, toast]);
+
+  const handleUseInputAsOutput = useCallback(() => {
+    if (!input) {
+      toast?.error("No hay entrada para usar como resultado");
+      return;
+    }
+    setOutput(input);
+    setError(null);
+    toast?.success("Entrada cargada como resultado");
+  }, [input, setOutput, setError, toast]);
+
   const handleCopyOutput = useCallback(() => {
     baseActions.handleCopy({
       text: output,
@@ -132,6 +151,8 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     handleDownloadOutput,
     handleFormat,
     handleMinify,
+    handleUseOutputAsInput,
+    handleUseInputAsOutput,
     /** True while a format/minify transform is in progress */
     isProcessing,
     /** Exposed for extended hooks that need to share the processing state */

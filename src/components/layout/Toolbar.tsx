@@ -95,7 +95,7 @@ export function Toolbar(props: ToolbarProps) {
                   <button
                     type="button"
                     onClick={props.tools.onOpenShortcuts}
-                    className="text-gray-300 hover:text-yellow-300 transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
                     title="Atajos de teclado (?)"
                     aria-label="Ver atajos de teclado"
                   >
@@ -106,7 +106,7 @@ export function Toolbar(props: ToolbarProps) {
                   <button
                     type="button"
                     onClick={() => setShowGenericConfigState(true)}
-                    className="text-gray-300 hover:text-yellow-300 transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
                     title={props.tools.configButtonTitle ?? "Configurar herramientas"}
                     aria-label={props.tools.configButtonTitle ?? "Configurar herramientas"}
                   >

@@ -118,6 +118,8 @@ export function HtmlPlayground() {
           onDownloadInput={actions.handleDownloadInput}
           onDownloadOutput={actions.handleDownloadOutput}
           isProcessing={actions.isProcessing}
+          onUseOutputAsInput={actions.handleUseOutputAsInput}
+          onUseInputAsOutput={actions.handleUseInputAsOutput}
           extraOutputActions={
             <Button
               variant="cyan"
@@ -172,6 +174,7 @@ export function HtmlPlayground() {
                   expandOutput,
                   onCopyOutput,
                   onDownloadOutput,
+                  onUseOutputAsInput,
                 }) => (
                   <Panel
                     title="Resultado"
@@ -183,6 +186,7 @@ export function HtmlPlayground() {
                           onCopyOutput={onCopyOutput}
                           onDownloadOutput={onDownloadOutput}
                           onExpand={expandOutput}
+                          onUseOutputAsInput={onUseOutputAsInput}
                         />
                         <Button
                           variant="cyan"

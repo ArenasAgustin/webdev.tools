@@ -5,6 +5,7 @@ interface InputActionsProps {
   onLoadExample: () => void;
   onDownloadInput: () => void;
   onExpand: () => void;
+  onUseInputAsOutput?: () => void;
 }
 
 export function InputActions({
@@ -12,6 +13,7 @@ export function InputActions({
   onLoadExample,
   onDownloadInput,
   onExpand,
+  onUseInputAsOutput,
 }: InputActionsProps) {
   return (
     <>
@@ -24,6 +26,16 @@ export function InputActions({
       <Button variant="cyan" onClick={onDownloadInput}>
         <i className="fas fa-download"></i> Descargar
       </Button>
+      {onUseInputAsOutput && (
+        <Button
+          variant="orange"
+          onClick={onUseInputAsOutput}
+          aria-label="Usar entrada como resultado"
+          title="Usar entrada como resultado"
+        >
+          <i className="fas fa-arrow-right" aria-hidden="true"></i>
+        </Button>
+      )}
       <Button
         variant="purple"
         onClick={onExpand}

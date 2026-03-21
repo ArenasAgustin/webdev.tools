@@ -80,6 +80,8 @@ export function CssPlayground() {
           onDownloadInput={actions.handleDownloadInput}
           onDownloadOutput={actions.handleDownloadOutput}
           isProcessing={actions.isProcessing}
+          onUseOutputAsInput={actions.handleUseOutputAsInput}
+          onUseInputAsOutput={actions.handleUseInputAsOutput}
         />
       }
       toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}

@@ -31,6 +31,8 @@ interface GenericEditorsProps {
   onDownloadInput: () => void;
   onDownloadOutput: () => void;
   isProcessing?: boolean;
+  onUseOutputAsInput?: () => void;
+  onUseInputAsOutput?: () => void;
   extraOutputActions?: ReactNode;
   outputPanel?: (props: {
     output: string;
@@ -40,6 +42,7 @@ interface GenericEditorsProps {
     expandOutput: () => void;
     onCopyOutput: () => void;
     onDownloadOutput: () => void;
+    onUseOutputAsInput?: () => void;
   }) => ReactNode;
 }
 
@@ -63,6 +66,8 @@ export const GenericEditors = memo(function GenericEditors({
   onDownloadInput,
   onDownloadOutput,
   isProcessing,
+  onUseOutputAsInput,
+  onUseInputAsOutput,
   extraOutputActions,
   outputPanel,
 }: GenericEditorsProps) {
@@ -100,6 +105,7 @@ export const GenericEditors = memo(function GenericEditors({
         onCopyOutput={onCopyOutput}
         onDownloadOutput={onDownloadOutput}
         onExpand={onExpand}
+        onUseOutputAsInput={onUseOutputAsInput}
       />
       {extraOutputActions}
     </>
@@ -135,6 +141,7 @@ export const GenericEditors = memo(function GenericEditors({
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
               onExpand={editor.collapse}
+              onUseInputAsOutput={onUseInputAsOutput}
             />
           }
           footer={inputFooter}
@@ -168,6 +175,7 @@ export const GenericEditors = memo(function GenericEditors({
               onLoadExample={onLoadExample}
               onDownloadInput={onDownloadInput}
               onExpand={() => editor.expand("input")}
+              onUseInputAsOutput={onUseInputAsOutput}
             />
           }
           footer={inputFooter}
@@ -189,6 +197,7 @@ export const GenericEditors = memo(function GenericEditors({
               expandOutput: () => editor.expand("output"),
               onCopyOutput,
               onDownloadOutput,
+              onUseOutputAsInput,
             })
           : defaultOutputPanel}
       </main>

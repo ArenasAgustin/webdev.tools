@@ -37,7 +37,7 @@ export function PlaygroundSidebar({
           </Link>
           <button
             type="button"
-            className="text-white/60 transition hover:text-white"
+            className="inline-flex items-center justify-center w-8 h-8 text-white/60 transition hover:text-white"
             onClick={onClose}
             aria-label="Close sidebar"
           >

@@ -108,7 +108,7 @@ export function JsonPlayground() {
             <button
               type="button"
               onClick={handleShowHistory}
-              className="text-gray-300 hover:text-cyan-300 transition-colors"
+              className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-cyan-300 transition-colors"
               title="Historial de filtros"
               aria-label="Historial de filtros"
             >
@@ -117,7 +117,7 @@ export function JsonPlayground() {
             <button
               type="button"
               onClick={handleShowTips}
-              className="text-gray-300 hover:text-cyan-300 transition-colors"
+              className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-cyan-300 transition-colors"
               title="Ver tips de filtros"
               aria-label="Ver tips de filtros"
             >
@@ -178,6 +178,8 @@ export function JsonPlayground() {
             onDownloadInput={actions.handleDownloadInput}
             onDownloadOutput={actions.handleDownloadOutput}
             isProcessing={actions.isProcessing}
+            onUseOutputAsInput={actions.handleUseOutputAsInput}
+            onUseInputAsOutput={actions.handleUseInputAsOutput}
           />
         }
         toolbar={
