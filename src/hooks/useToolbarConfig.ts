@@ -18,6 +18,8 @@ export interface UseToolbarConfigParams<M extends string, TFormat, TMinify> {
   isProcessing?: boolean;
   /** Handler to open the keyboard shortcuts modal */
   onOpenShortcuts?: () => void;
+  /** Handler to open the diff viewer modal */
+  onOpenDiff?: () => void;
 }
 
 interface CleanParams<TClean> {
@@ -75,6 +77,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
   gridClassName = "grid grid-cols-2 lg:grid-cols-5 gap-2",
   isProcessing = false,
   onOpenShortcuts,
+  onOpenDiff,
 }: UseToolbarConfigParams<M, TFormat, TMinify> & Partial<CleanParams<TClean>>) {
   const toolbarTools = useMemo<ToolbarConfig>(() => {
     const actions: ToolbarAction[] = [];
@@ -121,8 +124,9 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
       configButtonTitle: "Configurar herramientas",
       gridClassName,
       onOpenShortcuts,
+      onOpenDiff,
     };
-  }, [handleFormat, handleMinify, handleExecute, handleClean, gridClassName, isProcessing, onOpenShortcuts]);
+  }, [handleFormat, handleMinify, handleExecute, handleClean, gridClassName, isProcessing, onOpenShortcuts, onOpenDiff]);
 
   const toolbarConfig = useMemo(() => {
     const base = {

@@ -318,8 +318,8 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 14.3 — Vista diff input/output (~riesgo alto):**
 
-- [ ] Agregar toggle para ver diferencias entre input y output (formato vs minificado)
-- [ ] Evaluar Monaco diff editor o librería ligera
+- [x] Agregar toggle para ver diferencias entre input y output (formato vs minificado) ✅
+- [x] Evaluar Monaco diff editor o librería ligera ✅
 
 **Fase 14.4 — SEO avanzado (~riesgo bajo):**
 

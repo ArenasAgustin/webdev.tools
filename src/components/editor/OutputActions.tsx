@@ -7,7 +7,12 @@ interface OutputActionsProps {
   onUseOutputAsInput?: () => void;
 }
 
-export function OutputActions({ onCopyOutput, onDownloadOutput, onExpand, onUseOutputAsInput }: OutputActionsProps) {
+export function OutputActions({
+  onCopyOutput,
+  onDownloadOutput,
+  onExpand,
+  onUseOutputAsInput,
+}: OutputActionsProps) {
   return (
     <>
       <Button variant="primary" onClick={onCopyOutput}>

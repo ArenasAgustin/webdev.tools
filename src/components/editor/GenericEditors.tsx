@@ -2,8 +2,10 @@ import { type ReactNode, memo } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
+import { ExpandedDiffModal } from "@/components/editor/ExpandedDiffModal";
 import { InputActions } from "@/components/editor/InputActions";
 import { OutputActions } from "@/components/editor/OutputActions";
+import { Button } from "@/components/common/Button";
 import { EditorFooter } from "@/components/common/EditorFooter";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor } from "@/hooks/useExpandedEditor";
@@ -34,6 +36,8 @@ interface GenericEditorsProps {
   onUseOutputAsInput?: () => void;
   onUseInputAsOutput?: () => void;
   extraOutputActions?: ReactNode;
+  /** When provided, renders the diff modal (open state controlled externally) */
+  diffModal?: { isOpen: boolean; onClose: () => void };
   outputPanel?: (props: {
     output: string;
     error: string | null;
@@ -69,6 +73,7 @@ export const GenericEditors = memo(function GenericEditors({
   onUseOutputAsInput,
   onUseInputAsOutput,
   extraOutputActions,
+  diffModal,
   outputPanel,
 }: GenericEditorsProps) {
   const editor = useExpandedEditor();
@@ -130,6 +135,19 @@ export const GenericEditors = memo(function GenericEditors({
 
   return (
     <>
+      {diffModal?.isOpen && (
+        <ExpandedDiffModal
+          original={input}
+          modified={output}
+          language={language}
+          actions={
+            <Button variant="primary" onClick={diffModal.onClose} aria-label="Cerrar">
+              <i className="fas fa-times" aria-hidden="true"></i>
+            </Button>
+          }
+        />
+      )}
+
       {editor.isExpanded("input") && (
         <ExpandedEditorModal
           title={inputTitle}

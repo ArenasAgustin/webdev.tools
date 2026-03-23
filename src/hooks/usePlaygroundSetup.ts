@@ -95,6 +95,8 @@ interface PlaygroundToolbarBase<M extends string, TFormat, TMinify> {
   isProcessing?: boolean;
   /** Handler to open the keyboard shortcuts modal */
   onOpenShortcuts?: () => void;
+  /** Handler to open the diff viewer modal */
+  onOpenDiff?: () => void;
 }
 
 interface PlaygroundToolbarWithClean<
@@ -146,6 +148,7 @@ export function usePlaygroundToolbar<
   gridClassName,
   isProcessing,
   onOpenShortcuts,
+  onOpenDiff,
   ...cleanParams
 }: PlaygroundToolbarBase<M, TFormat, TMinify> &
   Partial<
@@ -179,6 +182,7 @@ export function usePlaygroundToolbar<
     gridClassName,
     isProcessing,
     onOpenShortcuts,
+    onOpenDiff,
     ...(handleClean
       ? {
           handleClean,

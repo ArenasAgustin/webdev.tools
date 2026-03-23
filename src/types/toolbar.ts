@@ -55,6 +55,8 @@ export interface ToolbarConfig {
   gridClassName?: string;
   /** Optional handler to open the keyboard shortcuts modal */
   onOpenShortcuts?: ToolbarActionHandler;
+  /** Optional handler to open the diff viewer modal */
+  onOpenDiff?: ToolbarActionHandler;
 }
 
 /**

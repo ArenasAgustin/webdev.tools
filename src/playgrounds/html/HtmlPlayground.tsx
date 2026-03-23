@@ -48,6 +48,7 @@ function inspectDom(source: string): string | null {
 
 export function HtmlPlayground() {
   const shortcutsModal = useModalState();
+  const diffModal = useModalState();
   const [showPreview, setShowPreview] = useState(false);
 
   const ctx = usePlaygroundSetup<HtmlFormatConfig, HtmlMinifyConfig>({
@@ -94,6 +95,7 @@ export function HtmlPlayground() {
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
     onOpenShortcuts: shortcutsModal.open,
+    onOpenDiff: diffModal.open,
   });
 
   return (
@@ -120,6 +122,7 @@ export function HtmlPlayground() {
           isProcessing={actions.isProcessing}
           onUseOutputAsInput={actions.handleUseOutputAsInput}
           onUseInputAsOutput={actions.handleUseInputAsOutput}
+          diffModal={{ isOpen: diffModal.isOpen, onClose: diffModal.close }}
           extraOutputActions={
             <Button
               variant="cyan"

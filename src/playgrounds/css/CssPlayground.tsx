@@ -18,6 +18,7 @@ const preload = () => {
 
 export function CssPlayground() {
   const shortcutsModal = useModalState();
+  const diffModal = useModalState();
   const ctx = usePlaygroundSetup<CssFormatConfig, CssMinifyConfig>({
     playgroundConfig: cssPlaygroundConfig,
     loadToolsConfig: loadCssToolsConfig,
@@ -56,6 +57,7 @@ export function CssPlayground() {
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
     onOpenShortcuts: shortcutsModal.open,
+    onOpenDiff: diffModal.open,
   });
 
   return (
@@ -82,6 +84,7 @@ export function CssPlayground() {
           isProcessing={actions.isProcessing}
           onUseOutputAsInput={actions.handleUseOutputAsInput}
           onUseInputAsOutput={actions.handleUseInputAsOutput}
+          diffModal={{ isOpen: diffModal.isOpen, onClose: diffModal.close }}
         />
       }
       toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}

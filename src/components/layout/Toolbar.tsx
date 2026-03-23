@@ -102,6 +102,17 @@ export function Toolbar(props: ToolbarProps) {
                     <i className="fas fa-keyboard" aria-hidden="true"></i>
                   </button>
                 )}
+                {props.tools.onOpenDiff && (
+                  <button
+                    type="button"
+                    onClick={props.tools.onOpenDiff}
+                    className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-purple-300 transition-colors"
+                    title="Ver diferencias input/output"
+                    aria-label="Ver diferencias input/output"
+                  >
+                    <i className="fas fa-code-compare" aria-hidden="true"></i>
+                  </button>
+                )}
                 {(props.tools.onOpenConfig ?? genericConfig) && (
                   <button
                     type="button"

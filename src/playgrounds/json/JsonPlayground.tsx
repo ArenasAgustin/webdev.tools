@@ -35,6 +35,7 @@ const preload = () => {
  */
 export function JsonPlayground() {
   const shortcutsModal = useModalState();
+  const diffModal = useModalState();
   // JSON-specific state
   const [jsonPathExpression, setJsonPathExpression] = useState("");
   const [cleanConfig, setCleanConfig] = useMergedConfigState<JsonCleanConfig>(
@@ -89,6 +90,7 @@ export function JsonPlayground() {
     gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
     isProcessing: actions.isProcessing,
     onOpenShortcuts: shortcutsModal.open,
+    onOpenDiff: diffModal.open,
   });
 
   // Modal state for tips/history (managed locally, not in Toolbar)
@@ -180,6 +182,7 @@ export function JsonPlayground() {
             isProcessing={actions.isProcessing}
             onUseOutputAsInput={actions.handleUseOutputAsInput}
             onUseInputAsOutput={actions.handleUseInputAsOutput}
+            diffModal={{ isOpen: diffModal.isOpen, onClose: diffModal.close }}
           />
         }
         toolbar={
