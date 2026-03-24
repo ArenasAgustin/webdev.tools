@@ -112,7 +112,6 @@ export function usePlaygroundOverlays(options?: UsePlaygroundOverlaysOptions) {
         setActive((prev) => (prev === key ? null : key));
       },
     }),
-     
     [active, openEditorInput, openEditorOutput, closeAll],
   );
 
