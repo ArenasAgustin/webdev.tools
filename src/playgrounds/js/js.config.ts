@@ -6,6 +6,7 @@ export const jsPlaygroundConfig: PlaygroundConfig = {
   icon: "fab fa-js",
   description: "Ejecutar y probar código JavaScript",
   language: "javascript",
+  keywords: ["JavaScript formatter", "JS beautifier", "JavaScript minifier", "online JS tool"],
   example: `// Ejemplo: Función para calcular factorial
 function factorial(n) {
   if (n <= 1) return 1;

@@ -323,9 +323,9 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 14.4 — SEO avanzado (~riesgo bajo):**
 
-- [ ] Agregar JSON-LD structured data (schema `SoftwareApplication`) por playground
-- [ ] Agregar `og:image` dinámico por playground en `useDocumentMeta`
-- [ ] Verificar canonical URLs consistentes en todas las rutas
+- [x] Agregar JSON-LD structured data (schema `SoftwareApplication`) por playground ✅
+- [x] Agregar `og:image` dinámico por playground en `useDocumentMeta` ✅
+- [x] Verificar canonical URLs consistentes en todas las rutas ✅
 
 ### Fase 15 — Design System y CSS
 

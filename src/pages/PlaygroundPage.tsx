@@ -21,12 +21,25 @@ export function PlaygroundPage() {
     description: playground
       ? `${playground.description}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.`
       : "Herramientas de desarrollo web online",
-    keywords: playground
+    keywords: playground?.keywords ?? (playground
       ? `${playground.name}, ${playground.description}, herramientas desarrollo web online`
-      : "herramientas desarrollo web",
+      : "herramientas desarrollo web"),
     ogUrl: playground
       ? `https://webdev.tools/playground/${playground.id}`
       : "https://webdev.tools/",
+    ogImage: playground ? `/og/${playground.id}.png` : undefined,
+    jsonLd: playground
+      ? {
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: playground.name,
+          description: playground.description,
+          url: `https://webdev.tools/playground/${playground.id}`,
+          applicationCategory: "DeveloperApplication",
+          operatingSystem: "Web",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        }
+      : undefined,
   });
 
   if (!playground) {

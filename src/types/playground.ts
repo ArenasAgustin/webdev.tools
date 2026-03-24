@@ -10,6 +10,7 @@ export interface PlaygroundConfig {
   description: string;
   language: string;
   example: string;
+  keywords?: string[];
 }
 
 export interface PlaygroundFeature {

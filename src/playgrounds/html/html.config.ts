@@ -6,6 +6,7 @@ export const htmlPlaygroundConfig: PlaygroundConfig = {
   icon: "fab fa-html5",
   description: "Formatear y minificar HTML",
   language: "html",
+  keywords: ["HTML formatter", "HTML minifier", "HTML beautifier", "online HTML tool"],
   example: `<!doctype html>
 <html lang="es">
   <head>

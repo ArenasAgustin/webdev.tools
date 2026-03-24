@@ -6,6 +6,7 @@ export const cssPlaygroundConfig: PlaygroundConfig = {
   icon: "fab fa-css3-alt",
   description: "Formatear y minificar CSS",
   language: "css",
+  keywords: ["CSS formatter", "CSS minifier", "CSS beautifier", "online CSS tool"],
   example: `:root {
   --primary: #2563eb;
   --surface: #0f172a;
