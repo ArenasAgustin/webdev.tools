@@ -17,6 +17,8 @@ export interface PlaygroundSetupConfig<TFormat extends object, TMinify extends o
   defaultFormatConfig: TFormat;
   defaultMinifyConfig: TMinify;
   preload: () => void;
+  /** If provided, the setup uses this modal state instead of creating its own */
+  configModal?: ReturnType<typeof useModalState>;
 }
 
 const INPUT_TOO_LARGE_MESSAGE = `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`;
@@ -29,6 +31,7 @@ export function usePlaygroundSetup<TFormat extends object, TMinify extends objec
   defaultFormatConfig,
   defaultMinifyConfig,
   preload,
+  configModal: externalConfigModal,
 }: PlaygroundSetupConfig<TFormat, TMinify>) {
   const [savedConfig] = useState(loadToolsConfig);
   const [input, setInput] = useState(() => {
@@ -47,7 +50,8 @@ export function usePlaygroundSetup<TFormat extends object, TMinify extends objec
     savedConfig?.minify,
   );
 
-  const configModal = useModalState();
+  const ownConfigModal = useModalState();
+  const configModal = externalConfigModal ?? ownConfigModal;
   const toast = useToast();
 
   const { debouncedInput, inputTooLarge, inputWarning } = usePlaygroundInputLifecycle({
@@ -167,6 +171,7 @@ export function usePlaygroundToolbar<
     onClearInput: handleClearInput,
     onOpenConfig: configModal.open,
     onOpenShortcuts,
+    onOpenDiff,
   });
 
   const toolbarParams = {

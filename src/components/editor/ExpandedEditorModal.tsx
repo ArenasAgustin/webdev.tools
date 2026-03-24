@@ -1,5 +1,5 @@
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Container } from "@/components/common/Container";
 import type { IconColorKey } from "@/utils/constants/colors";
 
@@ -13,6 +13,7 @@ interface ExpandedEditorModalProps {
   language: string;
   readOnly?: boolean;
   onChange?: (value: string) => void;
+  onClose?: () => void;
 }
 
 export function ExpandedEditorModal({
@@ -25,7 +26,20 @@ export function ExpandedEditorModal({
   language,
   readOnly = false,
   onChange,
+  onClose,
 }: ExpandedEditorModalProps) {
+  useEffect(() => {
+    if (!onClose) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   return (
     <Container
       title={title}

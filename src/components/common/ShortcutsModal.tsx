@@ -72,7 +72,8 @@ export function ShortcutsModal({ isOpen, onClose, hasClean = false }: ShortcutsM
           </h4>
           <div>
             <ShortcutRow keys={["Ctrl/⌘", ","]} description="Abrir configuración" />
-            <ShortcutRow keys={["?"]} description="Ver atajos de teclado" />
+            <ShortcutRow keys={["Ctrl/⌘", "'"]} description="Ver atajos de teclado" />
+            <ShortcutRow keys={["Ctrl/⌘", "Shift", "D"]} description="Ver diferencias" />
           </div>
         </section>
       </div>

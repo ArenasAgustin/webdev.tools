@@ -8,6 +8,7 @@ interface PlaygroundShortcutsHandlers {
   onClearInput: () => void;
   onOpenConfig: () => void;
   onOpenShortcuts?: () => void;
+  onOpenDiff?: () => void;
 }
 
 export function usePlaygroundShortcuts(handlers: PlaygroundShortcutsHandlers) {
@@ -19,5 +20,6 @@ export function usePlaygroundShortcuts(handlers: PlaygroundShortcutsHandlers) {
     onClearInput: handlers.onClearInput,
     onOpenConfig: handlers.onOpenConfig,
     onOpenShortcuts: handlers.onOpenShortcuts,
+    onOpenDiff: handlers.onOpenDiff,
   });
 }

@@ -8,6 +8,7 @@ interface KeyboardShortcutsConfig {
   onClearInput?: () => void;
   onOpenConfig?: () => void;
   onOpenShortcuts?: () => void;
+  onOpenDiff?: () => void;
 }
 
 /**
@@ -72,10 +73,16 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
         config.onOpenConfig?.();
       }
 
-      // ?: Open shortcuts modal
-      if (!ctrlKey && !event.shiftKey && !event.altKey && event.key === "?") {
+      // Ctrl/Cmd+': Open shortcuts modal
+      if (ctrlKey && !event.shiftKey && event.key === "'") {
         event.preventDefault();
         config.onOpenShortcuts?.();
+      }
+
+      // Ctrl/Cmd+Shift+D: Open diff viewer
+      if (ctrlKey && event.shiftKey && normalizedKey === "D") {
+        event.preventDefault();
+        config.onOpenDiff?.();
       }
     };
 

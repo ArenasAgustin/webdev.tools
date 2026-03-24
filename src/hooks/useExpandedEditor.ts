@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 
 type EditorType = "input" | "output";
 
-interface UseExpandedEditorReturn {
+export interface UseExpandedEditorReturn {
   expanded: EditorType | null;
   isExpanded: (type: EditorType) => boolean;
   expand: (type: EditorType) => void;

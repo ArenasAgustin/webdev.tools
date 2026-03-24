@@ -11,7 +11,7 @@ import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
 import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
-import { useModalState } from "@/hooks/useModalState";
+import { usePlaygroundOverlays } from "@/hooks/usePlaygroundOverlays";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import {
   DEFAULT_JSON_FORMAT_CONFIG,
@@ -34,15 +34,17 @@ const preload = () => {
  * Handles formatting, minification, validation and JSONPath filtering
  */
 export function JsonPlayground() {
-  const shortcutsModal = useModalState();
-  const diffModal = useModalState();
-  // JSON-specific state
   const [jsonPathExpression, setJsonPathExpression] = useState("");
   const [cleanConfig, setCleanConfig] = useMergedConfigState<JsonCleanConfig>(
     DEFAULT_JSON_CLEAN_CONFIG,
     savedCleanConfig,
   );
+  const [jsonPathModal, setJsonPathModal] = useState<"tips" | "history" | null>(null);
   const jsonPathHistory = useJsonPathHistory();
+
+  const overlays = usePlaygroundOverlays({
+    onCloseExtra: useCallback(() => setJsonPathModal(null), []),
+  });
 
   const ctx = usePlaygroundSetup<JsonFormatConfig, JsonMinifyConfig>({
     playgroundConfig: jsonPlaygroundConfig,
@@ -52,6 +54,7 @@ export function JsonPlayground() {
     defaultFormatConfig: DEFAULT_JSON_FORMAT_CONFIG,
     defaultMinifyConfig: DEFAULT_JSON_MINIFY_CONFIG,
     preload,
+    configModal: overlays.config,
   });
 
   const validation = useJsonParser(ctx.debouncedInput);
@@ -89,18 +92,14 @@ export function JsonPlayground() {
     setCleanConfig,
     gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
     isProcessing: actions.isProcessing,
-    onOpenShortcuts: shortcutsModal.open,
-    onOpenDiff: diffModal.open,
+    onOpenShortcuts: overlays.shortcuts.open,
+    onOpenDiff: overlays.diff.open,
   });
-
-  // Modal state for tips/history (managed locally, not in Toolbar)
-  const [jsonPathModal, setJsonPathModal] = useState<"tips" | "history" | null>(null);
 
   const handleShowTips = useCallback(() => setJsonPathModal("tips"), []);
   const handleShowHistory = useCallback(() => setJsonPathModal("history"), []);
   const handleCloseJsonPathModal = useCallback(() => setJsonPathModal(null), []);
 
-  // JSONPath extra content for Toolbar
   const jsonPathSection = useMemo(
     () => (
       <div>
@@ -182,7 +181,8 @@ export function JsonPlayground() {
             isProcessing={actions.isProcessing}
             onUseOutputAsInput={actions.handleUseOutputAsInput}
             onUseInputAsOutput={actions.handleUseInputAsOutput}
-            diffModal={{ isOpen: diffModal.isOpen, onClose: diffModal.close }}
+            diffModal={overlays.diff}
+            editorState={overlays.editor}
           />
         }
         toolbar={
@@ -190,13 +190,12 @@ export function JsonPlayground() {
             variant="generic"
             tools={toolbarTools}
             config={toolbarConfig}
-            shortcuts={shortcutsModal}
+            shortcuts={overlays.shortcuts}
             extraContent={jsonPathSection}
           />
         }
       />
 
-      {/* Tips Modal */}
       <TipsModal
         isOpen={jsonPathModal === "tips"}
         title="Tips para Filtros JSONPath"
@@ -211,7 +210,6 @@ export function JsonPlayground() {
         }}
       />
 
-      {/* History Modal */}
       <JsonPathHistoryModal
         isOpen={jsonPathModal === "history"}
         history={jsonPathHistory.history}

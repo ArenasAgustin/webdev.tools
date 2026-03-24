@@ -11,7 +11,7 @@ import { htmlPlaygroundConfig } from "./html.config";
 import { useHtmlParser } from "@/hooks/useHtmlParser";
 import { useHtmlPlaygroundActions } from "@/hooks/useHtmlPlaygroundActions";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
-import { useModalState } from "@/hooks/useModalState";
+import { usePlaygroundOverlays } from "@/hooks/usePlaygroundOverlays";
 import { loadLastHtml, saveLastHtml, loadHtmlToolsConfig } from "@/services/storage";
 import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
 import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
@@ -47,8 +47,7 @@ function inspectDom(source: string): string | null {
 }
 
 export function HtmlPlayground() {
-  const shortcutsModal = useModalState();
-  const diffModal = useModalState();
+  const overlays = usePlaygroundOverlays();
   const [showPreview, setShowPreview] = useState(false);
 
   const ctx = usePlaygroundSetup<HtmlFormatConfig, HtmlMinifyConfig>({
@@ -59,6 +58,7 @@ export function HtmlPlayground() {
     defaultFormatConfig: DEFAULT_HTML_FORMAT_CONFIG,
     defaultMinifyConfig: DEFAULT_HTML_MINIFY_CONFIG,
     preload,
+    configModal: overlays.config,
   });
 
   const previewSource = useMemo(
@@ -94,8 +94,8 @@ export function HtmlPlayground() {
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
-    onOpenShortcuts: shortcutsModal.open,
-    onOpenDiff: diffModal.open,
+    onOpenShortcuts: overlays.shortcuts.open,
+    onOpenDiff: overlays.diff.open,
   });
 
   return (
@@ -122,7 +122,8 @@ export function HtmlPlayground() {
           isProcessing={actions.isProcessing}
           onUseOutputAsInput={actions.handleUseOutputAsInput}
           onUseInputAsOutput={actions.handleUseInputAsOutput}
-          diffModal={{ isOpen: diffModal.isOpen, onClose: diffModal.close }}
+          diffModal={overlays.diff}
+          editorState={overlays.editor}
           extraOutputActions={
             <Button
               variant="cyan"
@@ -223,7 +224,7 @@ export function HtmlPlayground() {
           }
         />
       }
-      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={overlays.shortcuts} />}
     />
   );
 }

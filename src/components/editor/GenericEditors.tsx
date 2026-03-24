@@ -8,7 +8,7 @@ import { OutputActions } from "@/components/editor/OutputActions";
 import { Button } from "@/components/common/Button";
 import { EditorFooter } from "@/components/common/EditorFooter";
 import { useTextStats } from "@/hooks/useTextStats";
-import { useExpandedEditor } from "@/hooks/useExpandedEditor";
+import { useExpandedEditor, type UseExpandedEditorReturn } from "@/hooks/useExpandedEditor";
 
 interface GenericEditorsProps {
   input: string;
@@ -37,7 +37,9 @@ interface GenericEditorsProps {
   onUseInputAsOutput?: () => void;
   extraOutputActions?: ReactNode;
   /** When provided, renders the diff modal (open state controlled externally) */
-  diffModal?: { isOpen: boolean; onClose: () => void };
+  diffModal?: { isOpen: boolean; close: () => void };
+  /** When provided, uses this expanded-editor state instead of internal state */
+  editorState?: UseExpandedEditorReturn;
   outputPanel?: (props: {
     output: string;
     error: string | null;
@@ -74,9 +76,11 @@ export const GenericEditors = memo(function GenericEditors({
   onUseInputAsOutput,
   extraOutputActions,
   diffModal,
+  editorState,
   outputPanel,
 }: GenericEditorsProps) {
-  const editor = useExpandedEditor();
+  const ownEditor = useExpandedEditor();
+  const editor = editorState ?? ownEditor;
   const inputStats = useTextStats(input);
   const outputStats = useTextStats(output);
 
@@ -140,8 +144,9 @@ export const GenericEditors = memo(function GenericEditors({
           original={input}
           modified={output}
           language={language}
+          onClose={diffModal.close}
           actions={
-            <Button variant="primary" onClick={diffModal.onClose} aria-label="Cerrar">
+            <Button variant="primary" onClick={diffModal.close} aria-label="Cerrar">
               <i className="fas fa-times" aria-hidden="true"></i>
             </Button>
           }
@@ -153,6 +158,7 @@ export const GenericEditors = memo(function GenericEditors({
           title={inputTitle}
           icon="code"
           iconColor="blue-400"
+          onClose={editor.collapse}
           actions={
             <InputActions
               onClearInput={onClearInput}
@@ -174,6 +180,7 @@ export const GenericEditors = memo(function GenericEditors({
           title="Resultado"
           icon="terminal"
           iconColor="green-400"
+          onClose={editor.collapse}
           actions={outputActions(editor.collapse)}
           footer={outputFooter}
           value={output}

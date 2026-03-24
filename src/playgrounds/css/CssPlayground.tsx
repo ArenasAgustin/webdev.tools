@@ -5,7 +5,7 @@ import { cssPlaygroundConfig } from "./css.config";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
-import { useModalState } from "@/hooks/useModalState";
+import { usePlaygroundOverlays } from "@/hooks/usePlaygroundOverlays";
 import { loadCssToolsConfig, loadLastCss, saveLastCss } from "@/services/storage";
 import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
@@ -17,8 +17,7 @@ const preload = () => {
 };
 
 export function CssPlayground() {
-  const shortcutsModal = useModalState();
-  const diffModal = useModalState();
+  const overlays = usePlaygroundOverlays();
   const ctx = usePlaygroundSetup<CssFormatConfig, CssMinifyConfig>({
     playgroundConfig: cssPlaygroundConfig,
     loadToolsConfig: loadCssToolsConfig,
@@ -27,6 +26,7 @@ export function CssPlayground() {
     defaultFormatConfig: DEFAULT_CSS_FORMAT_CONFIG,
     defaultMinifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
     preload,
+    configModal: overlays.config,
   });
 
   const validation = useCssParser(ctx.debouncedInput);
@@ -56,8 +56,8 @@ export function CssPlayground() {
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
-    onOpenShortcuts: shortcutsModal.open,
-    onOpenDiff: diffModal.open,
+    onOpenShortcuts: overlays.shortcuts.open,
+    onOpenDiff: overlays.diff.open,
   });
 
   return (
@@ -84,10 +84,11 @@ export function CssPlayground() {
           isProcessing={actions.isProcessing}
           onUseOutputAsInput={actions.handleUseOutputAsInput}
           onUseInputAsOutput={actions.handleUseInputAsOutput}
-          diffModal={{ isOpen: diffModal.isOpen, onClose: diffModal.close }}
+          diffModal={overlays.diff}
+          editorState={overlays.editor}
         />
       }
-      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={overlays.shortcuts} />}
     />
   );
 }

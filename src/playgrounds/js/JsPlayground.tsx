@@ -5,7 +5,7 @@ import { jsPlaygroundConfig } from "./js.config";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
-import { useModalState } from "@/hooks/useModalState";
+import { usePlaygroundOverlays } from "@/hooks/usePlaygroundOverlays";
 import { loadLastJs, saveLastJs, loadJsToolsConfig } from "@/services/storage";
 import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
@@ -23,8 +23,7 @@ const preload = () => {
  * JavaScript Playground - Execute and test JavaScript code
  */
 export function JsPlayground() {
-  const shortcutsModal = useModalState();
-  const diffModal = useModalState();
+  const overlays = usePlaygroundOverlays();
   const ctx = usePlaygroundSetup<JsFormatConfig, JsMinifyConfig>({
     playgroundConfig: jsPlaygroundConfig,
     loadToolsConfig: loadJsToolsConfig,
@@ -33,6 +32,7 @@ export function JsPlayground() {
     defaultFormatConfig: DEFAULT_JS_FORMAT_CONFIG,
     defaultMinifyConfig: DEFAULT_JS_MINIFY_CONFIG,
     preload,
+    configModal: overlays.config,
   });
 
   const validation = useJsParser(ctx.debouncedInput);
@@ -63,8 +63,8 @@ export function JsPlayground() {
     minifyConfig: ctx.minifyConfig,
     setMinifyConfig: ctx.setMinifyConfig,
     isProcessing: actions.isProcessing,
-    onOpenShortcuts: shortcutsModal.open,
-    onOpenDiff: diffModal.open,
+    onOpenShortcuts: overlays.shortcuts.open,
+    onOpenDiff: overlays.diff.open,
   });
 
   return (
@@ -91,10 +91,11 @@ export function JsPlayground() {
           isProcessing={actions.isProcessing}
           onUseOutputAsInput={actions.handleUseOutputAsInput}
           onUseInputAsOutput={actions.handleUseInputAsOutput}
-          diffModal={{ isOpen: diffModal.isOpen, onClose: diffModal.close }}
+          diffModal={overlays.diff}
+          editorState={overlays.editor}
         />
       }
-      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={shortcutsModal} />}
+      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={overlays.shortcuts} />}
     />
   );
 }
