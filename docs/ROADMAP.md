@@ -344,12 +344,12 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 16.1 — Progressive Web App (~riesgo medio):**
 
-- [ ] Crear `manifest.json` en `public/` con nombre, iconos, tema, start_url
-- [ ] Integrar `vite-plugin-pwa` para generación automática de service worker
-- [ ] Configurar estrategia de cache (app shell + lazy chunks + workers)
-- [ ] Agregar fallback offline UI cuando no hay conexión
-- [ ] Agregar botón "Instalar app" con prompt de instalación PWA
-- [ ] Tests: verificar que la app funciona sin conexión (formato/minificación local)
+- [x] Crear `manifest.json` en `public/` con nombre, iconos, tema, start_url ✅
+- [x] Integrar `vite-plugin-pwa` para generación automática de service worker ✅
+- [x] Configurar estrategia de cache (app shell + lazy chunks + workers) ✅
+- [x] Agregar fallback offline UI cuando no hay conexión ✅
+- [x] Agregar botón "Instalar app" con prompt de instalación PWA ✅
+- [x] Tests: verificar que la app funciona sin conexión (formato/minificación local) ✅
 
 ### Fase 17 — CI/CD Completo
 

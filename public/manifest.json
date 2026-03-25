@@ -1,0 +1,57 @@
+{
+  "name": "webdev.tools",
+  "short_name": "webdev",
+  "description": "Herramientas de desarrollo web rápidas y eficientes. Sin instalación, 100% en el navegador.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "lang": "es",
+  "dir": "ltr",
+  "orientation": "any",
+  "categories": ["developer", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "JSON Tools",
+      "short_name": "JSON",
+      "description": "Formatear y filtrar JSON",
+      "url": "/playground/json",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "JavaScript",
+      "short_name": "JS",
+      "description": "Ejecutar y formatear JavaScript",
+      "url": "/playground/js",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "CSS Tools",
+      "short_name": "CSS",
+      "description": "Formatear y minificar CSS",
+      "url": "/playground/css",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "HTML Tools",
+      "short_name": "HTML",
+      "description": "Formatear y minificar HTML",
+      "url": "/playground/html",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    }
+  ]
+}
