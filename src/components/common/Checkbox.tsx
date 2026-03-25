@@ -1,4 +1,5 @@
 import { type ChangeEvent } from "react";
+import { cn } from "@/utils/cn";
 
 type CheckboxColor = "blue" | "purple" | "orange" | "green" | "cyan";
 
@@ -30,10 +31,10 @@ export function Checkbox({
   };
 
   return (
-    <label className={`flex items-center gap-2 cursor-pointer ${containerClassName}`}>
+    <label className={cn("flex items-center gap-2 cursor-pointer", containerClassName)}>
       <input
         type="checkbox"
-        className={`w-4 h-4 rounded bg-gray-800 border-gray-600 ${colorClasses[color]}`}
+        className={cn("w-4 h-4 rounded bg-gray-800 border-gray-600", colorClasses[color])}
         checked={checked}
         onChange={handleChange}
       />

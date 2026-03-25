@@ -331,14 +331,14 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 **Fase 15.1 — Tema centralizado en Tailwind (~riesgo bajo):**
 
-- [ ] Extraer colores, spacing y animaciones recurrentes al `tailwind.config.js` (`theme.extend`)
-- [ ] Mover animación `fadeIn` y estilos de scrollbar de `index.css` a plugins de Tailwind
-- [ ] Unificar variantes de color en `Button`, `Checkbox`, `RadioGroup` vía configuración de tema
+- [x] Extraer colores, spacing y animaciones recurrentes al `tailwind.config.js` (`theme.extend`)
+- [x] Mover animación `fadeIn` y estilos de scrollbar de `index.css` a plugins de Tailwind
+- [x] Unificar variantes de color en `Button`, `Checkbox`, `RadioGroup` vía configuración de tema
 
 **Fase 15.2 — Composición de clases CSS (~riesgo bajo):**
 
-- [ ] Evaluar adopción de `clsx` o `tailwind-merge` para composición segura de clases
-- [ ] Reemplazar concatenaciones manuales de `className` con template literals
+- [x] Evaluar adopción de `clsx` o `tailwind-merge` para composición segura de clases
+- [x] Reemplazar concatenaciones manuales de `className` con template literals
 
 ### Fase 16 — PWA y Soporte Offline
 

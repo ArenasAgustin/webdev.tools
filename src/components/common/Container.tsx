@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { getIconColorClass, type IconColorKey } from "@/utils/constants/colors";
+import { cn } from "@/utils/cn";
 
 interface ContainerProps {
   title: string;
@@ -36,7 +37,7 @@ export function Container({
     modal: "bg-black/50 backdrop-blur-md fixed inset-0 m-4 z-[9999]",
   };
 
-  const containerClass = `${baseClasses} ${variantClasses[variant]} ${className}`;
+  const containerClass = cn(baseClasses, variantClasses[variant], className);
 
   return (
     <section

@@ -1,3 +1,5 @@
+import { cn } from "@/utils/cn";
+
 interface RadioOption<T> {
   value: T;
   label: string;
@@ -34,7 +36,7 @@ export function RadioGroup<T extends string>({
   const colorClasses = colorMap[color];
 
   return (
-    <div className={`flex gap-4 ${className}`} role="radiogroup" aria-label={name}>
+    <div className={cn("flex gap-4", className)} role="radiogroup" aria-label={name}>
       {options.map((option) => (
         <label key={option.value} className="flex items-center gap-2 cursor-pointer">
           <input

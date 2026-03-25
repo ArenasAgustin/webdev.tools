@@ -1,4 +1,5 @@
 import { type ReactNode, memo } from "react";
+import { cn } from "@/utils/cn";
 
 interface ButtonProps {
   variant?: "primary" | "danger" | "success" | "purple" | "cyan" | "orange";
@@ -44,7 +45,13 @@ export const Button = memo(function Button({
       disabled={disabled}
       aria-label={ariaLabel}
       title={title}
-      className={`${variantStyles[variant]} ${sizeStyles[size]} rounded transition-all border ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
+      className={cn(
+          variantStyles[variant],
+          sizeStyles[size],
+          "rounded transition-all border",
+          disabled && "opacity-50 cursor-not-allowed",
+          className,
+        )}
     >
       {children}
     </button>

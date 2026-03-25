@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { cn } from "@/utils/cn";
 
 interface CardProps {
   title?: string;
@@ -21,9 +22,9 @@ export function Card({
   titleClassName = "",
 }: CardProps) {
   return (
-    <div className={`border rounded-lg p-3 ${className}`}>
+    <div className={cn("border rounded-lg p-3", className)}>
       {title && (
-        <h4 className={`font-semibold mb-2 flex items-center gap-2 ${headerClassName}`}>
+        <h4 className={cn("font-semibold mb-2 flex items-center gap-2", headerClassName)}>
           {icon && <i className={`fas fa-${icon}`}></i>}
           <span className={titleClassName}>{title}</span>
         </h4>

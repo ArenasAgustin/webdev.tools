@@ -124,7 +124,7 @@ export const TipsModal = memo(function TipsModal({
 
   return (
     <Modal isOpen={isOpen} title={title} icon={icon} iconColor={iconColor} onClose={onClose}>
-      <div className="space-y-4 text-xs max-h-[60vh] overflow-y-auto pr-2">
+      <div className="space-y-4 text-xs max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin">
         {renderedTips}
         {renderedQuickExamples}
       </div>
