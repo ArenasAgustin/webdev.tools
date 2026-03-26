@@ -74,6 +74,20 @@ vi.mock("@/components/common/EditorFooter", () => ({
   ),
 }));
 
+interface EditorTabBarMockProps {
+  activeTab: "input" | "output";
+  onTabChange: (tab: "input" | "output") => void;
+}
+
+vi.mock("@/components/editor/EditorTabBar", () => ({
+  EditorTabBar: ({ activeTab, onTabChange }: EditorTabBarMockProps) => (
+    <div data-testid="editor-tab-bar" data-active-tab={activeTab}>
+      <button onClick={() => onTabChange("input")}>tab-input</button>
+      <button onClick={() => onTabChange("output")}>tab-output</button>
+    </div>
+  ),
+}));
+
 // Base props (CSS) for feature-specific tests
 const baseProps = {
   input: "some input",
@@ -244,3 +258,71 @@ describe.each(LANGUAGE_CONFIGS)(
     });
   },
 );
+
+describe("GenericEditors — mobile tab behavior", () => {
+  const makeMobileProps = (overrides: Partial<typeof baseProps> = {}) => ({
+    ...baseProps,
+    ...overrides,
+    onInputChange: vi.fn(),
+    onClearInput: vi.fn(),
+    onLoadExample: vi.fn(),
+    onCopyOutput: vi.fn(),
+    onDownloadInput: vi.fn(),
+    onDownloadOutput: vi.fn(),
+  });
+
+  beforeEach(() => {
+    expandedState = null;
+    vi.clearAllMocks();
+  });
+
+  it("default active tab is 'input': input panel visible, output panel has 'hidden' class", () => {
+    render(<GenericEditors {...makeMobileProps({ output: "" })} />);
+
+    const inputPanel = document.querySelector("#panel-input");
+    const outputPanel = document.querySelector("#panel-output");
+
+    expect(inputPanel).not.toBeNull();
+    expect(outputPanel).not.toBeNull();
+    expect(inputPanel!.className).not.toContain("hidden");
+    expect(outputPanel!.className).toContain("hidden");
+  });
+
+  it("switches to 'output' tab when output changes from empty to non-empty", () => {
+    const { rerender } = render(<GenericEditors {...makeMobileProps({ output: "" })} />);
+
+    rerender(<GenericEditors {...makeMobileProps({ output: "some result" })} />);
+
+    const outputPanel = document.querySelector("#panel-output");
+    expect(outputPanel!.className).not.toContain("hidden");
+    const inputPanel = document.querySelector("#panel-input");
+    expect(inputPanel!.className).toContain("hidden");
+  });
+
+  it("does NOT switch tab again when output changes while already on 'output' tab", () => {
+    const { rerender } = render(<GenericEditors {...makeMobileProps({ output: "" })} />);
+
+    // Trigger switch to output
+    rerender(<GenericEditors {...makeMobileProps({ output: "first result" })} />);
+
+    // Manually switch back to input via tab bar to simulate user navigating away
+    fireEvent.click(screen.getByText("tab-input"));
+
+    // A subsequent output change should NOT switch back to output
+    rerender(<GenericEditors {...makeMobileProps({ output: "second result" })} />);
+
+    const inputPanel = document.querySelector("#panel-input");
+    expect(inputPanel!.className).not.toContain("hidden");
+  });
+
+  it("switching tab via EditorTabBar shows the correct panel", () => {
+    render(<GenericEditors {...makeMobileProps({ output: "some output" })} />);
+
+    fireEvent.click(screen.getByText("tab-output"));
+    expect(document.querySelector("#panel-output")!.className).not.toContain("hidden");
+
+    fireEvent.click(screen.getByText("tab-input"));
+    expect(document.querySelector("#panel-input")!.className).not.toContain("hidden");
+    expect(document.querySelector("#panel-output")!.className).toContain("hidden");
+  });
+});

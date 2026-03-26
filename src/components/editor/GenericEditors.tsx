@@ -7,8 +7,10 @@ import { InputActions } from "@/components/editor/InputActions";
 import { OutputActions } from "@/components/editor/OutputActions";
 import { Button } from "@/components/common/Button";
 import { EditorFooter } from "@/components/common/EditorFooter";
+import { EditorTabBar } from "@/components/editor/EditorTabBar";
 import { useTextStats } from "@/hooks/useTextStats";
 import { useExpandedEditor, type UseExpandedEditorReturn } from "@/hooks/useExpandedEditor";
+import { cn } from "@/utils/cn";
 
 interface GenericEditorsProps {
   input: string;
@@ -90,6 +92,17 @@ export const GenericEditors = memo(function GenericEditors({
   const inputStats = useTextStats(input);
   const outputStats = useTextStats(output);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [activeTab, setActiveTab] = useState<"input" | "output">("input");
+  const [prevOutput, setPrevOutput] = useState(output);
+
+  // Auto-switch to output tab on first result (empty → non-empty transition only).
+  // Uses the React "store previous prop" pattern — safe setState during render.
+  if (prevOutput !== output) {
+    setPrevOutput(output);
+    if (prevOutput === "" && output !== "") {
+      setActiveTab("output");
+    }
+  }
 
   const dragHandlers = onImportFile
     ? {
@@ -220,53 +233,64 @@ export const GenericEditors = memo(function GenericEditors({
         />
       )}
 
-      <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
-        <Panel
-          title={inputTitle}
-          icon="code"
-          iconColor="blue-400"
-          actions={
-            <InputActions
-              onClearInput={onClearInput}
-              onLoadExample={onLoadExample}
-              onDownloadInput={onDownloadInput}
-              onExpand={() => editor.expand("input")}
-              onUseInputAsOutput={onUseInputAsOutput}
-              onImportFile={onImportFile}
-              acceptExtensions={acceptExtensions}
-            />
-          }
-          footer={inputFooter}
-        >
-          <div className="relative h-full" {...dragHandlers}>
-            <LazyCodeEditor
-              value={input}
-              language={language}
-              onChange={onInputChange}
-              placeholder={inputPlaceholder}
-            />
-            {isDragOver && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg pointer-events-none transition-all">
-                <span className="text-blue-300 font-medium text-sm">
-                  Soltar archivo aquí
-                </span>
-              </div>
-            )}
-          </div>
-        </Panel>
+      <EditorTabBar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        inputLabel="Entrada"
+        outputLabel="Salida"
+      />
 
-        {outputPanel
-          ? outputPanel({
-              output,
-              error,
-              outputStats,
-              comparisonBytes: inputStats.bytes,
-              expandOutput: () => editor.expand("output"),
-              onCopyOutput,
-              onDownloadOutput,
-              onUseOutputAsInput,
-            })
-          : defaultOutputPanel}
+      <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
+        <div id="panel-input" className={cn(activeTab !== "input" && "hidden", "sm:block")}>
+          <Panel
+            title={inputTitle}
+            icon="code"
+            iconColor="blue-400"
+            actions={
+              <InputActions
+                onClearInput={onClearInput}
+                onLoadExample={onLoadExample}
+                onDownloadInput={onDownloadInput}
+                onExpand={() => editor.expand("input")}
+                onUseInputAsOutput={onUseInputAsOutput}
+                onImportFile={onImportFile}
+                acceptExtensions={acceptExtensions}
+              />
+            }
+            footer={inputFooter}
+          >
+            <div className="relative h-full" {...dragHandlers}>
+              <LazyCodeEditor
+                value={input}
+                language={language}
+                onChange={onInputChange}
+                placeholder={inputPlaceholder}
+              />
+              {isDragOver && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg pointer-events-none transition-all">
+                  <span className="text-blue-300 font-medium text-sm">
+                    Soltar archivo aquí
+                  </span>
+                </div>
+              )}
+            </div>
+          </Panel>
+        </div>
+
+        <div id="panel-output" className={cn(activeTab !== "output" && "hidden", "sm:block")}>
+          {outputPanel
+            ? outputPanel({
+                output,
+                error,
+                outputStats,
+                comparisonBytes: inputStats.bytes,
+                expandOutput: () => editor.expand("output"),
+                onCopyOutput,
+                onDownloadOutput,
+                onUseOutputAsInput,
+              })
+            : defaultOutputPanel}
+        </div>
       </main>
     </>
   );

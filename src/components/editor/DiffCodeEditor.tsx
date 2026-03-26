@@ -14,7 +14,7 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
   language,
 }: DiffCodeEditorProps) {
   return (
-    <div className="w-full h-full max-h-[240px] lg:max-h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
+    <div className="w-full h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
       <DiffEditor
         className="h-full"
         language={language}

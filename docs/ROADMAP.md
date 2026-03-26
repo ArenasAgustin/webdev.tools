@@ -377,7 +377,18 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Tests unitarios (handleImportFile) + integración (InputActions) + E2E (button path + expanded modal) ✅
 - [x] E2E drag & drop — marcado como manual (DataTransfer en Playwright + Monaco event capture hacen esto muy frágil) ✅
 
-### Fase 19 — Internacionalización (i18n)
+### Fase 19 — Mobile UX (Phase 1) ✅
+
+**Fase 19.1 — Tabs para editores + header compacto (~riesgo bajo):** ✅
+
+- [x] Nuevo componente `EditorTabBar` con ARIA completo (`role="tablist/tab"`, `aria-selected`, teclado ←→) ✅
+- [x] Tabs Input/Output en mobile — solo el panel activo visible, ambos montados (CSS `hidden sm:block`) ✅
+- [x] Auto-switch a "Salida" en primera ejecución (transición vacío→contenido), sin re-trigger posterior ✅
+- [x] Header compacto en mobile: label "Playground" y descripción ocultos, ícono reducido, padding menor ✅
+- [x] Removido `max-h-[240px]` de `CodeEditor` y `DiffCodeEditor` — editores ahora llenan el espacio disponible ✅
+- [x] Tests unitarios: EditorTabBar (ARIA, keyboard) + GenericEditors (tab state, auto-switch) ✅
+
+### Fase 20 — Internacionalización (i18n)
 
 **Fase 19.1 — Infraestructura de traducciones (~riesgo alto):**
 

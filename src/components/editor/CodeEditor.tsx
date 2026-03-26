@@ -23,7 +23,7 @@ export const CodeEditor = memo(function CodeEditor({
   };
 
   return (
-    <div className="w-full h-full max-h-[240px] lg:max-h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
+    <div className="w-full h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
       <Editor
         className="h-full"
         defaultLanguage={language}
