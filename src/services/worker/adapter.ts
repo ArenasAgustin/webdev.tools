@@ -53,9 +53,6 @@ export function createPlaygroundWorkerAdapter<
 export function createWorkerAdapter<
   TPayload extends WorkerPayloadBase,
   TResponse extends WorkerResponse,
->(options: {
-  workerUrl: URL;
-  idPrefix: string;
-}): PlaygroundWorkerAdapter<TPayload, TResponse> {
+>(options: { workerUrl: URL; idPrefix: string }): PlaygroundWorkerAdapter<TPayload, TResponse> {
   return createPlaygroundWorkerAdapter<TPayload, WorkerRequest<TPayload>, TResponse>(options);
 }

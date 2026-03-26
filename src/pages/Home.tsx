@@ -18,9 +18,12 @@ export function Home() {
     ogUrl: "https://webdev.tools/",
   });
 
-  useIdleCallback(() => {
-    void preloadAllPlaygrounds();
-  }, { timeout: 1500 });
+  useIdleCallback(
+    () => {
+      void preloadAllPlaygrounds();
+    },
+    { timeout: 1500 },
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white">

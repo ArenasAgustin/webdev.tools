@@ -226,7 +226,14 @@ export function HtmlPlayground() {
           }
         />
       }
-      toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={overlays.shortcuts} />}
+      toolbar={
+        <Toolbar
+          variant="generic"
+          tools={toolbarTools}
+          config={toolbarConfig}
+          shortcuts={overlays.shortcuts}
+        />
+      }
     />
   );
 }

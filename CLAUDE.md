@@ -17,6 +17,7 @@ Para fixes de una línea o typos podés saltearlo, pero si dudás, usalo.
 Corré la suite completa en este orden. Si alguno falla, corregí antes de seguir:
 
 ```bash
+pnpm format
 pnpm lint
 pnpm typecheck
 pnpm test:coverage --run

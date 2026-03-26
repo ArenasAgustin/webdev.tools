@@ -95,7 +95,9 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="p-4 overflow-y-auto max-h-[calc(80vh-120px)] scrollbar-thin">{children}</div>
+        <div className="p-4 overflow-y-auto max-h-[calc(80vh-120px)] scrollbar-thin">
+          {children}
+        </div>
 
         {/* Footer */}
         {footer && <div className="p-4 border-t border-white/10 bg-white/5">{footer}</div>}

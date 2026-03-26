@@ -26,13 +26,7 @@ describe("InputActions", () => {
   });
 
   it("renders a hidden file input with the correct accept attribute when onImportFile is provided", () => {
-    render(
-      <InputActions
-        {...baseProps}
-        onImportFile={vi.fn()}
-        acceptExtensions=".json"
-      />,
-    );
+    render(<InputActions {...baseProps} onImportFile={vi.fn()} acceptExtensions=".json" />);
     const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')!;
     expect(fileInput).not.toBeNull();
     expect(fileInput.accept).toBe(".json");
@@ -40,13 +34,7 @@ describe("InputActions", () => {
   });
 
   it("clicking Abrir triggers a click on the hidden file input", () => {
-    render(
-      <InputActions
-        {...baseProps}
-        onImportFile={vi.fn()}
-        acceptExtensions=".txt"
-      />,
-    );
+    render(<InputActions {...baseProps} onImportFile={vi.fn()} acceptExtensions=".txt" />);
 
     const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')!;
     const clickSpy = vi.spyOn(fileInput, "click").mockImplementation(() => undefined);

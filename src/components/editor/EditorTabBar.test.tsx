@@ -10,9 +10,7 @@ describe("EditorTabBar", () => {
   });
 
   it("renders with sm:hidden wrapper class", () => {
-    const { container } = render(
-      <EditorTabBar activeTab="input" onTabChange={onTabChange} />,
-    );
+    const { container } = render(<EditorTabBar activeTab="input" onTabChange={onTabChange} />);
     const tablist = container.querySelector('[role="tablist"]');
     expect(tablist).not.toBeNull();
     expect(tablist!.className).toContain("sm:hidden");

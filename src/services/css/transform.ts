@@ -64,12 +64,15 @@ function minifyCssString(source: string): string {
   const preserved = new Map<string, string>();
   let index = 0;
 
-  const withPreservedLiterals = source.replace(/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g, (match) => {
-    const token = `__CSS_LITERAL_${index}__`;
-    index += 1;
-    preserved.set(token, match);
-    return token;
-  });
+  const withPreservedLiterals = source.replace(
+    /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g,
+    (match) => {
+      const token = `__CSS_LITERAL_${index}__`;
+      index += 1;
+      preserved.set(token, match);
+      return token;
+    },
+  );
 
   const compact = withPreservedLiterals
     .replace(/\s+/g, " ")

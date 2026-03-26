@@ -1,4 +1,7 @@
-import { useGenericPlaygroundActions, type PlaygroundFileConfig } from "./useGenericPlaygroundActions";
+import {
+  useGenericPlaygroundActions,
+  type PlaygroundFileConfig,
+} from "./useGenericPlaygroundActions";
 import { cssPlaygroundConfig } from "@/playgrounds/css/css.config";
 import { cssService } from "@/services/css/service";
 import type { ToastApi } from "./usePlaygroundActions";

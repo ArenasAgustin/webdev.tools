@@ -95,17 +95,11 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
 
   const handleImportFile = useCallback(
     (file: File) => {
-      const ext = file.name.includes(".")
-        ? `.${file.name.split(".").pop()!.toLowerCase()}`
-        : "";
-      const allowed = acceptExtensions
-        .split(",")
-        .map((e) => e.trim().toLowerCase());
+      const ext = file.name.includes(".") ? `.${file.name.split(".").pop()!.toLowerCase()}` : "";
+      const allowed = acceptExtensions.split(",").map((e) => e.trim().toLowerCase());
 
       if (!allowed.includes(ext)) {
-        toast?.error(
-          `Archivo no válido. Extensiones aceptadas: ${acceptExtensions}`,
-        );
+        toast?.error(`Archivo no válido. Extensiones aceptadas: ${acceptExtensions}`);
         return;
       }
 

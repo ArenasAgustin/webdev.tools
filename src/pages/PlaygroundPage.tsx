@@ -12,18 +12,23 @@ export function PlaygroundPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const playground = getPlaygroundById(playgroundId ?? "");
 
-  useIdleCallback(() => {
-    void import("@monaco-editor/react");
-  }, { timeout: 1200 });
+  useIdleCallback(
+    () => {
+      void import("@monaco-editor/react");
+    },
+    { timeout: 1200 },
+  );
 
   useDocumentMeta({
     title: playground?.name ?? "Playground",
     description: playground
       ? `${playground.description}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.`
       : "Herramientas de desarrollo web online",
-    keywords: playground?.keywords ?? (playground
-      ? `${playground.name}, ${playground.description}, herramientas desarrollo web online`
-      : "herramientas desarrollo web"),
+    keywords:
+      playground?.keywords ??
+      (playground
+        ? `${playground.name}, ${playground.description}, herramientas desarrollo web online`
+        : "herramientas desarrollo web"),
     ogUrl: playground
       ? `https://webdev.tools/playground/${playground.id}`
       : "https://webdev.tools/",
@@ -77,7 +82,9 @@ export function PlaygroundPage() {
       <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
         <div className="container mx-auto flex flex-1 min-h-0 max-w-7xl flex-col gap-4 px-2 py-3 sm:px-4 sm:py-5">
           <header className="rounded-xl border border-white/5 bg-white/10 px-4 py-2 sm:py-3 shadow-2xl shadow-black/30 backdrop-blur-md">
-            <p className="hidden sm:block text-xs uppercase tracking-[0.3em] text-cyan-200/70">Playground</p>
+            <p className="hidden sm:block text-xs uppercase tracking-[0.3em] text-cyan-200/70">
+              Playground
+            </p>
             <div className="mt-1 sm:mt-2 flex items-center gap-3">
               <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-white/10 text-cyan-100">
                 <i className={`${playground.icon}`}></i>

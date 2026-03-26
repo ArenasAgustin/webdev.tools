@@ -126,7 +126,16 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
       onOpenShortcuts,
       onOpenDiff,
     };
-  }, [handleFormat, handleMinify, handleExecute, handleClean, gridClassName, isProcessing, onOpenShortcuts, onOpenDiff]);
+  }, [
+    handleFormat,
+    handleMinify,
+    handleExecute,
+    handleClean,
+    gridClassName,
+    isProcessing,
+    onOpenShortcuts,
+    onOpenDiff,
+  ]);
 
   const toolbarConfig = useMemo(() => {
     const base = {

@@ -28,9 +28,7 @@ describe("PlaygroundLayout", () => {
   });
 
   it("does not render panel area when omitted", () => {
-    render(
-      <PlaygroundLayout editors={<div>Editors</div>} toolbar={<div>Toolbar</div>} />,
-    );
+    render(<PlaygroundLayout editors={<div>Editors</div>} toolbar={<div>Toolbar</div>} />);
 
     expect(screen.queryByText("Panel content")).not.toBeInTheDocument();
   });

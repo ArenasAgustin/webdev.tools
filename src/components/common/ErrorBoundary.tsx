@@ -41,7 +41,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               {name ? `Error en ${name}` : "Algo salió mal"}
             </h2>
             <p className="max-w-sm text-sm text-white/60">
-              Ocurrió un error inesperado. Puedes intentar recargar el playground o volver al inicio.
+              Ocurrió un error inesperado. Puedes intentar recargar el playground o volver al
+              inicio.
             </p>
             {this.state.error && (
               <p className="mt-2 max-w-sm truncate font-mono text-xs text-red-400/80">

@@ -46,18 +46,14 @@ export const formatJsonAsync = async (
   input: string,
   options: JsonFormatOptions = {},
 ): Promise<Result<string, JsonError>> => {
-  return runJsonTransformOp({ action: "format", input, options }, () =>
-    formatJson(input, options),
-  );
+  return runJsonTransformOp({ action: "format", input, options }, () => formatJson(input, options));
 };
 
 export const minifyJsonAsync = async (
   input: string,
   options: JsonMinifyOptions = {},
 ): Promise<Result<string, JsonError>> => {
-  return runJsonTransformOp({ action: "minify", input, options }, () =>
-    minifyJson(input, options),
-  );
+  return runJsonTransformOp({ action: "minify", input, options }, () => minifyJson(input, options));
 };
 
 export const cleanJsonAsync = async (

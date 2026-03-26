@@ -46,12 +46,12 @@ export const Button = memo(function Button({
       aria-label={ariaLabel}
       title={title}
       className={cn(
-          variantStyles[variant],
-          sizeStyles[size],
-          "rounded transition-all border",
-          disabled && "opacity-50 cursor-not-allowed",
-          className,
-        )}
+        variantStyles[variant],
+        sizeStyles[size],
+        "rounded transition-all border",
+        disabled && "opacity-50 cursor-not-allowed",
+        className,
+      )}
     >
       {children}
     </button>

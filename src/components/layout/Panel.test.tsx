@@ -4,7 +4,11 @@ import { Panel } from "./Panel";
 
 describe("Panel", () => {
   it("renders title and children", () => {
-    render(<Panel title="CSS Editor" icon="code"><div>Editor content</div></Panel>);
+    render(
+      <Panel title="CSS Editor" icon="code">
+        <div>Editor content</div>
+      </Panel>,
+    );
 
     expect(screen.getByText("CSS Editor")).toBeInTheDocument();
     expect(screen.getByText("Editor content")).toBeInTheDocument();
@@ -31,7 +35,11 @@ describe("Panel", () => {
   });
 
   it("does not render dialog role (panel variant)", () => {
-    render(<Panel title="Test" icon="code">content</Panel>);
+    render(
+      <Panel title="Test" icon="code">
+        content
+      </Panel>,
+    );
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });

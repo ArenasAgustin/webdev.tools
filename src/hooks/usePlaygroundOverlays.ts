@@ -2,13 +2,7 @@ import { useState, useCallback, useMemo, type Dispatch, type SetStateAction } fr
 import type { ModalState } from "@/hooks/useModalState";
 import type { UseExpandedEditorReturn } from "@/hooks/useExpandedEditor";
 
-type OverlayKey =
-  | "shortcuts"
-  | "diff"
-  | "config"
-  | "editor-input"
-  | "editor-output"
-  | null;
+type OverlayKey = "shortcuts" | "diff" | "config" | "editor-input" | "editor-output" | null;
 
 interface UsePlaygroundOverlaysOptions {
   /** Called when all overlays close — use to close any local modal state */
@@ -41,10 +35,7 @@ export function usePlaygroundOverlays(options?: UsePlaygroundOverlaysOptions) {
     () => setActive((prev) => (prev === "shortcuts" ? null : "shortcuts")),
     [],
   );
-  const toggleDiff = useCallback(
-    () => setActive((prev) => (prev === "diff" ? null : "diff")),
-    [],
-  );
+  const toggleDiff = useCallback(() => setActive((prev) => (prev === "diff" ? null : "diff")), []);
   const toggleConfig = useCallback(
     () => setActive((prev) => (prev === "config" ? null : "config")),
     [],
@@ -100,8 +91,7 @@ export function usePlaygroundOverlays(options?: UsePlaygroundOverlaysOptions) {
 
   const editor: UseExpandedEditorReturn = useMemo(
     () => ({
-      expanded:
-        active === "editor-input" ? "input" : active === "editor-output" ? "output" : null,
+      expanded: active === "editor-input" ? "input" : active === "editor-output" ? "output" : null,
       isExpanded: (type: "input" | "output") =>
         active === (type === "input" ? "editor-input" : "editor-output"),
       expand: (type: "input" | "output") =>

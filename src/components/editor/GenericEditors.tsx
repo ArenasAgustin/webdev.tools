@@ -241,7 +241,10 @@ export const GenericEditors = memo(function GenericEditors({
       />
 
       <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
-        <div id="panel-input" className={cn(activeTab !== "input" && "hidden", "sm:block", "h-full")}>
+        <div
+          id="panel-input"
+          className={cn(activeTab !== "input" && "hidden", "sm:block", "h-full")}
+        >
           <Panel
             title={inputTitle}
             icon="code"
@@ -268,16 +271,17 @@ export const GenericEditors = memo(function GenericEditors({
               />
               {isDragOver && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg pointer-events-none transition-all">
-                  <span className="text-blue-300 font-medium text-sm">
-                    Soltar archivo aquí
-                  </span>
+                  <span className="text-blue-300 font-medium text-sm">Soltar archivo aquí</span>
                 </div>
               )}
             </div>
           </Panel>
         </div>
 
-        <div id="panel-output" className={cn(activeTab !== "output" && "hidden", "sm:block", "h-full")}>
+        <div
+          id="panel-output"
+          className={cn(activeTab !== "output" && "hidden", "sm:block", "h-full")}
+        >
           {outputPanel
             ? outputPanel({
                 output,

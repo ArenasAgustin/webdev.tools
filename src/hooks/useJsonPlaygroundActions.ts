@@ -194,7 +194,15 @@ export function useJsonPlaygroundActions({
         errorMessage: "Error al aplicar JSONPath",
       })();
     },
-    [generic.baseActions, setJsonPathExpression, inputJson, addToHistory, setOutput, setError, toast],
+    [
+      generic.baseActions,
+      setJsonPathExpression,
+      inputJson,
+      addToHistory,
+      setOutput,
+      setError,
+      toast,
+    ],
   );
 
   return {

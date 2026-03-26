@@ -43,7 +43,11 @@ export function InputActions({
               e.target.value = "";
             }}
           />
-          <Button variant="primary" onClick={() => fileInputRef.current?.click()} aria-label="Importar archivo">
+          <Button
+            variant="primary"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Importar archivo"
+          >
             <i className="fas fa-folder-open"></i> <span className="hidden sm:inline">Abrir</span>
           </Button>
         </>

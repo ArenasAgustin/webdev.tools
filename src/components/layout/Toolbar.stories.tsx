@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { Toolbar } from "./Toolbar";
 import type { ToolbarProps } from "./Toolbar";
-import { DEFAULT_JSON_FORMAT_CONFIG, DEFAULT_JSON_MINIFY_CONFIG, DEFAULT_JSON_CLEAN_CONFIG } from "@/types/json";
+import {
+  DEFAULT_JSON_FORMAT_CONFIG,
+  DEFAULT_JSON_MINIFY_CONFIG,
+  DEFAULT_JSON_CLEAN_CONFIG,
+} from "@/types/json";
 import { Button } from "@/components/common/Button";
 
 const meta = {

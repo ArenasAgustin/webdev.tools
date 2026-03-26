@@ -90,9 +90,7 @@ describe("Toolbar", () => {
       <Toolbar
         variant="generic"
         tools={{
-          actions: [
-            { label: "Format", icon: "indent", variant: "primary", onClick: vi.fn() },
-          ],
+          actions: [{ label: "Format", icon: "indent", variant: "primary", onClick: vi.fn() }],
         }}
         extraContent={<div data-testid="extra-section">Extra Content</div>}
       />,
@@ -108,9 +106,7 @@ describe("Toolbar", () => {
       <Toolbar
         variant="generic"
         tools={{
-          actions: [
-            { label: "Formatear", icon: "indent", variant: "primary", onClick: vi.fn() },
-          ],
+          actions: [{ label: "Formatear", icon: "indent", variant: "primary", onClick: vi.fn() }],
         }}
         config={{
           mode: "json",
@@ -139,9 +135,7 @@ describe("Toolbar", () => {
       <Toolbar
         variant="generic"
         tools={{
-          actions: [
-            { label: "Formatear", icon: "indent", variant: "primary", onClick: vi.fn() },
-          ],
+          actions: [{ label: "Formatear", icon: "indent", variant: "primary", onClick: vi.fn() }],
         }}
         config={{
           mode: "json",

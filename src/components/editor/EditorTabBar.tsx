@@ -47,7 +47,7 @@ export function EditorTabBar({
           "flex-1 py-2 text-sm font-medium transition-colors",
           activeTab === "input"
             ? "bg-blue-500/20 border-b-2 border-blue-400 text-white"
-            : "text-white/50 hover:text-white/70"
+            : "text-white/50 hover:text-white/70",
         )}
       >
         {inputLabel}
@@ -64,7 +64,7 @@ export function EditorTabBar({
           "flex-1 py-2 text-sm font-medium transition-colors",
           activeTab === "output"
             ? "bg-blue-500/20 border-b-2 border-blue-400 text-white"
-            : "text-white/50 hover:text-white/70"
+            : "text-white/50 hover:text-white/70",
         )}
       >
         {outputLabel}
