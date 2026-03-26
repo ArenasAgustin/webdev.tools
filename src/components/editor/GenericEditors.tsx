@@ -238,7 +238,7 @@ export const GenericEditors = memo(function GenericEditors({
           }
           footer={inputFooter}
         >
-          <div className="relative flex-1 min-h-0" {...dragHandlers}>
+          <div className="relative h-full" {...dragHandlers}>
             <LazyCodeEditor
               value={input}
               language={language}

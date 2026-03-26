@@ -375,7 +375,7 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Archivos vacíos (0 bytes) son válidos — carga string vacío con toast de éxito ✅
 - [x] Funciona en panel normal Y en modal expandido ✅
 - [x] Tests unitarios (handleImportFile) + integración (InputActions) + E2E (button path + expanded modal) ✅
-- [ ] E2E drag & drop — marcado como manual (DataTransfer en Playwright + Monaco event capture hacen esto muy frágil)
+- [x] E2E drag & drop — marcado como manual (DataTransfer en Playwright + Monaco event capture hacen esto muy frágil) ✅
 
 ### Fase 19 — Internacionalización (i18n)
 
