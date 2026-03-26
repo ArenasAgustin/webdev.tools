@@ -86,6 +86,8 @@ export function CssPlayground() {
           onUseInputAsOutput={actions.handleUseInputAsOutput}
           diffModal={overlays.diff}
           editorState={overlays.editor}
+          onImportFile={actions.handleImportFile}
+          acceptExtensions={actions.acceptExtensions}
         />
       }
       toolbar={<Toolbar variant="generic" tools={toolbarTools} config={toolbarConfig} shortcuts={overlays.shortcuts} />}

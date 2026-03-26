@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Button } from "@/components/common/Button";
 
 interface InputActionsProps {
@@ -6,6 +7,8 @@ interface InputActionsProps {
   onDownloadInput: () => void;
   onExpand: () => void;
   onUseInputAsOutput?: () => void;
+  onImportFile?: (file: File) => void;
+  acceptExtensions?: string;
 }
 
 export function InputActions({
@@ -14,7 +17,11 @@ export function InputActions({
   onDownloadInput,
   onExpand,
   onUseInputAsOutput,
+  onImportFile,
+  acceptExtensions,
 }: InputActionsProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <>
       <Button variant="danger" onClick={onClearInput}>
@@ -23,6 +30,24 @@ export function InputActions({
       <Button variant="success" onClick={onLoadExample}>
         <i className="fas fa-file-import"></i> Ejemplo
       </Button>
+      {onImportFile && (
+        <>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={acceptExtensions}
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onImportFile(file);
+              e.target.value = "";
+            }}
+          />
+          <Button variant="primary" onClick={() => fileInputRef.current?.click()}>
+            <i className="fas fa-folder-open"></i> Abrir
+          </Button>
+        </>
+      )}
       <Button variant="cyan" onClick={onDownloadInput}>
         <i className="fas fa-download"></i> Descargar
       </Button>

@@ -9,6 +9,7 @@ const FILE_CONFIG: PlaygroundFileConfig = {
   outputFileName: "result.css",
   mimeType: "text/css",
   language: "CSS",
+  acceptExtensions: ".css,.scss",
 };
 
 async function formatRunner(input: string, config: CssFormatConfig) {

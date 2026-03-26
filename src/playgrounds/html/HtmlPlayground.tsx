@@ -124,6 +124,8 @@ export function HtmlPlayground() {
           onUseInputAsOutput={actions.handleUseInputAsOutput}
           diffModal={overlays.diff}
           editorState={overlays.editor}
+          onImportFile={actions.handleImportFile}
+          acceptExtensions={actions.acceptExtensions}
           extraOutputActions={
             <Button
               variant="cyan"

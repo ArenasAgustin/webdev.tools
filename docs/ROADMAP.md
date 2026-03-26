@@ -364,15 +364,18 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Agregar script `typecheck` en `package.json` ✅
 - [ ] Comentario automático de bundle size en PRs (diferido — no aplica para proyecto solo)
 
-### Fase 18 — Importación de Archivos y Drag & Drop
+### Fase 18 — Importación de Archivos y Drag & Drop ✅
 
-**Fase 18.1 — Importar archivos desde disco (~riesgo bajo):**
+**Fase 18.1 — Importar archivos desde disco (~riesgo bajo):** ✅
 
-- [ ] Agregar botón "Abrir archivo" en `InputActions` con `<input type="file" accept=".json,.js,.html,.css">`
-- [ ] Leer contenido con `FileReader.readAsText()` y cargar en el editor
-- [ ] Soportar drag & drop de archivos sobre el panel de input (`onDragOver` + `onDrop`)
-- [ ] Validar tipo de archivo vs playground actual
-- [ ] Tests: verificar carga de archivo y drag & drop en e2e
+- [x] Agregar botón "Abrir archivo" en `InputActions` con `<input type="file">` por playground ✅
+- [x] Leer contenido con `FileReader.readAsText()` y cargar en el editor ✅
+- [x] Soportar drag & drop de archivos sobre el panel de input con overlay visual sobre Monaco ✅
+- [x] Validar extensión de archivo vs playground — error toast + rechazo si no coincide ✅
+- [x] Archivos vacíos (0 bytes) son válidos — carga string vacío con toast de éxito ✅
+- [x] Funciona en panel normal Y en modal expandido ✅
+- [x] Tests unitarios (handleImportFile) + integración (InputActions) + E2E (button path + expanded modal) ✅
+- [ ] E2E drag & drop — marcado como manual (DataTransfer en Playwright + Monaco event capture hacen esto muy frágil)
 
 ### Fase 19 — Internacionalización (i18n)
 

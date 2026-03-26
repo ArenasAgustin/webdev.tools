@@ -183,6 +183,8 @@ export function JsonPlayground() {
             onUseInputAsOutput={actions.handleUseInputAsOutput}
             diffModal={overlays.diff}
             editorState={overlays.editor}
+            onImportFile={actions.handleImportFile}
+            acceptExtensions={actions.acceptExtensions}
           />
         }
         toolbar={

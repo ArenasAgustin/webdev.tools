@@ -12,6 +12,8 @@ export interface PlaygroundFileConfig {
   mimeType: string;
   /** Language label for messages (e.g. "CSS") */
   language: string;
+  /** Comma-separated accepted extensions for file import, e.g. ".json" or ".js,.ts,.mjs" */
+  acceptExtensions: string;
 }
 
 export interface UseGenericPlaygroundActionsProps<TFormat, TMinify> {
@@ -47,7 +49,7 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
   formatRunner,
   minifyRunner,
 }: UseGenericPlaygroundActionsProps<TFormat, TMinify>) {
-  const { language, inputFileName, outputFileName, mimeType } = fileConfig;
+  const { language, inputFileName, outputFileName, mimeType, acceptExtensions } = fileConfig;
 
   const baseActions = usePlaygroundActions({
     input,
@@ -90,6 +92,35 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     setError(null);
     toast?.success("Entrada cargada como resultado");
   }, [input, setOutput, setError, toast]);
+
+  const handleImportFile = useCallback(
+    (file: File) => {
+      const ext = file.name.includes(".")
+        ? `.${file.name.split(".").pop()!.toLowerCase()}`
+        : "";
+      const allowed = acceptExtensions
+        .split(",")
+        .map((e) => e.trim().toLowerCase());
+
+      if (!allowed.includes(ext)) {
+        toast?.error(
+          `Archivo no válido. Extensiones aceptadas: ${acceptExtensions}`,
+        );
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        setInput(reader.result as string);
+        toast?.success(`Archivo "${file.name}" cargado`);
+      };
+      reader.onerror = () => {
+        toast?.error("Error al leer el archivo");
+      };
+      reader.readAsText(file);
+    },
+    [acceptExtensions, setInput, toast],
+  );
 
   const handleCopyOutput = useCallback(() => {
     baseActions.handleCopy({
@@ -146,6 +177,7 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
   return {
     handleClearInput: baseActions.handleClearInput,
     handleLoadExample: baseActions.handleLoadExample,
+    handleImportFile,
     handleCopyOutput,
     handleDownloadInput,
     handleDownloadOutput,
@@ -153,6 +185,8 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     handleMinify,
     handleUseOutputAsInput,
     handleUseInputAsOutput,
+    /** Accepted file extensions for import (e.g. ".json" or ".js,.ts") */
+    acceptExtensions,
     /** True while a format/minify transform is in progress */
     isProcessing,
     /** Exposed for extended hooks that need to share the processing state */

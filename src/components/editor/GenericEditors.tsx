@@ -1,4 +1,4 @@
-import { type ReactNode, memo } from "react";
+import { type ReactNode, memo, useState } from "react";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
@@ -40,6 +40,10 @@ interface GenericEditorsProps {
   diffModal?: { isOpen: boolean; close: () => void };
   /** When provided, uses this expanded-editor state instead of internal state */
   editorState?: UseExpandedEditorReturn;
+  /** Handler for file import via button or drag & drop */
+  onImportFile?: (file: File) => void;
+  /** Accepted file extensions for the hidden file input (e.g. ".json" or ".js,.ts") */
+  acceptExtensions?: string;
   outputPanel?: (props: {
     output: string;
     error: string | null;
@@ -78,11 +82,36 @@ export const GenericEditors = memo(function GenericEditors({
   diffModal,
   editorState,
   outputPanel,
+  onImportFile,
+  acceptExtensions,
 }: GenericEditorsProps) {
   const ownEditor = useExpandedEditor();
   const editor = editorState ?? ownEditor;
   const inputStats = useTextStats(input);
   const outputStats = useTextStats(output);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const dragHandlers = onImportFile
+    ? {
+        onDragOver: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragOver(true);
+        },
+        onDragLeave: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragOver(false);
+        },
+        onDrop: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragOver(false);
+          const file = e.dataTransfer.files[0];
+          if (file) onImportFile(file);
+        },
+      }
+    : {};
 
   const inputFooter = (
     <EditorFooter
@@ -166,6 +195,8 @@ export const GenericEditors = memo(function GenericEditors({
               onDownloadInput={onDownloadInput}
               onExpand={editor.collapse}
               onUseInputAsOutput={onUseInputAsOutput}
+              onImportFile={onImportFile}
+              acceptExtensions={acceptExtensions}
             />
           }
           footer={inputFooter}
@@ -201,16 +232,27 @@ export const GenericEditors = memo(function GenericEditors({
               onDownloadInput={onDownloadInput}
               onExpand={() => editor.expand("input")}
               onUseInputAsOutput={onUseInputAsOutput}
+              onImportFile={onImportFile}
+              acceptExtensions={acceptExtensions}
             />
           }
           footer={inputFooter}
         >
-          <LazyCodeEditor
-            value={input}
-            language={language}
-            onChange={onInputChange}
-            placeholder={inputPlaceholder}
-          />
+          <div className="relative flex-1 min-h-0" {...dragHandlers}>
+            <LazyCodeEditor
+              value={input}
+              language={language}
+              onChange={onInputChange}
+              placeholder={inputPlaceholder}
+            />
+            {isDragOver && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg pointer-events-none transition-all">
+                <span className="text-blue-300 font-medium text-sm">
+                  Soltar archivo aquí
+                </span>
+              </div>
+            )}
+          </div>
         </Panel>
 
         {outputPanel

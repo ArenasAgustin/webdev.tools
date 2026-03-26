@@ -16,6 +16,7 @@ const FILE_CONFIG: PlaygroundFileConfig = {
   outputFileName: "output.txt",
   mimeType: "application/javascript",
   language: "Código",
+  acceptExtensions: ".js,.ts,.mjs,.mts",
 };
 
 async function formatRunner(input: string, config: JsFormatConfig) {

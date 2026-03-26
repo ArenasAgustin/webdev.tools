@@ -21,6 +21,7 @@ const FILE_CONFIG: PlaygroundFileConfig = {
   outputFileName: "result.json",
   mimeType: "application/json",
   language: "JSON",
+  acceptExtensions: ".json",
 };
 
 const exampleContent = (() => {

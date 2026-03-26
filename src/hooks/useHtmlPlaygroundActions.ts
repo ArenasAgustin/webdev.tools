@@ -9,6 +9,7 @@ const FILE_CONFIG: PlaygroundFileConfig = {
   outputFileName: "result.html",
   mimeType: "text/html",
   language: "HTML",
+  acceptExtensions: ".html,.htm",
 };
 
 async function formatRunner(input: string, config: HtmlFormatConfig) {
