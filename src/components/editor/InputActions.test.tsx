@@ -33,7 +33,7 @@ describe("InputActions", () => {
         acceptExtensions=".json"
       />,
     );
-    const fileInput = document.querySelector('input[type="file"]')!;
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')!;
     expect(fileInput).not.toBeNull();
     expect(fileInput.accept).toBe(".json");
     expect(fileInput.className).toContain("hidden");
@@ -48,7 +48,7 @@ describe("InputActions", () => {
       />,
     );
 
-    const fileInput = document.querySelector('input[type="file"]')!;
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')!;
     const clickSpy = vi.spyOn(fileInput, "click").mockImplementation(() => undefined);
 
     fireEvent.click(screen.getByRole("button", { name: /Importar archivo/i }));
@@ -60,7 +60,7 @@ describe("InputActions", () => {
     const onImportFile = vi.fn();
     render(<InputActions {...baseProps} onImportFile={onImportFile} acceptExtensions=".txt" />);
 
-    const fileInput = document.querySelector('input[type="file"]')!;
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')!;
     const file = new File(["content"], "test.txt", { type: "text/plain" });
 
     // Simulate file selection
@@ -78,7 +78,7 @@ describe("InputActions", () => {
     const onImportFile = vi.fn();
     render(<InputActions {...baseProps} onImportFile={onImportFile} acceptExtensions=".txt" />);
 
-    const fileInput = document.querySelector('input[type="file"]')!;
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')!;
     const file = new File(["data"], "a.txt", { type: "text/plain" });
 
     Object.defineProperty(fileInput, "files", {
@@ -95,7 +95,7 @@ describe("InputActions", () => {
     const onImportFile = vi.fn();
     render(<InputActions {...baseProps} onImportFile={onImportFile} acceptExtensions=".txt" />);
 
-    const fileInput = document.querySelector('input[type="file"]')!;
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')!;
 
     Object.defineProperty(fileInput, "files", {
       value: [],
