@@ -83,14 +83,6 @@ function getRequiredFiles(lang) {
       label: "playground branches test",
     },
     {
-      path: `src/playgrounds/${lang}/${cap}Editors.tsx`,
-      label: "editors component",
-    },
-    {
-      path: `src/playgrounds/${lang}/${cap}Editors.test.tsx`,
-      label: "editors component test",
-    },
-    {
       path: `src/playgrounds/${lang}/${lang}.config.ts`,
       label: "playground config",
     },

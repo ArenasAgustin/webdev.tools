@@ -21,6 +21,7 @@ pnpm format
 pnpm lint
 pnpm typecheck
 pnpm test:coverage --run
+pnpm verify:arch
 pnpm build
 pnpm e2e
 ```
