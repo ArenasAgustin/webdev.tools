@@ -49,7 +49,7 @@ export function PlaygroundPage() {
   const PlaygroundComponent = playground.component;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white">
+    <div className="h-dvh flex flex-col bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white overflow-hidden">
       <PlaygroundSidebar
         currentPlaygroundId={playground.id}
         isOpen={sidebarOpen}
@@ -74,8 +74,8 @@ export function PlaygroundPage() {
         <i className="fas fa-bars" aria-hidden="true"></i>
       </button>
 
-      <div>
-        <div className="container mx-auto flex min-h-screen max-w-7xl flex-col gap-4 px-2 py-3 sm:px-4 sm:py-5">
+      <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
+        <div className="container mx-auto flex flex-1 min-h-0 max-w-7xl flex-col gap-4 px-2 py-3 sm:px-4 sm:py-5">
           <header className="rounded-xl border border-white/5 bg-white/10 px-4 py-2 sm:py-3 shadow-2xl shadow-black/30 backdrop-blur-md">
             <p className="hidden sm:block text-xs uppercase tracking-[0.3em] text-cyan-200/70">Playground</p>
             <div className="mt-1 sm:mt-2 flex items-center gap-3">

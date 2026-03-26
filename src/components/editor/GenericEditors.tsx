@@ -241,7 +241,7 @@ export const GenericEditors = memo(function GenericEditors({
       />
 
       <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
-        <div id="panel-input" className={cn(activeTab !== "input" && "hidden", "sm:block")}>
+        <div id="panel-input" className={cn(activeTab !== "input" && "hidden", "sm:block", "h-full")}>
           <Panel
             title={inputTitle}
             icon="code"
@@ -277,7 +277,7 @@ export const GenericEditors = memo(function GenericEditors({
           </Panel>
         </div>
 
-        <div id="panel-output" className={cn(activeTab !== "output" && "hidden", "sm:block")}>
+        <div id="panel-output" className={cn(activeTab !== "output" && "hidden", "sm:block", "h-full")}>
           {outputPanel
             ? outputPanel({
                 output,
