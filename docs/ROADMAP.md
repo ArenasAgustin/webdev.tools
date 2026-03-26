@@ -351,16 +351,18 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Agregar botón "Instalar app" con prompt de instalación PWA ✅
 - [x] Tests: verificar que la app funciona sin conexión (formato/minificación local) ✅
 
-### Fase 17 — CI/CD Completo
+### Fase 17 — CI/CD Completo ✅
 
-**Fase 17.1 — Ampliar pipeline de GitHub Actions (~riesgo bajo):**
+**Fase 17.1 — Ampliar pipeline de GitHub Actions (~riesgo bajo):** ✅
 
-- [ ] Agregar step de `pnpm lint` al workflow de CI
-- [ ] Agregar step de `pnpm test` (unit + integración) al workflow de CI
-- [ ] Agregar step de `pnpm verify:arch` al workflow de CI
-- [ ] Agregar step de type check (`tsc --noEmit`) explícito
-- [ ] Agregar reporte de cobertura (threshold mínimo configurable)
-- [ ] Agregar análisis de bundle size como comentario automático en PRs
+- [x] Agregar step de `pnpm lint` al workflow de CI ✅
+- [x] Agregar step de `pnpm test:coverage --run` (unit + integración + cobertura) al workflow de CI ✅
+- [x] Agregar step de `pnpm verify:arch` al workflow de CI ✅
+- [x] Agregar step de type check (`tsc -b`) explícito en `ci.yml` ✅
+- [x] Agregar reporte de cobertura con thresholds (50/50/40/50 lines/functions/branches/statements en `vitest.config.ts`) ✅
+- [x] Agregar análisis de bundle size como step summary + artifact en `e2e.yml` ✅
+- [x] Agregar script `typecheck` en `package.json` ✅
+- [ ] Comentario automático de bundle size en PRs (diferido — no aplica para proyecto solo)
 
 ### Fase 18 — Importación de Archivos y Drag & Drop
 

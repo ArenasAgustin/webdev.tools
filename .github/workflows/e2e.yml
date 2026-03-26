@@ -32,6 +32,33 @@ jobs:
       - name: Build app
         run: pnpm build
 
+      - name: Bundle size stats
+        continue-on-error: true
+        run: |
+          echo "## Bundle Stats" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size (KB) |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-----------|" >> $GITHUB_STEP_SUMMARY
+          for f in dist/assets/*.js dist/assets/*.css; do
+            if [ -f "$f" ]; then
+              size=$(du -k "$f" | cut -f1)
+              name=$(basename "$f")
+              echo "| \`$name\` | $size |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          total=$(du -sk dist/ | cut -f1)
+          echo "**Total dist size: ${total} KB**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload bundle stats
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-stats
+          path: dist/stats.html
+          retention-days: 14
+
       - name: Install Playwright browser
         run: pnpm e2e:install
 
