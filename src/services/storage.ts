@@ -37,6 +37,7 @@ export const STORAGE_KEYS = {
   LAST_HTML: "lastHtml",
   LAST_CSS: "lastCss",
   JSONPATH_HISTORY: "jsonPathHistory",
+  PWA_INSTALL_DISMISSED: "pwaInstallDismissed",
 } as const;
 
 /**

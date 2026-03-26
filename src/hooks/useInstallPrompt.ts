@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { getItem, setItem, STORAGE_KEYS } from "@/services/storage";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -21,6 +22,7 @@ export function useInstallPrompt(): UseInstallPromptReturn {
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
+      if (getItem<boolean>(STORAGE_KEYS.PWA_INSTALL_DISMISSED)) return;
       setPromptEvent(e as BeforeInstallPromptEvent);
     };
     window.addEventListener("beforeinstallprompt", handler);
@@ -40,7 +42,10 @@ export function useInstallPrompt(): UseInstallPromptReturn {
     if (outcome === "accepted") setPromptEvent(null);
   }, [promptEvent]);
 
-  const dismiss = useCallback(() => setPromptEvent(null), []);
+  const dismiss = useCallback(() => {
+    setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, true);
+    setPromptEvent(null);
+  }, []);
 
   return { canInstall: promptEvent !== null, install, dismiss };
 }

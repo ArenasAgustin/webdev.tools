@@ -13,10 +13,10 @@ export function InstallPromptBanner() {
     <div
       role="complementary"
       aria-label="Instalar aplicación"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-gray-900 border border-white/10 rounded-2xl shadow-2xl px-4 py-3 animate-fade-in"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/5 rounded-2xl shadow-2xl shadow-black/30 px-4 py-3 animate-fade-in"
     >
       <i className="fas fa-download text-blue-400" aria-hidden="true" />
-      <span className="text-sm text-gray-200">Instalar webdev.tools</span>
+      <span className="text-sm text-white/90">Instalar webdev.tools</span>
       <button
         type="button"
         onClick={install}
