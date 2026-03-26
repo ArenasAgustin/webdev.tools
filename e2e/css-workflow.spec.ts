@@ -44,4 +44,44 @@ test.describe("CSS workflow", () => {
     const indent4Reloaded = page.getByRole("button", { name: "4 espacios" });
     await expect(indent4Reloaded).toHaveAttribute("aria-pressed", "true");
   });
+
+  test("Ctrl+Shift+F formats CSS", async ({ page }) => {
+    await page.goto("/playground/css");
+
+    const inputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "CSS", exact: true }) });
+    await inputPanel.getByRole("button", { name: "Ejemplo" }).click();
+
+    // Use keyboard shortcut to format
+    await page.keyboard.press("Control+Shift+F");
+
+    // Verify the output panel has formatted content
+    await expect(page.getByText("CSS formateado correctamente")).toBeVisible();
+  });
+
+  test("download output button triggers file download", async ({ page }) => {
+    await page.goto("/playground/css");
+
+    const inputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "CSS", exact: true }) });
+    await inputPanel.getByRole("button", { name: "Ejemplo" }).click();
+
+    await page.getByRole("button", { name: /Formatear/i }).click();
+    await expect(page.getByText("CSS formateado correctamente")).toBeVisible();
+
+    // Wait a moment for output to be ready
+    await page.waitForTimeout(300);
+
+    // Setup download listener and click download inside the output panel
+    const downloadPromise = page.waitForEvent("download");
+    const outputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Resultado", exact: true }) });
+    await outputPanel.getByRole("button", { name: "Descargar resultado" }).click();
+
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.css$/);
+  });
 });

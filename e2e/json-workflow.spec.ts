@@ -265,4 +265,99 @@ test.describe("JSON workflow", () => {
       page.getByRole("heading", { name: "Configuración de Herramientas JSON" }),
     ).toBeVisible();
   });
+
+  test("Ctrl+Shift+D opens diff overlay and Escape closes it", async ({ page }) => {
+    await page.goto("/playground/json");
+
+    // Load example and format to get some output
+    await page.getByRole("button", { name: "Ejemplo" }).click();
+    await page.getByRole("button", { name: "Formatear" }).click();
+    await expect(page.getByText("JSON formateado correctamente")).toBeVisible();
+
+    // Open diff overlay with keyboard shortcut
+    await page.keyboard.press("Control+Shift+D");
+
+    // Verify the diff modal is open — Container renders with title "Diferencias" and role="dialog"
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByText("Diferencias")).toBeVisible();
+
+    // Close with Escape
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+  });
+
+  test("expand button opens editor modal with input value and Escape closes it", async ({
+    page,
+  }) => {
+    await page.goto("/playground/json");
+
+    // Load example so there's content in the editor
+    await page.getByRole("button", { name: "Ejemplo" }).click();
+
+    // The input panel has an "Expandir editor" button in InputActions
+    // There are two such buttons (input + output panels); first one belongs to the input panel
+    const inputPanel = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "JSON", exact: true }) });
+    await inputPanel.getByRole("button", { name: "Expandir editor" }).click();
+
+    // Verify the expanded modal dialog appears
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    // The expanded modal shows a code editor with the same content
+    await expect(dialog.locator(".monaco-editor")).toBeVisible();
+
+    // Close with Escape
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+  });
+
+  test("Ctrl+' shows keyboard shortcuts modal", async ({ page }) => {
+    await page.goto("/playground/json");
+
+    // Click a button to ensure focus is not inside Monaco (contentEditable) or an input
+    // (keyboard shortcuts are suppressed when focus is inside inputs/contentEditable)
+    await page.getByRole("button", { name: "Ejemplo" }).click();
+
+    // Open shortcuts modal with keyboard shortcut
+    await page.keyboard.press("Control+'");
+
+    // Verify the shortcuts modal is visible
+    await expect(page.getByRole("heading", { name: "Atajos de teclado" })).toBeVisible();
+
+    // Close modal with the close button
+    await page.getByRole("button", { name: "Cerrar modal" }).click();
+    await expect(page.getByRole("heading", { name: "Atajos de teclado" })).not.toBeVisible();
+  });
+
+  test("JSONPath history: delete entry removes it from list", async ({ page }) => {
+    await page.goto("/playground/json");
+
+    // Load example and apply a JSONPath query to create history entry
+    await page.getByRole("button", { name: "Ejemplo" }).click();
+
+    const jsonPathInput = page.getByLabel("Expresion JSONPath");
+    await jsonPathInput.fill("$.users[*].name");
+    await page.getByRole("button", { name: "Aplicar filtro JSONPath" }).click();
+
+    // Wait for the result to be applied before opening history
+    await expect(page.locator(".monaco-editor").last()).toBeVisible();
+    await page.waitForTimeout(300);
+
+    // Open history modal
+    await page.getByRole("button", { name: "Historial de filtros" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Historial de Filtros", exact: true }),
+    ).toBeVisible();
+
+    // Verify the entry is in the list
+    await expect(page.getByText("$.users[*].name")).toBeVisible();
+
+    // Click the delete button for this entry
+    await page.getByRole("button", { name: "Borrar filtro" }).first().click();
+
+    // Verify the entry is no longer in the list
+    await expect(page.getByText("$.users[*].name")).not.toBeVisible();
+  });
 });
