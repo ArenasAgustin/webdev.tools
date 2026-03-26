@@ -30,7 +30,7 @@ export function Container({
   const iconColorClass = getIconColorClass(iconColor);
 
   const baseClasses =
-    "rounded-xl p-3 sm:p-4 shadow-2xl transition-all duration-300 border border-white/5 flex flex-col min-w-0";
+    "rounded-xl p-3 sm:p-4 shadow-2xl transition-all duration-300 border border-white/5 flex flex-col min-w-0 h-full";
 
   const variantClasses = {
     panel: "bg-white/10 backdrop-blur-md min-h-0",

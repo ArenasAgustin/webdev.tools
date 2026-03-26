@@ -24,11 +24,11 @@ export function InputActions({
 
   return (
     <>
-      <Button variant="danger" onClick={onClearInput}>
-        <i className="fas fa-trash"></i> Limpiar
+      <Button variant="danger" onClick={onClearInput} aria-label="Limpiar entrada">
+        <i className="fas fa-trash"></i> <span className="hidden sm:inline">Limpiar</span>
       </Button>
-      <Button variant="success" onClick={onLoadExample}>
-        <i className="fas fa-file-import"></i> Ejemplo
+      <Button variant="success" onClick={onLoadExample} aria-label="Cargar ejemplo">
+        <i className="fas fa-file-import"></i> <span className="hidden sm:inline">Ejemplo</span>
       </Button>
       {onImportFile && (
         <>
@@ -43,13 +43,13 @@ export function InputActions({
               e.target.value = "";
             }}
           />
-          <Button variant="primary" onClick={() => fileInputRef.current?.click()}>
-            <i className="fas fa-folder-open"></i> Abrir
+          <Button variant="primary" onClick={() => fileInputRef.current?.click()} aria-label="Importar archivo">
+            <i className="fas fa-folder-open"></i> <span className="hidden sm:inline">Abrir</span>
           </Button>
         </>
       )}
-      <Button variant="cyan" onClick={onDownloadInput}>
-        <i className="fas fa-download"></i> Descargar
+      <Button variant="cyan" onClick={onDownloadInput} aria-label="Descargar entrada">
+        <i className="fas fa-download"></i> <span className="hidden sm:inline">Descargar</span>
       </Button>
       {onUseInputAsOutput && (
         <Button

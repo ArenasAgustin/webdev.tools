@@ -15,11 +15,11 @@ export function OutputActions({
 }: OutputActionsProps) {
   return (
     <>
-      <Button variant="primary" onClick={onCopyOutput}>
-        <i className="fas fa-copy"></i> Copiar
+      <Button variant="primary" onClick={onCopyOutput} aria-label="Copiar resultado">
+        <i className="fas fa-copy"></i> <span className="hidden sm:inline">Copiar</span>
       </Button>
-      <Button variant="cyan" onClick={onDownloadOutput}>
-        <i className="fas fa-download"></i> Descargar
+      <Button variant="cyan" onClick={onDownloadOutput} aria-label="Descargar resultado">
+        <i className="fas fa-download"></i> <span className="hidden sm:inline">Descargar</span>
       </Button>
       {onUseOutputAsInput && (
         <Button
