@@ -65,7 +65,7 @@ test.describe("File import — button path (JSON playground)", () => {
       .locator("section")
       .filter({ has: page.getByRole("heading", { name: "JSON", exact: true }) });
 
-    await expect(inputPanel.getByRole("button", { name: /Abrir/i })).toBeVisible();
+    await expect(inputPanel.getByRole("button", { name: /Importar archivo/i })).toBeVisible();
   });
 });
 

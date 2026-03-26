@@ -16,13 +16,13 @@ describe("InputActions", () => {
 
   it("does NOT render the Abrir button when onImportFile is not provided", () => {
     render(<InputActions {...baseProps} />);
-    expect(screen.queryByRole("button", { name: /Abrir/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Importar archivo/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
   it("renders the Abrir button when onImportFile prop is provided", () => {
     render(<InputActions {...baseProps} onImportFile={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /Abrir/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Importar archivo/i })).toBeInTheDocument();
   });
 
   it("renders a hidden file input with the correct accept attribute when onImportFile is provided", () => {
@@ -51,7 +51,7 @@ describe("InputActions", () => {
     const fileInput = document.querySelector('input[type="file"]')!;
     const clickSpy = vi.spyOn(fileInput, "click").mockImplementation(() => undefined);
 
-    fireEvent.click(screen.getByRole("button", { name: /Abrir/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Importar archivo/i }));
 
     expect(clickSpy).toHaveBeenCalledTimes(1);
   });
