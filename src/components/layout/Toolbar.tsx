@@ -81,8 +81,8 @@ export function Toolbar(props: ToolbarProps) {
   };
 
   const gridLayoutClass = props.extraContent
-    ? "grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
-    : "grid grid-cols-1 gap-4 sm:gap-6";
+    ? "grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start"
+    : "grid grid-cols-1 gap-4 sm:gap-6 items-start";
 
   return (
     <>
@@ -147,35 +147,40 @@ export function Toolbar(props: ToolbarProps) {
         </div>
 
         {/* Buttons grid — hidden on mobile when collapsed, always visible on sm+ */}
-        <div className={gridLayoutClass}>
-          <div
-            className={cn(
-              isMobileOpen ? "grid" : "hidden sm:grid",
-              props.tools.gridClassName ?? "grid-cols-2 sm:grid-cols-3 gap-2",
-            )}
-          >
-            {props.tools.actions.map((action) => (
-              <Button
-                key={action.id ?? action.label}
-                variant={action.variant}
-                size="md"
-                onClick={action.onClick}
-                disabled={action.disabled}
-                title={action.tooltip ?? action.label}
-                aria-label={action.tooltip ?? action.label}
-              >
-                {action.loading ? (
-                  <i className="fas fa-spinner fa-spin mr-1"></i>
-                ) : (
-                  <i className={`fas fa-${action.icon} mr-1`}></i>
-                )}
-                {action.label}
-              </Button>
-            ))}
-          </div>
-          {props.extraContent && (
-            <div className={cn(!isMobileOpen && "hidden sm:block")}>{props.extraContent}</div>
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-200",
+            isMobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 sm:max-h-96 sm:opacity-100",
           )}
+        >
+          <div className={gridLayoutClass}>
+            <div
+              className={cn(
+                "grid",
+                props.tools.gridClassName ?? "grid-cols-2 sm:grid-cols-3 gap-2",
+              )}
+            >
+              {props.tools.actions.map((action) => (
+                <Button
+                  key={action.id ?? action.label}
+                  variant={action.variant}
+                  size="sm"
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                  title={action.tooltip ?? action.label}
+                  aria-label={action.tooltip ?? action.label}
+                >
+                  {action.loading ? (
+                    <i className="fas fa-spinner fa-spin mr-1"></i>
+                  ) : (
+                    <i className={`fas fa-${action.icon} mr-1`}></i>
+                  )}
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+            {props.extraContent && <div>{props.extraContent}</div>}
+          </div>
         </div>
       </section>
 
