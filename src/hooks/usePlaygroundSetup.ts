@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useModalState } from "@/hooks/useModalState";
 import { useToast } from "@/hooks/useToast";
 import { usePlaygroundInputLifecycle } from "@/hooks/usePlaygroundInputLifecycle";
@@ -33,7 +33,7 @@ export function usePlaygroundSetup<TFormat extends object, TMinify extends objec
   preload,
   configModal: externalConfigModal,
 }: PlaygroundSetupConfig<TFormat, TMinify>) {
-  const [savedConfig] = useState(loadToolsConfig);
+  const savedConfig = useMemo(() => loadToolsConfig(), [loadToolsConfig]);
   const [input, setInput] = useState(() => {
     const saved = loadLastInput();
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string must fall through to example

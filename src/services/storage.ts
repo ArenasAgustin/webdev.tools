@@ -150,88 +150,6 @@ export function removeJsonToolsConfig(): boolean {
 }
 
 /**
- * Load last JSON input from localStorage
- */
-export function loadLastJson(): string {
-  try {
-    const storage = getStorage();
-    if (!storage) return "";
-
-    const item = storage.getItem(STORAGE_KEYS.LAST_JSON);
-    return item ?? "";
-  } catch (error) {
-    console.error("Error loading last JSON:", error);
-    return "";
-  }
-}
-
-/**
- * Save last JSON input to localStorage
- */
-export function saveLastJson(json: string): boolean {
-  try {
-    const storage = getStorage();
-    if (!storage) return false;
-
-    storage.setItem(STORAGE_KEYS.LAST_JSON, json);
-    return true;
-  } catch (error) {
-    console.error("Error saving last JSON:", error);
-    return false;
-  }
-}
-
-/**
- * Remove last JSON from localStorage
- */
-export function removeLastJson(): boolean {
-  return removeItem(STORAGE_KEYS.LAST_JSON);
-}
-
-// ============================================
-// Specific storage functions for JS Tools
-// ============================================
-
-/**
- * Load last JS input from localStorage
- */
-export function loadLastJs(): string {
-  try {
-    const storage = getStorage();
-    if (!storage) return "";
-
-    const item = storage.getItem(STORAGE_KEYS.LAST_JS);
-    return item ?? "";
-  } catch (error) {
-    console.error("Error loading last JS:", error);
-    return "";
-  }
-}
-
-/**
- * Save last JS input to localStorage
- */
-export function saveLastJs(code: string): boolean {
-  try {
-    const storage = getStorage();
-    if (!storage) return false;
-
-    storage.setItem(STORAGE_KEYS.LAST_JS, code);
-    return true;
-  } catch (error) {
-    console.error("Error saving last JS:", error);
-    return false;
-  }
-}
-
-/**
- * Remove last JS from localStorage
- */
-export function removeLastJs(): boolean {
-  return removeItem(STORAGE_KEYS.LAST_JS);
-}
-
-/**
  * Load JS tools configuration from localStorage
  */
 export function loadJsToolsConfig(): Partial<JsToolsConfig> | null {
@@ -250,49 +168,6 @@ export function saveJsToolsConfig(config: Partial<JsToolsConfig>): boolean {
  */
 export function removeJsToolsConfig(): boolean {
   return removeItem(STORAGE_KEYS.JS_TOOLS_CONFIG);
-}
-
-// ============================================
-// Specific storage functions for HTML Tools
-// ============================================
-
-/**
- * Load last HTML input from localStorage
- */
-export function loadLastHtml(): string {
-  try {
-    const storage = getStorage();
-    if (!storage) return "";
-
-    const item = storage.getItem(STORAGE_KEYS.LAST_HTML);
-    return item ?? "";
-  } catch (error) {
-    console.error("Error loading last HTML:", error);
-    return "";
-  }
-}
-
-/**
- * Save last HTML input to localStorage
- */
-export function saveLastHtml(html: string): boolean {
-  try {
-    const storage = getStorage();
-    if (!storage) return false;
-
-    storage.setItem(STORAGE_KEYS.LAST_HTML, html);
-    return true;
-  } catch (error) {
-    console.error("Error saving last HTML:", error);
-    return false;
-  }
-}
-
-/**
- * Remove last HTML from localStorage
- */
-export function removeLastHtml(): boolean {
-  return removeItem(STORAGE_KEYS.LAST_HTML);
 }
 
 /**
@@ -316,49 +191,6 @@ export function removeHtmlToolsConfig(): boolean {
   return removeItem(STORAGE_KEYS.HTML_TOOLS_CONFIG);
 }
 
-// ============================================
-// Specific storage functions for CSS Tools
-// ============================================
-
-/**
- * Load last CSS input from localStorage
- */
-export function loadLastCss(): string {
-  try {
-    const storage = getStorage();
-    if (!storage) return "";
-
-    const item = storage.getItem(STORAGE_KEYS.LAST_CSS);
-    return item ?? "";
-  } catch (error) {
-    console.error("Error loading last CSS:", error);
-    return "";
-  }
-}
-
-/**
- * Save last CSS input to localStorage
- */
-export function saveLastCss(css: string): boolean {
-  try {
-    const storage = getStorage();
-    if (!storage) return false;
-
-    storage.setItem(STORAGE_KEYS.LAST_CSS, css);
-    return true;
-  } catch (error) {
-    console.error("Error saving last CSS:", error);
-    return false;
-  }
-}
-
-/**
- * Remove last CSS from localStorage
- */
-export function removeLastCss(): boolean {
-  return removeItem(STORAGE_KEYS.LAST_CSS);
-}
-
 /**
  * Load CSS tools configuration from localStorage
  */
@@ -379,3 +211,71 @@ export function saveCssToolsConfig(config: Partial<CssToolsConfig>): boolean {
 export function removeCssToolsConfig(): boolean {
   return removeItem(STORAGE_KEYS.CSS_TOOLS_CONFIG);
 }
+
+// ============================================
+// Generic Last Input functions (internal)
+// ============================================
+
+const loadLastInput = (key: string, errorName: string): string => {
+  try {
+    const storage = getStorage();
+    if (!storage) return "";
+    const item = storage.getItem(key);
+    return item ?? "";
+  } catch (error) {
+    console.error(`Error loading last ${errorName}:`, error);
+    return "";
+  }
+};
+
+const saveLastInput = (key: string, errorName: string, value: string): boolean => {
+  try {
+    const storage = getStorage();
+    if (!storage) return false;
+    storage.setItem(key, value);
+    return true;
+  } catch (error) {
+    console.error(`Error saving last ${errorName}:`, error);
+    return false;
+  }
+};
+
+// ============================================
+// Last Input functions for each playground
+// ============================================
+
+/** Load last JSON input from localStorage */
+export const loadLastJson = () => loadLastInput(STORAGE_KEYS.LAST_JSON, "JSON");
+
+/** Save last JSON input to localStorage */
+export const saveLastJson = (value: string) => saveLastInput(STORAGE_KEYS.LAST_JSON, "JSON", value);
+
+/** Remove last JSON from localStorage */
+export const removeLastJson = () => removeItem(STORAGE_KEYS.LAST_JSON);
+
+/** Load last JS input from localStorage */
+export const loadLastJs = () => loadLastInput(STORAGE_KEYS.LAST_JS, "JS");
+
+/** Save last JS input to localStorage */
+export const saveLastJs = (value: string) => saveLastInput(STORAGE_KEYS.LAST_JS, "JS", value);
+
+/** Remove last JS from localStorage */
+export const removeLastJs = () => removeItem(STORAGE_KEYS.LAST_JS);
+
+/** Load last HTML input from localStorage */
+export const loadLastHtml = () => loadLastInput(STORAGE_KEYS.LAST_HTML, "HTML");
+
+/** Save last HTML input to localStorage */
+export const saveLastHtml = (value: string) => saveLastInput(STORAGE_KEYS.LAST_HTML, "HTML", value);
+
+/** Remove last HTML from localStorage */
+export const removeLastHtml = () => removeItem(STORAGE_KEYS.LAST_HTML);
+
+/** Load last CSS input from localStorage */
+export const loadLastCss = () => loadLastInput(STORAGE_KEYS.LAST_CSS, "CSS");
+
+/** Save last CSS input to localStorage */
+export const saveLastCss = (value: string) => saveLastInput(STORAGE_KEYS.LAST_CSS, "CSS", value);
+
+/** Remove last CSS from localStorage */
+export const removeLastCss = () => removeItem(STORAGE_KEYS.LAST_CSS);

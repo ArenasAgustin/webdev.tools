@@ -1,4 +1,4 @@
-import { type ChangeEvent } from "react";
+import { type ChangeEvent, memo } from "react";
 import { cn } from "@/utils/cn";
 
 type CheckboxColor = "blue" | "purple" | "orange" | "green" | "cyan";
@@ -19,7 +19,7 @@ const colorClasses: Record<CheckboxColor, string> = {
   cyan: "text-cyan-500 focus:ring-cyan-500",
 };
 
-export function Checkbox({
+export const Checkbox = memo(function Checkbox({
   checked,
   onChange,
   label,
@@ -41,4 +41,4 @@ export function Checkbox({
       <span className="text-gray-400">{label}</span>
     </label>
   );
-}
+});

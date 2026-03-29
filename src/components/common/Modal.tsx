@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useId } from "react";
+import { type ReactNode, useEffect, useId, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { getIconColorClass, type IconColorKey } from "@/utils/constants/colors";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -14,7 +14,7 @@ interface ModalProps {
   maxWidth?: string;
 }
 
-export function Modal({
+export const Modal = memo(function Modal({
   isOpen,
   title,
   icon,
@@ -106,4 +106,4 @@ export function Modal({
       </div>
     </div>
   );
-}
+});

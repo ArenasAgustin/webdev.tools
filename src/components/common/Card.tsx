@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, memo } from "react";
 import { cn } from "@/utils/cn";
 
 interface CardProps {
@@ -13,7 +13,7 @@ interface CardProps {
 /**
  * Reusable card component for modal sections
  */
-export function Card({
+export const Card = memo(function Card({
   title,
   icon,
   children,
@@ -32,4 +32,4 @@ export function Card({
       {children}
     </div>
   );
-}
+});
