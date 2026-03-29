@@ -79,10 +79,17 @@ describe("EditorFooter", () => {
   describe("output variant", () => {
     it("renders waiting message when output is empty", () => {
       render(
-        <EditorFooter variant="output" value="" error={null} stats={stats} comparisonBytes={100} />,
+        <EditorFooter
+          variant="output"
+          value=""
+          error={null}
+          stats={stats}
+          comparisonBytes={100}
+          isProcessing={true}
+        />,
       );
 
-      expect(screen.getByText("Esperando operación...")).toBeInTheDocument();
+      expect(screen.getByText("Procesando...")).toBeInTheDocument();
     });
 
     it("renders error message when error is present", () => {

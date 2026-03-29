@@ -1,6 +1,7 @@
 import { Modal } from "./Modal";
 import { Card } from "./Card";
 import { memo, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { IconColorKey } from "@/utils/constants/colors";
 
 export interface TipItem {
@@ -69,6 +70,7 @@ export const TipsModal = memo(function TipsModal({
   onClose,
   onTryExample,
 }: TipsModalProps) {
+  const { t } = useTranslation();
   const renderedTips = useMemo(
     () =>
       tips.map((tip) => {
@@ -100,7 +102,7 @@ export const TipsModal = memo(function TipsModal({
     () =>
       quickExamples.length > 0 ? (
         <Card
-          title="Ejemplos Rápidos"
+          title={t("tips.quickExamples")}
           icon="magic"
           className="bg-pink-500/10 border-pink-500/20"
           headerClassName="text-pink-400"
@@ -119,7 +121,7 @@ export const TipsModal = memo(function TipsModal({
           </div>
         </Card>
       ) : null,
-    [quickExamples, onTryExample],
+    [t, quickExamples, onTryExample],
   );
 
   return (

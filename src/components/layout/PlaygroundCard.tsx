@@ -1,10 +1,14 @@
 import type { PlaygroundConfig } from "@/types/playground";
+import { getLocalizedString } from "@/types/playground";
 
 interface PlaygroundCardProps {
   playground: PlaygroundConfig;
 }
 
 export function PlaygroundCard({ playground }: PlaygroundCardProps) {
+  const name = getLocalizedString(playground.name);
+  const description = getLocalizedString(playground.description);
+
   return (
     <div className="group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/20 backdrop-blur-sm transition hover:-translate-y-1 hover:border-white/20">
       <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
@@ -18,10 +22,10 @@ export function PlaygroundCard({ playground }: PlaygroundCardProps) {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">Playground</p>
-            <h3 className="text-xl font-semibold text-white">{playground.name}</h3>
+            <h3 className="text-xl font-semibold text-white">{name}</h3>
           </div>
         </div>
-        <p className="mt-4 text-sm leading-relaxed text-white/70">{playground.description}</p>
+        <p className="mt-4 text-sm leading-relaxed text-white/70">{description}</p>
         <div className="mt-6 flex items-center justify-between">
           <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-widest text-white/70">
             {playground.language}

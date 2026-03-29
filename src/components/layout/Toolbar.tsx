@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/cn";
 import { Button } from "@/components/common/Button";
 import { ConfigModal } from "@/components/common/ConfigModal";
@@ -58,11 +59,12 @@ export interface ToolbarProps {
 }
 
 export function Toolbar(props: ToolbarProps) {
+  const { t } = useTranslation();
   const [openModal, setOpenModal] = useState<"config" | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const hasClean = props.config?.mode === "json";
 
-  const toolsTitle = props.tools.title ?? "Herramientas";
+  const toolsTitle = props.tools.title ?? t("toolbar.title");
   const genericConfig = props.config;
   const showGenericConfig = genericConfig
     ? (genericConfig.isOpen ?? openModal === "config")
@@ -104,8 +106,8 @@ export function Toolbar(props: ToolbarProps) {
                 type="button"
                 onClick={props.tools.onOpenShortcuts}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
-                title="Atajos de teclado (?)"
-                aria-label="Ver atajos de teclado"
+                title={t("toolbar.shortcuts")}
+                aria-label={t("actions.viewShortcuts")}
               >
                 <i className="fas fa-keyboard" aria-hidden="true"></i>
               </button>
@@ -115,8 +117,8 @@ export function Toolbar(props: ToolbarProps) {
                 type="button"
                 onClick={props.tools.onOpenDiff}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-purple-300 transition-colors"
-                title="Ver diferencias input/output"
-                aria-label="Ver diferencias input/output"
+                title={t("actions.viewDifferences")}
+                aria-label={t("actions.viewDifferences")}
               >
                 <i className="fas fa-code-compare" aria-hidden="true"></i>
               </button>
@@ -126,8 +128,8 @@ export function Toolbar(props: ToolbarProps) {
                 type="button"
                 onClick={() => setShowGenericConfigState(true)}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
-                title={props.tools.configButtonTitle ?? "Configurar herramientas"}
-                aria-label={props.tools.configButtonTitle ?? "Configurar herramientas"}
+                title={props.tools.configButtonTitle ?? t("actions.configure")}
+                aria-label={props.tools.configButtonTitle ?? t("actions.configure")}
               >
                 <i className="fas fa-cog" aria-hidden="true"></i>
               </button>
@@ -136,7 +138,7 @@ export function Toolbar(props: ToolbarProps) {
               type="button"
               onClick={() => setIsMobileOpen((v) => !v)}
               className="sm:hidden inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
-              aria-label={isMobileOpen ? "Ocultar herramientas" : "Mostrar herramientas"}
+              aria-label={isMobileOpen ? t("actions.hideTools") : t("actions.showTools")}
             >
               <i
                 className={`fas fa-chevron-${isMobileOpen ? "down" : "up"}`}

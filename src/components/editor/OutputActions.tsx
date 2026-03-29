@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/common/Button";
 
 interface OutputActionsProps {
@@ -13,20 +14,31 @@ export function OutputActions({
   onExpand,
   onUseOutputAsInput,
 }: OutputActionsProps) {
+  const { t } = useTranslation();
   return (
     <>
-      <Button variant="primary" onClick={onCopyOutput} aria-label="Copiar resultado">
-        <i className="fas fa-copy"></i> <span className="hidden sm:inline">Copiar</span>
+      <Button
+        variant="primary"
+        onClick={onCopyOutput}
+        aria-label={t("actions.copyResult")}
+        title={t("common.copy")}
+      >
+        <i className="fas fa-copy"></i>
       </Button>
-      <Button variant="cyan" onClick={onDownloadOutput} aria-label="Descargar resultado">
-        <i className="fas fa-download"></i> <span className="hidden sm:inline">Descargar</span>
+      <Button
+        variant="cyan"
+        onClick={onDownloadOutput}
+        aria-label={t("actions.downloadResult")}
+        title={t("common.download")}
+      >
+        <i className="fas fa-download"></i>
       </Button>
       {onUseOutputAsInput && (
         <Button
           variant="orange"
           onClick={onUseOutputAsInput}
-          aria-label="Usar resultado como entrada"
-          title="Usar resultado como entrada"
+          aria-label={t("actions.useOutputAsInput")}
+          title={t("actions.useOutputAsInput")}
         >
           <i className="fas fa-arrow-left" aria-hidden="true"></i>
         </Button>
@@ -34,8 +46,8 @@ export function OutputActions({
       <Button
         variant="purple"
         onClick={onExpand}
-        aria-label="Expandir editor"
-        title="Expandir editor"
+        aria-label={t("actions.expandEditor")}
+        title={t("actions.expandEditor")}
       >
         <i className="fas fa-expand" aria-hidden="true"></i>
       </Button>

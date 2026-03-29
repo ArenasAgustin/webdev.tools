@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 import { StatusIndicator } from "./StatusIndicator";
 import { Stats } from "./Stats";
 
@@ -28,6 +29,7 @@ interface OutputEditorFooterProps {
 type EditorFooterProps = InputEditorFooterProps | OutputEditorFooterProps;
 
 export const EditorFooter = memo(function EditorFooter(props: EditorFooterProps) {
+  const { t } = useTranslation();
   if (props.variant === "input") {
     return (
       <StatusIndicator
@@ -56,7 +58,7 @@ export const EditorFooter = memo(function EditorFooter(props: EditorFooterProps)
     return (
       <div className="text-xs h-4 flex items-center gap-1">
         <span className="text-yellow-400 flex items-center gap-1">
-          <i className="fas fa-spinner fa-spin" aria-hidden="true"></i> Procesando...
+          <i className="fas fa-spinner fa-spin" aria-hidden="true"></i> {t("common.processing")}
         </span>
       </div>
     );
@@ -66,7 +68,7 @@ export const EditorFooter = memo(function EditorFooter(props: EditorFooterProps)
     <StatusIndicator
       value={props.value}
       error={props.error}
-      waitingLabel="Esperando operación..."
+      waitingLabel={t("common.waiting")}
       showValidLabel={false}
       withWrapper
       className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"

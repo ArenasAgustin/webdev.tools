@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Modal } from "./Modal";
 import { Card } from "./Card";
 import { Button } from "./Button";
@@ -84,6 +85,7 @@ const MODE_LABELS: Record<string, string> = {
 };
 
 export function ConfigModal(props: ConfigModalProps) {
+  const { t } = useTranslation();
   const mode = props.mode ?? "json";
   const modeLabel = MODE_LABELS[mode];
 
@@ -151,7 +153,7 @@ export function ConfigModal(props: ConfigModalProps) {
   return (
     <Modal
       isOpen={props.isOpen}
-      title={`Configuración de Herramientas ${modeLabel}`}
+      title={`${t("modal.configTitle")} ${modeLabel}`}
       icon="cog"
       iconColor="yellow-400"
       maxWidth="max-w-3xl"
@@ -159,7 +161,7 @@ export function ConfigModal(props: ConfigModalProps) {
       footer={
         <div className="flex justify-end gap-2">
           <Button onClick={handleReset}>
-            <i className="fas fa-undo"></i> Restablecer
+            <i className="fas fa-undo"></i> {t("common.reset")}
           </Button>
         </div>
       }
@@ -167,14 +169,14 @@ export function ConfigModal(props: ConfigModalProps) {
       <div className="space-y-6 text-xs">
         {/* Formatear */}
         <Card
-          title={`Formatear ${modeLabel}`}
+          title={`${t("config.format")} ${modeLabel}`}
           icon="indent"
           className="bg-blue-500/10 border-blue-500/20"
           headerClassName="text-blue-400"
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-gray-300 mb-1">Espaciado</label>
+              <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
               <ToggleButtonGroup
                 options={INDENT_OPTIONS}
                 value={props.formatConfig.indentSize}
@@ -184,11 +186,11 @@ export function ConfigModal(props: ConfigModalProps) {
 
             {jsonProps && (
               <div>
-                <label className="block text-gray-300 mb-1">Ordenar claves alfabéticamente</label>
+                <label className="block text-gray-300 mb-1">{t("config.sortKeys")}</label>
                 <Checkbox
                   checked={jsonProps.formatConfig.sortKeys}
                   onChange={(checked) => updateFormat({ sortKeys: checked })}
-                  label="Habilitar ordenamiento"
+                  label={t("config.enableSort")}
                   color="blue"
                 />
               </div>
@@ -196,18 +198,18 @@ export function ConfigModal(props: ConfigModalProps) {
 
             {htmlProps && (
               <div>
-                <label className="block text-gray-300 mb-1">Formato embebido</label>
+                <label className="block text-gray-300 mb-1">{t("config.embeddedFormat")}</label>
                 <div className="space-y-2">
                   <Checkbox
                     checked={htmlProps.formatConfig.formatCss}
                     onChange={(checked) => updateFormat({ formatCss: checked })}
-                    label="Formatear CSS en &lt;style&gt;"
+                    label={t("config.formatCss")}
                     color="blue"
                   />
                   <Checkbox
                     checked={htmlProps.formatConfig.formatJs}
                     onChange={(checked) => updateFormat({ formatJs: checked })}
-                    label="Formatear JS en &lt;script&gt;"
+                    label={t("config.formatJs")}
                     color="blue"
                   />
                 </div>
@@ -215,13 +217,11 @@ export function ConfigModal(props: ConfigModalProps) {
             )}
 
             <div>
-              <label className="block text-gray-300 mb-1">
-                Copiar automáticamente al formatear
-              </label>
+              <label className="block text-gray-300 mb-1">{t("config.autoCopy")}</label>
               <Checkbox
                 checked={props.formatConfig.autoCopy}
                 onChange={(checked) => updateFormat({ autoCopy: checked })}
-                label="Habilitar auto-copia"
+                label={t("config.enableAutoCopy")}
                 color="blue"
               />
             </div>
@@ -230,27 +230,27 @@ export function ConfigModal(props: ConfigModalProps) {
 
         {/* Minificar */}
         <Card
-          title={`Minificar ${modeLabel}`}
+          title={`${t("config.minify")} ${modeLabel}`}
           icon="compress"
           className="bg-purple-500/10 border-purple-500/20"
           headerClassName="text-purple-400"
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-gray-300 mb-1">Opciones de minificación</label>
+              <label className="block text-gray-300 mb-1">{t("config.minifyOptions")}</label>
               <div className="space-y-2">
                 {jsCssProps && (
                   <>
                     <Checkbox
                       checked={jsCssProps.minifyConfig.removeComments}
                       onChange={(checked) => updateMinify({ removeComments: checked })}
-                      label="Eliminar comentarios"
+                      label={t("config.removeComments")}
                       color="purple"
                     />
                     <Checkbox
                       checked={jsCssProps.minifyConfig.removeSpaces}
                       onChange={(checked) => updateMinify({ removeSpaces: checked })}
-                      label="Eliminar espacios"
+                      label={t("config.removeSpaces")}
                       color="purple"
                     />
                   </>
@@ -261,25 +261,25 @@ export function ConfigModal(props: ConfigModalProps) {
                     <Checkbox
                       checked={htmlProps.minifyConfig.removeComments}
                       onChange={(checked) => updateMinify({ removeComments: checked })}
-                      label="Eliminar comentarios"
+                      label={t("config.removeComments")}
                       color="purple"
                     />
                     <Checkbox
                       checked={htmlProps.minifyConfig.collapseWhitespace}
                       onChange={(checked) => updateMinify({ collapseWhitespace: checked })}
-                      label="Colapsar espacios"
+                      label={t("config.collapseWhitespace")}
                       color="purple"
                     />
                     <Checkbox
                       checked={htmlProps.minifyConfig.minifyCss}
                       onChange={(checked) => updateMinify({ minifyCss: checked })}
-                      label="Minificar CSS inline"
+                      label={t("config.minifyCss")}
                       color="purple"
                     />
                     <Checkbox
                       checked={htmlProps.minifyConfig.minifyJs}
                       onChange={(checked) => updateMinify({ minifyJs: checked })}
-                      label="Minificar JS inline"
+                      label={t("config.minifyJs")}
                       color="purple"
                     />
                   </>
@@ -290,13 +290,13 @@ export function ConfigModal(props: ConfigModalProps) {
                     <Checkbox
                       checked={jsonProps.minifyConfig.removeSpaces}
                       onChange={(checked) => updateMinify({ removeSpaces: checked })}
-                      label="Eliminar todos los espacios"
+                      label={t("config.removeAllSpaces")}
                       color="purple"
                     />
                     <Checkbox
                       checked={jsonProps.minifyConfig.sortKeys}
                       onChange={(checked) => updateMinify({ sortKeys: checked })}
-                      label="Ordenar claves alfabéticamente"
+                      label={t("config.sortKeys")}
                       color="purple"
                     />
                   </>
@@ -304,11 +304,11 @@ export function ConfigModal(props: ConfigModalProps) {
               </div>
             </div>
             <div>
-              <label className="block text-gray-300 mb-1">Copiar automáticamente</label>
+              <label className="block text-gray-300 mb-1">{t("config.autoCopyMinify")}</label>
               <Checkbox
                 checked={props.minifyConfig.autoCopy}
                 onChange={(checked) => updateMinify({ autoCopy: checked })}
-                label="Habilitar auto-copia"
+                label={t("config.enableAutoCopy")}
                 color="purple"
               />
             </div>
@@ -318,14 +318,14 @@ export function ConfigModal(props: ConfigModalProps) {
         {/* Limpiar vacíos */}
         {jsonProps && (
           <Card
-            title="Limpiar Valores Vacíos"
+            title={t("config.clean")}
             icon="broom"
             className="bg-orange-500/10 border-orange-500/20"
             headerClassName="text-orange-400"
           >
             <div className="space-y-3">
               <div>
-                <label className="block text-gray-300 mb-2">Valores a eliminar</label>
+                <label className="block text-gray-300 mb-2">{t("config.valuesToRemove")}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <Checkbox
                     checked={jsonProps.cleanConfig.removeNull}
@@ -335,7 +335,7 @@ export function ConfigModal(props: ConfigModalProps) {
                         removeNull: checked,
                       })
                     }
-                    label="null"
+                    label={t("config.null")}
                     color="orange"
                     containerClassName="p-2 bg-white/5 rounded"
                   />
@@ -347,7 +347,7 @@ export function ConfigModal(props: ConfigModalProps) {
                         removeUndefined: checked,
                       })
                     }
-                    label="undefined"
+                    label={t("config.undefined")}
                     color="orange"
                     containerClassName="p-2 bg-white/5 rounded"
                   />
@@ -359,7 +359,7 @@ export function ConfigModal(props: ConfigModalProps) {
                         removeEmptyString: checked,
                       })
                     }
-                    label='"" (vacío)'
+                    label={t("config.emptyString")}
                     color="orange"
                     containerClassName="p-2 bg-white/5 rounded"
                   />
@@ -371,7 +371,7 @@ export function ConfigModal(props: ConfigModalProps) {
                         removeEmptyArray: checked,
                       })
                     }
-                    label="[] (array vacío)"
+                    label={t("config.emptyArray")}
                     color="orange"
                     containerClassName="p-2 bg-white/5 rounded"
                   />
@@ -383,20 +383,20 @@ export function ConfigModal(props: ConfigModalProps) {
                         removeEmptyObject: checked,
                       })
                     }
-                    label="{} (objeto vacío)"
+                    label={t("config.emptyObject")}
                     color="orange"
                     containerClassName="p-2 bg-white/5 rounded"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-gray-300 mb-2">Formato de salida</label>
+                <label className="block text-gray-300 mb-2">{t("config.outputFormat")}</label>
                 <RadioGroup
                   name="cleanOutputMode"
                   value={jsonProps.cleanConfig.outputFormat}
                   options={[
-                    { value: "format", label: "Formatear" },
-                    { value: "minify", label: "Minificar" },
+                    { value: "format", label: t("config.format") },
+                    { value: "minify", label: t("config.minify") },
                   ]}
                   onChange={(value) =>
                     jsonProps.onCleanConfigChange({ ...jsonProps.cleanConfig, outputFormat: value })
@@ -405,13 +405,13 @@ export function ConfigModal(props: ConfigModalProps) {
                 />
               </div>
               <div>
-                <label className="block text-gray-300 mb-1">Copiar automáticamente</label>
+                <label className="block text-gray-300 mb-1">{t("config.autoCopyMinify")}</label>
                 <Checkbox
                   checked={jsonProps.cleanConfig.autoCopy}
                   onChange={(checked) =>
                     jsonProps.onCleanConfigChange({ ...jsonProps.cleanConfig, autoCopy: checked })
                   }
-                  label="Habilitar auto-copia"
+                  label={t("config.enableAutoCopy")}
                   color="orange"
                 />
               </div>

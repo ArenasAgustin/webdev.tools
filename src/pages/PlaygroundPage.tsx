@@ -6,11 +6,15 @@ import { PlaygroundSidebar } from "@/components/layout/PlaygroundSidebar";
 import { getPlaygroundById } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
+import { getLocalizedString } from "@/types/playground";
 
 export function PlaygroundPage() {
   const { playgroundId } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const playground = getPlaygroundById(playgroundId ?? "");
+
+  const name = playground ? getLocalizedString(playground.name) : undefined;
+  const description = playground ? getLocalizedString(playground.description) : undefined;
 
   useIdleCallback(
     () => {
@@ -20,14 +24,14 @@ export function PlaygroundPage() {
   );
 
   useDocumentMeta({
-    title: playground?.name ?? "Playground",
+    title: name ?? "Playground",
     description: playground
-      ? `${playground.description}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.`
+      ? `${description}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.`
       : "Herramientas de desarrollo web online",
     keywords:
       playground?.keywords ??
       (playground
-        ? `${playground.name}, ${playground.description}, herramientas desarrollo web online`
+        ? `${name}, ${description}, herramientas desarrollo web online`
         : "herramientas desarrollo web"),
     ogUrl: playground
       ? `https://webdev.tools/playground/${playground.id}`
@@ -37,8 +41,8 @@ export function PlaygroundPage() {
       ? {
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          name: playground.name,
-          description: playground.description,
+          name: name,
+          description: description,
           url: `https://webdev.tools/playground/${playground.id}`,
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Web",
@@ -90,15 +94,15 @@ export function PlaygroundPage() {
                 <i className={`${playground.icon}`}></i>
               </div>
               <div>
-                <h1 className="text-lg font-semibold sm:text-xl">{playground.name}</h1>
-                <p className="hidden sm:block text-xs text-white/60">{playground.description}</p>
+                <h1 className="text-lg font-semibold sm:text-xl">{name}</h1>
+                <p className="hidden sm:block text-xs text-white/60">{description}</p>
               </div>
             </div>
           </header>
 
           <div key={playgroundId} className="flex-1 min-h-0 flex flex-col gap-4 fade-in">
-            <ErrorBoundary name={playground.name}>
-              <Suspense fallback={<PlaygroundLoader name={playground.name} />}>
+            <ErrorBoundary name={name ?? playground.id}>
+              <Suspense fallback={<PlaygroundLoader name={name ?? playground.id} />}>
                 <PlaygroundComponent />
               </Suspense>
             </ErrorBoundary>

@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useId } from "react";
+import { useTranslation } from "react-i18next";
 import { getIconColorClass, type IconColorKey } from "@/utils/constants/colors";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
@@ -23,6 +24,7 @@ export function Modal({
   onClose,
   maxWidth = "max-w-2xl",
 }: ModalProps) {
+  const { t } = useTranslation();
   const iconColorClass = getIconColorClass(iconColor);
   const titleId = useId();
   const focusTrapRef = useFocusTrap(isOpen);
@@ -88,7 +90,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
-            aria-label="Cerrar modal"
+            aria-label={t("modal.close")}
           >
             <i className="fas fa-times" aria-hidden="true"></i>
           </button>

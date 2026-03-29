@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Modal } from "./Modal";
 
 interface ShortcutRowProps {
@@ -30,11 +31,12 @@ interface ShortcutsModalProps {
 }
 
 export function ShortcutsModal({ isOpen, onClose, hasClean = false }: ShortcutsModalProps) {
+  const { t } = useTranslation();
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Atajos de teclado"
+      title={t("shortcuts.title")}
       icon="keyboard"
       iconColor="yellow-400"
       maxWidth="max-w-lg"
@@ -43,13 +45,16 @@ export function ShortcutsModal({ isOpen, onClose, hasClean = false }: ShortcutsM
         {/* Transformar */}
         <section>
           <h4 className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <i className="fas fa-tools" aria-hidden="true"></i> Transformar
+            <i className="fas fa-tools" aria-hidden="true"></i> {t("shortcuts.transform")}
           </h4>
           <div>
-            <ShortcutRow keys={["Ctrl/⌘", "Shift", "F"]} description="Formatear" />
-            <ShortcutRow keys={["Ctrl/⌘", "Shift", "M"]} description="Minificar" />
+            <ShortcutRow keys={["Ctrl/⌘", "Shift", "F"]} description={t("shortcuts.format")} />
+            <ShortcutRow keys={["Ctrl/⌘", "Shift", "M"]} description={t("shortcuts.minify")} />
             {hasClean && (
-              <ShortcutRow keys={["Ctrl/⌘", "Shift", "L"]} description="Limpiar vacíos" />
+              <ShortcutRow
+                keys={["Ctrl/⌘", "Shift", "L"]}
+                description={t("shortcuts.cleanEmpty")}
+              />
             )}
           </div>
         </section>
@@ -57,23 +62,29 @@ export function ShortcutsModal({ isOpen, onClose, hasClean = false }: ShortcutsM
         {/* Resultado */}
         <section>
           <h4 className="text-xs font-semibold text-green-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <i className="fas fa-terminal" aria-hidden="true"></i> Resultado
+            <i className="fas fa-terminal" aria-hidden="true"></i> {t("shortcuts.result")}
           </h4>
           <div>
-            <ShortcutRow keys={["Ctrl/⌘", "Shift", "C"]} description="Copiar resultado" />
-            <ShortcutRow keys={["Ctrl/⌘", "Shift", "Supr"]} description="Limpiar entrada" />
+            <ShortcutRow keys={["Ctrl/⌘", "Shift", "C"]} description={t("shortcuts.copyResult")} />
+            <ShortcutRow
+              keys={["Ctrl/⌘", "Shift", "Supr"]}
+              description={t("shortcuts.clearInput")}
+            />
           </div>
         </section>
 
         {/* Interfaz */}
         <section>
           <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <i className="fas fa-sliders-h" aria-hidden="true"></i> Interfaz
+            <i className="fas fa-sliders-h" aria-hidden="true"></i> {t("shortcuts.interface")}
           </h4>
           <div>
-            <ShortcutRow keys={["Ctrl/⌘", ","]} description="Abrir configuración" />
-            <ShortcutRow keys={["Ctrl/⌘", "'"]} description="Ver atajos de teclado" />
-            <ShortcutRow keys={["Ctrl/⌘", "Shift", "D"]} description="Ver diferencias" />
+            <ShortcutRow keys={["Ctrl/⌘", ","]} description={t("shortcuts.openConfig")} />
+            <ShortcutRow keys={["Ctrl/⌘", "'"]} description={t("shortcuts.viewShortcuts")} />
+            <ShortcutRow
+              keys={["Ctrl/⌘", "Shift", "D"]}
+              description={t("shortcuts.viewDifferences")}
+            />
           </div>
         </section>
       </div>

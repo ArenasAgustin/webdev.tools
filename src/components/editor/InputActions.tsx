@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/common/Button";
 
 interface InputActionsProps {
@@ -20,15 +21,26 @@ export function InputActions({
   onImportFile,
   acceptExtensions,
 }: InputActionsProps) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <>
-      <Button variant="danger" onClick={onClearInput} aria-label="Limpiar entrada">
-        <i className="fas fa-trash"></i> <span className="hidden sm:inline">Limpiar</span>
+      <Button
+        variant="danger"
+        onClick={onClearInput}
+        aria-label={t("actions.clearInput")}
+        title={t("common.clear")}
+      >
+        <i className="fas fa-trash"></i>
       </Button>
-      <Button variant="success" onClick={onLoadExample} aria-label="Cargar ejemplo">
-        <i className="fas fa-file-import"></i> <span className="hidden sm:inline">Ejemplo</span>
+      <Button
+        variant="success"
+        onClick={onLoadExample}
+        aria-label={t("actions.loadExample")}
+        title={t("common.example")}
+      >
+        <i className="fas fa-file-import"></i>
       </Button>
       {onImportFile && (
         <>
@@ -46,21 +58,27 @@ export function InputActions({
           <Button
             variant="primary"
             onClick={() => fileInputRef.current?.click()}
-            aria-label="Importar archivo"
+            aria-label={t("actions.importFile")}
+            title={t("common.open")}
           >
-            <i className="fas fa-folder-open"></i> <span className="hidden sm:inline">Abrir</span>
+            <i className="fas fa-folder-open"></i>
           </Button>
         </>
       )}
-      <Button variant="cyan" onClick={onDownloadInput} aria-label="Descargar entrada">
-        <i className="fas fa-download"></i> <span className="hidden sm:inline">Descargar</span>
+      <Button
+        variant="cyan"
+        onClick={onDownloadInput}
+        aria-label={t("actions.downloadInput")}
+        title={t("common.download")}
+      >
+        <i className="fas fa-download"></i>
       </Button>
       {onUseInputAsOutput && (
         <Button
           variant="orange"
           onClick={onUseInputAsOutput}
-          aria-label="Usar entrada como resultado"
-          title="Usar entrada como resultado"
+          aria-label={t("actions.useInputAsOutput")}
+          title={t("actions.useInputAsOutput")}
         >
           <i className="fas fa-arrow-right" aria-hidden="true"></i>
         </Button>
@@ -68,8 +86,8 @@ export function InputActions({
       <Button
         variant="purple"
         onClick={onExpand}
-        aria-label="Expandir editor"
-        title="Expandir editor"
+        aria-label={t("actions.expandEditor")}
+        title={t("actions.expandEditor")}
       >
         <i className="fas fa-expand" aria-hidden="true"></i>
       </Button>

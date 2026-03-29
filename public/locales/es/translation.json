@@ -1,0 +1,109 @@
+{
+  "common": {
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "reset": "Restablecer",
+    "copy": "Copiar",
+    "download": "Descargar",
+    "clear": "Limpiar",
+    "format": "Formatear",
+    "minify": "Minificar",
+    "expand": "Expandir",
+    "collapse": "Colapsar",
+    "loading": "Cargando...",
+    "processing": "Procesando...",
+    "waiting": "Esperando operación...",
+    "example": "Ejemplo",
+    "open": "Abrir",
+    "import": "Importar",
+    "export": "Exportar"
+  },
+  "sidebar": {
+    "title": "WebDev Tools",
+    "home": "Inicio",
+    "playgrounds": "Playgrounds",
+    "navigation": "Panel de navegación",
+    "closeSidebar": "Cerrar panel",
+    "availablePlaygrounds": "Playgrounds disponibles"
+  },
+  "actions": {
+    "clearInput": "Limpiar entrada",
+    "loadExample": "Cargar ejemplo",
+    "importFile": "Importar archivo",
+    "downloadInput": "Descargar entrada",
+    "useInputAsOutput": "Usar entrada como resultado",
+    "expandEditor": "Expandir editor",
+    "copyResult": "Copiar resultado",
+    "downloadResult": "Descargar resultado",
+    "useOutputAsInput": "Usar resultado como entrada",
+    "viewDifferences": "Ver diferencias input/output",
+    "viewShortcuts": "Ver atajos de teclado",
+    "configure": "Configurar herramientas",
+    "showTools": "Mostrar herramientas",
+    "hideTools": "Ocultar herramientas"
+  },
+  "toolbar": {
+    "title": "Herramientas",
+    "shortcuts": "Atajos de teclado (?)",
+    "differences": "Ver diferencias",
+    "settings": "Configuración"
+  },
+  "modal": {
+    "close": "Cerrar modal",
+    "configTitle": "Configuración de Herramientas"
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "transform": "Transformar",
+    "result": "Resultado",
+    "interface": "Interfaz",
+    "format": "Formatear",
+    "minify": "Minificar",
+    "cleanEmpty": "Limpiar vacíos",
+    "copyResult": "Copiar resultado",
+    "clearInput": "Limpiar entrada",
+    "openConfig": "Abrir configuración",
+    "viewShortcuts": "Ver atajos de teclado",
+    "viewDifferences": "Ver diferencias"
+  },
+  "tips": {
+    "quickExamples": "Ejemplos Rápidos"
+  },
+  "config": {
+    "format": "Formatear",
+    "minify": "Minificar",
+    "clean": "Limpiar Valores Vacíos",
+    "indent": "Espaciado",
+    "sortKeys": "Ordenar claves alfabéticamente",
+    "enableSort": "Habilitar ordenamiento",
+    "autoCopy": "Copiar automáticamente",
+    "enableAutoCopy": "Habilitar auto-copia",
+    "minifyOptions": "Opciones de minificación",
+    "removeComments": "Eliminar comentarios",
+    "removeSpaces": "Eliminar espacios",
+    "embeddedFormat": "Formato embebido",
+    "formatCss": "Formatear CSS en <style>",
+    "formatJs": "Formatear JS en <script>",
+    "collapseWhitespace": "Colapsar espacios",
+    "minifyCss": "Minificar CSS inline",
+    "minifyJs": "Minificar JS inline",
+    "removeAllSpaces": "Eliminar todos los espacios",
+    "valuesToRemove": "Valores a eliminar",
+    "outputFormat": "Formato de salida",
+    "null": "null",
+    "undefined": "undefined",
+    "emptyString": "\"\" (vacío)",
+    "emptyArray": "[] (array vacío)",
+    "emptyObject": "{} (objeto vacío)",
+    "autoCopyMinify": "Copiar automáticamente"
+  },
+  "language": {
+    "select": "Seleccionar idioma"
+  },
+  "editor": {
+    "lines": "líneas",
+    "characters": "caracteres",
+    "bytes": "bytes"
+  }
+}

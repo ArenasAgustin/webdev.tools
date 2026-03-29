@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { playgroundRegistry } from "@/playgrounds/registry";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 interface PlaygroundSidebarProps {
   currentPlaygroundId: string;
@@ -12,9 +14,16 @@ export function PlaygroundSidebar({
   isOpen,
   onClose,
 }: PlaygroundSidebarProps) {
+  const { i18n, t } = useTranslation();
+
+  const getLocalizedName = (name: string | Record<string, string>): string => {
+    if (typeof name === "string") return name;
+    return name[i18n.language] || name.es || Object.values(name)[0] || "";
+  };
+
   return (
     <aside
-      aria-label="Panel de navegación"
+      aria-label={t("sidebar.navigation")}
       aria-hidden={!isOpen}
       className={`fixed inset-y-0 right-0 z-40 w-64 transform border-l border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur-xl transition duration-300 lg:rounded-l-2xl ${
         isOpen ? "translate-x-0" : "translate-x-full"
@@ -31,22 +40,32 @@ export function PlaygroundSidebar({
               <i className="fas fa-layer-group"></i>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">WebDev Tools</p>
-              <p className="text-sm font-semibold">Inicio</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">
+                {t("sidebar.title")}
+              </p>
+              <p className="text-sm font-semibold">{t("sidebar.home")}</p>
             </div>
           </Link>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center w-8 h-8 text-white/60 transition hover:text-white"
-            onClick={onClose}
-            aria-label="Close sidebar"
-          >
-            <i className="fas fa-xmark" aria-hidden="true"></i>
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <button
+              type="button"
+              className="inline-flex items-center justify-center w-8 h-8 text-white/60 transition hover:text-white"
+              onClick={onClose}
+              aria-label={t("sidebar.closeSidebar")}
+            >
+              <i className="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
 
-        <nav aria-label="Playgrounds disponibles" className="flex-1 overflow-y-auto px-4 py-6">
-          <p className="px-2 text-xs uppercase tracking-[0.25em] text-white/50">Playgrounds</p>
+        <nav
+          aria-label={t("sidebar.availablePlaygrounds")}
+          className="flex-1 overflow-y-auto px-4 py-6"
+        >
+          <p className="px-2 text-xs uppercase tracking-[0.25em] text-white/50">
+            {t("sidebar.playgrounds")}
+          </p>
           <ul className="mt-4 space-y-2">
             {playgroundRegistry.map((playground) => {
               const isActive = playground.id === currentPlaygroundId;
@@ -68,7 +87,7 @@ export function PlaygroundSidebar({
                     >
                       <i className={`${playground.icon} text-sm`}></i>
                     </span>
-                    <span className="font-medium">{playground.name}</span>
+                    <span className="font-medium">{getLocalizedName(playground.name)}</span>
                   </Link>
                 </li>
               );

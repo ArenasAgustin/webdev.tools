@@ -1,0 +1,109 @@
+{
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "reset": "Reset",
+    "copy": "Copy",
+    "download": "Download",
+    "clear": "Clear",
+    "format": "Format",
+    "minify": "Minify",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "waiting": "Waiting for operation...",
+    "example": "Example",
+    "open": "Open",
+    "import": "Import",
+    "export": "Export"
+  },
+  "sidebar": {
+    "title": "WebDev Tools",
+    "home": "Home",
+    "playgrounds": "Playgrounds",
+    "navigation": "Navigation panel",
+    "closeSidebar": "Close panel",
+    "availablePlaygrounds": "Available playgrounds"
+  },
+  "actions": {
+    "clearInput": "Clear input",
+    "loadExample": "Load example",
+    "importFile": "Import file",
+    "downloadInput": "Download input",
+    "useInputAsOutput": "Use input as result",
+    "expandEditor": "Expand editor",
+    "copyResult": "Copy result",
+    "downloadResult": "Download result",
+    "useOutputAsInput": "Use result as input",
+    "viewDifferences": "View input/output differences",
+    "viewShortcuts": "View keyboard shortcuts",
+    "configure": "Configure tools",
+    "showTools": "Show tools",
+    "hideTools": "Hide tools"
+  },
+  "toolbar": {
+    "title": "Tools",
+    "shortcuts": "Keyboard shortcuts (?)",
+    "differences": "View differences",
+    "settings": "Settings"
+  },
+  "modal": {
+    "close": "Close modal",
+    "configTitle": "Tools Configuration"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "transform": "Transform",
+    "result": "Result",
+    "interface": "Interface",
+    "format": "Format",
+    "minify": "Minify",
+    "cleanEmpty": "Clean empty",
+    "copyResult": "Copy result",
+    "clearInput": "Clear input",
+    "openConfig": "Open settings",
+    "viewShortcuts": "View shortcuts",
+    "viewDifferences": "View differences"
+  },
+  "tips": {
+    "quickExamples": "Quick Examples"
+  },
+  "config": {
+    "format": "Format",
+    "minify": "Minify",
+    "clean": "Clean Empty Values",
+    "indent": "Indentation",
+    "sortKeys": "Sort keys alphabetically",
+    "enableSort": "Enable sorting",
+    "autoCopy": "Auto copy on format",
+    "enableAutoCopy": "Enable auto-copy",
+    "minifyOptions": "Minification options",
+    "removeComments": "Remove comments",
+    "removeSpaces": "Remove spaces",
+    "embeddedFormat": "Embedded format",
+    "formatCss": "Format CSS in <style>",
+    "formatJs": "Format JS in <script>",
+    "collapseWhitespace": "Collapse whitespace",
+    "minifyCss": "Minify inline CSS",
+    "minifyJs": "Minify inline JS",
+    "removeAllSpaces": "Remove all spaces",
+    "valuesToRemove": "Values to remove",
+    "outputFormat": "Output format",
+    "null": "null",
+    "undefined": "undefined",
+    "emptyString": "\"\" (empty)",
+    "emptyArray": "[] (empty array)",
+    "emptyObject": "{} (empty object)",
+    "autoCopyMinify": "Auto copy"
+  },
+  "language": {
+    "select": "Select language"
+  },
+  "editor": {
+    "lines": "lines",
+    "characters": "characters",
+    "bytes": "bytes"
+  }
+}
