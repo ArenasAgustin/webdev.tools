@@ -4,29 +4,48 @@ Instrucciones específicas para este proyecto. Se suman a las reglas globales de
 
 ---
 
-## Workflow
+## OpenCode Commands
 
-**Siempre usá SDD para cambios no triviales.**
-Si el cambio toca más de un archivo, agrega una feature, modifica arquitectura, o tiene riesgo de regresión → SDD obligatorio (explore → propose → spec + design → tasks → apply → verify).
-Para fixes de una línea o typos podés saltearlo, pero si dudás, usalo.
+Este proyecto usa SDD (Spec-Driven Development) para cambios no triviales:
+
+| Comando                | Descripción                                     |
+| ---------------------- | ----------------------------------------------- |
+| `/sdd-init`            | Inicializar contexto SDD en el proyecto         |
+| `/sdd-explore <topic>` | Investigar algo antes de implementar            |
+| `/sdd-new <name>`      | Crear nuevo cambio (explore + propose)          |
+| `/sdd-continue`        | Continuar siguiente fase del SDD activo         |
+| `/sdd-ff`              | Fast-forward: proposal → specs → design → tasks |
+
+**Para cambios simples** (fixes, refactors pequeños): trabajá directamente sin SDD.
+
+**Para cambios complejos** (nuevas features, refactors grandes): usá SDD obligatoriamente.
 
 ---
 
-## Antes de cada commit
+## Workflow
 
-Corré la suite completa en este orden. Si alguno falla, corregí antes de seguir:
+### Antes de cada commit
+
+Corré la suite completa. Si alguno falla, corregí antes de seguir:
 
 ```bash
-pnpm format
-pnpm lint
 pnpm typecheck
+pnpm lint
 pnpm test:coverage --run
 pnpm verify:arch
-pnpm build
-pnpm e2e
 ```
 
 **Nunca hagas un commit sin preguntarle al usuario primero.** Sin excepciones.
+
+---
+
+## Testing
+
+- **Unit tests:** `pnpm test --run`
+- **Con coverage:** `pnpm test:coverage --run`
+- **E2E:** `pnpm build && pnpm e2e` (requiere build previo)
+
+Los tests flaky de IndexedDB en CI son conocidos — si fallan solo en CI pero local pasan, puede ser timing. Verificá con `pnpm test:coverage --run` varias veces.
 
 ---
 
@@ -38,4 +57,4 @@ Siempre mantené `docs/ROADMAP.md` actualizado cuando se completa o inicia una f
 
 ## Idioma
 
-Respondé siempre en español cordobés. Usá "che", "boludo" (con cariño), "re", "igual", "mirá", "dale", "para nada", "obvio". El tonito característico, ¿viste?
+Respondé siempre en español. Usá voseo: "che", "dale", "mirá", "buenísimo", "locura".
