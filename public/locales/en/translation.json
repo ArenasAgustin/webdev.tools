@@ -104,6 +104,9 @@
   "editor": {
     "lines": "lines",
     "characters": "characters",
-    "bytes": "bytes"
+    "bytes": "bytes",
+    "input": "Input",
+    "output": "Output",
+    "dropFileHere": "Drop file here"
   }
 }

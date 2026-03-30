@@ -1,4 +1,5 @@
 import { type ReactNode, memo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { ExpandedEditorModal } from "@/components/editor/ExpandedEditorModal";
@@ -88,6 +89,7 @@ export const GenericEditors = memo(function GenericEditors({
   onImportFile,
   acceptExtensions,
 }: GenericEditorsProps) {
+  const { t } = useTranslation();
   const ownEditor = useExpandedEditor();
   const editor = editorState ?? ownEditor;
   const inputStats = useTextStats(input);
@@ -237,8 +239,8 @@ export const GenericEditors = memo(function GenericEditors({
       <EditorTabBar
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        inputLabel="Entrada"
-        outputLabel="Salida"
+        inputLabel={t("editor.input")}
+        outputLabel={t("editor.output")}
       />
 
       <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
@@ -272,7 +274,9 @@ export const GenericEditors = memo(function GenericEditors({
               />
               {isDragOver && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg pointer-events-none transition-all">
-                  <span className="text-blue-300 font-medium text-sm">Soltar archivo aquí</span>
+                  <span className="text-blue-300 font-medium text-sm">
+                    {t("editor.dropFileHere")}
+                  </span>
                 </div>
               )}
             </div>
