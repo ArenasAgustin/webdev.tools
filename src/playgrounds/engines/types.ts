@@ -3,6 +3,16 @@ import type { PlaygroundConfig } from "@/types/playground";
 import type { ValidationState } from "@/hooks/useAsyncValidator";
 
 /**
+ * Playground mode - identifies which playground is active
+ */
+export type PlaygroundMode = "json" | "js" | "html" | "css";
+
+/**
+ * Monaco editor language identifiers
+ */
+export type MonacoLanguage = "json" | "javascript" | "html" | "css";
+
+/**
  * Playground features - what special capabilities each playground supports
  */
 export type PlaygroundFeature =
@@ -151,7 +161,7 @@ export interface PlaygroundEngine {
   config: PlaygroundConfig;
 
   /** Monaco editor language */
-  editorLanguage: "json" | "javascript" | "html" | "css";
+  editorLanguage: MonacoLanguage;
 
   /** Features supported by this playground */
   features: readonly PlaygroundFeature[];

@@ -197,6 +197,7 @@ export function usePlaygroundToolbar<
       : {}),
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-  return useToolbarConfig(toolbarParams as any);
+  // TypeScript cannot verify that conditional toolbarParams match useToolbarConfig overloads.
+  // The overloads handle both clean/non-clean cases at compile time, this cast is safe.
+  return useToolbarConfig(toolbarParams as Parameters<typeof useToolbarConfig>[0]);
 }

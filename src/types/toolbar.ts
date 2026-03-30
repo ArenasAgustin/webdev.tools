@@ -59,22 +59,5 @@ export interface ToolbarConfig {
   onOpenDiff?: ToolbarActionHandler;
 }
 
-/**
- * Helper to create a toolbar action with type safety
- */
-export function createToolbarAction(action: ToolbarAction): ToolbarAction {
-  return {
-    id: action.id ?? action.label,
-    tooltip: action.tooltip ?? action.label,
-    disabled: action.disabled ?? false,
-    loading: action.loading ?? false,
-    ...action,
-  };
-}
-
-/**
- * Helper to create multiple toolbar actions
- */
-export function createToolbarActions(actions: ToolbarAction[]): ToolbarAction[] {
-  return actions.map(createToolbarAction);
-}
+// Note: createToolbarAction and createToolbarActions were removed -
+// not used anywhere in the codebase
