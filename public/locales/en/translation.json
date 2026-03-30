@@ -96,7 +96,13 @@
     "emptyString": "\"\" (empty)",
     "emptyArray": "[] (empty array)",
     "emptyObject": "{} (empty object)",
-    "autoCopyMinify": "Auto copy"
+    "autoCopyMinify": "Auto copy",
+    "emptyFunction": "() => {} (empty function)",
+    "rulesToRemove": "Rules to remove",
+    "emptyRules": "Empty rules",
+    "rulesWithOnlyComments": "Rules with only comments",
+    "tagsToRemove": "Tags to remove",
+    "emptyTags": "Empty tags"
   },
   "language": {
     "select": "Select language"

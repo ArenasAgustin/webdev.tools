@@ -6,18 +6,30 @@ import { ToggleButtonGroup } from "./ToggleButtonGroup";
 import { Checkbox } from "./Checkbox";
 import { RadioGroup } from "./RadioGroup";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
-import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
-import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
-import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
+import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
+import type { HtmlFormatConfig, HtmlMinifyConfig, HtmlCleanConfig } from "@/types/html";
+import type { CssFormatConfig, CssMinifyConfig, CssCleanConfig } from "@/types/css";
 import { INDENT_OPTIONS } from "@/types/format";
 import {
   DEFAULT_JSON_FORMAT_CONFIG,
   DEFAULT_JSON_MINIFY_CONFIG,
   DEFAULT_JSON_CLEAN_CONFIG,
 } from "@/types/json";
-import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
-import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
-import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
+import {
+  DEFAULT_JS_FORMAT_CONFIG,
+  DEFAULT_JS_MINIFY_CONFIG,
+  DEFAULT_JS_CLEAN_CONFIG,
+} from "@/types/js";
+import {
+  DEFAULT_HTML_FORMAT_CONFIG,
+  DEFAULT_HTML_MINIFY_CONFIG,
+  DEFAULT_HTML_CLEAN_CONFIG,
+} from "@/types/html";
+import {
+  DEFAULT_CSS_FORMAT_CONFIG,
+  DEFAULT_CSS_MINIFY_CONFIG,
+  DEFAULT_CSS_CLEAN_CONFIG,
+} from "@/types/css";
 import {
   saveJsonToolsConfig,
   removeJsonToolsConfig,
@@ -49,6 +61,8 @@ interface JsConfigModalProps {
   onFormatConfigChange: (config: JsFormatConfig) => void;
   minifyConfig: JsMinifyConfig;
   onMinifyConfigChange: (config: JsMinifyConfig) => void;
+  cleanConfig: JsCleanConfig;
+  onCleanConfigChange: (config: JsCleanConfig) => void;
 }
 
 interface HtmlConfigModalProps {
@@ -59,6 +73,8 @@ interface HtmlConfigModalProps {
   onFormatConfigChange: (config: HtmlFormatConfig) => void;
   minifyConfig: HtmlMinifyConfig;
   onMinifyConfigChange: (config: HtmlMinifyConfig) => void;
+  cleanConfig: HtmlCleanConfig;
+  onCleanConfigChange: (config: HtmlCleanConfig) => void;
 }
 
 interface CssConfigModalProps {
@@ -69,6 +85,8 @@ interface CssConfigModalProps {
   onFormatConfigChange: (config: CssFormatConfig) => void;
   minifyConfig: CssMinifyConfig;
   onMinifyConfigChange: (config: CssMinifyConfig) => void;
+  cleanConfig: CssCleanConfig;
+  onCleanConfigChange: (config: CssCleanConfig) => void;
 }
 
 type ConfigModalProps =
@@ -92,6 +110,8 @@ export function ConfigModal(props: ConfigModalProps) {
   // Narrowed accessors for mode-specific UI sections
   const jsonProps = mode === "json" ? (props as JsonConfigModalProps) : null;
   const htmlProps = mode === "html" ? (props as HtmlConfigModalProps) : null;
+  const jsProps = mode === "js" ? (props as JsConfigModalProps) : null;
+  const cssProps = mode === "css" ? (props as CssConfigModalProps) : null;
   const jsCssProps =
     mode === "js" || mode === "css" ? (props as JsConfigModalProps | CssConfigModalProps) : null;
 
@@ -116,14 +136,17 @@ export function ConfigModal(props: ConfigModalProps) {
     if (props.mode === "js") {
       props.onFormatConfigChange(DEFAULT_JS_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_JS_MINIFY_CONFIG);
+      props.onCleanConfigChange(DEFAULT_JS_CLEAN_CONFIG);
       removeJsToolsConfig();
     } else if (props.mode === "html") {
       props.onFormatConfigChange(DEFAULT_HTML_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_HTML_MINIFY_CONFIG);
+      props.onCleanConfigChange(DEFAULT_HTML_CLEAN_CONFIG);
       removeHtmlToolsConfig();
     } else if (props.mode === "css") {
       props.onFormatConfigChange(DEFAULT_CSS_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_CSS_MINIFY_CONFIG);
+      props.onCleanConfigChange(DEFAULT_CSS_CLEAN_CONFIG);
       removeCssToolsConfig();
     } else {
       props.onFormatConfigChange(DEFAULT_JSON_FORMAT_CONFIG);
@@ -135,11 +158,23 @@ export function ConfigModal(props: ConfigModalProps) {
 
   const handleClose = () => {
     if (props.mode === "js") {
-      saveJsToolsConfig({ format: props.formatConfig, minify: props.minifyConfig });
+      saveJsToolsConfig({
+        format: props.formatConfig,
+        minify: props.minifyConfig,
+        clean: props.cleanConfig,
+      });
     } else if (props.mode === "html") {
-      saveHtmlToolsConfig({ format: props.formatConfig, minify: props.minifyConfig });
+      saveHtmlToolsConfig({
+        format: props.formatConfig,
+        minify: props.minifyConfig,
+        clean: props.cleanConfig,
+      });
     } else if (props.mode === "css") {
-      saveCssToolsConfig({ format: props.formatConfig, minify: props.minifyConfig });
+      saveCssToolsConfig({
+        format: props.formatConfig,
+        minify: props.minifyConfig,
+        clean: props.cleanConfig,
+      });
     } else {
       saveJsonToolsConfig({
         format: props.formatConfig,
@@ -315,7 +350,7 @@ export function ConfigModal(props: ConfigModalProps) {
           </div>
         </Card>
 
-        {/* Limpiar vacíos */}
+        {/* Limpiar vacíos - JSON */}
         {jsonProps && (
           <Card
             title={t("config.clean")}
@@ -410,6 +445,175 @@ export function ConfigModal(props: ConfigModalProps) {
                   checked={jsonProps.cleanConfig.autoCopy}
                   onChange={(checked) =>
                     jsonProps.onCleanConfigChange({ ...jsonProps.cleanConfig, autoCopy: checked })
+                  }
+                  label={t("config.enableAutoCopy")}
+                  color="orange"
+                />
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Limpiar vacíos - JS */}
+        {jsProps && (
+          <Card
+            title={t("config.clean")}
+            icon="broom"
+            className="bg-orange-500/10 border-orange-500/20"
+            headerClassName="text-orange-400"
+          >
+            <div className="space-y-3">
+              <div>
+                <label className="block text-gray-300 mb-2">{t("config.valuesToRemove")}</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Checkbox
+                    checked={jsProps.cleanConfig.removeEmptyString}
+                    onChange={(checked) =>
+                      jsProps.onCleanConfigChange({
+                        ...jsProps.cleanConfig,
+                        removeEmptyString: checked,
+                      })
+                    }
+                    label={t("config.emptyString")}
+                    color="orange"
+                    containerClassName="p-2 bg-white/5 rounded"
+                  />
+                  <Checkbox
+                    checked={jsProps.cleanConfig.removeEmptyArray}
+                    onChange={(checked) =>
+                      jsProps.onCleanConfigChange({
+                        ...jsProps.cleanConfig,
+                        removeEmptyArray: checked,
+                      })
+                    }
+                    label={t("config.emptyArray")}
+                    color="orange"
+                    containerClassName="p-2 bg-white/5 rounded"
+                  />
+                  <Checkbox
+                    checked={jsProps.cleanConfig.removeEmptyObject}
+                    onChange={(checked) =>
+                      jsProps.onCleanConfigChange({
+                        ...jsProps.cleanConfig,
+                        removeEmptyObject: checked,
+                      })
+                    }
+                    label={t("config.emptyObject")}
+                    color="orange"
+                    containerClassName="p-2 bg-white/5 rounded"
+                  />
+                  <Checkbox
+                    checked={jsProps.cleanConfig.removeEmptyFunction}
+                    onChange={(checked) =>
+                      jsProps.onCleanConfigChange({
+                        ...jsProps.cleanConfig,
+                        removeEmptyFunction: checked,
+                      })
+                    }
+                    label={t("config.emptyFunction")}
+                    color="orange"
+                    containerClassName="p-2 bg-white/5 rounded"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">{t("config.autoCopyMinify")}</label>
+                <Checkbox
+                  checked={jsProps.cleanConfig.autoCopy}
+                  onChange={(checked) =>
+                    jsProps.onCleanConfigChange({ ...jsProps.cleanConfig, autoCopy: checked })
+                  }
+                  label={t("config.enableAutoCopy")}
+                  color="orange"
+                />
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Limpiar vacíos - CSS */}
+        {cssProps && (
+          <Card
+            title={t("config.clean")}
+            icon="broom"
+            className="bg-orange-500/10 border-orange-500/20"
+            headerClassName="text-orange-400"
+          >
+            <div className="space-y-3">
+              <div>
+                <label className="block text-gray-300 mb-2">{t("config.rulesToRemove")}</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Checkbox
+                    checked={cssProps.cleanConfig.removeEmptyRules}
+                    onChange={(checked) =>
+                      cssProps.onCleanConfigChange({
+                        ...cssProps.cleanConfig,
+                        removeEmptyRules: checked,
+                      })
+                    }
+                    label={t("config.emptyRules")}
+                    color="orange"
+                    containerClassName="p-2 bg-white/5 rounded"
+                  />
+                  <Checkbox
+                    checked={cssProps.cleanConfig.removeRulesWithOnlyComments}
+                    onChange={(checked) =>
+                      cssProps.onCleanConfigChange({
+                        ...cssProps.cleanConfig,
+                        removeRulesWithOnlyComments: checked,
+                      })
+                    }
+                    label={t("config.rulesWithOnlyComments")}
+                    color="orange"
+                    containerClassName="p-2 bg-white/5 rounded"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">{t("config.autoCopyMinify")}</label>
+                <Checkbox
+                  checked={cssProps.cleanConfig.autoCopy}
+                  onChange={(checked) =>
+                    cssProps.onCleanConfigChange({ ...cssProps.cleanConfig, autoCopy: checked })
+                  }
+                  label={t("config.enableAutoCopy")}
+                  color="orange"
+                />
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Limpiar vacíos - HTML */}
+        {htmlProps && (
+          <Card
+            title={t("config.clean")}
+            icon="broom"
+            className="bg-orange-500/10 border-orange-500/20"
+            headerClassName="text-orange-400"
+          >
+            <div className="space-y-3">
+              <div>
+                <label className="block text-gray-300 mb-2">{t("config.tagsToRemove")}</label>
+                <Checkbox
+                  checked={htmlProps.cleanConfig.removeEmptyTags}
+                  onChange={(checked) =>
+                    htmlProps.onCleanConfigChange({
+                      ...htmlProps.cleanConfig,
+                      removeEmptyTags: checked,
+                    })
+                  }
+                  label={t("config.emptyTags")}
+                  color="orange"
+                  containerClassName="p-2 bg-white/5 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">{t("config.autoCopyMinify")}</label>
+                <Checkbox
+                  checked={htmlProps.cleanConfig.autoCopy}
+                  onChange={(checked) =>
+                    htmlProps.onCleanConfigChange({ ...htmlProps.cleanConfig, autoCopy: checked })
                   }
                   label={t("config.enableAutoCopy")}
                   color="orange"

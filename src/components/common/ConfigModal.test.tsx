@@ -5,6 +5,7 @@ import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/type
 import {
   DEFAULT_JS_FORMAT_CONFIG,
   DEFAULT_JS_MINIFY_CONFIG,
+  DEFAULT_JS_CLEAN_CONFIG,
   type JsFormatConfig,
   type JsMinifyConfig,
 } from "@/types/js";
@@ -323,15 +324,17 @@ describe("ConfigModal", () => {
       onFormatConfigChange: vi.fn(),
       minifyConfig: jsMinifyConfig,
       onMinifyConfigChange: vi.fn(),
+      cleanConfig: DEFAULT_JS_CLEAN_CONFIG,
+      onCleanConfigChange: vi.fn(),
     };
 
-    it("renders JS sections and hides clean section", () => {
+    it("renders JS sections including clean section", () => {
       render(<ConfigModal {...jsProps} />);
 
       expect(screen.getByText("Configuración de Herramientas JavaScript")).toBeInTheDocument();
       expect(screen.getByText("Formatear JavaScript")).toBeInTheDocument();
       expect(screen.getByText("Minificar JavaScript")).toBeInTheDocument();
-      expect(screen.queryByText("Limpiar Valores Vacíos")).not.toBeInTheDocument();
+      expect(screen.getByText("Limpiar Valores Vacíos")).toBeInTheDocument();
     });
 
     it("changes JS indent size", () => {
@@ -364,6 +367,7 @@ describe("ConfigModal", () => {
       const { removeJsToolsConfig, saveJsToolsConfig } = await import("@/services/storage");
       const onFormatConfigChange = vi.fn();
       const onMinifyConfigChange = vi.fn();
+      const onCleanConfigChange = vi.fn();
       const onClose = vi.fn();
 
       render(
@@ -371,6 +375,7 @@ describe("ConfigModal", () => {
           {...jsProps}
           onFormatConfigChange={onFormatConfigChange}
           onMinifyConfigChange={onMinifyConfigChange}
+          onCleanConfigChange={onCleanConfigChange}
           onClose={onClose}
         />,
       );
@@ -378,12 +383,14 @@ describe("ConfigModal", () => {
       fireEvent.click(screen.getByRole("button", { name: /Restablecer/i }));
       expect(onFormatConfigChange).toHaveBeenCalledWith(DEFAULT_JS_FORMAT_CONFIG);
       expect(onMinifyConfigChange).toHaveBeenCalledWith(DEFAULT_JS_MINIFY_CONFIG);
+      expect(onCleanConfigChange).toHaveBeenCalledWith(DEFAULT_JS_CLEAN_CONFIG);
       expect(removeJsToolsConfig).toHaveBeenCalled();
 
       fireEvent.click(screen.getByLabelText("Cerrar modal"));
       expect(saveJsToolsConfig).toHaveBeenCalledWith({
         format: jsFormatConfig,
         minify: jsMinifyConfig,
+        clean: DEFAULT_JS_CLEAN_CONFIG,
       });
       expect(onClose).toHaveBeenCalled();
     });

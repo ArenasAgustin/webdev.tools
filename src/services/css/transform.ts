@@ -120,13 +120,13 @@ export function cleanCss(input: string, options: CssCleanOptions = {}): Result<s
     // First, handle rules with only comments
     if (opts.removeRulesWithOnlyComments) {
       // Match selectors with only comments inside: selector { /* comment */ }
-      result = result.replace(/([^{}]+)\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "");
+      result = result.replace(/([^{}]*?)\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "");
     }
 
     // Remove empty rules: selector { }
     if (opts.removeEmptyRules) {
       // Match rules with only whitespace: selector { }
-      result = result.replace(/[^{}]+\{\s*\}/g, "");
+      result = result.replace(/[^{}]*?\{\s*\}/g, "");
     }
 
     // Clean up: remove multiple newlines and trim

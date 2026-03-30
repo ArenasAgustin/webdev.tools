@@ -6,9 +6,9 @@ import { ConfigModal } from "@/components/common/ConfigModal";
 import { ShortcutsModal } from "@/components/common/ShortcutsModal";
 import type { ModalState } from "@/hooks/useModalState";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
-import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
-import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
-import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
+import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
+import type { HtmlFormatConfig, HtmlMinifyConfig, HtmlCleanConfig } from "@/types/html";
+import type { CssFormatConfig, CssMinifyConfig, CssCleanConfig } from "@/types/css";
 import type { ToolbarConfig } from "@/types/toolbar";
 
 export interface ToolbarProps {
@@ -35,6 +35,8 @@ export interface ToolbarProps {
         onFormatChange: (config: JsFormatConfig) => void;
         minify: JsMinifyConfig;
         onMinifyChange: (config: JsMinifyConfig) => void;
+        clean: JsCleanConfig;
+        onCleanChange: (config: JsCleanConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       }
@@ -44,6 +46,8 @@ export interface ToolbarProps {
         onFormatChange: (config: HtmlFormatConfig) => void;
         minify: HtmlMinifyConfig;
         onMinifyChange: (config: HtmlMinifyConfig) => void;
+        clean: HtmlCleanConfig;
+        onCleanChange: (config: HtmlCleanConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       }
@@ -53,6 +57,8 @@ export interface ToolbarProps {
         onFormatChange: (config: CssFormatConfig) => void;
         minify: CssMinifyConfig;
         onMinifyChange: (config: CssMinifyConfig) => void;
+        clean: CssCleanConfig;
+        onCleanChange: (config: CssCleanConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       };
@@ -62,7 +68,7 @@ export function Toolbar(props: ToolbarProps) {
   const { t } = useTranslation();
   const [openModal, setOpenModal] = useState<"config" | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const hasClean = props.config?.mode === "json";
+  const hasClean = !!props.config?.mode;
 
   const toolsTitle = props.tools.title ?? t("toolbar.title");
   const genericConfig = props.config;
@@ -208,6 +214,8 @@ export function Toolbar(props: ToolbarProps) {
           onFormatConfigChange={genericConfig.onFormatChange}
           minifyConfig={genericConfig.minify}
           onMinifyConfigChange={genericConfig.onMinifyChange}
+          cleanConfig={genericConfig.clean}
+          onCleanConfigChange={genericConfig.onCleanChange}
         />
       )}
 
@@ -220,6 +228,8 @@ export function Toolbar(props: ToolbarProps) {
           onFormatConfigChange={genericConfig.onFormatChange}
           minifyConfig={genericConfig.minify}
           onMinifyConfigChange={genericConfig.onMinifyChange}
+          cleanConfig={genericConfig.clean}
+          onCleanConfigChange={genericConfig.onCleanChange}
         />
       )}
 
@@ -232,6 +242,8 @@ export function Toolbar(props: ToolbarProps) {
           onFormatConfigChange={genericConfig.onFormatChange}
           minifyConfig={genericConfig.minify}
           onMinifyConfigChange={genericConfig.onMinifyChange}
+          cleanConfig={genericConfig.clean}
+          onCleanConfigChange={genericConfig.onCleanChange}
         />
       )}
 
