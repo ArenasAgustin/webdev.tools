@@ -85,7 +85,15 @@ export interface UseActionsParams {
 }
 
 /**
+ * Configuration types for format and minify runners
+ * Using object type for flexibility with existing config types
+ */
+export type BaseFormatConfig = object;
+export type BaseMinifyConfig = object;
+
+/**
  * File configuration for downloads
+ * Using flexible function types to accommodate different runner signatures
  */
 export interface PlaygroundFileConfig {
   inputFileName: string;
@@ -95,9 +103,9 @@ export interface PlaygroundFileConfig {
   acceptExtensions: string;
   exampleContent: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  formatRunner: (input: string, config: any) => any;
+  formatRunner: (input: string, ...args: any[]) => any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  minifyRunner: (input: string, config: any) => any;
+  minifyRunner: (input: string, ...args: any[]) => any;
 }
 
 /**
@@ -114,6 +122,21 @@ export interface BaseActionsParams {
   inputTooLarge: boolean;
   inputTooLargeMessage: string;
   toast: PlaygroundToast;
+}
+
+/**
+ * Engine-specific params passed to actions hook
+ * Using object type - each engine defines its own param interface and maps accordingly
+ */
+export type EngineActionsParams = object;
+
+/**
+ * Render params passed to toolbar/output extras and modals
+ */
+export interface RenderParams {
+  input: string;
+  output: string;
+  actions: PlaygroundActions;
 }
 
 /**
@@ -134,8 +157,8 @@ export interface PlaygroundEngine {
   features: readonly PlaygroundFeature[];
 
   /** Default format config */
-  defaultFormatConfig: object;
-  defaultMinifyConfig: object;
+  defaultFormatConfig: BaseFormatConfig;
+  defaultMinifyConfig: BaseMinifyConfig;
 
   /** Storage functions */
   loadToolsConfig: () => { format?: object; minify?: object; clean?: object } | null;
@@ -153,22 +176,19 @@ export interface PlaygroundEngine {
   useActions: (params: any) => PlaygroundActions;
 
   /** Map generic params to engine-specific params */
-  mapActionsParams: (params: BaseActionsParams) => unknown;
+  mapActionsParams: (params: BaseActionsParams) => EngineActionsParams;
 
   /** Extra toolbar content (JSONPath section, etc.) */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  renderToolbarExtra?: (params: any) => ReactNode;
+  renderToolbarExtra?: (params: RenderParams) => ReactNode;
 
   /** Extra output actions (preview button for HTML, etc.) */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  renderOutputActions?: (params: any) => ReactNode;
+  renderOutputActions?: (params: RenderParams) => ReactNode;
 
   /** Extra output panel (HTML preview iframe, etc.) */
   renderOutputPanel?: (props: OutputPanelProps) => ReactNode;
 
   /** Extra modals to render (TipsModal, JsonPathHistoryModal, etc.) */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  renderModals?: (params: any) => ReactNode[];
+  renderModals?: (params: RenderParams) => ReactNode[];
 
   /** File configuration for downloads */
   fileConfig: PlaygroundFileConfig;
@@ -180,5 +200,4 @@ export interface PlaygroundEngine {
 export interface PlaygroundEngineWithClean extends PlaygroundEngine {
   /** Clean config defaults (JSON only) */
   cleanConfig: object;
-  setCleanConfig: (config: object) => void;
 }
