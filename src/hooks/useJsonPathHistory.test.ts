@@ -118,12 +118,24 @@ describe("useJsonPathHistory", () => {
     it("empties the history list completely", async () => {
       const { result } = renderHook(() => useJsonPathHistory());
 
+      // Add items one at a time with proper waiting to avoid race conditions
       await act(async () => {
         await result.current.addToHistory("$.name");
-        await result.current.addToHistory("$.age");
-        await result.current.addToHistory("$.address");
+      });
+      await waitFor(() => {
+        expect(result.current.history).toHaveLength(1);
       });
 
+      await act(async () => {
+        await result.current.addToHistory("$.age");
+      });
+      await waitFor(() => {
+        expect(result.current.history).toHaveLength(2);
+      });
+
+      await act(async () => {
+        await result.current.addToHistory("$.address");
+      });
       await waitFor(() => {
         expect(result.current.history).toHaveLength(3);
       });
