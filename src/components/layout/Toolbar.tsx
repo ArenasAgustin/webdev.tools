@@ -88,18 +88,16 @@ export function Toolbar(props: ToolbarProps) {
     }
   };
 
-  const gridLayoutClass = props.extraContent
-    ? "grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start"
-    : "grid grid-cols-1 gap-4 sm:gap-6 items-start";
+  const gridLayoutClass = "grid grid-cols-1 gap-4 sm:gap-6 items-start";
 
   return (
     <>
-      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 sticky bottom-0 z-10 shrink-0">
+      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 z-10 shrink-0">
         {/* Header row — always visible, acts as mobile toggle tap target */}
         <div
           className={cn(
             "flex items-center justify-between gap-2",
-            isMobileOpen ? "mb-3" : "mb-0 sm:mb-3",
+            isMobileOpen ? "mb-3" : "mb-0",
           )}
         >
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
@@ -143,7 +141,7 @@ export function Toolbar(props: ToolbarProps) {
             <button
               type="button"
               onClick={() => setIsMobileOpen((v) => !v)}
-              className="sm:hidden inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
+              className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
               aria-label={isMobileOpen ? t("actions.hideTools") : t("actions.showTools")}
             >
               <i
@@ -154,11 +152,11 @@ export function Toolbar(props: ToolbarProps) {
           </div>
         </div>
 
-        {/* Buttons grid — hidden on mobile when collapsed, always visible on sm+ */}
+        {/* Buttons grid — hidden on mobile/tablet when collapsed, always visible on md+ */}
         <div
           className={cn(
             "overflow-hidden transition-all duration-200",
-            isMobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 sm:max-h-96 sm:opacity-100",
+            isMobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
           )}
         >
           <div className={gridLayoutClass}>
