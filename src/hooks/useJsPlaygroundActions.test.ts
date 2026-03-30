@@ -1,7 +1,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useJsPlaygroundActions } from "./useJsPlaygroundActions";
-import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
+import {
+  DEFAULT_JS_FORMAT_CONFIG,
+  DEFAULT_JS_MINIFY_CONFIG,
+  DEFAULT_JS_CLEAN_CONFIG,
+} from "@/types/js";
 
 vi.mock("@/services/js/service", () => ({
   jsService: {
@@ -25,6 +29,7 @@ function makeHook(inputJs = "") {
       setError,
       formatConfig: DEFAULT_JS_FORMAT_CONFIG,
       minifyConfig: DEFAULT_JS_MINIFY_CONFIG,
+      cleanConfig: DEFAULT_JS_CLEAN_CONFIG,
       toast,
     }),
   );

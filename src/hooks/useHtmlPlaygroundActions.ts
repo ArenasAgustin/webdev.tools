@@ -1,11 +1,14 @@
+import { useCallback } from "react";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
 } from "./useGenericPlaygroundActions";
 import { htmlPlaygroundConfig } from "@/playgrounds/html/html.config";
 import { htmlService } from "@/services/html/service";
+import { createTransformHandler } from "@/utils/createTransformHandler";
 import type { ToastApi } from "./usePlaygroundActions";
-import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
+import type { HtmlFormatConfig, HtmlMinifyConfig, HtmlCleanConfig } from "@/types/html";
+import { cleanHtmlAsync } from "@/services/html/worker";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "index.html",
@@ -46,6 +49,7 @@ interface UseHtmlPlaygroundActionsProps {
   inputTooLargeMessage?: string;
   formatConfig: HtmlFormatConfig;
   minifyConfig: HtmlMinifyConfig;
+  cleanConfig: HtmlCleanConfig;
   toast?: ToastApi;
 }
 
@@ -59,9 +63,10 @@ export function useHtmlPlaygroundActions({
   inputTooLargeMessage,
   formatConfig,
   minifyConfig,
+  cleanConfig,
   toast,
 }: UseHtmlPlaygroundActionsProps) {
-  return useGenericPlaygroundActions({
+  const generic = useGenericPlaygroundActions({
     input: inputHtml,
     setInput: setInputHtml,
     output,
@@ -77,4 +82,29 @@ export function useHtmlPlaygroundActions({
     formatRunner,
     minifyRunner,
   });
+
+  // Extensión: limpiar HTML
+  const handleClean = useCallback(() => {
+    createTransformHandler({
+      runTransformAction: generic.runTransformAction,
+      run: async () => {
+        const result = await cleanHtmlAsync(inputHtml, {
+          removeEmptyTags: cleanConfig.removeEmptyTags,
+        });
+        if (!result.ok) throw new Error(result.error.message);
+        if (!result.value.trim()) throw new Error("El HTML estaba completamente vacío");
+        return result.value;
+      },
+      setOutput,
+      setError,
+      autoCopy: cleanConfig.autoCopy,
+      successMessage: "HTML limpiado correctamente",
+      errorMessage: "Error al limpiar HTML",
+    });
+  }, [generic.runTransformAction, inputHtml, cleanConfig, setError, setOutput]);
+
+  return {
+    ...generic,
+    handleClean,
+  };
 }

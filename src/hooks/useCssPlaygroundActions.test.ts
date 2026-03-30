@@ -2,7 +2,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useCssPlaygroundActions } from "./useCssPlaygroundActions";
 import { formatCss, minifyCss } from "@/services/css/transform";
-import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
+import {
+  DEFAULT_CSS_FORMAT_CONFIG,
+  DEFAULT_CSS_MINIFY_CONFIG,
+  DEFAULT_CSS_CLEAN_CONFIG,
+} from "@/types/css";
 
 vi.mock("@/services/css/transform", () => ({
   formatCss: vi.fn(),
@@ -31,6 +35,7 @@ describe("useCssPlaygroundActions", () => {
         setError,
         formatConfig: DEFAULT_CSS_FORMAT_CONFIG,
         minifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
+        cleanConfig: DEFAULT_CSS_CLEAN_CONFIG,
         toast,
       }),
     );
@@ -64,6 +69,7 @@ describe("useCssPlaygroundActions", () => {
         setError,
         formatConfig: DEFAULT_CSS_FORMAT_CONFIG,
         minifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
+        cleanConfig: DEFAULT_CSS_CLEAN_CONFIG,
         toast,
       }),
     );
@@ -100,6 +106,7 @@ describe("useCssPlaygroundActions", () => {
         inputTooLargeMessage: "Demasiado grande",
         formatConfig: DEFAULT_CSS_FORMAT_CONFIG,
         minifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
+        cleanConfig: DEFAULT_CSS_CLEAN_CONFIG,
         toast,
       }),
     );

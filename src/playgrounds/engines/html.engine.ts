@@ -1,7 +1,11 @@
 import type { BaseActionsParams } from "./types";
 import { useHtmlParser } from "@/hooks/useHtmlParser";
 import { useHtmlPlaygroundActions } from "@/hooks/useHtmlPlaygroundActions";
-import { DEFAULT_HTML_FORMAT_CONFIG, DEFAULT_HTML_MINIFY_CONFIG } from "@/types/html";
+import {
+  DEFAULT_HTML_FORMAT_CONFIG,
+  DEFAULT_HTML_MINIFY_CONFIG,
+  DEFAULT_HTML_CLEAN_CONFIG,
+} from "@/types/html";
 import { loadHtmlToolsConfig, loadLastHtml, saveLastHtml } from "@/services/storage";
 import { htmlPlaygroundConfig } from "../html/html.config";
 import { formatHtml, minifyHtml } from "@/services/html/transform";
@@ -18,6 +22,7 @@ function mapToHtmlParams(params: BaseActionsParams) {
     setError: params.setError,
     formatConfig: params.formatConfig,
     minifyConfig: params.minifyConfig,
+    cleanConfig: params.cleanConfig,
     inputTooLarge: params.inputTooLarge,
     inputTooLargeMessage: params.inputTooLargeMessage,
     toast: params.toast,
@@ -31,9 +36,10 @@ export const htmlEngine = {
   id: "html",
   config: htmlPlaygroundConfig,
   editorLanguage: "html" as const,
-  features: ["preview"] as const,
+  features: ["preview", "clean"] as const,
   defaultFormatConfig: DEFAULT_HTML_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_HTML_MINIFY_CONFIG,
+  cleanConfig: DEFAULT_HTML_CLEAN_CONFIG,
   loadToolsConfig: loadHtmlToolsConfig,
   loadLastInput: loadLastHtml,
   saveLastInput: saveLastHtml,

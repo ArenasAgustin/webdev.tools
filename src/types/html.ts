@@ -14,9 +14,14 @@ export type HtmlMinifyConfig = ConfigWithAutoCopy<{
   minifyJs: boolean;
 }>;
 
+export type HtmlCleanConfig = ConfigWithAutoCopy<{
+  removeEmptyTags: boolean;
+}>;
+
 export type HtmlToolsConfig = PlaygroundToolsConfig<{
   format: HtmlFormatConfig;
   minify: HtmlMinifyConfig;
+  clean: HtmlCleanConfig;
 }>;
 
 export const DEFAULT_HTML_FORMAT_CONFIG: HtmlFormatConfig = {
@@ -34,7 +39,13 @@ export const DEFAULT_HTML_MINIFY_CONFIG: HtmlMinifyConfig = {
   autoCopy: false,
 };
 
+export const DEFAULT_HTML_CLEAN_CONFIG: HtmlCleanConfig = {
+  removeEmptyTags: true,
+  autoCopy: false,
+};
+
 export const DEFAULT_HTML_TOOLS_CONFIG: HtmlToolsConfig = {
   format: DEFAULT_HTML_FORMAT_CONFIG,
   minify: DEFAULT_HTML_MINIFY_CONFIG,
+  clean: DEFAULT_HTML_CLEAN_CONFIG,
 };

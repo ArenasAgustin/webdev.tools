@@ -4,7 +4,7 @@ import { jsWorkerAdapter } from "@/services/js/workerClient";
 import type { JsWorkerPayload } from "@/services/js/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 import type { IndentStyle } from "@/types/format";
-import type { JsMinifyOptions } from "@/services/js/transform";
+import type { JsMinifyOptions, JsCleanOptions } from "@/services/js/transform";
 
 const runJsOperation = (
   payload: JsWorkerPayload,
@@ -54,5 +54,15 @@ export const minifyJsAsync = async (
   return runJsOperation({ action: "minify", input, options }, async () => {
     const { minifyJs } = await import("@/services/js/transform");
     return minifyJs(input, options);
+  });
+};
+
+export const cleanJsAsync = async (
+  input: string,
+  options: JsCleanOptions = {},
+): Promise<Result<string, JsonError>> => {
+  return runJsOperation({ action: "clean", input, options }, async () => {
+    const { cleanJs } = await import("@/services/js/transform");
+    return cleanJs(input, options);
   });
 };

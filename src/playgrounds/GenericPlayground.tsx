@@ -52,7 +52,10 @@ export function GenericPlayground({
   const hasExecute = engine.features.includes("execute");
 
   // Handle clean config
-  const hasCleanConfig = hasClean && "cleanConfig" in engine && engine.cleanConfig !== undefined;
+  const hasCleanConfig =
+    hasClean &&
+    "cleanConfig" in engine &&
+    (engine as PlaygroundEngineWithClean).cleanConfig !== undefined;
   const engineWithClean = engine as PlaygroundEngineWithClean;
   const savedCleanConfig = hasCleanConfig ? engineWithClean.loadToolsConfig()?.clean : undefined;
   const defaultCleanConfig =

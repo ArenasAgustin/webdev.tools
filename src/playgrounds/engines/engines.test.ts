@@ -136,7 +136,7 @@ describe("Playground Engines", () => {
     it("has correct id and config", () => {
       expect(cssEngine.id).toBe("css");
       expect(cssEngine.editorLanguage).toBe("css");
-      expect(cssEngine.features).toHaveLength(0);
+      expect(cssEngine.features).toContain("clean");
     });
 
     it("maps base params to css-specific params", () => {

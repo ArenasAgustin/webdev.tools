@@ -1,7 +1,11 @@
 import type { BaseActionsParams } from "./types";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
-import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
+import {
+  DEFAULT_CSS_FORMAT_CONFIG,
+  DEFAULT_CSS_MINIFY_CONFIG,
+  DEFAULT_CSS_CLEAN_CONFIG,
+} from "@/types/css";
 import { loadCssToolsConfig, loadLastCss, saveLastCss } from "@/services/storage";
 import { cssPlaygroundConfig } from "../css/css.config";
 import { formatCss, minifyCss } from "@/services/css/transform";
@@ -18,6 +22,7 @@ function mapToCssParams(params: BaseActionsParams) {
     setError: params.setError,
     formatConfig: params.formatConfig,
     minifyConfig: params.minifyConfig,
+    cleanConfig: params.cleanConfig,
     inputTooLarge: params.inputTooLarge,
     inputTooLargeMessage: params.inputTooLargeMessage,
     toast: params.toast,
@@ -31,9 +36,10 @@ export const cssEngine = {
   id: "css",
   config: cssPlaygroundConfig,
   editorLanguage: "css" as const,
-  features: [] as const,
+  features: ["clean"] as const,
   defaultFormatConfig: DEFAULT_CSS_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
+  cleanConfig: DEFAULT_CSS_CLEAN_CONFIG,
   loadToolsConfig: loadCssToolsConfig,
   loadLastInput: loadLastCss,
   saveLastInput: saveLastCss,

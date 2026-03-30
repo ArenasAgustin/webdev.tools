@@ -7,6 +7,11 @@ interface CssMinifyOptions {
   removeSpaces?: boolean;
 }
 
+export interface CssCleanOptions {
+  removeEmptyRules?: boolean;
+  removeRulesWithOnlyComments?: boolean;
+}
+
 export async function formatCss(
   input: string,
   indentSize: IndentStyle = 2,
@@ -86,4 +91,51 @@ function minifyCssString(source: string): string {
   }
 
   return restored;
+}
+
+const CSS_ERROR_MESSAGES = {
+  EMPTY_INPUT: "El CSS está vacío",
+} as const;
+
+/**
+ * Clean empty CSS rules
+ * Pure function - no side effects
+ */
+export function cleanCss(input: string, options: CssCleanOptions = {}): Result<string, string> {
+  if (!input.trim()) {
+    return {
+      ok: false,
+      error: CSS_ERROR_MESSAGES.EMPTY_INPUT,
+    };
+  }
+
+  const opts = {
+    removeEmptyRules: options?.removeEmptyRules ?? true,
+    removeRulesWithOnlyComments: options?.removeRulesWithOnlyComments ?? true,
+  };
+
+  try {
+    let result = input;
+
+    // First, handle rules with only comments
+    if (opts.removeRulesWithOnlyComments) {
+      // Match selectors with only comments inside: selector { /* comment */ }
+      result = result.replace(/([^{}]+)\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "");
+    }
+
+    // Remove empty rules: selector { }
+    if (opts.removeEmptyRules) {
+      // Match rules with only whitespace: selector { }
+      result = result.replace(/[^{}]+\{\s*\}/g, "");
+    }
+
+    // Clean up: remove multiple newlines and trim
+    result = result.replace(/\n{3,}/g, "\n\n");
+    result = result.trim();
+
+    return { ok: true, value: result };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { ok: false, error: `Error al limpiar CSS: ${message}` };
+  }
 }

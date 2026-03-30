@@ -23,6 +23,10 @@ export const htmlPlaygroundConfig: PlaygroundConfig = {
       <h1>Hola, webdev.tools</h1>
       <p>Este es un ejemplo inicial para formatear y minificar HTML.</p>
       <button id="actionBtn" type="button">Haz click</button>
+      
+      <!-- Empty tags to clean -->
+      <div></div>
+      <span />
     </main>
 
     <script>

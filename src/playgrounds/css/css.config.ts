@@ -43,5 +43,10 @@ body {
   color: white;
   padding: 0.5rem 0.75rem;
   cursor: pointer;
-}`,
+}
+
+/* Empty rules to clean */
+.vacio { }
+.solo-comentario { /* solo comentario */ }
+`,
 };

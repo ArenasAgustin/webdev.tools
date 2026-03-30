@@ -29,5 +29,17 @@ const usuario = {
   }
 };
 
-console.log(usuario.saludar());`,
+console.log(usuario.saludar());
+
+// Ejemplo: Código con vacíos para limpiar
+const data = {
+  nombre: "Test",
+  vacio: "",
+  objetoVacio: {},
+  arrayVacio: [],
+  funcionVacia: function() {},
+  activo: true
+};
+
+// Cleaning removes: "", {}, [], function(){}`,
 };

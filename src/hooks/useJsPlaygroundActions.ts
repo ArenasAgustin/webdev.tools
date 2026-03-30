@@ -2,12 +2,14 @@ import { useCallback } from "react";
 import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
 import { jsService } from "@/services/js/service";
 import { createValidatedHandler } from "@/utils/handlerFactory";
+import { createTransformHandler } from "@/utils/createTransformHandler";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
 } from "./useGenericPlaygroundActions";
 import type { ToastApi } from "./usePlaygroundActions";
-import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
+import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
+import { cleanJsAsync } from "@/services/js/worker";
 
 const JS_EXEC_TIMEOUT_MS = 5000;
 
@@ -44,6 +46,7 @@ interface UseJsPlaygroundActionsProps {
   inputTooLargeMessage?: string;
   formatConfig: JsFormatConfig;
   minifyConfig: JsMinifyConfig;
+  cleanConfig: JsCleanConfig;
   toast?: ToastApi;
 }
 
@@ -57,6 +60,7 @@ export function useJsPlaygroundActions({
   inputTooLargeMessage,
   formatConfig,
   minifyConfig,
+  cleanConfig,
   toast,
 }: UseJsPlaygroundActionsProps) {
   const generic = useGenericPlaygroundActions({
@@ -104,9 +108,33 @@ export function useJsPlaygroundActions({
     })();
   }, [generic, inputJs, setOutput, setError, toast]);
 
+  // Extensión: limpiar código JS
+  const handleClean = useCallback(() => {
+    createTransformHandler({
+      runTransformAction: generic.runTransformAction,
+      run: async () => {
+        const result = await cleanJsAsync(inputJs, {
+          removeEmptyObject: cleanConfig.removeEmptyObject,
+          removeEmptyArray: cleanConfig.removeEmptyArray,
+          removeEmptyFunction: cleanConfig.removeEmptyFunction,
+          removeEmptyString: cleanConfig.removeEmptyString,
+        });
+        if (!result.ok) throw new Error(result.error.message);
+        if (!result.value.trim()) throw new Error("El código estaba completamente vacío");
+        return result.value;
+      },
+      setOutput,
+      setError,
+      autoCopy: cleanConfig.autoCopy,
+      successMessage: "Código limpiado correctamente",
+      errorMessage: "Error al limpiar código",
+    });
+  }, [generic.runTransformAction, inputJs, cleanConfig, setError, setOutput]);
+
   return {
     ...generic,
     handleExecute,
+    handleClean,
   };
 }
 

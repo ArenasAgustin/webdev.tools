@@ -10,6 +10,10 @@ interface HtmlFormatOptions {
   formatJs?: boolean;
 }
 
+export interface HtmlCleanOptions {
+  removeEmptyTags?: boolean;
+}
+
 export async function formatHtml(
   input: string,
   indentSize: IndentStyle = 2,
@@ -205,4 +209,78 @@ function restorePreservedContent(source: string, preservedBlocks: Map<string, st
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const HTML_ERROR_MESSAGES = {
+  EMPTY_INPUT: "El HTML está vacío",
+} as const;
+
+/**
+ * Tags that should be preserved even if empty (they have semantic meaning)
+ */
+const PRESERVED_EMPTY_TAGS = [
+  "script",
+  "style",
+  "pre",
+  "textarea",
+  "iframe",
+  "canvas",
+  "svg",
+  "math",
+];
+
+/**
+ * Clean empty HTML tags
+ * Pure function - no side effects
+ */
+export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result<string, string> {
+  if (!input.trim()) {
+    return {
+      ok: false,
+      error: HTML_ERROR_MESSAGES.EMPTY_INPUT,
+    };
+  }
+
+  const opts = {
+    removeEmptyTags: options?.removeEmptyTags ?? true,
+  };
+
+  try {
+    let result = input;
+
+    if (opts.removeEmptyTags) {
+      // Preserve script, style, pre, textarea blocks by replacing with tokens
+      const preservedBlocks = new Map<string, string>();
+      let index = 0;
+
+      for (const tagName of PRESERVED_EMPTY_TAGS) {
+        const pattern = new RegExp(`<${tagName}(\\b[^>]*)>[\\s\\S]*?</${tagName}>`, "gi");
+        result = result.replace(pattern, (match) => {
+          const token = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
+          index++;
+          preservedBlocks.set(token, match);
+          return token;
+        });
+      }
+
+      // Remove empty tags: <tag></tag> or <tag />
+      // Match opening tag followed by optional whitespace and closing tag or self-closing
+      result = result.replace(/<(\w+)([^>]*?)\s*>\s*<\/\1>/g, "");
+      result = result.replace(/<(\w+)([^>]*?)\s*\/\s*>/g, "");
+
+      // Restore preserved blocks
+      for (const [token, content] of preservedBlocks.entries()) {
+        result = result.replace(token, content);
+      }
+    }
+
+    // Clean up multiple newlines and trim
+    result = result.replace(/\n{3,}/g, "\n\n");
+    result = result.trim();
+
+    return { ok: true, value: result };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { ok: false, error: `Error al limpiar HTML: ${message}` };
+  }
 }

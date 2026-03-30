@@ -129,6 +129,7 @@ export interface BaseActionsParams {
   setError: (error: string | null) => void;
   formatConfig: object;
   minifyConfig: object;
+  cleanConfig?: object;
   inputTooLarge: boolean;
   inputTooLargeMessage: string;
   toast: PlaygroundToast;
@@ -169,6 +170,7 @@ export interface PlaygroundEngine {
   /** Default format config */
   defaultFormatConfig: BaseFormatConfig;
   defaultMinifyConfig: BaseMinifyConfig;
+  cleanConfig?: BaseFormatConfig;
 
   /** Storage functions */
   loadToolsConfig: () => { format?: object; minify?: object; clean?: object } | null;

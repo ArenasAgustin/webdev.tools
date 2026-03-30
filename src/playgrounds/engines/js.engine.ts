@@ -1,7 +1,11 @@
 import type { BaseActionsParams } from "./types";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
-import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
+import {
+  DEFAULT_JS_FORMAT_CONFIG,
+  DEFAULT_JS_MINIFY_CONFIG,
+  DEFAULT_JS_CLEAN_CONFIG,
+} from "@/types/js";
 import { loadJsToolsConfig, loadLastJs, saveLastJs } from "@/services/storage";
 import { jsPlaygroundConfig } from "../js/js.config";
 import { formatJs, minifyJs } from "@/services/js/transform";
@@ -18,6 +22,7 @@ function mapToJsParams(params: BaseActionsParams) {
     setError: params.setError,
     formatConfig: params.formatConfig,
     minifyConfig: params.minifyConfig,
+    cleanConfig: params.cleanConfig,
     inputTooLarge: params.inputTooLarge,
     inputTooLargeMessage: params.inputTooLargeMessage,
     toast: params.toast,
@@ -31,9 +36,10 @@ export const jsEngine = {
   id: "js",
   config: jsPlaygroundConfig,
   editorLanguage: "javascript" as const,
-  features: ["execute"] as const,
+  features: ["execute", "clean"] as const,
   defaultFormatConfig: DEFAULT_JS_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_JS_MINIFY_CONFIG,
+  cleanConfig: DEFAULT_JS_CLEAN_CONFIG,
   loadToolsConfig: loadJsToolsConfig,
   loadLastInput: loadLastJs,
   saveLastInput: saveLastJs,

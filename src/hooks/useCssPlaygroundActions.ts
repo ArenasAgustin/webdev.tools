@@ -1,11 +1,14 @@
+import { useCallback } from "react";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
 } from "./useGenericPlaygroundActions";
 import { cssPlaygroundConfig } from "@/playgrounds/css/css.config";
 import { cssService } from "@/services/css/service";
+import { createTransformHandler } from "@/utils/createTransformHandler";
 import type { ToastApi } from "./usePlaygroundActions";
-import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
+import type { CssFormatConfig, CssMinifyConfig, CssCleanConfig } from "@/types/css";
+import { cleanCssAsync } from "@/services/css/worker";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "styles.css",
@@ -40,6 +43,7 @@ interface UseCssPlaygroundActionsProps {
   inputTooLargeMessage?: string;
   formatConfig: CssFormatConfig;
   minifyConfig: CssMinifyConfig;
+  cleanConfig: CssCleanConfig;
   toast?: ToastApi;
 }
 
@@ -53,9 +57,10 @@ export function useCssPlaygroundActions({
   inputTooLargeMessage,
   formatConfig,
   minifyConfig,
+  cleanConfig,
   toast,
 }: UseCssPlaygroundActionsProps) {
-  return useGenericPlaygroundActions({
+  const generic = useGenericPlaygroundActions({
     input: inputCss,
     setInput: setInputCss,
     output,
@@ -71,4 +76,30 @@ export function useCssPlaygroundActions({
     formatRunner,
     minifyRunner,
   });
+
+  // Extensión: limpiar CSS
+  const handleClean = useCallback(() => {
+    createTransformHandler({
+      runTransformAction: generic.runTransformAction,
+      run: async () => {
+        const result = await cleanCssAsync(inputCss, {
+          removeEmptyRules: cleanConfig.removeEmptyRules,
+          removeRulesWithOnlyComments: cleanConfig.removeRulesWithOnlyComments,
+        });
+        if (!result.ok) throw new Error(result.error.message);
+        if (!result.value.trim()) throw new Error("El CSS estaba completamente vacío");
+        return result.value;
+      },
+      setOutput,
+      setError,
+      autoCopy: cleanConfig.autoCopy,
+      successMessage: "CSS limpiado correctamente",
+      errorMessage: "Error al limpiar CSS",
+    });
+  }, [generic.runTransformAction, inputCss, cleanConfig, setError, setOutput]);
+
+  return {
+    ...generic,
+    handleClean,
+  };
 }

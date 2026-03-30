@@ -1,7 +1,11 @@
 import type { Result, JsonError } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { cssWorkerAdapter } from "@/services/css/workerClient";
-import type { CssMinifyOptions, CssWorkerPayload } from "@/services/css/worker.types";
+import type {
+  CssMinifyOptions,
+  CssCleanOptions,
+  CssWorkerPayload,
+} from "@/services/css/worker.types";
 import { executeWorkerOperation } from "@/services/worker/runtime";
 
 const runCssOperation = (
@@ -52,5 +56,15 @@ export const minifyCssAsync = async (
   return runCssOperation({ action: "minify", input, options }, async () => {
     const { minifyCss } = await import("@/services/css/transform");
     return minifyCss(input, options);
+  });
+};
+
+export const cleanCssAsync = async (
+  input: string,
+  options: CssCleanOptions = {},
+): Promise<Result<string, JsonError>> => {
+  return runCssOperation({ action: "clean", input, options }, async () => {
+    const { cleanCss } = await import("@/services/css/transform");
+    return cleanCss(input, options);
   });
 };

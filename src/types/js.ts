@@ -10,9 +10,17 @@ export type JsMinifyConfig = ConfigWithAutoCopy<{
   removeSpaces: boolean;
 }>;
 
+export type JsCleanConfig = ConfigWithAutoCopy<{
+  removeEmptyObject: boolean;
+  removeEmptyArray: boolean;
+  removeEmptyFunction: boolean;
+  removeEmptyString: boolean;
+}>;
+
 export type JsToolsConfig = PlaygroundToolsConfig<{
   format: JsFormatConfig;
   minify: JsMinifyConfig;
+  clean: JsCleanConfig;
 }>;
 
 export const DEFAULT_JS_FORMAT_CONFIG: JsFormatConfig = {
@@ -26,7 +34,16 @@ export const DEFAULT_JS_MINIFY_CONFIG: JsMinifyConfig = {
   autoCopy: false,
 };
 
+export const DEFAULT_JS_CLEAN_CONFIG: JsCleanConfig = {
+  removeEmptyObject: true,
+  removeEmptyArray: true,
+  removeEmptyFunction: true,
+  removeEmptyString: true,
+  autoCopy: false,
+};
+
 export const DEFAULT_JS_TOOLS_CONFIG: JsToolsConfig = {
   format: DEFAULT_JS_FORMAT_CONFIG,
   minify: DEFAULT_JS_MINIFY_CONFIG,
+  clean: DEFAULT_JS_CLEAN_CONFIG,
 };
