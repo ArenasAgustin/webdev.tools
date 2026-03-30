@@ -3,6 +3,30 @@ import type { PlaygroundConfig } from "@/types/playground";
 import type { ValidationState } from "@/hooks/useAsyncValidator";
 
 /**
+ * Playground features - what special capabilities each playground supports
+ */
+export type PlaygroundFeature =
+  | "clean" // JSON - has clean/format options
+  | "execute" // JS - can execute code
+  | "preview" // HTML - has live preview iframe
+  | "jsonPath"; // JSON - has JSONPath filtering
+
+/**
+ * Output panel props - passed to custom output panel renderers
+ */
+export interface OutputPanelProps {
+  input: string;
+  output: string;
+  error: string | null;
+  outputStats: { lines: number; characters: number; bytes: number };
+  comparisonBytes: number;
+  expandOutput: () => void;
+  onCopyOutput: () => void;
+  onDownloadOutput: () => void;
+  onUseOutputAsInput?: () => void;
+}
+
+/**
  * Playground Actions return type - shared across all playgrounds
  */
 export interface PlaygroundActions {
@@ -70,8 +94,26 @@ export interface PlaygroundFileConfig {
   language: string;
   acceptExtensions: string;
   exampleContent: string;
-  formatRunner: (input: string, config: object) => Promise<string>;
-  minifyRunner: (input: string, config: object) => Promise<string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  formatRunner: (input: string, config: any) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  minifyRunner: (input: string, config: any) => any;
+}
+
+/**
+ * Base parameters for actions hooks - shared across all playgrounds
+ */
+export interface BaseActionsParams {
+  input: string;
+  setInput: (value: string) => void;
+  output: string;
+  setOutput: (value: string) => void;
+  setError: (error: string | null) => void;
+  formatConfig: object;
+  minifyConfig: object;
+  inputTooLarge: boolean;
+  inputTooLargeMessage: string;
+  toast: PlaygroundToast;
 }
 
 /**
@@ -87,6 +129,9 @@ export interface PlaygroundEngine {
 
   /** Monaco editor language */
   editorLanguage: "json" | "javascript" | "html" | "css";
+
+  /** Features supported by this playground */
+  features: readonly PlaygroundFeature[];
 
   /** Default format config */
   defaultFormatConfig: object;
@@ -104,18 +149,36 @@ export interface PlaygroundEngine {
   useParser: (input: string) => ValidationState;
 
   /** Actions hook - returns the playground actions */
-  useActions: (params: UseActionsParams) => PlaygroundActions;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useActions: (params: any) => PlaygroundActions;
 
-  /** Optional clean config (JSON only) */
-  cleanConfig?: object;
-  setCleanConfig?: (config: object) => void;
+  /** Map generic params to engine-specific params */
+  mapActionsParams: (params: BaseActionsParams) => unknown;
 
   /** Extra toolbar content (JSONPath section, etc.) */
-  extraToolbarContent?: ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  renderToolbarExtra?: (params: any) => ReactNode;
 
-  /** Extra modals to render */
-  extraModals?: ReactNode[];
+  /** Extra output actions (preview button for HTML, etc.) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  renderOutputActions?: (params: any) => ReactNode;
+
+  /** Extra output panel (HTML preview iframe, etc.) */
+  renderOutputPanel?: (props: OutputPanelProps) => ReactNode;
+
+  /** Extra modals to render (TipsModal, JsonPathHistoryModal, etc.) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  renderModals?: (params: any) => ReactNode[];
 
   /** File configuration for downloads */
   fileConfig: PlaygroundFileConfig;
+}
+
+/**
+ * Playground Engine with clean config support (JSON only)
+ */
+export interface PlaygroundEngineWithClean extends PlaygroundEngine {
+  /** Clean config defaults (JSON only) */
+  cleanConfig: object;
+  setCleanConfig: (config: object) => void;
 }

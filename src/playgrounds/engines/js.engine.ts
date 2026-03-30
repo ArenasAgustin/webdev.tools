@@ -1,3 +1,4 @@
+import type { BaseActionsParams } from "./types";
 import { useJsParser } from "@/hooks/useJsParser";
 import { useJsPlaygroundActions } from "@/hooks/useJsPlaygroundActions";
 import { DEFAULT_JS_FORMAT_CONFIG, DEFAULT_JS_MINIFY_CONFIG } from "@/types/js";
@@ -6,12 +7,31 @@ import { jsPlaygroundConfig } from "../js/js.config";
 import { formatJs, minifyJs } from "@/services/js/transform";
 
 /**
+ * Map generic params to JS-specific params
+ */
+function mapToJsParams(params: BaseActionsParams) {
+  return {
+    inputJs: params.input,
+    setInputJs: params.setInput,
+    output: params.output,
+    setOutput: params.setOutput,
+    setError: params.setError,
+    formatConfig: params.formatConfig,
+    minifyConfig: params.minifyConfig,
+    inputTooLarge: params.inputTooLarge,
+    inputTooLargeMessage: params.inputTooLargeMessage,
+    toast: params.toast,
+  };
+}
+
+/**
  * JavaScript Playground Engine Configuration
  */
 export const jsEngine = {
   id: "js",
   config: jsPlaygroundConfig,
   editorLanguage: "javascript" as const,
+  features: ["execute"] as const,
   defaultFormatConfig: DEFAULT_JS_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_JS_MINIFY_CONFIG,
   loadToolsConfig: loadJsToolsConfig,
@@ -24,6 +44,7 @@ export const jsEngine = {
   },
   useParser: useJsParser,
   useActions: useJsPlaygroundActions,
+  mapActionsParams: mapToJsParams,
   fileConfig: {
     inputFileName: "script.js",
     outputFileName: "result.js",

@@ -47,6 +47,7 @@ interface GenericEditorsProps {
   /** Accepted file extensions for the hidden file input (e.g. ".json" or ".js,.ts") */
   acceptExtensions?: string;
   outputPanel?: (props: {
+    input: string;
     output: string;
     error: string | null;
     outputStats: { lines: number; characters: number; bytes: number };
@@ -284,6 +285,7 @@ export const GenericEditors = memo(function GenericEditors({
         >
           {outputPanel
             ? outputPanel({
+                input,
                 output,
                 error,
                 outputStats,

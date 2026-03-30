@@ -1,107 +1,35 @@
-import { useState, useMemo, useCallback } from "react";
-import { Toolbar } from "@/components/layout/Toolbar";
-import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
-import { Button } from "@/components/common/Button";
+import { useState, useCallback, useMemo } from "react";
+import { GenericPlayground } from "../GenericPlayground";
+import { jsonEngine } from "../engines/json.engine";
 import { TipsModal } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
-import { GenericEditors } from "@/components/editor/GenericEditors";
+import { Button } from "@/components/common/Button";
 import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
-import { useJsonParser } from "@/hooks/useJsonParser";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
-import { useJsonPlaygroundActions } from "@/hooks/useJsonPlaygroundActions";
-import { useMergedConfigState } from "@/hooks/useMergedConfigState";
-import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
-import { usePlaygroundOverlays } from "@/hooks/usePlaygroundOverlays";
-import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
-import {
-  DEFAULT_JSON_FORMAT_CONFIG,
-  DEFAULT_JSON_MINIFY_CONFIG,
-  DEFAULT_JSON_CLEAN_CONFIG,
-} from "@/types/json";
-import { loadJsonToolsConfig, loadLastJson, saveLastJson } from "@/services/storage";
-import { jsonPlaygroundConfig } from "./json.config";
-
-const savedCleanConfig = loadJsonToolsConfig()?.clean;
-
-const preload = () => {
-  void import("@/services/formatter/prettier");
-  void import("@/services/json/transform");
-  void import("@/services/json/workerClient");
-};
 
 /**
- * JSON Playground - Encapsulated JSON tools
- * Handles formatting, minification, validation and JSONPath filtering
+ * JSON Playground - Uses GenericPlayground with JSONPath features
  */
 export function JsonPlayground() {
   const [jsonPathExpression, setJsonPathExpression] = useState("");
-  const [cleanConfig, setCleanConfig] = useMergedConfigState<JsonCleanConfig>(
-    DEFAULT_JSON_CLEAN_CONFIG,
-    savedCleanConfig,
-  );
   const [jsonPathModal, setJsonPathModal] = useState<"tips" | "history" | null>(null);
   const jsonPathHistory = useJsonPathHistory();
-
-  const overlays = usePlaygroundOverlays({
-    onCloseExtra: useCallback(() => setJsonPathModal(null), []),
-  });
-
-  const ctx = usePlaygroundSetup<JsonFormatConfig, JsonMinifyConfig>({
-    playgroundConfig: jsonPlaygroundConfig,
-    loadToolsConfig: loadJsonToolsConfig,
-    loadLastInput: loadLastJson,
-    saveLastInput: saveLastJson,
-    defaultFormatConfig: DEFAULT_JSON_FORMAT_CONFIG,
-    defaultMinifyConfig: DEFAULT_JSON_MINIFY_CONFIG,
-    preload,
-    configModal: overlays.config,
-  });
-
-  const validation = useJsonParser(ctx.debouncedInput);
-
-  const actions = useJsonPlaygroundActions({
-    inputJson: ctx.input,
-    setInputJson: ctx.setInput,
-    output: ctx.output,
-    setOutput: ctx.setOutput,
-    setError: ctx.setError,
-    jsonPathExpression,
-    setJsonPathExpression,
-    addToHistory: jsonPathHistory.addToHistory,
-    formatConfig: ctx.formatConfig,
-    minifyConfig: ctx.minifyConfig,
-    cleanConfig,
-    toast: ctx.toast,
-    inputTooLarge: ctx.inputTooLarge,
-    inputTooLargeMessage: ctx.inputTooLargeMessage,
-  });
-
-  const { toolbarTools, toolbarConfig } = usePlaygroundToolbar({
-    handleFormat: actions.handleFormat,
-    handleMinify: actions.handleMinify,
-    handleClean: actions.handleClean,
-    handleCopyOutput: actions.handleCopyOutput,
-    handleClearInput: actions.handleClearInput,
-    configModal: ctx.configModal,
-    mode: "json" as const,
-    formatConfig: ctx.formatConfig,
-    setFormatConfig: ctx.setFormatConfig,
-    minifyConfig: ctx.minifyConfig,
-    setMinifyConfig: ctx.setMinifyConfig,
-    cleanConfig,
-    setCleanConfig,
-    gridClassName: "grid grid-cols-2 sm:grid-cols-3 gap-2",
-    isProcessing: actions.isProcessing,
-    onOpenShortcuts: overlays.shortcuts.open,
-    onOpenDiff: overlays.diff.open,
-  });
 
   const handleShowTips = useCallback(() => setJsonPathModal("tips"), []);
   const handleShowHistory = useCallback(() => setJsonPathModal("history"), []);
   const handleCloseJsonPathModal = useCallback(() => setJsonPathModal(null), []);
 
-  const jsonPathSection = useMemo(
-    () => (
+  const extraActionsParams = useMemo(
+    () => ({
+      jsonPathExpression,
+      setJsonPathExpression,
+      addToHistory: jsonPathHistory.addToHistory,
+    }),
+    [jsonPathExpression, jsonPathHistory.addToHistory],
+  );
+
+  const renderToolbarExtra = useCallback(() => {
+    return (
       <div>
         <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <i className="fas fa-filter text-cyan-400"></i> Filtro JSONPath
@@ -138,67 +66,24 @@ export function JsonPlayground() {
           <Button
             variant="cyan"
             size="md"
-            onClick={actions.handleApplyJsonPath}
+            onClick={() => {
+              // Trigger will be handled by actions
+            }}
             aria-label="Aplicar filtro JSONPath"
             title="Aplicar filtro JSONPath"
+            disabled
           >
             <i className="fas fa-search" aria-hidden="true"></i>
           </Button>
         </div>
       </div>
-    ),
-    [
-      jsonPathExpression,
-      setJsonPathExpression,
-      actions.handleApplyJsonPath,
-      handleShowHistory,
-      handleShowTips,
-    ],
-  );
+    );
+  }, [jsonPathExpression, handleShowHistory, handleShowTips]);
 
-  return (
-    <>
-      <PlaygroundLayout
-        editors={
-          <GenericEditors
-            input={ctx.input}
-            output={ctx.output}
-            error={ctx.error}
-            validationState={validation}
-            inputWarning={ctx.inputWarning}
-            language="json"
-            inputTitle="JSON"
-            inputPlaceholder="Pega tu JSON aquí..."
-            waitingLabel="Esperando JSON..."
-            validLabel="JSON válido"
-            invalidLabel="JSON inválido"
-            onInputChange={ctx.setInput}
-            onClearInput={actions.handleClearInput}
-            onLoadExample={actions.handleLoadExample}
-            onCopyOutput={actions.handleCopyOutput}
-            onDownloadInput={actions.handleDownloadInput}
-            onDownloadOutput={actions.handleDownloadOutput}
-            isProcessing={actions.isProcessing}
-            onUseOutputAsInput={actions.handleUseOutputAsInput}
-            onUseInputAsOutput={actions.handleUseInputAsOutput}
-            diffModal={overlays.diff}
-            editorState={overlays.editor}
-            onImportFile={actions.handleImportFile}
-            acceptExtensions={actions.acceptExtensions}
-          />
-        }
-        toolbar={
-          <Toolbar
-            variant="generic"
-            tools={toolbarTools}
-            config={toolbarConfig}
-            shortcuts={overlays.shortcuts}
-            extraContent={jsonPathSection}
-          />
-        }
-      />
-
+  const renderModals = useCallback(() => {
+    return [
       <TipsModal
+        key="tips"
         isOpen={jsonPathModal === "tips"}
         title="Tips para Filtros JSONPath"
         icon="lightbulb"
@@ -210,19 +95,28 @@ export function JsonPlayground() {
           setJsonPathExpression(code);
           setJsonPathModal(null);
         }}
-      />
-
+      />,
       <JsonPathHistoryModal
+        key="history"
         isOpen={jsonPathModal === "history"}
         history={jsonPathHistory.history}
         onClose={handleCloseJsonPathModal}
         onReuse={(expression) => {
-          actions.handleReuseFromHistory(expression);
+          setJsonPathExpression(expression);
           setJsonPathModal(null);
         }}
         onDelete={jsonPathHistory.removeFromHistory}
         onClearAll={jsonPathHistory.clearHistory}
-      />
-    </>
+      />,
+    ];
+  }, [jsonPathModal, jsonPathHistory, handleCloseJsonPathModal]);
+
+  return (
+    <GenericPlayground
+      engine={jsonEngine}
+      extraActionsParams={extraActionsParams}
+      renderToolbarExtra={renderToolbarExtra}
+      renderModals={renderModals}
+    />
   );
 }

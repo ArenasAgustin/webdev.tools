@@ -1,3 +1,4 @@
+import type { BaseActionsParams } from "./types";
 import { useCssParser } from "@/hooks/useCssParser";
 import { useCssPlaygroundActions } from "@/hooks/useCssPlaygroundActions";
 import { DEFAULT_CSS_FORMAT_CONFIG, DEFAULT_CSS_MINIFY_CONFIG } from "@/types/css";
@@ -6,12 +7,31 @@ import { cssPlaygroundConfig } from "../css/css.config";
 import { formatCss, minifyCss } from "@/services/css/transform";
 
 /**
+ * Map generic params to CSS-specific params
+ */
+function mapToCssParams(params: BaseActionsParams) {
+  return {
+    inputCss: params.input,
+    setInputCss: params.setInput,
+    output: params.output,
+    setOutput: params.setOutput,
+    setError: params.setError,
+    formatConfig: params.formatConfig,
+    minifyConfig: params.minifyConfig,
+    inputTooLarge: params.inputTooLarge,
+    inputTooLargeMessage: params.inputTooLargeMessage,
+    toast: params.toast,
+  };
+}
+
+/**
  * CSS Playground Engine Configuration
  */
 export const cssEngine = {
   id: "css",
   config: cssPlaygroundConfig,
   editorLanguage: "css" as const,
+  features: [] as const,
   defaultFormatConfig: DEFAULT_CSS_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
   loadToolsConfig: loadCssToolsConfig,
@@ -24,6 +44,7 @@ export const cssEngine = {
   },
   useParser: useCssParser,
   useActions: useCssPlaygroundActions,
+  mapActionsParams: mapToCssParams,
   fileConfig: {
     inputFileName: "styles.css",
     outputFileName: "result.css",
