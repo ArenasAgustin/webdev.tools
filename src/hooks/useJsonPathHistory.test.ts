@@ -166,13 +166,18 @@ describe("useJsonPathHistory", () => {
     it("discards the oldest entry when the 21st item is added", async () => {
       const { result } = renderHook(() => useJsonPathHistory());
 
-      // Add 20 unique expressions sequentially so timestamps are distinct
+      // Add 20 unique expressions one at a time with proper waiting
       for (let i = 1; i <= 20; i++) {
         await act(async () => {
           await result.current.addToHistory(`$.field${i}`);
         });
+        // Wait for each add to complete before next iteration
+        await waitFor(() => {
+          expect(result.current.history.length).toBeGreaterThanOrEqual(i);
+        });
       }
 
+      // Final wait to ensure all 20 are stored
       await waitFor(() => {
         expect(result.current.history).toHaveLength(20);
       });
