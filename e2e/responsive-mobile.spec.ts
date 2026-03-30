@@ -43,13 +43,15 @@ test.describe("Responsive & Mobile", () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/playground/json");
 
+    // Sidebar close button text varies by language: "Close sidebar" / "Cerrar sidebar" / "Close panel" / "Cerrar panel"
+    const closeSidebarRegex = /(Close sidebar|Cerrar sidebar|Close panel|Cerrar panel)/i;
     const overlay = page.getByRole("button", { name: /Close sidebar overlay/i });
 
-    await page.getByRole("button", { name: /Open sidebar/i }).click();
-    await expect(page.getByRole("button", { name: "Close sidebar", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: /Open sidebar|Abrir sidebar|Abrir panel/i }).click();
+    await expect(page.getByRole("button", { name: closeSidebarRegex })).toBeVisible();
     await expect(overlay).toBeVisible();
 
-    await page.getByRole("button", { name: "Close sidebar", exact: true }).click();
+    await page.getByRole("button", { name: closeSidebarRegex }).click();
     await expect(overlay).not.toBeVisible();
   });
 
