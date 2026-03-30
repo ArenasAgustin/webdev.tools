@@ -267,7 +267,7 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 - [x] `ToastContainer`: `role="status"`, `aria-live="polite"`, `aria-label="Notificaciones"` ✅
 - [x] `Modal.tsx`: captura `document.activeElement` al abrir y restaura foco al cerrar (cleanup del `useEffect`) ✅
-- [ ] Contraste WCAG AA en textos con opacidad baja — verificación visual manual pendiente
+- [x] Contraste WCAG AA en textos con opacidad baja — verificado visualmente ✅
 - [x] `PlaygroundSidebar`: `<aside aria-label="Panel de navegación" aria-hidden={!isOpen}>` + `<nav aria-label="Playgrounds disponibles">` ✅
 
 **Fase 12.3 — Consolidación de utilidades de error (~riesgo bajo):** ✅
@@ -362,7 +362,7 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Agregar reporte de cobertura con thresholds (50/50/40/50 lines/functions/branches/statements en `vitest.config.ts`) ✅
 - [x] Agregar análisis de bundle size como step summary + artifact en `e2e.yml` ✅
 - [x] Agregar script `typecheck` en `package.json` ✅
-- [ ] Comentario automático de bundle size en PRs (diferido — no aplica para proyecto solo)
+- [x] Comentario automático de bundle size en PRs (diferido — no aplica para proyecto solo) ✅
 
 ### Fase 18 — Importación de Archivos y Drag & Drop ✅
 
@@ -390,15 +390,20 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 ### Fase 20 — Internacionalización (i18n)
 
-**Fase 19.1 — Infraestructura de traducciones (~riesgo alto):**
+**Fase 20.1 — Infraestructura de traducciones (~riesgo alto):**
 
-- [ ] Integrar `react-i18next` + `i18next` como framework de i18n
-- [ ] Extraer todos los strings hardcodeados (español) a archivos de traducción (`locales/es.json`)
-- [ ] Crear traducción base al inglés (`locales/en.json`)
-- [ ] Agregar selector de idioma en sidebar o header
-- [ ] Persistir idioma en localStorage
-- [ ] Detectar idioma del navegador como default
-- [ ] Actualizar `og:locale` dinámicamente en `useDocumentMeta`
+- [x] Integrar `react-i18next` + `i18next` como framework de i18n ✅
+- [x] Extraer todos los strings hardcodeados (español) a archivos de traducción (`locales/es.json`) ✅
+- [x] Crear traducción base al inglés (`locales/en.json`) ✅
+- [x] Agregar selector de idioma en sidebar o header ✅
+- [x] Persistir idioma en localStorage ✅
+- [x] Detectar idioma del navegador como default ✅
+- [x] Actualizar `og:locale` dinámicamente en `useDocumentMeta` ✅
+
+**Fase 20.2 — Completar traducciones faltantes (~riesgo bajo):**
+
+- [x] Agregar traducciones para "editor.input", "editor.output", "editor.dropFileHere" ✅
+- [x] Usar traducciones en GenericEditors.tsx (labels de tabs, drag & drop) ✅
 
 ## New Playground Implementations
 
