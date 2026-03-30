@@ -14,11 +14,13 @@ import type {
 
 type PlaygroundMode = "json" | "js" | "html" | "css";
 
+import type { PlaygroundActions } from "./engines/types";
+
 interface GenericPlaygroundExtraProps {
   /** Extra params for actions (jsonPathExpression, etc.) */
   extraActionsParams?: object;
-  /** Extra toolbar content */
-  renderToolbarExtra?: () => ReactNode;
+  /** Extra toolbar content - receives actions for direct access */
+  renderToolbarExtra?: (params: { actions: PlaygroundActions }) => ReactNode;
   /** Extra output actions */
   renderOutputActions?: () => ReactNode;
   /** Extra output panel */
@@ -139,7 +141,8 @@ export function GenericPlayground({
 
   // Use engine's render functions or props
   const extraParams = { input: ctx.input, output: ctx.output, actions, overlays };
-  const toolbarExtraContent = renderToolbarExtra?.() ?? engine.renderToolbarExtra?.(extraParams);
+  const toolbarExtraContent =
+    renderToolbarExtra?.({ actions }) ?? engine.renderToolbarExtra?.(extraParams);
   const outputActions = renderOutputActions?.() ?? engine.renderOutputActions?.(extraParams);
   const outputPanelFn = renderOutputPanel ?? engine.renderOutputPanel;
   const modals = renderModals?.() ?? engine.renderModals?.(extraParams) ?? [];
