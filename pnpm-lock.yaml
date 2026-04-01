@@ -44,9 +44,6 @@ importers:
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
-      terser:
-        specifier: ^5.46.0
-        version: 5.46.0
     devDependencies:
       '@babel/parser':
         specifier: ^7.29.2
@@ -159,6 +156,9 @@ importers:
       tailwindcss:
         specifier: '3'
         version: 3.4.19(yaml@2.8.2)
+      terser:
+        specifier: ^5.46.0
+        version: 5.46.0
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
