@@ -436,9 +436,11 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 ## Nuevas features por implementar
 
-- [ ] Agregar limpiar vacios a JS (variables, funciones, objetos vacíos), html (etiquetas vacías) y css (reglas vacías)
+- [x] Agregar limpiar vacios a JS (variables, funciones, objetos vacíos), html (etiquetas vacías) y css (reglas vacías)
 - [ ] Transformación de JSON a TOON, CSV, XML, YAML
-- [ ] Color transform
+- [x] Color transform (Color Picker con conversión HEX, RGB, HSL, HSV, CMYK)
+- [ ] Hash generador
+- [ ] Random password generator
 - [ ] Unix timestamp transform
 - [ ] Convertidor de unidades de CSS
 - [ ] Generador de QR codes

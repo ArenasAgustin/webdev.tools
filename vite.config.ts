@@ -56,12 +56,18 @@ export default defineConfig({
     },
   },
   build: {
+    target: "esnext",
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes("@monaco-editor/react")) return "monaco";
           if (id.includes("node_modules/react-router")) return "router";
-          if (id.includes("jsonpath-plus")) return "jsonpath";
+          if (
+            id.includes("node_modules/i18next") ||
+            id.includes("node_modules/react-i18next") ||
+            id.includes("node_modules/i18next-browser-languagedetector")
+          )
+            return "i18n";
           if (id.includes("node_modules/react") || id.includes("node_modules/scheduler"))
             return "vendor";
         },

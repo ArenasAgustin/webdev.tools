@@ -6,9 +6,9 @@ import { ConfigModal } from "@/components/common/ConfigModal";
 import { ShortcutsModal } from "@/components/common/ShortcutsModal";
 import type { ModalState } from "@/hooks/useModalState";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
-import type { JsFormatConfig, JsMinifyConfig } from "@/types/js";
-import type { HtmlFormatConfig, HtmlMinifyConfig } from "@/types/html";
-import type { CssFormatConfig, CssMinifyConfig } from "@/types/css";
+import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
+import type { HtmlFormatConfig, HtmlMinifyConfig, HtmlCleanConfig } from "@/types/html";
+import type { CssFormatConfig, CssMinifyConfig, CssCleanConfig } from "@/types/css";
 import type { ToolbarConfig } from "@/types/toolbar";
 
 export interface ToolbarProps {
@@ -35,6 +35,8 @@ export interface ToolbarProps {
         onFormatChange: (config: JsFormatConfig) => void;
         minify: JsMinifyConfig;
         onMinifyChange: (config: JsMinifyConfig) => void;
+        clean: JsCleanConfig;
+        onCleanChange: (config: JsCleanConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       }
@@ -44,6 +46,8 @@ export interface ToolbarProps {
         onFormatChange: (config: HtmlFormatConfig) => void;
         minify: HtmlMinifyConfig;
         onMinifyChange: (config: HtmlMinifyConfig) => void;
+        clean: HtmlCleanConfig;
+        onCleanChange: (config: HtmlCleanConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       }
@@ -53,6 +57,8 @@ export interface ToolbarProps {
         onFormatChange: (config: CssFormatConfig) => void;
         minify: CssMinifyConfig;
         onMinifyChange: (config: CssMinifyConfig) => void;
+        clean: CssCleanConfig;
+        onCleanChange: (config: CssCleanConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       };
@@ -62,7 +68,7 @@ export function Toolbar(props: ToolbarProps) {
   const { t } = useTranslation();
   const [openModal, setOpenModal] = useState<"config" | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const hasClean = props.config?.mode === "json";
+  const hasClean = !!props.config?.mode;
 
   const toolsTitle = props.tools.title ?? t("toolbar.title");
   const genericConfig = props.config;
@@ -82,18 +88,16 @@ export function Toolbar(props: ToolbarProps) {
     }
   };
 
-  const gridLayoutClass = props.extraContent
-    ? "grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start"
-    : "grid grid-cols-1 gap-4 sm:gap-6 items-start";
+  const gridLayoutClass = "grid grid-cols-1 gap-4 sm:gap-6 items-start";
 
   return (
     <>
-      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 sticky bottom-0 z-10 shrink-0">
+      <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 z-10 shrink-0">
         {/* Header row — always visible, acts as mobile toggle tap target */}
         <div
           className={cn(
             "flex items-center justify-between gap-2",
-            isMobileOpen ? "mb-3" : "mb-0 sm:mb-3",
+            isMobileOpen ? "mb-3" : "mb-0",
           )}
         >
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
@@ -137,7 +141,7 @@ export function Toolbar(props: ToolbarProps) {
             <button
               type="button"
               onClick={() => setIsMobileOpen((v) => !v)}
-              className="sm:hidden inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
+              className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
               aria-label={isMobileOpen ? t("actions.hideTools") : t("actions.showTools")}
             >
               <i
@@ -148,11 +152,11 @@ export function Toolbar(props: ToolbarProps) {
           </div>
         </div>
 
-        {/* Buttons grid — hidden on mobile when collapsed, always visible on sm+ */}
+        {/* Buttons grid — hidden on mobile/tablet when collapsed, always visible on md+ */}
         <div
           className={cn(
             "overflow-hidden transition-all duration-200",
-            isMobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 sm:max-h-96 sm:opacity-100",
+            isMobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
           )}
         >
           <div className={gridLayoutClass}>
@@ -208,6 +212,8 @@ export function Toolbar(props: ToolbarProps) {
           onFormatConfigChange={genericConfig.onFormatChange}
           minifyConfig={genericConfig.minify}
           onMinifyConfigChange={genericConfig.onMinifyChange}
+          cleanConfig={genericConfig.clean}
+          onCleanConfigChange={genericConfig.onCleanChange}
         />
       )}
 
@@ -220,6 +226,8 @@ export function Toolbar(props: ToolbarProps) {
           onFormatConfigChange={genericConfig.onFormatChange}
           minifyConfig={genericConfig.minify}
           onMinifyConfigChange={genericConfig.onMinifyChange}
+          cleanConfig={genericConfig.clean}
+          onCleanConfigChange={genericConfig.onCleanChange}
         />
       )}
 
@@ -232,6 +240,8 @@ export function Toolbar(props: ToolbarProps) {
           onFormatConfigChange={genericConfig.onFormatChange}
           minifyConfig={genericConfig.minify}
           onMinifyConfigChange={genericConfig.onMinifyChange}
+          cleanConfig={genericConfig.clean}
+          onCleanConfigChange={genericConfig.onCleanChange}
         />
       )}
 

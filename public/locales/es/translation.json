@@ -96,7 +96,13 @@
     "emptyString": "\"\" (vacío)",
     "emptyArray": "[] (array vacío)",
     "emptyObject": "{} (objeto vacío)",
-    "autoCopyMinify": "Copiar automáticamente"
+    "autoCopyMinify": "Copiar automáticamente",
+    "emptyFunction": "() => {} (función vacía)",
+    "rulesToRemove": "Reglas a eliminar",
+    "emptyRules": "Reglas vacías",
+    "rulesWithOnlyComments": "Reglas solo con comentarios",
+    "tagsToRemove": "Etiquetas a eliminar",
+    "emptyTags": "Etiquetas vacías"
   },
   "language": {
     "select": "Seleccionar idioma"

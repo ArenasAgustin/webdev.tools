@@ -230,6 +230,27 @@ const PRESERVED_EMPTY_TAGS = [
 ];
 
 /**
+ * Self-closing void HTML tags that should NEVER be removed
+ * These are native HTML5 void elements that don't require closing tags
+ */
+const SELF_CLOSING_VOID_TAGS = [
+  "meta",
+  "link",
+  "br",
+  "hr",
+  "img",
+  "input",
+  "area",
+  "base",
+  "col",
+  "embed",
+  "param",
+  "source",
+  "track",
+  "wbr",
+];
+
+/**
  * Clean empty HTML tags
  * Pure function - no side effects
  */
@@ -266,7 +287,13 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
       // Remove empty tags: <tag></tag> or <tag />
       // Match opening tag followed by optional whitespace and closing tag or self-closing
       result = result.replace(/<(\w+)([^>]*?)\s*>\s*<\/\1>/g, "");
-      result = result.replace(/<(\w+)([^>]*?)\s*\/\s*>/g, "");
+
+      // Remove self-closing tags EXCEPT void HTML tags (meta, link, br, etc.)
+      // These void tags have semantic meaning and should not be removed
+      result = result.replace(/<(\w+)([^>]*?)\s*\/\s*>/g, (_match, tagName) => {
+        const name = tagName as string;
+        return SELF_CLOSING_VOID_TAGS.includes(name.toLowerCase()) ? _match : "";
+      });
 
       // Restore preserved blocks
       for (const [token, content] of preservedBlocks.entries()) {

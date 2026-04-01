@@ -5,6 +5,7 @@ import { jsonPlaygroundConfig } from "./json/json.config";
 import { jsPlaygroundConfig } from "./js/js.config";
 import { htmlPlaygroundConfig } from "./html/html.config";
 import { cssPlaygroundConfig } from "./css/css.config";
+import { colorsConfig } from "./colors/colors.config";
 
 export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
@@ -14,12 +15,14 @@ const loadJsonPlayground = () => import("./json/JsonPlayground");
 const loadJsPlayground = () => import("./js/JsPlayground");
 const loadHtmlPlayground = () => import("./html/HtmlPlayground");
 const loadCssPlayground = () => import("./css/CssPlayground");
+const loadColorsPlayground = () => import("./colors/ColorsPlayground");
 
 const playgroundLoaders: Record<string, () => Promise<unknown>> = {
   [jsonPlaygroundConfig.id]: loadJsonPlayground,
   [jsPlaygroundConfig.id]: loadJsPlayground,
   [htmlPlaygroundConfig.id]: loadHtmlPlayground,
   [cssPlaygroundConfig.id]: loadCssPlayground,
+  [colorsConfig.id]: loadColorsPlayground,
 };
 
 export const playgroundRegistry: PlaygroundRegistryItem[] = [
@@ -52,6 +55,14 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
     component: lazy(() =>
       loadCssPlayground().then((module) => ({
         default: module.CssPlayground,
+      })),
+    ),
+  },
+  {
+    ...colorsConfig,
+    component: lazy(() =>
+      loadColorsPlayground().then((module) => ({
+        default: module.ColorsPlayground,
       })),
     ),
   },
