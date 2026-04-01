@@ -95,10 +95,7 @@ export function Toolbar(props: ToolbarProps) {
       <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 z-10 shrink-0">
         {/* Header row — always visible, acts as mobile toggle tap target */}
         <div
-          className={cn(
-            "flex items-center justify-between gap-2",
-            isMobileOpen ? "mb-3" : "mb-0",
-          )}
+          className={cn("flex items-center justify-between gap-2", isMobileOpen ? "mb-3" : "mb-0")}
         >
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <i className="fas fa-tools text-yellow-400" aria-hidden="true"></i>
