@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { openToolbar } from "./helpers";
 
 test.describe("JS workflow", () => {
   test("execute valid JavaScript code", async ({ page }) => {
     await page.goto("/playground/js");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: /Ejemplo/i }).click();
     await page.getByRole("button", { name: /Ejecutar/i }).click();
@@ -20,6 +22,7 @@ test.describe("JS workflow", () => {
     });
 
     await page.goto("/playground/js");
+    await openToolbar(page);
     await page.getByRole("button", { name: "Ejecutar" }).click();
 
     await expect(page.getByText("Código ejecutado correctamente")).toBeVisible();
@@ -37,6 +40,7 @@ test.describe("JS workflow", () => {
     });
 
     await page.goto("/playground/js");
+    await openToolbar(page);
     await page.getByRole("button", { name: "Ejecutar" }).click();
 
     await expect(page.getByRole("main").getByText(/Boom/i)).toBeVisible();
@@ -44,6 +48,7 @@ test.describe("JS workflow", () => {
 
   test("format JS code", async ({ page }) => {
     await page.goto("/playground/js");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: /Ejemplo/i }).click();
     await page.getByRole("button", { name: /Formatear/i }).click();
@@ -53,6 +58,7 @@ test.describe("JS workflow", () => {
 
   test("minify JS code", async ({ page }) => {
     await page.goto("/playground/js");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: /Ejemplo/i }).click();
     await page.getByRole("button", { name: /Minificar/i }).click();
@@ -99,6 +105,7 @@ test.describe("JS workflow", () => {
     });
 
     await page.goto("/playground/js");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: "Ejecutar" }).click();
     await expect(page.getByText("Código ejecutado correctamente")).toBeVisible();
@@ -119,6 +126,7 @@ test.describe("JS workflow", () => {
     });
 
     await page.goto("/playground/js");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: "Formatear" }).click();
 
@@ -129,6 +137,7 @@ test.describe("JS workflow", () => {
 
   test("keyboard shortcuts", async ({ page }) => {
     await page.goto("/playground/js");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: /Ejemplo/i }).click();
 
