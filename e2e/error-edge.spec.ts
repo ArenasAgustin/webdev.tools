@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openToolbar } from "./helpers";
 
 test.describe("Error handling & Edge cases", () => {
   test("large input shows graceful size limit handling", async ({ page }) => {
@@ -9,6 +10,7 @@ test.describe("Error handling & Edge cases", () => {
     }, hugeJson);
 
     await page.goto("/playground/json");
+    await openToolbar(page);
     await page.getByRole("button", { name: "Formatear" }).click();
 
     await expect(page.getByText(/El contenido supera 500 KB/).first()).toBeVisible();
@@ -20,6 +22,7 @@ test.describe("Error handling & Edge cases", () => {
     });
 
     await page.goto("/playground/js");
+    await openToolbar(page);
     await page.getByRole("button", { name: /Ejecutar/i }).click({ noWaitAfter: true });
     await expect(page.getByRole("main").getByText(/5 segundos|cancelad|ejecuci[oó]n/i)).toBeVisible(
       {
@@ -43,6 +46,7 @@ test.describe("Error handling & Edge cases", () => {
     });
 
     await page.goto("/playground/json");
+    await openToolbar(page);
     await page.getByRole("button", { name: "Ejemplo" }).click();
     await page.getByRole("button", { name: "Formatear" }).click();
 
@@ -51,6 +55,7 @@ test.describe("Error handling & Edge cases", () => {
 
   test("offline mode keeps core local tools working", async ({ page }) => {
     await page.goto("/playground/json");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: "Ejemplo" }).click();
     await expect(page.getByText("JSON válido")).toBeVisible();

@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { openToolbar } from "./helpers";
 
 test.describe("CSS workflow", () => {
   test("load example and format CSS", async ({ page }) => {
     await page.goto("/playground/css");
+    await openToolbar(page);
 
     const inputPanel = page
       .locator("section")
@@ -15,6 +17,7 @@ test.describe("CSS workflow", () => {
 
   test("load example and minify CSS", async ({ page }) => {
     await page.goto("/playground/css");
+    await openToolbar(page);
 
     const inputPanel = page
       .locator("section")
@@ -53,15 +56,14 @@ test.describe("CSS workflow", () => {
       .filter({ has: page.getByRole("heading", { name: "CSS", exact: true }) });
     await inputPanel.getByRole("button", { name: "Ejemplo" }).click();
 
-    // Use keyboard shortcut to format
     await page.keyboard.press("Control+Shift+F");
 
-    // Verify the output panel has formatted content
     await expect(page.getByText("CSS formateado correctamente")).toBeVisible();
   });
 
   test("download output button triggers file download", async ({ page }) => {
     await page.goto("/playground/css");
+    await openToolbar(page);
 
     const inputPanel = page
       .locator("section")
@@ -71,10 +73,8 @@ test.describe("CSS workflow", () => {
     await page.getByRole("button", { name: /Formatear/i }).click();
     await expect(page.getByText("CSS formateado correctamente")).toBeVisible();
 
-    // Wait a moment for output to be ready
     await page.waitForTimeout(300);
 
-    // Setup download listener and click download inside the output panel
     const downloadPromise = page.waitForEvent("download");
     const outputPanel = page
       .locator("section")

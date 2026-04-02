@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { openToolbar } from "./helpers";
 
 test.describe("HTML workflow", () => {
   test("load example and format HTML", async ({ page }) => {
     await page.goto("/playground/html");
+    await openToolbar(page);
 
     const inputPanel = page
       .locator("section")
@@ -15,6 +17,7 @@ test.describe("HTML workflow", () => {
 
   test("load example and minify HTML", async ({ page }) => {
     await page.goto("/playground/html");
+    await openToolbar(page);
 
     const inputPanel = page
       .locator("section")
@@ -64,6 +67,7 @@ test.describe("HTML workflow", () => {
     });
 
     await page.goto("/playground/html");
+    await openToolbar(page);
 
     const inputPanel = page
       .locator("section")
@@ -85,6 +89,7 @@ test.describe("HTML workflow", () => {
 
   test("toolbar actions", async ({ page }) => {
     await page.goto("/playground/html");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: /Formatear/i }).click();
     await expect(page.getByText("HTML formateado correctamente")).toBeVisible();
@@ -100,6 +105,7 @@ test.describe("HTML workflow", () => {
 
   test("live preview and DOM inspection", async ({ page }) => {
     await page.goto("/playground/html");
+    await openToolbar(page);
 
     await page.getByRole("button", { name: "Ver vista previa" }).click();
     await expect(page.getByTitle("Vista previa HTML")).toBeVisible();
