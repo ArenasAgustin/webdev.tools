@@ -4,17 +4,36 @@ import {
   setItem,
   removeItem,
   clearAll,
+  isAvailable,
   loadJsonToolsConfig,
   saveJsonToolsConfig,
+  removeJsonToolsConfig,
   loadLastJson,
   saveLastJson,
+  removeLastJson,
   loadJsToolsConfig,
   saveJsToolsConfig,
+  removeJsToolsConfig,
   loadLastJs,
   saveLastJs,
+  removeLastJs,
+  loadHtmlToolsConfig,
+  saveHtmlToolsConfig,
+  removeHtmlToolsConfig,
+  loadLastHtml,
+  saveLastHtml,
+  removeLastHtml,
+  loadCssToolsConfig,
+  saveCssToolsConfig,
+  removeCssToolsConfig,
+  loadLastCss,
+  saveLastCss,
+  removeLastCss,
 } from "./storage";
 import type { JsonToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
+import type { HtmlToolsConfig } from "@/types/html";
+import type { CssToolsConfig } from "@/types/css";
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -425,6 +444,184 @@ describe("Storage Service", () => {
       const result = saveLastJs("console.log('test')");
       expect(result).toBe(false);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error saving last JS:", expect.any(Error));
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe("isAvailable", () => {
+    it("should return true when localStorage works", () => {
+      expect(isAvailable()).toBe(true);
+    });
+
+    it("should return false when storage throws on setItem", () => {
+      const brokenStorage = {
+        getItem: () => null,
+        setItem: () => {
+          throw new Error("QuotaExceededError");
+        },
+        removeItem: () => {},
+        clear: () => {},
+      };
+      Object.defineProperty(window, "localStorage", { value: brokenStorage });
+      expect(isAvailable()).toBe(false);
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    });
+  });
+
+  describe("removeJsonToolsConfig / removeJsToolsConfig", () => {
+    it("removeJsonToolsConfig removes the saved config", () => {
+      saveJsonToolsConfig({ format: { indentSize: 2, sortKeys: false, autoCopy: false } });
+      expect(loadJsonToolsConfig()).not.toBeNull();
+      removeJsonToolsConfig();
+      expect(loadJsonToolsConfig()).toBeNull();
+    });
+
+    it("removeJsToolsConfig removes the saved config", () => {
+      saveJsToolsConfig({ format: { indentSize: 2, autoCopy: false } });
+      expect(loadJsToolsConfig()).not.toBeNull();
+      removeJsToolsConfig();
+      expect(loadJsToolsConfig()).toBeNull();
+    });
+  });
+
+  describe("removeLastJson / removeLastJs", () => {
+    it("removeLastJson clears the saved JSON input", () => {
+      saveLastJson('{"a":1}');
+      expect(loadLastJson()).toBe('{"a":1}');
+      removeLastJson();
+      expect(loadLastJson()).toBe("");
+    });
+
+    it("removeLastJs clears the saved JS input", () => {
+      saveLastJs("console.log(1)");
+      expect(loadLastJs()).toBe("console.log(1)");
+      removeLastJs();
+      expect(loadLastJs()).toBe("");
+    });
+  });
+
+  describe("loadHtmlToolsConfig / saveHtmlToolsConfig / removeHtmlToolsConfig", () => {
+    it("saves and loads HTML tools config", () => {
+      const config: Partial<HtmlToolsConfig> = {
+        format: { indentSize: 4, formatCss: true, formatJs: true, autoCopy: false },
+      };
+      saveHtmlToolsConfig(config);
+      const loaded = loadHtmlToolsConfig();
+      expect(loaded?.format?.indentSize).toBe(4);
+    });
+
+    it("returns null when no HTML config saved", () => {
+      expect(loadHtmlToolsConfig()).toBeNull();
+    });
+
+    it("overwrites HTML config", () => {
+      saveHtmlToolsConfig({ format: { indentSize: 2, formatCss: true, formatJs: true, autoCopy: false } });
+      saveHtmlToolsConfig({ format: { indentSize: 4, formatCss: true, formatJs: true, autoCopy: false } });
+      expect(loadHtmlToolsConfig()?.format?.indentSize).toBe(4);
+    });
+
+    it("removes HTML config", () => {
+      saveHtmlToolsConfig({ format: { indentSize: 2, formatCss: true, formatJs: true, autoCopy: false } });
+      removeHtmlToolsConfig();
+      expect(loadHtmlToolsConfig()).toBeNull();
+    });
+  });
+
+  describe("loadLastHtml / saveLastHtml / removeLastHtml", () => {
+    it("saves and loads last HTML", () => {
+      saveLastHtml("<div>hello</div>");
+      expect(loadLastHtml()).toBe("<div>hello</div>");
+    });
+
+    it("returns empty string when no HTML saved", () => {
+      expect(loadLastHtml()).toBe("");
+    });
+
+    it("removes last HTML", () => {
+      saveLastHtml("<p>test</p>");
+      removeLastHtml();
+      expect(loadLastHtml()).toBe("");
+    });
+  });
+
+  describe("loadCssToolsConfig / saveCssToolsConfig / removeCssToolsConfig", () => {
+    it("saves and loads CSS tools config", () => {
+      const config: Partial<CssToolsConfig> = { format: { indentSize: 2, autoCopy: false } };
+      saveCssToolsConfig(config);
+      const loaded = loadCssToolsConfig();
+      expect(loaded?.format?.indentSize).toBe(2);
+    });
+
+    it("returns null when no CSS config saved", () => {
+      expect(loadCssToolsConfig()).toBeNull();
+    });
+
+    it("removes CSS config", () => {
+      saveCssToolsConfig({ format: { indentSize: 2, autoCopy: false } });
+      removeCssToolsConfig();
+      expect(loadCssToolsConfig()).toBeNull();
+    });
+  });
+
+  describe("loadLastCss / saveLastCss / removeLastCss", () => {
+    it("saves and loads last CSS", () => {
+      saveLastCss(".foo { color: red }");
+      expect(loadLastCss()).toBe(".foo { color: red }");
+    });
+
+    it("returns empty string when no CSS saved", () => {
+      expect(loadLastCss()).toBe("");
+    });
+
+    it("removes last CSS", () => {
+      saveLastCss(".foo {}");
+      removeLastCss();
+      expect(loadLastCss()).toBe("");
+    });
+  });
+
+  describe("Error handling - removeItem", () => {
+    it("returns false and logs error when removeItem throws", () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const brokenStorage = {
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {
+          throw new Error("removeItem failed");
+        },
+        clear: () => {},
+      };
+
+      Object.defineProperty(window, "localStorage", { value: brokenStorage });
+
+      const result = removeItem("anyKey");
+      expect(result).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe("Error handling - clearAll", () => {
+    it("returns false and logs error when clear throws", () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const brokenStorage = {
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+        clear: () => {
+          throw new Error("clear failed");
+        },
+      };
+
+      Object.defineProperty(window, "localStorage", { value: brokenStorage });
+
+      const result = clearAll();
+      expect(result).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalled();
 
       Object.defineProperty(window, "localStorage", { value: localStorageMock });
       vi.restoreAllMocks();

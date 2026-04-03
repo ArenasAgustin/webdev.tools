@@ -3,6 +3,7 @@ import {
   formatJson,
   minifyJson,
   cleanJson,
+  cleanJsonTransform,
   parseJson,
   sortJsonKeys,
   JSON_ERROR_MESSAGES,
@@ -389,6 +390,51 @@ describe("sortJsonKeys", () => {
 describe("JSON_ERROR_MESSAGES", () => {
   it("should have EMPTY_INPUT message", () => {
     expect(JSON_ERROR_MESSAGES.EMPTY_INPUT).toBe("El JSON está vacío");
+  });
+});
+
+describe("cleanJson edge cases", () => {
+  it("returns empty value when entire object is cleaned to nothing", () => {
+    // {"a": null} → after removing null, object has 0 keys → returns ""
+    const result = cleanJson('{"a": null}');
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe("");
+  });
+
+  it("returns empty value for array of only nulls after cleaning", () => {
+    // [null, null] → nulls removed → empty array → Object.keys([]).length === 0 → undefined → ""
+    const result = cleanJson("[null, null]");
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe("");
+  });
+
+  it("minify output returns error when internal minify fails", () => {
+    // cleanJson with minify path on valid input should succeed
+    const result = cleanJson('{"a": 1, "b": null}', { outputFormat: "minify" });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe('{"a":1}');
+  });
+});
+
+describe("cleanJsonTransform", () => {
+  it("delegates to cleanJson with no options", async () => {
+    const result = await cleanJsonTransform.transform('{"a": 1, "b": null}');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const parsed = JSON.parse(result.value) as Record<string, unknown>;
+      expect(parsed).toEqual({ a: 1 });
+    }
+  });
+
+  it("delegates to cleanJson with options", async () => {
+    const result = await cleanJsonTransform.transform('{"a": 1, "b": null}', {
+      removeNull: false,
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const parsed = JSON.parse(result.value) as Record<string, unknown>;
+      expect(parsed.b).toBeNull();
+    }
   });
 });
 

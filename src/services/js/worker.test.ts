@@ -1,6 +1,6 @@
-import { vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { defineWorkerServiceTests } from "@/test/workerHarness";
-import { formatJsAsync, minifyJsAsync } from "./worker";
+import { formatJsAsync, minifyJsAsync, cleanJsAsync } from "./worker";
 
 import * as workerClient from "./workerClient";
 vi.mock("./workerClient", () => ({
@@ -8,6 +8,31 @@ vi.mock("./workerClient", () => ({
     run: vi.fn(),
   },
 }));
+
+describe("cleanJsAsync (sync path)", () => {
+  it("returns error for empty input via sync path", async () => {
+    const result = await cleanJsAsync("   ");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBeTruthy();
+  });
+
+  it("removes empty functions via sync path", async () => {
+    const result = await cleanJsAsync("function noop() {} const x = 1;");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).not.toContain("function noop");
+      expect(result.value).toContain("const x = 1");
+    }
+  });
+});
+
+describe("formatJsAsync error via sync path", () => {
+  it("returns error for invalid JS on small input (sync path)", async () => {
+    const result = await formatJsAsync("const =");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBeTruthy();
+  });
+});
 
 defineWorkerServiceTests({
   name: "js worker async services",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatHtml, minifyHtml } from "./transform";
+import { formatHtml, minifyHtml, cleanHtml } from "./transform";
 
 describe("formatHtml", () => {
   it("returns empty output for blank input", async () => {
@@ -172,6 +172,17 @@ describe("minifyHtml", () => {
     }
   });
 
+  it("returns error for invalid HTML that throws during minification", async () => {
+    // Trigger the catch path by passing a non-string
+    const result = await minifyHtml(null as unknown as string, {
+      removeComments: true,
+      collapseWhitespace: true,
+      minifyCss: false,
+      minifyJs: false,
+    });
+    expect(result.ok).toBe(false);
+  });
+
   it("preserves inline CSS and JS content when minifyCss/minifyJs are disabled", async () => {
     const input = `
       <style>
@@ -202,6 +213,76 @@ describe("minifyHtml", () => {
       expect(result.value).not.toContain("<style>.box{color:red}");
       expect(result.value).not.toContain("const value=3");
       expect(result.value).toContain("<div>ok</div>");
+    }
+  });
+});
+
+describe("cleanHtml", () => {
+  it("returns error for empty input", () => {
+    const result = cleanHtml("   ");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain("vacío");
+  });
+
+  it("removes empty tags by default", () => {
+    const result = cleanHtml("<div></div><p>hello</p>");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).not.toContain("<div></div>");
+      expect(result.value).toContain("<p>hello</p>");
+    }
+  });
+
+  it("keeps empty tags when removeEmptyTags is false", () => {
+    const result = cleanHtml("<div></div><p>hello</p>", { removeEmptyTags: false });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toContain("<div></div>");
+  });
+
+  it("removes self-closing non-void tags", () => {
+    const result = cleanHtml("<section /><p>content</p>");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).not.toContain("<section />");
+      expect(result.value).toContain("<p>content</p>");
+    }
+  });
+
+  it("preserves void self-closing tags (br, img, input, meta)", () => {
+    const result = cleanHtml("<br /><img src='x.png' /><input type='text' />");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("<br");
+      expect(result.value).toContain("<img");
+      expect(result.value).toContain("<input");
+    }
+  });
+
+  it("preserves script and style blocks even if they appear empty", () => {
+    const result = cleanHtml("<style></style><script></script><div></div>");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("<style></style>");
+      expect(result.value).toContain("<script></script>");
+    }
+  });
+
+  it("preserves valid content", () => {
+    const result = cleanHtml("<div><h1>Title</h1><p>Text</p></div>");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("<h1>Title</h1>");
+      expect(result.value).toContain("<p>Text</p>");
+    }
+  });
+
+  it("removes multiple consecutive empty tags", () => {
+    const result = cleanHtml("<span></span><em></em><strong>ok</strong>");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).not.toContain("<span></span>");
+      expect(result.value).not.toContain("<em></em>");
+      expect(result.value).toContain("<strong>ok</strong>");
     }
   });
 });

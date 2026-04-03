@@ -72,7 +72,7 @@ vi.mock("@/utils/download", () => ({
 
 vi.mock("@/hooks/useJsonPathHistory", () => ({
   useJsonPathHistory: () => ({
-    history: [],
+    history: [{ id: "hist-1", expression: "$.users" }],
     addToHistory: vi.fn(),
     removeFromHistory: vi.fn(),
     clearHistory: vi.fn(),
@@ -292,6 +292,50 @@ describe("JsonPlayground branches", () => {
     await waitFor(() => {
       expect(toastMocks.error).toHaveBeenCalledWith("format fail");
       expect(toastMocks.error).toHaveBeenCalledWith("minify fail");
+    });
+  });
+
+  it("updates jsonPath expression on input change", () => {
+    render(<JsonPlayground />);
+
+    const input = screen.getByLabelText("Expresion JSONPath");
+    fireEvent.change(input, { target: { value: "$.name" } });
+
+    expect((input as HTMLInputElement).value).toBe("$.name");
+  });
+
+  it("tries a quick example from TipsModal and closes modal", async () => {
+    render(<JsonPlayground />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Ver tips de filtros" }));
+
+    // Quick example buttons contain both label and description — find by textContent
+    await waitFor(() => {
+      const quickBtn = screen
+        .getAllByRole("button")
+        .find((b) => b.textContent?.includes("$.users"));
+      expect(quickBtn).toBeDefined();
+      fireEvent.click(quickBtn!);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Expresion JSONPath")).toHaveValue("$.users");
+    });
+  });
+
+  it("reuses an expression from JsonPathHistoryModal and closes modal", async () => {
+    render(<JsonPlayground />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Historial de filtros" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Reutilizar filtro")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByLabelText("Reutilizar filtro"));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Expresion JSONPath")).toHaveValue("$.users");
     });
   });
 
