@@ -67,7 +67,7 @@ export function parseColor(input: string): RGB | null {
     const r = parseInt(rgbMatch[1], 10);
     const g = parseInt(rgbMatch[2], 10);
     const b = parseInt(rgbMatch[3], 10);
-    if (r <= 255 && g <= 255 && b <= 255) {
+    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
       return { r, g, b };
     }
   }
@@ -80,7 +80,7 @@ export function parseColor(input: string): RGB | null {
     const r = parseInt(rgbaMatch[1], 10);
     const g = parseInt(rgbaMatch[2], 10);
     const b = parseInt(rgbaMatch[3], 10);
-    if (r <= 255 && g <= 255 && b <= 255) {
+    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
       return { r, g, b };
     }
   }

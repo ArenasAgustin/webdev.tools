@@ -9,9 +9,13 @@ export function ColorsPlayground() {
 
   const handleInputChange = useCallback((value: string) => {
     setInput(value);
-    const formats = convertColor(value);
-    if (formats) {
-      setColor(formats.hex);
+    try {
+      const formats = convertColor(value);
+      if (formats) {
+        setColor(formats.hex);
+      }
+    } catch (err) {
+      console.warn("Invalid color input:", err);
     }
   }, []);
 
@@ -32,7 +36,11 @@ export function ColorsPlayground() {
   const displayFormats = parsed ?? getAllFormatsFromHex(color);
 
   const copyToClipboard = useCallback((value: string) => {
-    navigator.clipboard.writeText(value);
+    try {
+      navigator.clipboard.writeText(value);
+    } catch (err) {
+      console.warn("Clipboard write failed:", err);
+    }
   }, []);
 
   return (

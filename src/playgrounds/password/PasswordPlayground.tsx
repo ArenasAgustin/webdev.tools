@@ -31,8 +31,8 @@ export function PasswordPlayground() {
         navigator.clipboard.writeText(password);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } catch {
-        // Silently fail if clipboard is unavailable
+      } catch (err) {
+        console.warn("Clipboard write failed:", err);
       }
     }
   }, [password]);

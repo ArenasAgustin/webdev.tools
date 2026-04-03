@@ -60,8 +60,8 @@ export function HashPlayground() {
   const copyToClipboard = useCallback((value: string) => {
     try {
       navigator.clipboard.writeText(value);
-    } catch {
-      // Silently fail if clipboard is unavailable
+    } catch (err) {
+      console.warn("Clipboard write failed:", err);
     }
   }, []);
 
