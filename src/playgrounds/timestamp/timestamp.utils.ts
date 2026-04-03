@@ -70,6 +70,11 @@ function getRelativeTime(date: Date, lang = "es"): string {
   const absDiff = Math.abs(diff);
   const isFuture = diff < 0;
 
+  // Handle diff = 0 (now)
+  if (absDiff === 0) {
+    return lang === "es" ? "ahora mismo" : "just now";
+  }
+
   const seconds = Math.floor(absDiff / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
@@ -77,56 +82,41 @@ function getRelativeTime(date: Date, lang = "es"): string {
   const months = Math.floor(days / 30);
   const years = Math.floor(days / 365);
 
-  const translations: Record<string, Record<string, string>> = {
-    es: {
-      future: "dentro de",
-      past: "hace",
-      seconds: seconds === 1 ? "segundo" : "segundos",
-      minutes: minutes === 1 ? "minuto" : "minutos",
-      hours: hours === 1 ? "hora" : "horas",
-      days: days === 1 ? "día" : "días",
-      months: months === 1 ? "mes" : "meses",
-      years: years === 1 ? "año" : "años",
-    },
-    en: {
-      future: "in",
-      past: "ago",
-      seconds: "second(s)",
-      minutes: "minute(s)",
-      hours: "hour(s)",
-      days: "day(s)",
-      months: "month(s)",
-      years: "year(s)",
-    },
-  };
-
-  const t = translations[lang] || translations.es;
-  const prefix = isFuture ? t.future + " " : t.past + " ";
-
+  // Determine value and unit first
   let value: number;
   let unit: string;
+  let isSingular = false;
 
   if (years > 0) {
     value = years;
-    unit = t.years;
+    isSingular = years === 1;
+    unit = lang === "es" ? (isSingular ? "año" : "años") : isSingular ? "year" : "years";
   } else if (months > 0) {
     value = months;
-    unit = t.months;
+    isSingular = months === 1;
+    unit = lang === "es" ? (isSingular ? "mes" : "meses") : isSingular ? "month" : "months";
   } else if (days > 0) {
     value = days;
-    unit = t.days;
+    isSingular = days === 1;
+    unit = lang === "es" ? (isSingular ? "día" : "días") : isSingular ? "day" : "days";
   } else if (hours > 0) {
     value = hours;
-    unit = t.hours;
+    isSingular = hours === 1;
+    unit = lang === "es" ? (isSingular ? "hora" : "horas") : isSingular ? "hour" : "hours";
   } else if (minutes > 0) {
     value = minutes;
-    unit = t.minutes;
+    isSingular = minutes === 1;
+    unit = lang === "es" ? (isSingular ? "minuto" : "minutos") : isSingular ? "minute" : "minutes";
   } else {
     value = seconds;
-    unit = t.seconds;
+    isSingular = seconds === 1;
+    unit =
+      lang === "es" ? (isSingular ? "segundo" : "segundos") : isSingular ? "second" : "seconds";
   }
 
-  return `${prefix} ${value} ${unit}`;
+  const prefix = isFuture ? (lang === "es" ? "dentro de " : "in ") : lang === "es" ? "hace " : "";
+
+  return `${prefix}${value} ${unit}`;
 }
 
 /**

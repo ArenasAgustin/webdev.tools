@@ -26,9 +26,7 @@ export function HashPlayground() {
       } else if (fileInput) {
         const buffer = await fileInput.arrayBuffer();
         const bytes = new Uint8Array(buffer);
-        inputText = Array.from(bytes)
-          .map((b) => String.fromCharCode(b))
-          .join("");
+        inputText = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
       }
 
       if (!inputText) {
@@ -60,14 +58,18 @@ export function HashPlayground() {
   }, []);
 
   const copyToClipboard = useCallback((value: string) => {
-    navigator.clipboard.writeText(value);
+    try {
+      navigator.clipboard.writeText(value);
+    } catch {
+      // Silently fail if clipboard is unavailable
+    }
   }, []);
 
   const handleCompare = useCallback(() => {
     if (!compareValue || results.length === 0) return;
 
     // Find matching hash
-    const match = results.find((r) => r.hash === compareValue.toLowerCase());
+    const match = results.find((r) => r.hash.toLowerCase() === compareValue.toLowerCase());
     setCompareResult(match !== undefined);
   }, [compareValue, results]);
 

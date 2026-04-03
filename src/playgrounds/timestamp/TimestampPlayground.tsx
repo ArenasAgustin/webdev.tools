@@ -41,7 +41,11 @@ export function TimestampPlayground() {
   }, []);
 
   const copyToClipboard = useCallback((value: string) => {
-    navigator.clipboard.writeText(value);
+    try {
+      navigator.clipboard.writeText(value);
+    } catch {
+      // Silently fail if clipboard is unavailable
+    }
   }, []);
 
   const formatLabels: { key: keyof TimestampResult; label: string }[] = [

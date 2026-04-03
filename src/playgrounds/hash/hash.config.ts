@@ -10,5 +10,5 @@ export const hashConfig: PlaygroundConfig = {
   },
   language: "text",
   example: "Hello World",
-  keywords: ["hash", "md5", "sha1", "sha256", "sha512", "checksum", "generator"],
+  keywords: ["hash", "md5", "sha1", "sha256", "sha512", "generator"],
 };

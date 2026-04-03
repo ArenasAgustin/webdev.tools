@@ -107,10 +107,15 @@ export function generatePassword(options: PasswordOptions): string {
     return password;
   }
 
-  // Replace random positions with guaranteed characters
+  // Replace random positions with guaranteed characters (using unique positions)
   const passwordArray = password.split("");
+  const usedPositions = new Set<number>();
   for (let i = 0; i < ensureCharacters.length && i < options.length; i++) {
-    const pos = crypto.getRandomValues(new Uint32Array(1))[0] % options.length;
+    let pos: number;
+    do {
+      pos = crypto.getRandomValues(new Uint32Array(1))[0] % options.length;
+    } while (usedPositions.has(pos));
+    usedPositions.add(pos);
     passwordArray[pos] = ensureCharacters[i];
   }
 

@@ -3,10 +3,9 @@ import { generateAllHashes, generateHash, compareHash } from "./hash.utils";
 
 describe("hash.utils", () => {
   describe("generateHash", () => {
-    it("generates MD5 hash", async () => {
+    it("MD5 no está disponible (usar SHA-256)", async () => {
       const hash = await generateHash("hello", "md5");
-      expect(hash).toHaveLength(32);
-      // MD5 is 128-bit = 32 hex characters
+      expect(hash).toBe("No disponible");
     });
 
     it("generates SHA-1 hash", async () => {
@@ -33,10 +32,10 @@ describe("hash.utils", () => {
   });
 
   describe("generateAllHashes", () => {
-    it("generates all hash types", async () => {
+    it("generates SHA hashes (MD5 no disponible)", async () => {
       const results = await generateAllHashes("hello");
-      expect(results).toHaveLength(4);
-      expect(results.map((r) => r.algorithm)).toContain("md5");
+      // MD5 returns "No disponible", pero los SHA siguen funcionando
+      expect(results.length).toBeGreaterThanOrEqual(3);
       expect(results.map((r) => r.algorithm)).toContain("sha1");
       expect(results.map((r) => r.algorithm)).toContain("sha256");
       expect(results.map((r) => r.algorithm)).toContain("sha512");

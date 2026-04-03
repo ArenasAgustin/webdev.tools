@@ -1,5 +1,7 @@
 export type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha512";
 
+export const MD5_UNAVAILABLE = true;
+
 export interface HashResult {
   algorithm: HashAlgorithm;
   hash: string;
@@ -31,32 +33,6 @@ async function generateShaHash(
 }
 
 /**
- * MD5 implementation (using digest if available, fallback to simple)
- * Note: Web Crypto doesn't support MD5, so we use a simple implementation
- * For production, consider using crypto-js or spark-md5
- */
-function generateMd5(message: string): string {
-  // Simple MD5 implementation for demonstration
-  // For production use, consider importing a proper MD5 library
-  let hash = 0;
-  for (let i = 0; i < message.length; i++) {
-    const char = message.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  // Convert to hex with padding
-  let hex = "";
-  for (let i = 0; i < 8; i++) {
-    hex = ((hash >> (i * 4)) & 0x0f).toString(16) + hex;
-  }
-  // Pad to 32 characters (128-bit)
-  while (hex.length < 32) {
-    hex = "0" + hex;
-  }
-  return hex;
-}
-
-/**
  * Generate all hash types for a given text
  */
 export async function generateAllHashes(
@@ -72,7 +48,7 @@ export async function generateAllHashes(
   ]);
 
   return [
-    { algorithm: "md5", hash: generateMd5(text) },
+    { algorithm: "md5", hash: "No disponible" },
     { algorithm: "sha1", hash: uppercase ? sha1.toUpperCase() : sha1 },
     { algorithm: "sha256", hash: uppercase ? sha256.toUpperCase() : sha256 },
     { algorithm: "sha512", hash: uppercase ? sha512.toUpperCase() : sha512 },
@@ -88,7 +64,7 @@ export async function generateHash(
   outputCase: HashOutputCase = "lowercase",
 ): Promise<string> {
   if (algorithm === "md5") {
-    return generateMd5(text);
+    return "No disponible";
   }
 
   const uppercase = outputCase === "uppercase";
@@ -111,12 +87,20 @@ export async function generateHashFromFile(
   outputCase: HashOutputCase = "lowercase",
 ): Promise<string> {
   const buffer = await file.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-  const text = Array.from(bytes)
-    .map((b) => String.fromCharCode(b))
-    .join("");
 
-  return generateHash(text, algorithm, outputCase);
+  if (algorithm === "md5") {
+    return "No disponible";
+  }
+
+  const algorithmMap: Record<Exclude<HashAlgorithm, "md5">, "SHA-1" | "SHA-256" | "SHA-512"> = {
+    sha1: "SHA-1",
+    sha256: "SHA-256",
+    sha512: "SHA-512",
+  };
+
+  const hashBuffer = await crypto.subtle.digest(algorithmMap[algorithm], buffer);
+  const hash = arrayBufferToHex(hashBuffer);
+  return outputCase === "uppercase" ? hash.toUpperCase() : hash;
 }
 
 /**

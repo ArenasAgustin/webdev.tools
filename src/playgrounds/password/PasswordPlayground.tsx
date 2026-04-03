@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import {
   generatePasswordWithStrength,
   defaultPasswordOptions,
+  calculateStrength,
   type PasswordOptions,
 } from "./password.utils";
 
@@ -26,9 +27,13 @@ export function PasswordPlayground() {
 
   const handleCopy = useCallback(() => {
     if (password) {
-      navigator.clipboard.writeText(password);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        navigator.clipboard.writeText(password);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Silently fail if clipboard is unavailable
+      }
     }
   }, [password]);
 
@@ -48,35 +53,7 @@ export function PasswordPlayground() {
     return "bg-emerald-400";
   };
 
-  const strengthResult = password
-    ? (() => {
-        const s = calculateStrengthFromPassword(password, options);
-        return s;
-      })()
-    : null;
-
-  function calculateStrengthFromPassword(
-    pwd: string,
-    opts: PasswordOptions,
-  ): { strength: number; label: string } {
-    let score = 0;
-    score += Math.min(pwd.length * 2, 40);
-    if (opts.includeUppercase) score += 10;
-    if (opts.includeLowercase) score += 10;
-    if (opts.includeNumbers) score += 15;
-    if (opts.includeSymbols) score += 25;
-    const typesUsed = [
-      opts.includeUppercase,
-      opts.includeLowercase,
-      opts.includeNumbers,
-      opts.includeSymbols,
-    ].filter(Boolean).length;
-    if (typesUsed >= 3) score += 10;
-    if (typesUsed === 4) score += 10;
-    score = Math.min(score, 100);
-    const label = score < 40 ? "Débil" : score < 60 ? "Regular" : score < 80 ? "Buena" : "Fuerte";
-    return { strength: score, label };
-  }
+  const strengthResult = password ? calculateStrength(password, options) : null;
 
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-6">
