@@ -140,9 +140,12 @@ export function useJsPlaygroundActions({
 
 function hasLikelyInfiniteLoop(code: string): boolean {
   const patterns = [
-    /while\s*\(\s*true\s*\)/,
+    /while\s*\(\s*1\s*\)/,
+    /while\s*\(\s*true\s*\)/i,
     /for\s*\(\s*;\s*;\s*\)/,
-    /do\s*\{[\s\S]*\}\s*while\s*\(\s*true\s*\)/,
+    /for\s*\(\s*;\s*;\s*[^}]*\)\s*/,
+    /do\s*\{[\s\S]*\}\s*while\s*\(\s*(1|true)\s*\)/i,
+    /while\s*\(\s*!+[^)]+\)/,
   ];
   return patterns.some((pattern) => pattern.test(code));
 }

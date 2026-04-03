@@ -166,6 +166,13 @@ describe("Playground Engines", () => {
   });
 
   describe("all engines", () => {
+    it("calls preload without throwing", () => {
+      expect(() => jsonEngine.preload()).not.toThrow();
+      expect(() => jsEngine.preload()).not.toThrow();
+      expect(() => htmlEngine.preload()).not.toThrow();
+      expect(() => cssEngine.preload()).not.toThrow();
+    });
+
     it("have required properties", () => {
       const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine];
 

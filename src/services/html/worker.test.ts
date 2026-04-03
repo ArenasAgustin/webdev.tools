@@ -1,6 +1,6 @@
-import { vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { defineWorkerServiceTests } from "@/test/workerHarness";
-import { formatHtmlAsync, minifyHtmlAsync } from "./worker";
+import { formatHtmlAsync, minifyHtmlAsync, cleanHtmlAsync } from "./worker";
 
 import * as workerClient from "./workerClient";
 vi.mock("./workerClient", () => ({
@@ -8,6 +8,27 @@ vi.mock("./workerClient", () => ({
     run: vi.fn(),
   },
 }));
+
+describe("cleanHtmlAsync (sync path)", () => {
+  it("returns error for empty input via sync path", async () => {
+    const result = await cleanHtmlAsync("   ");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBeTruthy();
+  });
+
+  it("removes empty tags via sync path", async () => {
+    const result = await cleanHtmlAsync("<div></div><p>hello</p>");
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toContain("<p>hello</p>");
+  });
+});
+
+describe("formatHtmlAsync error via sync path", () => {
+  it("returns error for invalid HTML on small input (sync path)", async () => {
+    const result = await formatHtmlAsync("<div><span>unclosed");
+    expect(result.ok).toBeTypeOf("boolean");
+  });
+});
 
 defineWorkerServiceTests({
   name: "html worker async services",

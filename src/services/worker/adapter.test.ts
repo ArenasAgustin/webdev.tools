@@ -28,8 +28,9 @@ describe("createPlaygroundWorkerAdapter", () => {
   interface TestPayload extends WorkerPayloadBase {
     action: string;
   }
-  it("envía y recibe mensajes correctamente", async () => {
-    const adapter = createPlaygroundWorkerAdapter<
+
+  const makeAdapter = () =>
+    createPlaygroundWorkerAdapter<
       TestPayload,
       { id: string; input: string; action: string },
       { id: string; ok: boolean; value?: string }
@@ -39,8 +40,21 @@ describe("createPlaygroundWorkerAdapter", () => {
       unavailableMessage: "No disponible",
       buildRequest: (id, payload) => ({ id, ...payload }),
     });
+
+  it("envía y recibe mensajes correctamente", async () => {
+    const adapter = makeAdapter();
     const result = await adapter.run({ input: "test", action: "format" });
     expect(result.ok).toBe(true);
     expect(result.value).toBe("ok");
+  });
+
+  it("preload delegates to run.preload", () => {
+    const adapter = makeAdapter();
+    expect(() => adapter.preload()).not.toThrow();
+  });
+
+  it("terminate delegates to run.terminate", () => {
+    const adapter = makeAdapter();
+    expect(() => adapter.terminate()).not.toThrow();
   });
 });

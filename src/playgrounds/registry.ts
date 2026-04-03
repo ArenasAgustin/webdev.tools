@@ -6,6 +6,9 @@ import { jsPlaygroundConfig } from "./js/js.config";
 import { htmlPlaygroundConfig } from "./html/html.config";
 import { cssPlaygroundConfig } from "./css/css.config";
 import { colorsConfig } from "./colors/colors.config";
+import { hashConfig } from "./hash/hash.config";
+import { passwordConfig } from "./password/password.config";
+import { timestampConfig } from "./timestamp/timestamp.config";
 
 export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
@@ -16,6 +19,9 @@ const loadJsPlayground = () => import("./js/JsPlayground");
 const loadHtmlPlayground = () => import("./html/HtmlPlayground");
 const loadCssPlayground = () => import("./css/CssPlayground");
 const loadColorsPlayground = () => import("./colors/ColorsPlayground");
+const loadHashPlayground = () => import("./hash/HashPlayground");
+const loadPasswordPlayground = () => import("./password/PasswordPlayground");
+const loadTimestampPlayground = () => import("./timestamp/TimestampPlayground");
 
 const playgroundLoaders: Record<string, () => Promise<unknown>> = {
   [jsonPlaygroundConfig.id]: loadJsonPlayground,
@@ -23,6 +29,9 @@ const playgroundLoaders: Record<string, () => Promise<unknown>> = {
   [htmlPlaygroundConfig.id]: loadHtmlPlayground,
   [cssPlaygroundConfig.id]: loadCssPlayground,
   [colorsConfig.id]: loadColorsPlayground,
+  [hashConfig.id]: loadHashPlayground,
+  [passwordConfig.id]: loadPasswordPlayground,
+  [timestampConfig.id]: loadTimestampPlayground,
 };
 
 export const playgroundRegistry: PlaygroundRegistryItem[] = [
@@ -63,6 +72,30 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
     component: lazy(() =>
       loadColorsPlayground().then((module) => ({
         default: module.ColorsPlayground,
+      })),
+    ),
+  },
+  {
+    ...hashConfig,
+    component: lazy(() =>
+      loadHashPlayground().then((module) => ({
+        default: module.HashPlayground,
+      })),
+    ),
+  },
+  {
+    ...passwordConfig,
+    component: lazy(() =>
+      loadPasswordPlayground().then((module) => ({
+        default: module.PasswordPlayground,
+      })),
+    ),
+  },
+  {
+    ...timestampConfig,
+    component: lazy(() =>
+      loadTimestampPlayground().then((module) => ({
+        default: module.TimestampPlayground,
       })),
     ),
   },

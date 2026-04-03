@@ -198,6 +198,42 @@ describe("colorConverter - hsvToRgb", () => {
     const result = hsvToRgb(0, 0, 100);
     expect(result).toEqual({ r: 255, g: 255, b: 255 });
   });
+
+  it("handles hue sector 1 (60-120°) — chartreuse", () => {
+    // h=90, i=floor(90/360*6)=1 → case 1: r=q, g=v, b=p
+    const result = hsvToRgb(90, 100, 100);
+    expect(result.g).toBe(255);
+    expect(result.b).toBe(0);
+    expect(result.r).toBeGreaterThan(0);
+    expect(result.r).toBeLessThan(255);
+  });
+
+  it("handles hue sector 2 (120-180°) — spring green", () => {
+    // h=150, i=floor(150/360*6)=2 → case 2: r=p, g=v, b=t
+    const result = hsvToRgb(150, 100, 100);
+    expect(result.r).toBe(0);
+    expect(result.g).toBe(255);
+    expect(result.b).toBeGreaterThan(0);
+    expect(result.b).toBeLessThan(255);
+  });
+
+  it("handles hue sector 4 (240-300°) — violet", () => {
+    // h=270, i=floor(270/360*6)=4 → case 4: r=t, g=p, b=v
+    const result = hsvToRgb(270, 100, 100);
+    expect(result.b).toBe(255);
+    expect(result.g).toBe(0);
+    expect(result.r).toBeGreaterThan(0);
+    expect(result.r).toBeLessThan(255);
+  });
+
+  it("handles hue sector 5 (300-360°) — rose", () => {
+    // h=330, i=floor(330/360*6)=5 → case 5: r=v, g=p, b=q
+    const result = hsvToRgb(330, 100, 100);
+    expect(result.r).toBe(255);
+    expect(result.g).toBe(0);
+    expect(result.b).toBeGreaterThan(0);
+    expect(result.b).toBeLessThan(255);
+  });
 });
 
 describe("colorConverter - rgbToCmyk", () => {

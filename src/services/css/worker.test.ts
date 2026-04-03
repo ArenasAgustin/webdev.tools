@@ -1,6 +1,6 @@
-import { vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { defineWorkerServiceTests } from "@/test/workerHarness";
-import { formatCssAsync, minifyCssAsync } from "./worker";
+import { formatCssAsync, minifyCssAsync, cleanCssAsync } from "./worker";
 
 import * as workerClient from "./workerClient";
 vi.mock("./workerClient", () => ({
@@ -8,6 +8,31 @@ vi.mock("./workerClient", () => ({
     run: vi.fn(),
   },
 }));
+
+describe("cleanCssAsync (sync path)", () => {
+  it("returns error for empty input via sync path", async () => {
+    const result = await cleanCssAsync("   ");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toContain("vacío");
+  });
+
+  it("removes empty rules via sync path", async () => {
+    const result = await cleanCssAsync(".empty {} .used { color: red; }");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).not.toContain(".empty");
+      expect(result.value).toContain(".used");
+    }
+  });
+});
+
+describe("formatCssAsync error via sync path", () => {
+  it("returns error for invalid CSS on small input (sync path)", async () => {
+    const result = await formatCssAsync(".card { color: red;");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBeTruthy();
+  });
+});
 
 defineWorkerServiceTests({
   name: "css worker async services",
