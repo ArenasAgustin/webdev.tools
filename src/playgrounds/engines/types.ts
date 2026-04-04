@@ -5,12 +5,12 @@ import type { ValidationState } from "@/hooks/useAsyncValidator";
 /**
  * Playground mode - identifies which playground is active
  */
-export type PlaygroundMode = "json" | "js" | "html" | "css";
+export type PlaygroundMode = "json" | "js" | "html" | "css" | "php";
 
 /**
  * Monaco editor language identifiers
  */
-export type MonacoLanguage = "json" | "javascript" | "html" | "css";
+export type MonacoLanguage = "json" | "javascript" | "html" | "css" | "php";
 
 /**
  * Playground features - what special capabilities each playground supports
@@ -19,7 +19,9 @@ export type PlaygroundFeature =
   | "clean" // JSON - has clean/format options
   | "execute" // JS - can execute code
   | "preview" // HTML - has live preview iframe
-  | "jsonPath"; // JSON - has JSONPath filtering
+  | "jsonPath" // JSON - has JSONPath filtering
+  | "validate" // PHP - has syntax validation
+  | "minify"; // JSON, JS, HTML, CSS - has minify capability
 
 /**
  * Output panel props - passed to custom output panel renderers

@@ -36,7 +36,7 @@ export const cssEngine = {
   id: "css",
   config: cssPlaygroundConfig,
   editorLanguage: "css" as const,
-  features: ["clean"] as const,
+  features: ["clean", "minify"] as const,
   defaultFormatConfig: DEFAULT_CSS_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_CSS_MINIFY_CONFIG,
   cleanConfig: DEFAULT_CSS_CLEAN_CONFIG,
