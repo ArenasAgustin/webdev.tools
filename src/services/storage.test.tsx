@@ -517,13 +517,19 @@ describe("Storage Service", () => {
     });
 
     it("overwrites HTML config", () => {
-      saveHtmlToolsConfig({ format: { indentSize: 2, formatCss: true, formatJs: true, autoCopy: false } });
-      saveHtmlToolsConfig({ format: { indentSize: 4, formatCss: true, formatJs: true, autoCopy: false } });
+      saveHtmlToolsConfig({
+        format: { indentSize: 2, formatCss: true, formatJs: true, autoCopy: false },
+      });
+      saveHtmlToolsConfig({
+        format: { indentSize: 4, formatCss: true, formatJs: true, autoCopy: false },
+      });
       expect(loadHtmlToolsConfig()?.format?.indentSize).toBe(4);
     });
 
     it("removes HTML config", () => {
-      saveHtmlToolsConfig({ format: { indentSize: 2, formatCss: true, formatJs: true, autoCopy: false } });
+      saveHtmlToolsConfig({
+        format: { indentSize: 2, formatCss: true, formatJs: true, autoCopy: false },
+      });
       removeHtmlToolsConfig();
       expect(loadHtmlToolsConfig()).toBeNull();
     });

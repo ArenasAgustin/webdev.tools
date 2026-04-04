@@ -107,9 +107,7 @@ describe("createWorkerClient", () => {
       unavailableMessage: "Worker no disponible en este entorno",
     });
 
-    await expect(client({ value: "test" })).rejects.toThrow(
-      "Worker no disponible en este entorno",
-    );
+    await expect(client({ value: "test" })).rejects.toThrow("Worker no disponible en este entorno");
   });
 
   it("worker onerror rejects all pending requests", async () => {
