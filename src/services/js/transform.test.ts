@@ -183,7 +183,7 @@ describe("cleanJs", () => {
   });
 
   it("does not remove empty object used as property value", () => {
-    const result = cleanJs('const obj = { a: {} };');
+    const result = cleanJs("const obj = { a: {} };");
     expect(result.ok).toBe(true);
     if (result.ok) {
       // Property value {} should NOT be removed (invalid syntax if removed)

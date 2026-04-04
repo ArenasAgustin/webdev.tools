@@ -36,7 +36,7 @@ export const jsEngine = {
   id: "js",
   config: jsPlaygroundConfig,
   editorLanguage: "javascript" as const,
-  features: ["execute", "clean"] as const,
+  features: ["execute", "clean", "minify"] as const,
   defaultFormatConfig: DEFAULT_JS_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_JS_MINIFY_CONFIG,
   cleanConfig: DEFAULT_JS_CLEAN_CONFIG,

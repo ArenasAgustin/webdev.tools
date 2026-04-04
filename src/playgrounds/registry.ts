@@ -9,6 +9,7 @@ import { colorsConfig } from "./colors/colors.config";
 import { hashConfig } from "./hash/hash.config";
 import { passwordConfig } from "./password/password.config";
 import { timestampConfig } from "./timestamp/timestamp.config";
+import { phpPlaygroundConfig } from "./php/php.config";
 
 export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
@@ -22,6 +23,7 @@ const loadColorsPlayground = () => import("./colors/ColorsPlayground");
 const loadHashPlayground = () => import("./hash/HashPlayground");
 const loadPasswordPlayground = () => import("./password/PasswordPlayground");
 const loadTimestampPlayground = () => import("./timestamp/TimestampPlayground");
+const loadPhpPlayground = () => import("./php/PhpPlayground");
 
 const playgroundLoaders: Record<string, () => Promise<unknown>> = {
   [jsonPlaygroundConfig.id]: loadJsonPlayground,
@@ -32,6 +34,7 @@ const playgroundLoaders: Record<string, () => Promise<unknown>> = {
   [hashConfig.id]: loadHashPlayground,
   [passwordConfig.id]: loadPasswordPlayground,
   [timestampConfig.id]: loadTimestampPlayground,
+  [phpPlaygroundConfig.id]: loadPhpPlayground,
 };
 
 export const playgroundRegistry: PlaygroundRegistryItem[] = [
@@ -64,6 +67,14 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
     component: lazy(() =>
       loadCssPlayground().then((module) => ({
         default: module.CssPlayground,
+      })),
+    ),
+  },
+  {
+    ...phpPlaygroundConfig,
+    component: lazy(() =>
+      loadPhpPlayground().then((module) => ({
+        default: module.PhpPlayground,
       })),
     ),
   },

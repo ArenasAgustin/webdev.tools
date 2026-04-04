@@ -49,7 +49,7 @@ export const jsonEngine = {
   id: "json",
   config: jsonPlaygroundConfig,
   editorLanguage: "json" as const,
-  features: ["clean", "jsonPath"] as const,
+  features: ["clean", "jsonPath", "minify"] as const,
   defaultFormatConfig: DEFAULT_JSON_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_JSON_MINIFY_CONFIG,
   loadToolsConfig: loadJsonToolsConfig,

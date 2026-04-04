@@ -6,6 +6,7 @@
 import type { JsonToolsConfig } from "@/types/json";
 import type { JsToolsConfig } from "@/types/js";
 import type { HtmlToolsConfig } from "@/types/html";
+import type { PhpToolsConfig } from "@/types/php";
 import type { CssToolsConfig } from "@/types/css";
 
 const getStorage = (): Storage | null => {
@@ -32,6 +33,8 @@ export const STORAGE_KEYS = {
   JS_TOOLS_CONFIG: "jsToolsConfig",
   HTML_TOOLS_CONFIG: "htmlToolsConfig",
   CSS_TOOLS_CONFIG: "cssToolsConfig",
+  PHP_TOOLS_CONFIG: "phpToolsConfig",
+  LAST_PHP: "lastPhp",
   LAST_JSON: "lastJson",
   LAST_JS: "lastJs",
   LAST_HTML: "lastHtml",
@@ -279,3 +282,27 @@ export const saveLastCss = (value: string) => saveLastInput(STORAGE_KEYS.LAST_CS
 
 /** Remove last CSS from localStorage */
 export const removeLastCss = () => removeItem(STORAGE_KEYS.LAST_CSS);
+
+/** Load PHP tools configuration from localStorage */
+export function loadPhpToolsConfig(): Partial<PhpToolsConfig> | null {
+  return getItem<Partial<PhpToolsConfig>>(STORAGE_KEYS.PHP_TOOLS_CONFIG);
+}
+
+/** Save PHP tools configuration to localStorage */
+export function savePhpToolsConfig(config: Partial<PhpToolsConfig>): boolean {
+  return setItem(STORAGE_KEYS.PHP_TOOLS_CONFIG, config);
+}
+
+/** Remove PHP tools configuration from localStorage */
+export function removePhpToolsConfig(): boolean {
+  return removeItem(STORAGE_KEYS.PHP_TOOLS_CONFIG);
+}
+
+/** Load last PHP input from localStorage */
+export const loadLastPhp = () => loadLastInput(STORAGE_KEYS.LAST_PHP, "PHP");
+
+/** Save last PHP input to localStorage */
+export const saveLastPhp = (value: string) => saveLastInput(STORAGE_KEYS.LAST_PHP, "PHP", value);
+
+/** Remove last PHP from localStorage */
+export const removeLastPhp = () => removeItem(STORAGE_KEYS.LAST_PHP);

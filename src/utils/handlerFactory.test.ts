@@ -22,7 +22,12 @@ describe("createValidatedHandler", () => {
     const toast = { success: vi.fn(), error: vi.fn() };
     const run = vi.fn().mockReturnValue({ ok: true });
 
-    const handler = createValidatedHandler({ validate: () => null, run, toast, successMessage: "done" });
+    const handler = createValidatedHandler({
+      validate: () => null,
+      run,
+      toast,
+      successMessage: "done",
+    });
     handler();
 
     expect(run).toHaveBeenCalled();
@@ -126,7 +131,7 @@ describe("createValidatedHandler", () => {
     const toast = { success: vi.fn(), error: vi.fn() };
 
     const handler = createValidatedHandler({
-      run: () => ({ ok: "yes" } as unknown as { ok: boolean }),
+      run: () => ({ ok: "yes" }) as unknown as { ok: boolean },
       toast,
       successMessage: "done",
     });

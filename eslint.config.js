@@ -112,6 +112,18 @@ export default defineConfig([
       "@typescript-eslint/no-implied-eval": "off",
     },
   },
+  {
+    files: [
+      "src/hooks/usePhpPlaygroundActions.ts",
+      "src/playgrounds/engines/php.engine.ts",
+      "src/services/php/service.ts",
+      "src/services/php/transform.ts",
+    ],
+    rules: {
+      "@typescript-eslint/no-implied-eval": "off",
+      "@typescript-eslint/require-await": "off",
+    },
+  },
   prettierConfig,
   ...storybook.configs["flat/recommended"],
 ]);

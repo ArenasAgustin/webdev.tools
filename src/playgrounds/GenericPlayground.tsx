@@ -50,6 +50,7 @@ export function GenericPlayground({
   // Check features
   const hasClean = engine.features.includes("clean");
   const hasExecute = engine.features.includes("execute");
+  const hasMinify = engine.features.includes("minify");
 
   // Handle clean config
   const hasCleanConfig =
@@ -104,7 +105,7 @@ export function GenericPlayground({
   const toolbarParams = hasCleanConfig
     ? {
         handleFormat: actions.handleFormat,
-        handleMinify: actions.handleMinify,
+        handleMinify: hasMinify ? actions.handleMinify : undefined,
         handleClean: actions.handleClean!,
         handleExecute: actions.handleExecute,
         handleCopyOutput: actions.handleCopyOutput,
@@ -124,7 +125,7 @@ export function GenericPlayground({
       }
     : {
         handleFormat: actions.handleFormat,
-        handleMinify: actions.handleMinify,
+        handleMinify: hasMinify ? actions.handleMinify : undefined,
         handleExecute: hasExecute ? actions.handleExecute : undefined,
         handleCopyOutput: actions.handleCopyOutput,
         handleClearInput: actions.handleClearInput,

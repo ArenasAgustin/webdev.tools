@@ -84,7 +84,7 @@ export function usePlaygroundSetup<TFormat extends object, TMinify extends objec
 
 interface PlaygroundToolbarBase<M extends string, TFormat, TMinify> {
   handleFormat: () => void;
-  handleMinify: () => void;
+  handleMinify?: () => void;
   handleCopyOutput: () => void;
   handleClearInput: () => void;
   handleExecute?: () => void;
@@ -165,7 +165,7 @@ export function usePlaygroundToolbar<
 
   usePlaygroundShortcuts({
     onFormat: handleFormat,
-    onMinify: handleMinify,
+    onMinify: handleMinify ?? undefined,
     onClean: handleClean,
     onCopyOutput: handleCopyOutput,
     onClearInput: handleClearInput,

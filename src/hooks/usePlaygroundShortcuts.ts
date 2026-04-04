@@ -2,7 +2,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 interface PlaygroundShortcutsHandlers {
   onFormat: () => void;
-  onMinify: () => void;
+  onMinify?: () => void;
   onClean?: () => void;
   onCopyOutput: () => void;
   onClearInput: () => void;

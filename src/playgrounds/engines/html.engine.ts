@@ -36,7 +36,7 @@ export const htmlEngine = {
   id: "html",
   config: htmlPlaygroundConfig,
   editorLanguage: "html" as const,
-  features: ["preview", "clean"] as const,
+  features: ["preview", "clean", "minify"] as const,
   defaultFormatConfig: DEFAULT_HTML_FORMAT_CONFIG,
   defaultMinifyConfig: DEFAULT_HTML_MINIFY_CONFIG,
   cleanConfig: DEFAULT_HTML_CLEAN_CONFIG,

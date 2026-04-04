@@ -4,7 +4,7 @@ import type { ToolbarAction, ToolbarConfig } from "@/types/toolbar";
 export interface UseToolbarConfigParams<M extends string, TFormat, TMinify> {
   mode: M;
   handleFormat: () => void;
-  handleMinify: () => void;
+  handleMinify?: () => void;
   formatConfig: TFormat;
   setFormatConfig: (config: TFormat) => void;
   minifyConfig: TMinify;
@@ -91,24 +91,24 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
         loading: isProcessing,
       });
     }
-    actions.push(
-      {
-        label: "Formatear",
-        icon: "indent",
-        variant: "primary",
-        onClick: handleFormat,
-        disabled: isProcessing,
-        loading: isProcessing,
-      },
-      {
+    actions.push({
+      label: "Formatear",
+      icon: "indent",
+      variant: "primary",
+      onClick: handleFormat,
+      disabled: isProcessing,
+      loading: isProcessing,
+    });
+    if (handleMinify) {
+      actions.push({
         label: "Minificar",
         icon: "compress",
         variant: "purple",
         onClick: handleMinify,
         disabled: isProcessing,
         loading: isProcessing,
-      },
-    );
+      });
+    }
     if (handleClean) {
       actions.push({
         label: "Limpiar vacíos",

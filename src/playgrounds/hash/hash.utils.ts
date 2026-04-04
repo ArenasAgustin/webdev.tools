@@ -1,6 +1,4 @@
-export type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha512";
-
-export const MD5_UNAVAILABLE = true;
+export type HashAlgorithm = "sha1" | "sha256" | "sha512";
 
 export interface HashResult {
   algorithm: HashAlgorithm;
@@ -48,7 +46,6 @@ export async function generateAllHashes(
   ]);
 
   return [
-    { algorithm: "md5", hash: "No disponible" },
     { algorithm: "sha1", hash: uppercase ? sha1.toUpperCase() : sha1 },
     { algorithm: "sha256", hash: uppercase ? sha256.toUpperCase() : sha256 },
     { algorithm: "sha512", hash: uppercase ? sha512.toUpperCase() : sha512 },
@@ -63,12 +60,8 @@ export async function generateHash(
   algorithm: HashAlgorithm,
   outputCase: HashOutputCase = "lowercase",
 ): Promise<string> {
-  if (algorithm === "md5") {
-    return "No disponible";
-  }
-
   const uppercase = outputCase === "uppercase";
-  const algorithmMap: Record<Exclude<HashAlgorithm, "md5">, "SHA-1" | "SHA-256" | "SHA-512"> = {
+  const algorithmMap: Record<HashAlgorithm, "SHA-1" | "SHA-256" | "SHA-512"> = {
     sha1: "SHA-1",
     sha256: "SHA-256",
     sha512: "SHA-512",
@@ -88,11 +81,7 @@ export async function generateHashFromFile(
 ): Promise<string> {
   const buffer = await file.arrayBuffer();
 
-  if (algorithm === "md5") {
-    return "No disponible";
-  }
-
-  const algorithmMap: Record<Exclude<HashAlgorithm, "md5">, "SHA-1" | "SHA-256" | "SHA-512"> = {
+  const algorithmMap: Record<HashAlgorithm, "SHA-1" | "SHA-256" | "SHA-512"> = {
     sha1: "SHA-1",
     sha256: "SHA-256",
     sha512: "SHA-512",
