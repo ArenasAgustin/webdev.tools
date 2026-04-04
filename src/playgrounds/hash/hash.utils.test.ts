@@ -3,11 +3,6 @@ import { generateAllHashes, generateHash, compareHash } from "./hash.utils";
 
 describe("hash.utils", () => {
   describe("generateHash", () => {
-    it("MD5 no está disponible (usar SHA-256)", async () => {
-      const hash = await generateHash("hello", "md5");
-      expect(hash).toBe("No disponible");
-    });
-
     it("generates SHA-1 hash", async () => {
       const hash = await generateHash("hello", "sha1");
       expect(hash).toHaveLength(40);
@@ -32,10 +27,9 @@ describe("hash.utils", () => {
   });
 
   describe("generateAllHashes", () => {
-    it("generates SHA hashes (MD5 no disponible)", async () => {
+    it("generates SHA hashes", async () => {
       const results = await generateAllHashes("hello");
-      // MD5 returns "No disponible", pero los SHA siguen funcionando
-      expect(results.length).toBeGreaterThanOrEqual(3);
+      expect(results.length).toBe(3);
       expect(results.map((r) => r.algorithm)).toContain("sha1");
       expect(results.map((r) => r.algorithm)).toContain("sha256");
       expect(results.map((r) => r.algorithm)).toContain("sha512");
@@ -44,7 +38,7 @@ describe("hash.utils", () => {
 
   describe("compareHash", () => {
     it("returns false for non-matching hash", async () => {
-      const result = await compareHash("hello", "wronghash", "md5");
+      const result = await compareHash("hello", "wronghash", "sha256");
       expect(result).toBe(false);
     });
   });

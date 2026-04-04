@@ -71,6 +71,14 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
     ),
   },
   {
+    ...phpPlaygroundConfig,
+    component: lazy(() =>
+      loadPhpPlayground().then((module) => ({
+        default: module.PhpPlayground,
+      })),
+    ),
+  },
+  {
     ...colorsConfig,
     component: lazy(() =>
       loadColorsPlayground().then((module) => ({
@@ -99,14 +107,6 @@ export const playgroundRegistry: PlaygroundRegistryItem[] = [
     component: lazy(() =>
       loadTimestampPlayground().then((module) => ({
         default: module.TimestampPlayground,
-      })),
-    ),
-  },
-  {
-    ...phpPlaygroundConfig,
-    component: lazy(() =>
-      loadPhpPlayground().then((module) => ({
-        default: module.PhpPlayground,
       })),
     ),
   },

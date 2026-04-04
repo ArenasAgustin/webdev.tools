@@ -5,10 +5,10 @@ export const hashConfig: PlaygroundConfig = {
   name: { es: "Hash Generator", en: "Hash Generator" },
   icon: "fas fa-hashtag",
   description: {
-    es: "Generar hashes MD5, SHA-1, SHA-256 y SHA-512 desde texto o archivos",
-    en: "Generate MD5, SHA-1, SHA-256 and SHA-512 hashes from text or files",
+    es: "Generar hashes SHA-1, SHA-256 y SHA-512 desde texto o archivos",
+    en: "Generate SHA-1, SHA-256 and SHA-512 hashes from text or files",
   },
   language: "text",
   example: "Hello World",
-  keywords: ["hash", "md5", "sha1", "sha256", "sha512", "generator"],
+  keywords: ["hash", "sha1", "sha256", "sha512", "generator"],
 };
