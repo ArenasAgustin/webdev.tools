@@ -2,37 +2,37 @@
 
 Project-specific skill registry for SDD integration.
 
-## User-Level Skills
+## User Skills
 
-| Skill                         | Trigger                                  | Description                              |
-| ----------------------------- | ---------------------------------------- | ---------------------------------------- |
-| `sdd-init`                    | `/sdd-init`, "iniciar sdd"               | Initialize SDD context                   |
-| `sdd-explore`                 | `/sdd-explore <topic>`                   | Explore and investigate ideas            |
-| `sdd-propose`                 | `/sdd-new <name>`, `/sdd-propose`        | Create change proposal                   |
-| `sdd-spec`                    | SDD workflow                             | Write specifications with scenarios      |
-| `sdd-design`                  | SDD workflow                             | Technical design document                |
-| `sdd-tasks`                   | SDD workflow                             | Break down into implementation tasks     |
-| `sdd-apply`                   | SDD workflow                             | Implement tasks from change              |
-| `sdd-verify`                  | SDD workflow                             | Validate implementation matches specs    |
-| `sdd-archive`                 | SDD workflow                             | Sync delta specs to main, archive change |
-| `skill-registry`              | "update skills", "skill registry"        | Update skill registry                    |
-| `skill-creator`               | "create skill", "add agent instructions" | Create new AI skills                     |
-| `go-testing`                  | Go tests, Bubbletea TUI                  | Go testing patterns                      |
-| `judgment-day`                | "judgment day", "dual review"            | Adversarial review                       |
-| `vercel-react-best-practices` | React/Next.js code                       | Vercel React performance guidelines      |
+| Skill                         | Trigger                                       | Description                              |
+| ----------------------------- | --------------------------------------------- | ---------------------------------------- |
+| `sdd-init`                    | `/sdd-init`, "iniciar sdd"                    | Initialize SDD context                   |
+| `sdd-explore`                 | `/sdd-explore <topic>`                        | Explore and investigate ideas            |
+| `sdd-propose`                 | `/sdd-new <name>`, `/sdd-propose`             | Create change proposal                   |
+| `sdd-spec`                    | SDD workflow                                  | Write specifications with scenarios      |
+| `sdd-design`                  | SDD workflow                                  | Technical design document                |
+| `sdd-tasks`                   | SDD workflow                                  | Break down into implementation tasks     |
+| `sdd-apply`                   | SDD workflow                                  | Implement tasks from change              |
+| `sdd-verify`                  | SDD workflow                                  | Validate implementation matches specs    |
+| `sdd-archive`                 | SDD workflow                                  | Sync delta specs to main, archive change |
+| `skill-registry`              | "update skills", "skill registry"             | Update skill registry                    |
+| `skill-creator`               | "create skill", "add agent instructions"      | Create new AI skills                     |
+| `go-testing`                  | Go tests, Bubbletea TUI                       | Go testing patterns                      |
+| `judgment-day`                | "judgment day", "dual review", "doble review" | Adversarial review                       |
+| `vercel-react-best-practices` | React/Next.js code                            | Vercel React performance guidelines      |
+| `storybook-story-writing`     | Storybook stories                             | CSF3 Storybook story writing             |
 
 ## Project Conventions
 
-### Referenced Files
+| File                   | Path                                           | Notes                                 |
+| ---------------------- | ---------------------------------------------- | ------------------------------------- |
+| AGENTS.md              | D:/Programacion/webdev.tools/AGENTS.md         | Index — project commands and workflow |
+| CLAUDE.md              | D:/Programacion/webdev.tools/CLAUDE.md         | Global rules and personality          |
+| docs/ROADMAP.md        | D:/Programacion/webdev.tools/ROADMAP.md        | Keep updated on phase completion      |
+| docs/ARCHITECTURE.md   | D:/Programacion/webdev.tools/ARCHITECTURE.md   | System architecture                   |
+| docs/TESTING_MATRIX.md | D:/Programacion/webdev.tools/TESTING_MATRIX.md | Testing strategy                      |
 
-- `AGENTS.md` — Project-specific agent instructions (OpenCode commands, workflow, testing)
-- `CLAUDE.md` — Global rules and personality
-- `docs/ROADMAP.md` — Project roadmap (keep updated)
-- `docs/ARCHITECTURE.md` — System architecture documentation
-- `docs/AI_CONTEXT.md` — AI-specific context
-- `docs/TESTING_MATRIX.md` — Testing strategy and coverage
-
-### Project Stack
+## Project Stack
 
 - **Frontend**: React 19 + TypeScript 5.9
 - **Build**: Vite 7.2.5 (rolldown-vite)
@@ -44,32 +44,20 @@ Project-specific skill registry for SDD integration.
 - **Routing**: React Router DOM 7
 - **CI/Git**: Husky + lint-staged
 
-### Workflow Commands
+## Workflow Commands
 
 ```bash
 # Pre-commit validation (REQUIRED before commit)
-pnpm typecheck
-pnpm lint
-pnpm test:coverage --run
-pnpm verify:arch
-
-# Testing
-pnpm test --run          # Unit tests
-pnpm test:coverage --run # With coverage
-pnpm build && pnpm e2e  # E2E tests
-
-# Development
-pnpm dev
-pnpm storybook
+pnpm typecheck && pnpm lint && pnpm test:coverage --run && pnpm verify:arch
 ```
 
-### Language
+## Language
 
 - **Response language**: Spanish (voseo)
 - **Code comments**: English preferred
 - **Commit messages**: Conventional commits (English)
 
-### Notes
+## Notes
 
 - SDD mandatory for complex changes (new features, large refactors)
 - Direct work allowed for simple fixes and small refactors

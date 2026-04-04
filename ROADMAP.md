@@ -439,9 +439,9 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 - [x] Agregar limpiar vacios a JS (variables, funciones, objetos vacíos), html (etiquetas vacías) y css (reglas vacías)
 - [ ] Transformación de JSON a TOON, CSV, XML, YAML
 - [x] Color transform (Color Picker con conversión HEX, RGB, HSL, HSV, CMYK)
-- [ ] Hash generador
-- [ ] Random password generator
-- [ ] Unix timestamp transform
+- [x] Hash generador
+- [x] Random password generator
+- [x] Unix timestamp transform
 - [ ] Convertidor de unidades de CSS
 - [ ] Generador de QR codes
 - [ ] Playground de Markdown con preview

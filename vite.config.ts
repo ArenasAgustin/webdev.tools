@@ -55,6 +55,21 @@ export default defineConfig({
       "@/playgrounds": path.resolve(__dirname, "./src/playgrounds"),
     },
   },
+  define: {
+    // Polyfill for php-parser and other Node.js-dependent libraries
+    "process.env": "{}",
+    "process.argv": "[]",
+    "process.platform": "'browser'",
+    "process.version": "''",
+    "process.cwd": "() => '/'",
+    "process.exit": "() => {}",
+    "process.stdout": "{ write: () => {} }",
+    "process.stderr": "{ write: () => {} }",
+    "process.hrtime": "() => [0, 0]",
+    "process.umask": "() => 0",
+    "process.getuid": "() => 0",
+    "process.getgid": "() => 0",
+  },
   build: {
     target: "esnext",
     rollupOptions: {
