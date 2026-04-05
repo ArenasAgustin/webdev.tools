@@ -179,7 +179,7 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
         });
       } else {
         store.add({
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           expression,
           timestamp: Date.now(),
           frequency: 1,
