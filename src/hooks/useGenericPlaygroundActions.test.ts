@@ -144,9 +144,9 @@ describe("useGenericPlaygroundActions", () => {
         readAsText: vi.fn(),
       };
 
-      vi.spyOn(global, "FileReader").mockImplementation(function () {
-        return mockFileReader;
-      } as unknown as typeof FileReader);
+      vi.spyOn(global, "FileReader").mockImplementation(
+        () => mockFileReader as unknown as FileReader,
+      );
     });
 
     it("valid extension → calls setInput with file content and shows success toast", async () => {
