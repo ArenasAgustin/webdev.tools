@@ -3,6 +3,7 @@ import { jsonEngine } from "./json.engine";
 import { jsEngine } from "./js.engine";
 import { htmlEngine } from "./html.engine";
 import { cssEngine } from "./css.engine";
+import { phpEngine } from "./php.engine";
 
 describe("Playground Engines", () => {
   describe("jsonEngine", () => {
@@ -165,16 +166,54 @@ describe("Playground Engines", () => {
     });
   });
 
+  describe("phpEngine", () => {
+    it("has correct id and config", () => {
+      expect(phpEngine.id).toBe("php");
+      expect(phpEngine.editorLanguage).toBe("php");
+      expect(phpEngine.features).toContain("validate");
+    });
+
+    it("maps base params to php-specific params", () => {
+      const baseParams = {
+        input: "<?php echo 'hello';",
+        setInput: () => {},
+        output: "",
+        setOutput: () => {},
+        setError: () => {},
+        formatConfig: { indentSize: 2 },
+        minifyConfig: { autoCopy: false },
+        inputTooLarge: false,
+        inputTooLargeMessage: "Too large",
+        toast: { success: () => {}, error: () => {} },
+      };
+
+      const mapped = phpEngine.mapActionsParams(baseParams);
+
+      expect(mapped.inputPhp).toBe(baseParams.input);
+      expect(mapped.setInputPhp).toBe(baseParams.setInput);
+    });
+
+    it("has correct file config", () => {
+      expect(phpEngine.fileConfig.inputFileName).toBe("code.php");
+      expect(phpEngine.fileConfig.mimeType).toBe("application/x-php");
+    });
+
+    it("preload does not throw", () => {
+      expect(() => phpEngine.preload()).not.toThrow();
+    });
+  });
+
   describe("all engines", () => {
     it("calls preload without throwing", () => {
       expect(() => jsonEngine.preload()).not.toThrow();
       expect(() => jsEngine.preload()).not.toThrow();
       expect(() => htmlEngine.preload()).not.toThrow();
       expect(() => cssEngine.preload()).not.toThrow();
+      expect(() => phpEngine.preload()).not.toThrow();
     });
 
     it("have required properties", () => {
-      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine];
+      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine, phpEngine];
 
       for (const engine of engines) {
         expect(engine.id).toBeDefined();
@@ -195,7 +234,7 @@ describe("Playground Engines", () => {
     });
 
     it("have valid file configs with all required fields", () => {
-      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine];
+      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine, phpEngine];
 
       for (const engine of engines) {
         const { fileConfig } = engine;

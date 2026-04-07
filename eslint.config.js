@@ -92,6 +92,8 @@ export default defineConfig([
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/prefer-promise-reject-errors": "off",
+      "@typescript-eslint/require-await": "off",
+      "@typescript-eslint/unbound-method": "off",
     },
   },
   {

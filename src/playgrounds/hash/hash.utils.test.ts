@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateAllHashes, generateHash, compareHash } from "./hash.utils";
+import { generateAllHashes, generateHash, compareHash, generateHashFromFile } from "./hash.utils";
 
 describe("hash.utils", () => {
   describe("generateHash", () => {
@@ -40,6 +40,29 @@ describe("hash.utils", () => {
     it("returns false for non-matching hash", async () => {
       const result = await compareHash("hello", "wronghash", "sha256");
       expect(result).toBe(false);
+    });
+
+    it("returns true for matching hash", async () => {
+      // Generate correct hash for "hello" with sha256
+      const correctHash = await generateHash("hello", "sha256", "lowercase");
+      const result = await compareHash("hello", correctHash, "sha256");
+      expect(result).toBe(true);
+    });
+  });
+
+  describe("generateHashFromFile", () => {
+    it("generates hash from File object", async () => {
+      const file = new File(["hello"], "test.txt", { type: "text/plain" });
+      const hash = await generateHashFromFile(file, "sha256");
+      expect(hash).toHaveLength(64);
+    });
+
+    it("respects output case for file hash", async () => {
+      const file = new File(["hello"], "test.txt", { type: "text/plain" });
+      const lower = await generateHashFromFile(file, "sha256", "lowercase");
+      const upper = await generateHashFromFile(file, "sha256", "uppercase");
+      expect(lower).toBe(lower.toLowerCase());
+      expect(upper).toBe(upper.toUpperCase());
     });
   });
 });

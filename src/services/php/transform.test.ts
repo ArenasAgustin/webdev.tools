@@ -55,7 +55,7 @@ function hello($name){return "Hello, ".$name;}`;
     }
   });
 
-  it("should return empty output for empty input", () => {
+  it("returns empty output for empty input", () => {
     const result = formatPhp("   ");
 
     expect(result.ok).toBe(true);
@@ -64,7 +64,7 @@ function hello($name){return "Hello, ".$name;}`;
     }
   });
 
-  it("should return error for invalid PHP syntax", () => {
+  it("returns error for invalid PHP syntax", () => {
     const input = "<?php echo ";
     const result = formatPhp(input);
 
@@ -76,7 +76,7 @@ function hello($name){return "Hello, ".$name;}`;
     }
   });
 
-  it("should format with custom indentation (4 spaces)", () => {
+  it("formats with custom indentation (4 spaces)", () => {
     const input = `<?php
 function test(){
 return 1;
@@ -89,7 +89,7 @@ return 1;
     }
   });
 
-  it("should format with tabs", () => {
+  it("formats with tabs", () => {
     const input = `<?php
 function test(){
 return 1;
@@ -99,6 +99,130 @@ return 1;
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value).toContain("\treturn");
+    }
+  });
+
+  // Test uncovered branches
+  it("handles line starting with closing brace", () => {
+    const input = `<?php
+function test() {
+}
+echo "done";`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("}");
+    }
+  });
+
+  it("handles line with closing brace and more content", () => {
+    const input = `<?php
+function test() { return 1; }`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles else keyword on same line", () => {
+    const input = `<?php
+if ($x) {
+  echo "a";
+} else {
+  echo "b";
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("else");
+    }
+  });
+
+  it("handles elseif keyword on same line", () => {
+    const input = `<?php
+if ($x) {
+  echo "a";
+} elseif ($y) {
+  echo "b";
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles catch keyword on same line", () => {
+    const input = `<?php
+try {
+  echo "a";
+} catch (Exception $e) {
+  echo "b";
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles return statement with semicolon", () => {
+    const input = `<?php
+function test() {
+return 1;
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles throw statement", () => {
+    const input = `<?php
+if ($error) {
+throw new Exception("error");
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles break statement", () => {
+    const input = `<?php
+foreach ($items as $item) {
+break;
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles continue statement", () => {
+    const input = `<?php
+foreach ($items as $item) {
+continue;
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles goto statement", () => {
+    const input = `<?php
+goto label;
+label:
+echo "done";`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("removes trailing empty lines", () => {
+    const input = `<?php
+echo "test";
+
+`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.endsWith("\n")).toBe(false);
     }
   });
 });
