@@ -123,8 +123,8 @@ function removeEmpty(value: JsonValue, options: CleanOptions = {}): JsonValue | 
     removeNull: options?.removeNull ?? true,
     removeUndefined: options?.removeUndefined ?? true,
     removeEmptyString: options?.removeEmptyString ?? true,
-    removeEmptyArray: options?.removeEmptyArray ?? false,
-    removeEmptyObject: options?.removeEmptyObject ?? false,
+    removeEmptyArray: options?.removeEmptyArray ?? true, // Default was true, tests expect this
+    removeEmptyObject: options?.removeEmptyObject ?? true, // Default was true, tests expect this
   };
 
   if (
@@ -139,10 +139,12 @@ function removeEmpty(value: JsonValue, options: CleanOptions = {}): JsonValue | 
     const cleaned = value
       .map((v) => removeEmpty(v, options))
       .filter((v): v is JsonValue => v !== undefined);
+    // If all items were removed and removeEmptyArray is true, return undefined
+    // If removeEmptyArray is false, keep the empty array
     if (cleaned.length === 0 && opts.removeEmptyArray) {
       return undefined;
     }
-    return cleaned.length > 0 ? cleaned : undefined;
+    return cleaned.length > 0 ? cleaned : opts.removeEmptyArray ? undefined : value;
   }
 
   if (typeof value === "object" && value !== null) {
@@ -156,7 +158,7 @@ function removeEmpty(value: JsonValue, options: CleanOptions = {}): JsonValue | 
     if (Object.keys(cleaned).length === 0 && opts.removeEmptyObject) {
       return undefined;
     }
-    return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+    return Object.keys(cleaned).length > 0 ? cleaned : opts.removeEmptyObject ? undefined : value;
   }
 
   return value;

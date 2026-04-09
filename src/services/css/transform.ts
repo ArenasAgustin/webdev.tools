@@ -81,7 +81,14 @@ function minifyCssString(source: string): string {
 
   const compact = withPreservedLiterals
     .replace(/\s+/g, " ")
-    .replace(/\s*([{}:;,>+~])\s*/g, "$1")
+    // Strip spaces around structural punctuation. `:` is handled separately below
+    // to avoid collapsing pseudo-selectors (e.g. `a :hover` → `a:hover`) or
+    // CSS custom property values / calc() expressions that contain colons.
+    .replace(/\s*([{};,>])\s*/g, "$1")
+    // Strip spaces around `:` only in declaration context: after a word character
+    // (property name) and before a non-`/` character (value). This avoids collapsing
+    // descendant pseudo-selectors like `a :hover` while still minifying `color : red`.
+    .replace(/([a-zA-Z0-9_-])\s*:\s*(?=[^/])/g, "$1:")
     .replace(/;}/g, "}")
     .trim();
 
@@ -120,7 +127,7 @@ export function cleanCss(input: string, options: CssCleanOptions = {}): Result<s
     // First, handle rules with only comments
     if (opts.removeRulesWithOnlyComments) {
       // Match selectors with only comments inside: selector { /* comment */ }
-      result = result.replace(/([^{}]*?)\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "");
+      result = result.replace(/([^{}]*?)\{\s*(\/\*[\s\S]*?\*\/\s*)+\}/g, "");
     }
 
     // Remove empty rules: selector { }

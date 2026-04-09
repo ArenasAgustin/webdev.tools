@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   generatePasswordWithStrength,
   defaultPasswordOptions,
@@ -12,6 +12,13 @@ export function PasswordPlayground() {
   const [showPassword, setShowPassword] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
 
   const handleGenerate = useCallback(() => {
     const result = generatePasswordWithStrength(options);
@@ -25,12 +32,13 @@ export function PasswordPlayground() {
     });
   }, [options]);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     if (password) {
       try {
-        navigator.clipboard.writeText(password);
+        await navigator.clipboard.writeText(password);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
+        copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
       } catch (err) {
         console.warn("Clipboard write failed:", err);
       }
@@ -71,7 +79,7 @@ export function PasswordPlayground() {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="p-3 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-colors"
-            title={showPassword ? "Ocultar" : "Mostrar"}
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
           >
             <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
           </button>
@@ -90,7 +98,7 @@ export function PasswordPlayground() {
             className={`p-3 rounded-lg transition-colors ${
               copied ? "bg-green-500 text-white" : "bg-white/10 hover:bg-white/20 text-gray-300"
             }`}
-            title="Copiar"
+            aria-label={copied ? "Contraseña copiada" : "Copiar contraseña"}
           >
             <i className={`fas ${copied ? "fa-check" : "fa-copy"}`}></i>
           </button>
@@ -181,7 +189,7 @@ export function PasswordPlayground() {
           <div className="flex flex-wrap gap-2">
             {history.map((pwd, index) => (
               <button
-                key={index}
+                key={`${index}-${pwd}`}
                 type="button"
                 onClick={() => handleHistoryClick(pwd)}
                 className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 text-sm font-mono rounded-lg transition-colors truncate max-w-32"

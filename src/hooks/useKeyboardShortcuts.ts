@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface KeyboardShortcutsConfig {
   onFormat?: () => void;
@@ -22,19 +22,29 @@ interface KeyboardShortcutsConfig {
  * - Ctrl+, / Cmd+,: Open config
  */
 export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
+  // Keep a ref so the stable listener always reads the latest callbacks
+  // without needing to re-register on every render
+  const configRef = useRef(config);
+
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Don't handle shortcuts if focused on input/textarea
+      const config = configRef.current;
+      // Don't handle shortcuts if focused on a plain text input or textarea.
+      // For contentEditable (e.g. Monaco editor), only suppress plain-character
+      // shortcuts that conflict with native text editing; keep Ctrl/Cmd+Shift+*
+      // shortcuts active so the playground actions remain reachable.
       const target = event.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.contentEditable === "true"
-      ) {
+      const ctrlKey = event.ctrlKey || event.metaKey;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
         return;
       }
-
-      const ctrlKey = event.ctrlKey || event.metaKey;
+      if (target.contentEditable === "true" && !ctrlKey) {
+        return;
+      }
       const normalizedKey = event.key.length === 1 ? event.key.toUpperCase() : event.key;
 
       // Ctrl/Cmd+Shift+F: Format
@@ -68,7 +78,7 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
       }
 
       // Ctrl/Cmd+,: Open config
-      if (ctrlKey && (event.key === "," || event.key === "Comma")) {
+      if (ctrlKey && event.key === ",") {
         event.preventDefault();
         config.onOpenConfig?.();
       }
@@ -88,5 +98,5 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [config]);
+  }, []);
 }

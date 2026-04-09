@@ -1,6 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { hashConfig } from "./hash.config";
-import { generateAllHashes, type HashResult, type HashOutputCase } from "./hash.utils";
+import {
+  generateAllHashes,
+  generateHashFromFile,
+  type HashAlgorithm,
+  type HashResult,
+  type HashOutputCase,
+} from "./hash.utils";
 
 type InputMode = "text" | "file";
 
@@ -13,30 +19,43 @@ export function HashPlayground() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [compareResult, setCompareResult] = useState<boolean | null>(null);
+  const [clipboardError, setClipboardError] = useState(false);
+  const clipboardErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
+    };
+  }, []);
 
   const processInput = useCallback(async () => {
     setIsProcessing(true);
     setCompareResult(null);
 
     try {
-      let inputText = "";
-
       if (inputMode === "text") {
-        inputText = textInput;
+        if (!textInput) {
+          setResults([]);
+          setIsProcessing(false);
+          return;
+        }
+        const hashes = await generateAllHashes(textInput, outputCase);
+        setResults(hashes);
       } else if (fileInput) {
-        const buffer = await fileInput.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        inputText = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
-      }
-
-      if (!inputText) {
+        const algorithms: HashAlgorithm[] = ["sha1", "sha256", "sha512"];
+        const hashes = await Promise.all(
+          algorithms.map(async (algorithm) => ({
+            algorithm,
+            hash: await generateHashFromFile(fileInput, algorithm, outputCase),
+          })),
+        );
+        setResults(hashes as HashResult[]);
+      } else {
         setResults([]);
         setIsProcessing(false);
         return;
       }
-
-      const hashes = await generateAllHashes(inputText, outputCase);
-      setResults(hashes);
     } catch (error) {
       console.error("Hash generation error:", error);
       setResults([]);
@@ -57,11 +76,14 @@ export function HashPlayground() {
     e.preventDefault();
   }, []);
 
-  const copyToClipboard = useCallback((value: string) => {
+  const copyToClipboard = useCallback(async (value: string) => {
     try {
-      navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value);
     } catch (err) {
       console.warn("Clipboard write failed:", err);
+      setClipboardError(true);
+      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
+      clipboardErrorTimerRef.current = setTimeout(() => setClipboardError(false), 2000);
     }
   }, []);
 
@@ -112,30 +134,58 @@ export function HashPlayground() {
             spellCheck={false}
           />
         ) : (
-          <div
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            className="w-full h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 transition-colors"
-          >
-            {fileInput ? (
-              <div className="text-center">
-                <p className="text-white font-medium">{fileInput.name}</p>
-                <p className="text-gray-400 text-sm">{(fileInput.size / 1024).toFixed(2)} KB</p>
-                <button
-                  type="button"
-                  onClick={() => setFileInput(null)}
-                  className="text-cyan-400 text-sm mt-2 hover:underline"
-                >
-                  Cambiar archivo
-                </button>
-              </div>
-            ) : (
-              <>
-                <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                <p className="text-gray-400">Arrastra un archivo aquí</p>
-              </>
-            )}
-          </div>
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="sr-only"
+              aria-hidden="true"
+              tabIndex={-1}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setFileInput(file);
+              }}
+            />
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              {...(!fileInput && {
+                onClick: () => fileInputRef.current?.click(),
+                onKeyDown: (e: React.KeyboardEvent) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                },
+                role: "button" as const,
+                tabIndex: 0,
+                "aria-label": "Seleccionar archivo — clic o arrastrar aquí",
+              })}
+              className="w-full h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-400"
+            >
+              {fileInput ? (
+                <div className="text-center">
+                  <p className="text-white font-medium">{fileInput.name}</p>
+                  <p className="text-gray-400 text-sm">{(fileInput.size / 1024).toFixed(2)} KB</p>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFileInput(null);
+                    }}
+                    className="text-cyan-400 text-sm mt-2 hover:underline"
+                  >
+                    Cambiar archivo
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                  <p className="text-gray-400">Arrastrá un archivo o hacé clic aquí</p>
+                </>
+              )}
+            </div>
+          </>
         )}
 
         {/* Options */}
@@ -194,6 +244,9 @@ export function HashPlayground() {
           ))}
         </div>
       )}
+
+      {/* Clipboard error feedback */}
+      {clipboardError && <p className="text-red-400 text-sm">No se pudo copiar al portapapeles</p>}
 
       {/* Compare Section */}
       <div className="flex flex-col gap-2 mt-4 p-4 bg-white/5 rounded-lg">

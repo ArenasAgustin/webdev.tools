@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ToastVariant } from "@/context/toast.context";
 import { cn } from "@/utils/cn";
 
@@ -32,6 +32,15 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
   const [isEntering, setIsEntering] = useState(true);
   const config = variantConfig[variant];
 
+  // Capture latest onRemove in a ref so the timer effect never needs to re-run
+  // when the caller passes a new function reference on each render
+  const onRemoveRef = useRef(onRemove);
+  useLayoutEffect(() => {
+    onRemoveRef.current = onRemove;
+  });
+
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     // Remove the entering state after animation
     const enterTimer = setTimeout(() => {
@@ -42,17 +51,23 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
   }, []);
 
   useEffect(() => {
+    let removeTimer: ReturnType<typeof setTimeout>;
     const timer = setTimeout(() => {
       setIsExiting(true);
-      setTimeout(onRemove, 200);
+      removeTimer = setTimeout(() => onRemoveRef.current(), 200);
     }, duration);
 
-    return () => clearTimeout(timer);
-  }, [duration, onRemove]);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(removeTimer);
+      // Also clear any in-flight close timer started by handleClose
+      if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current);
+    };
+  }, [duration]);
 
   const handleClose = () => {
     setIsExiting(true);
-    setTimeout(onRemove, 200);
+    closeTimerRef.current = setTimeout(() => onRemoveRef.current(), 200);
   };
 
   return (

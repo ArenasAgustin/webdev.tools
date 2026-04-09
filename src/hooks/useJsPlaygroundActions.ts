@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
 import { jsService } from "@/services/js/service";
 import { createValidatedHandler } from "@/utils/handlerFactory";
@@ -81,17 +80,13 @@ export function useJsPlaygroundActions({
   });
 
   // Extensión: ejecutar código JS
-  const handleExecute = useCallback(() => {
+  const handleExecute = () => {
     createValidatedHandler({
       validate: generic.baseActions.createInputValidator,
       run: async () => {
         generic.setIsProcessing(true);
         setError(null);
         setOutput("");
-
-        if (hasLikelyInfiniteLoop(inputJs)) {
-          throw new Error("La ejecución superó 5 segundos y fue cancelada");
-        }
 
         const outputText = await executeJavaScript(inputJs, JS_EXEC_TIMEOUT_MS);
         setOutput(outputText);
@@ -106,10 +101,10 @@ export function useJsPlaygroundActions({
         setError(message.replace(/^Error:\s*/, ""));
       },
     })();
-  }, [generic, inputJs, setOutput, setError, toast]);
+  };
 
   // Extensión: limpiar código JS
-  const handleClean = useCallback(() => {
+  const handleClean = () => {
     createTransformHandler({
       runTransformAction: generic.runTransformAction,
       run: async () => {
@@ -129,25 +124,13 @@ export function useJsPlaygroundActions({
       successMessage: "Código limpiado correctamente",
       errorMessage: "Error al limpiar código",
     });
-  }, [generic.runTransformAction, inputJs, cleanConfig, setError, setOutput]);
+  };
 
   return {
     ...generic,
     handleExecute,
     handleClean,
   };
-}
-
-function hasLikelyInfiniteLoop(code: string): boolean {
-  const patterns = [
-    /while\s*\(\s*1\s*\)/,
-    /while\s*\(\s*true\s*\)/i,
-    /for\s*\(\s*;\s*;\s*\)/,
-    /for\s*\(\s*;\s*;\s*[^}]*\)\s*/,
-    /do\s*\{[\s\S]*\}\s*while\s*\(\s*(1|true)\s*\)/i,
-    /while\s*\(\s*!+[^)]+\)/,
-  ];
-  return patterns.some((pattern) => pattern.test(code));
 }
 
 async function executeJavaScript(code: string, timeoutMs: number): Promise<string> {
@@ -170,6 +153,15 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
       if (typeof value === "boolean") return String(value);
       return Object.prototype.toString.call(value);
     };
+    // Restrict network access: block the most common browser network APIs.
+    // Note: this is a best-effort sandbox — other exotic channels (e.g. SharedArrayBuffer
+    // messaging) are not blocked. Do NOT rely on this for security-critical isolation.
+    try { Object.defineProperty(self, 'fetch', { value: undefined, writable: false, configurable: false }); } catch (_) {}
+    try { Object.defineProperty(self, 'WebSocket', { value: undefined, writable: false, configurable: false }); } catch (_) {}
+    try { Object.defineProperty(self, 'XMLHttpRequest', { value: undefined, writable: false, configurable: false }); } catch (_) {}
+    try { Object.defineProperty(self, 'EventSource', { value: undefined, writable: false, configurable: false }); } catch (_) {}
+    try { if (typeof navigator !== 'undefined') { Object.defineProperty(navigator, 'sendBeacon', { value: undefined, writable: false, configurable: false }); } } catch (_) {}
+    try { Object.defineProperty(self, 'importScripts', { value: undefined, writable: false, configurable: false }); } catch (_) {}
     self.onmessage = (event) => {
       const { code } = event.data;
       const logs = [];
@@ -198,6 +190,7 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
     };
   `;
   return new Promise((resolve, reject) => {
+    let settled = false;
     const blob = new Blob([workerSource], { type: "application/javascript" });
     const workerUrl = URL.createObjectURL(blob);
     const worker = new Worker(workerUrl);
@@ -206,10 +199,14 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
       URL.revokeObjectURL(workerUrl);
     };
     const timeout = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
       cleanup();
       reject(new Error("La ejecución superó 5 segundos y fue cancelada"));
     }, timeoutMs);
     worker.onmessage = (event: MessageEvent<{ ok: boolean; output?: string; error?: string }>) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timeout);
       const data = event.data;
       cleanup();
@@ -220,6 +217,8 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
       resolve(data.output ?? "");
     };
     worker.onerror = (event: ErrorEvent) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timeout);
       cleanup();
       reject(new Error(event.message || "Error en el worker de ejecución"));

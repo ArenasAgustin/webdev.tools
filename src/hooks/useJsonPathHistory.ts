@@ -21,30 +21,53 @@ const DB_NAME = "webdev.tools";
 const DB_VERSION = 2;
 const STORE_NAME = "jsonPathHistory";
 
-const openDb = (): Promise<IDBDatabase> =>
-  new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+// Singleton promise — only one IDBDatabase connection is ever opened per page load.
+// Exported for testing purposes only
+export let dbPromise: Promise<IDBDatabase> | null = null;
 
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-        store.createIndex("timestamp", "timestamp");
-        store.createIndex("expression", "expression", { unique: true });
-      } else {
-        const store = request.transaction?.objectStore(STORE_NAME);
-        if (store && !store.indexNames.contains("timestamp")) {
+export const resetDbPromise = () => {
+  dbPromise = null;
+};
+
+const openDb = (): Promise<IDBDatabase> => {
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  if (dbPromise == null) {
+    dbPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
           store.createIndex("timestamp", "timestamp");
-        }
-        if (store && !store.indexNames.contains("expression")) {
           store.createIndex("expression", "expression", { unique: true });
+        } else {
+          const store = request.transaction?.objectStore(STORE_NAME);
+          if (store && !store.indexNames.contains("timestamp")) {
+            store.createIndex("timestamp", "timestamp");
+          }
+          if (store && !store.indexNames.contains("expression")) {
+            store.createIndex("expression", "expression", { unique: true });
+          }
         }
-      }
-    };
+      };
 
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(new Error(request.error?.message ?? "IndexedDB error"));
-  });
+      request.onsuccess = () => {
+        const db = request.result;
+        // Reset the singleton if the connection is closed externally (e.g. another tab deletes the DB)
+        db.onclose = () => {
+          dbPromise = null;
+        };
+        resolve(db);
+      };
+      request.onerror = () => {
+        dbPromise = null; // allow retry on next call
+        reject(new Error(request.error?.message ?? "IndexedDB error"));
+      };
+    });
+  }
+  return dbPromise;
+};
 
 const loadHistoryFromDb = async (): Promise<JsonPathHistoryItem[]> => {
   const db = await openDb();
@@ -79,13 +102,15 @@ const pruneHistory = async () => {
   let count = 0;
 
   await new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () =>
+      reject(new Error(transaction.error?.message ?? "Prune transaction error"));
+    transaction.onabort = () => reject(new Error("Prune transaction aborted"));
+
     const cursorRequest = index.openCursor(null, "prev");
     cursorRequest.onsuccess = () => {
       const cursor = cursorRequest.result;
-      if (!cursor) {
-        resolve();
-        return;
-      }
+      if (!cursor) return;
 
       count += 1;
       if (count > MAX_ITEMS) {
@@ -114,15 +139,18 @@ const migrateLocalStorage = async () => {
     saved.forEach((item) => store.put(item));
 
     await new Promise<void>((resolve, reject) => {
-      transaction.oncomplete = () => resolve();
+      transaction.oncomplete = () => {
+        removeItem(HISTORY_KEY);
+        resolve();
+      };
       transaction.onerror = () =>
         reject(new Error(transaction.error?.message ?? "Transaction error"));
       transaction.onabort = () => reject(new Error("Transaction aborted"));
     });
-
-    removeItem(HISTORY_KEY);
   } catch (error) {
     console.error("Error migrating JSONPath history:", error);
+    // Remove the key even on failure to prevent infinite retry on persistent errors
+    removeItem(HISTORY_KEY);
   }
 };
 
@@ -158,39 +186,38 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
 
     try {
       const db = await openDb();
-      const transaction = db.transaction([STORE_NAME], "readwrite");
-      const store = transaction.objectStore(STORE_NAME);
-      const expressionIndex = store.index("expression");
-
-      const existing = await new Promise<JsonPathHistoryItem | null>((resolve, reject) => {
-        const request = expressionIndex.get(expression);
-        request.onsuccess = () => {
-          const result = (request.result as JsonPathHistoryItem | undefined) ?? null;
-          resolve(result);
-        };
-        request.onerror = () => reject(new Error(request.error?.message ?? "Request error"));
-      });
-
-      if (existing) {
-        store.put({
-          ...existing,
-          frequency: existing.frequency + 1,
-          timestamp: Date.now(),
-        });
-      } else {
-        store.add({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          expression,
-          timestamp: Date.now(),
-          frequency: 1,
-        });
-      }
-
+      // All IDB requests (get + put/add) are issued synchronously within the same
+      // transaction's onsuccess callbacks — no `await` between them — to prevent
+      // the transaction from auto-committing before the write request is issued.
       await new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const expressionIndex = store.index("expression");
+
         transaction.oncomplete = () => resolve();
         transaction.onerror = () =>
           reject(new Error(transaction.error?.message ?? "Transaction error"));
         transaction.onabort = () => reject(new Error("Transaction aborted"));
+
+        const getRequest = expressionIndex.get(expression);
+        getRequest.onsuccess = () => {
+          const existing = (getRequest.result as JsonPathHistoryItem | undefined) ?? null;
+          if (existing) {
+            store.put({
+              ...existing,
+              frequency: existing.frequency + 1,
+              timestamp: Date.now(),
+            });
+          } else {
+            store.add({
+              id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+              expression,
+              timestamp: Date.now(),
+              frequency: 1,
+            });
+          }
+        };
+        getRequest.onerror = () => reject(new Error(getRequest.error?.message ?? "Request error"));
       });
 
       await pruneHistory();
