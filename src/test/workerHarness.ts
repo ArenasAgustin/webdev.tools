@@ -13,6 +13,7 @@ class MockWorker implements WorkerLike {
   onmessage: ((event: MessageEvent) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
   postMessage = vi.fn();
+  terminate = vi.fn();
 
   constructor() {
     MockWorker.instances.push(this);

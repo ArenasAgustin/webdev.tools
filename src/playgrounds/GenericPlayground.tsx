@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, type ComponentProps } from "react";
 import type { ReactNode } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
@@ -45,8 +45,6 @@ export function GenericPlayground({
   renderOutputPanel,
   renderModals,
 }: GenericPlaygroundProps) {
-  const [, setJsonPathModal] = useState<"tips" | "history" | null>(null);
-
   // Check features
   const hasClean = engine.features.includes("clean");
   const hasExecute = engine.features.includes("execute");
@@ -58,7 +56,9 @@ export function GenericPlayground({
     "cleanConfig" in engine &&
     (engine as PlaygroundEngineWithClean).cleanConfig !== undefined;
   const engineWithClean = engine as PlaygroundEngineWithClean;
-  const savedCleanConfig = hasCleanConfig ? engineWithClean.loadToolsConfig()?.clean : undefined;
+  const [savedCleanConfig] = useState(() =>
+    hasCleanConfig ? engineWithClean.loadToolsConfig()?.clean : undefined,
+  );
   const defaultCleanConfig =
     hasCleanConfig && engineWithClean.cleanConfig ? engineWithClean.cleanConfig : {};
 
@@ -66,7 +66,9 @@ export function GenericPlayground({
   const effectiveCleanConfig = hasCleanConfig ? cleanConfig : undefined;
 
   const overlays = usePlaygroundOverlays({
-    onCloseExtra: useCallback(() => setJsonPathModal(null), []),
+    onCloseExtra: () => {
+      // No-op: extra panel not used in this playground
+    },
   });
 
   const ctx = usePlaygroundSetup({
@@ -193,7 +195,7 @@ export function GenericPlayground({
           <Toolbar
             variant="generic"
             tools={toolbarTools}
-            config={toolbarConfig as never}
+            config={toolbarConfig as ComponentProps<typeof Toolbar>["config"]}
             shortcuts={overlays.shortcuts}
             extraContent={toolbarExtraContent}
           />

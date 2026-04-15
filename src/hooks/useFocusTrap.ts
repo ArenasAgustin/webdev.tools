@@ -19,20 +19,24 @@ export function useFocusTrap(isActive: boolean) {
     previousActiveElement.current = document.activeElement as HTMLElement;
 
     // Enfocar el primer elemento enfocable en el contenedor
-    const focusableElements = container.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
+    const getFocusableElements = () =>
+      container.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
 
-    const firstFocusable = focusableElements[0];
-    const lastFocusable = focusableElements[focusableElements.length - 1];
-
-    if (firstFocusable) {
-      firstFocusable.focus();
+    const initialFocusable = getFocusableElements();
+    if (initialFocusable[0]) {
+      initialFocusable[0].focus();
     }
 
-    // Manejar Tab para hacer trap del foco
+    // Manejar Tab para hacer trap del foco.
+    // Re-query on every keypress so the list is never stale if the DOM changes.
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
+
+      const focusableElements = getFocusableElements();
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
 
       if (focusableElements.length === 0) {
         event.preventDefault();
@@ -59,7 +63,7 @@ export function useFocusTrap(isActive: boolean) {
     // Cleanup: restaurar foco al elemento anterior
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
-      previousActiveElement.current?.focus();
+      if (previousActiveElement.current?.isConnected) previousActiveElement.current.focus();
     };
   }, [isActive]);
 

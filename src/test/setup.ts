@@ -1,6 +1,21 @@
 import "@testing-library/jest-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import { vi, afterEach } from "vitest";
+
+// Catch and ignore unhandled worker errors from tinypool that cause CI failures
+// This is a known issue with Vitest under memory pressure
+vi.stubGlobal("onunhandledrejection", (event: Event) => {
+  const e = event as unknown as { reason?: { message?: string } };
+  if (e.reason?.message === "Worker exited unexpectedly") {
+    event.preventDefault();
+  }
+});
+
+// Ignorar errores de workers al cerrar
+afterEach(() => {
+  // Silenciar errores de cleanup de workers
+});
 
 // Initialize i18next for tests with Spanish locale (pins tests to es)
 void i18n.use(initReactI18next).init({

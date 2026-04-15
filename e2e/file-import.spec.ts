@@ -31,7 +31,7 @@ test.describe("File import — button path (JSON playground)", () => {
     // Success toast must appear
     await expect(page.getByText(/Archivo "sample\.json" cargado/)).toBeVisible();
 
-    // Editor must contain the loaded content — wait for Monaco to update
+    // Editor must contain the loaded content — wait for Monaco async update
     await expect(page.locator(".monaco-editor").first()).toContainText('"hello"');
   });
 

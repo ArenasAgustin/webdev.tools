@@ -53,8 +53,16 @@ export function createWorkerClient<
 
       worker.onerror = (event) => {
         const error = new Error(event.message || "Worker error");
-        pending.forEach((entry) => entry.reject(error));
+        // Snapshot and clear before rejecting: a reject callback may synchronously
+        // call run() → ensureWorker(), which must see an already-cleared pending map.
+        const snapshot = new Map(pending);
         pending.clear();
+        worker?.terminate();
+        worker = null;
+        snapshot.forEach((entry) => entry.reject(error));
+
+        // Reiniciar el worker en el próximo run
+        console.warn("Worker reiniciado después de un error");
       };
     }
 

@@ -74,32 +74,40 @@ export function generatePassword(options: PasswordOptions): string {
     charset = LOWERCASE;
   }
 
-  // Generate random password using crypto.getRandomValues
-  const array = new Uint32Array(options.length);
-  crypto.getRandomValues(array);
-
-  let password = "";
-  for (let i = 0; i < options.length; i++) {
-    password += charset[array[i] % charset.length];
+  /**
+   * Unbiased random index using rejection sampling.
+   * Discards values >= floor(2^32 / len) * len to eliminate modulo bias.
+   */
+  function unbiasedRandom(len: number): number {
+    const limit = Math.floor(2 ** 32 / len) * len;
+    const buf = new Uint32Array(1);
+    let val: number;
+    do {
+      crypto.getRandomValues(buf);
+      val = buf[0];
+    } while (val >= limit);
+    return val % len;
   }
+
+  // Generate random password using crypto.getRandomValues (unbiased)
+  let password = "";
+  Array.from({ length: options.length }).forEach(() => {
+    password += charset[unbiasedRandom(charset.length)];
+  });
 
   // Ensure at least one character from each selected type
   const ensureCharacters: string[] = [];
   if (options.includeUppercase) {
-    const idx = crypto.getRandomValues(new Uint32Array(1))[0] % UPPERCASE.length;
-    ensureCharacters.push(UPPERCASE[idx]);
+    ensureCharacters.push(UPPERCASE[unbiasedRandom(UPPERCASE.length)]);
   }
   if (options.includeLowercase) {
-    const idx = crypto.getRandomValues(new Uint32Array(1))[0] % LOWERCASE.length;
-    ensureCharacters.push(LOWERCASE[idx]);
+    ensureCharacters.push(LOWERCASE[unbiasedRandom(LOWERCASE.length)]);
   }
   if (options.includeNumbers) {
-    const idx = crypto.getRandomValues(new Uint32Array(1))[0] % NUMBERS.length;
-    ensureCharacters.push(NUMBERS[idx]);
+    ensureCharacters.push(NUMBERS[unbiasedRandom(NUMBERS.length)]);
   }
   if (options.includeSymbols) {
-    const idx = crypto.getRandomValues(new Uint32Array(1))[0] % SYMBOLS.length;
-    ensureCharacters.push(SYMBOLS[idx]);
+    ensureCharacters.push(SYMBOLS[unbiasedRandom(SYMBOLS.length)]);
   }
 
   // If no character types selected, just return random password
@@ -107,13 +115,16 @@ export function generatePassword(options: PasswordOptions): string {
     return password;
   }
 
-  // Replace random positions with guaranteed characters (using unique positions)
+  // Replace random positions with guaranteed characters (using unique positions).
+  // Cap count to options.length to avoid an infinite loop when ensureCharacters
+  // has more entries than available positions (e.g. length < number of char types).
   const passwordArray = password.split("");
   const usedPositions = new Set<number>();
-  for (let i = 0; i < ensureCharacters.length && i < options.length; i++) {
+  const count = Math.min(ensureCharacters.length, options.length);
+  for (let i = 0; i < count; i++) {
     let pos: number;
     do {
-      pos = crypto.getRandomValues(new Uint32Array(1))[0] % options.length;
+      pos = unbiasedRandom(options.length);
     } while (usedPositions.has(pos));
     usedPositions.add(pos);
     passwordArray[pos] = ensureCharacters[i];

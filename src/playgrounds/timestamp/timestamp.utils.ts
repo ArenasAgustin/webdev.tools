@@ -28,22 +28,12 @@ export function parseInput(input: string): { type: InputType; value: number | Da
     }
   }
 
-  // Then, try to parse as number (Unix timestamp)
-  const num = parseFloat(trimmed);
-  if (!isNaN(num)) {
-    // Determine if it's seconds or milliseconds
-    // Seconds are typically less than 1e11 (year 5138)
-    // Milliseconds are typically greater than 1e11
-    if (num > 1e11) {
-      // Likely milliseconds
-      return { type: "unix", value: num };
-    } else {
-      // Could be seconds or a small number
-      // Check if it looks like a Unix timestamp (positive and reasonable)
-      if (num > 0 && num < 1e11) {
-        return { type: "unix", value: num };
-      }
-    }
+  // Then, try to parse as number (Unix timestamp).
+  // The seconds-vs-milliseconds disambiguation is handled downstream in unixToDate()
+  // using the same 1e11 boundary check.
+  const num = Number(trimmed);
+  if (Number.isFinite(num)) {
+    return { type: "unix", value: num };
   }
 
   return null;
@@ -53,8 +43,8 @@ export function parseInput(input: string): { type: InputType; value: number | Da
  * Convert Unix timestamp (seconds or milliseconds) to Date
  */
 export function unixToDate(unix: number): Date {
-  // If the number is greater than 1e11, assume it's milliseconds
-  if (unix > 1e11) {
+  // If the absolute value is greater than 1e11, assume it's milliseconds
+  if (Math.abs(unix) > 1e11) {
     return new Date(unix);
   }
   // Otherwise, assume it's seconds and convert to milliseconds
@@ -151,7 +141,7 @@ export function convertTimestamp(
     unixMilliseconds: date.getTime(),
     iso8601: date.toISOString(),
     rfc2822: date.toUTCString(),
-    humanReadable: date.toLocaleString(lang === "en" ? "en-ES" : "es-ES", {
+    humanReadable: date.toLocaleString(lang === "en" ? "en-GB" : "es-ES", {
       timeZone: userTimezone,
       year: "numeric",
       month: "2-digit",

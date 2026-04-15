@@ -48,8 +48,63 @@ export function parsePhp(input: string): Result<PhpAst, string> {
 
 /**
  * Simple PHP formatter - works in browser without Node.js dependencies
- * Uses basic indentation rules based on braces and keywords
+ * Uses basic indentation rules based on braces and keywords.
+ *
+ * WARNING: This is a line-based heuristic formatter. It uses a simple
+ * odd-quote heuristic to skip brace counting inside string literals, but
+ * it cannot handle all edge cases (e.g. heredoc, nested quotes, escaped
+ * quotes). For production-grade formatting, a full AST-based tool is
+ * recommended.
  */
+
+/** Shown in UI when the formatter's limitations may affect the result. */
+export const PHP_FORMATTER_WARNING_DISCLAIMER =
+  "Este formateador es heurístico y puede producir indentación incorrecta en código con heredocs, strings complejos o comentarios con llaves.";
+
+/**
+ * Count { and } characters that appear outside string literals and line comments.
+ * Handles single-quoted strings, double-quoted strings, and // and # comments.
+ */
+function countOuterBraces(line: string): { open: number; close: number } {
+  let open = 0;
+  let close = 0;
+  type StringState = "outside" | "single" | "double";
+  let state: StringState = "outside";
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+
+    if (state === "outside") {
+      if (ch === "'") {
+        state = "single";
+        continue;
+      }
+      if (ch === '"') {
+        state = "double";
+        continue;
+      }
+      if (ch === "/" && line[i + 1] === "/") break; // line comment
+      if (ch === "#") break; // shell-style comment
+      if (ch === "{") open++;
+      else if (ch === "}") close++;
+    } else if (state === "single") {
+      if (ch === "\\") {
+        i++;
+        continue;
+      } // skip escaped char
+      if (ch === "'") state = "outside";
+    } else {
+      if (ch === "\\") {
+        i++;
+        continue;
+      } // skip escaped char
+      if (ch === '"') state = "outside";
+    }
+  }
+
+  return { open, close };
+}
+
 export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<string, string> {
   try {
     if (!input.trim()) {
@@ -63,7 +118,6 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
     const formatted: string[] = [];
 
     const decreaseKeywordsRegex = /^(break|continue|return|throw|goto)\s*;?$/;
-    const elseKeywordsRegex = /^(else|elseif|catch)\s/;
 
     for (const line of lines) {
       const trimmed = line.trim();
@@ -74,31 +128,30 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
         continue;
       }
 
-      // Decrease indent BEFORE for closing braces
-      if (trimmed === "}" || trimmed.startsWith("}")) {
-        if (indentLevel > 0) {
-          indentLevel--;
-        }
+      const braces = countOuterBraces(trimmed);
+
+      // Decrease indent BEFORE for a leading closing brace
+      if (trimmed.startsWith("}")) {
+        if (indentLevel > 0) indentLevel--;
       }
 
       // Apply current indent level
       const indentedLine = indent.repeat(indentLevel) + trimmed;
       formatted.push(indentedLine);
 
-      // Increase indent AFTER opening braces
-      if (trimmed.includes("{")) {
-        indentLevel++;
+      // Increase indent for opening braces found outside strings
+      if (braces.open > 0) {
+        indentLevel += braces.open;
+      }
+
+      // Decrease for closing braces not already handled above
+      const trailingClose = trimmed.startsWith("}") ? braces.close - 1 : braces.close;
+      if (trailingClose > 0) {
+        indentLevel = Math.max(0, indentLevel - trailingClose);
       }
 
       // Decrease indent AFTER certain keywords
       if (decreaseKeywordsRegex.exec(trimmed)) {
-        if (indentLevel > 0) {
-          indentLevel--;
-        }
-      }
-
-      // Handle else/elseif on same line
-      if (elseKeywordsRegex.exec(trimmed)) {
         if (indentLevel > 0) {
           indentLevel--;
         }
