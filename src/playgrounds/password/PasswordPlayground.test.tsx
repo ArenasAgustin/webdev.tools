@@ -61,11 +61,8 @@ describe("PasswordPlayground", () => {
       fireEvent.click(generateBtn);
     });
 
-    const passwordInput = screen.getByPlaceholderText(
-      /contraseña aparecerá aquí/i,
-    );
+    const passwordInput = screen.getByPlaceholderText(/contraseña aparecerá aquí/i);
     expect(passwordInput).toHaveValue();
-    expect(passwordInput.value.length).toBeGreaterThan(0);
   });
 
   it("toggles password visibility when eye button is clicked", async () => {
@@ -77,16 +74,16 @@ describe("PasswordPlayground", () => {
       fireEvent.click(generateBtn);
     });
 
-    // Find the toggle visibility button (has eye icon)
-    const toggleBtn = screen.getByTitle(/Mostrar/i);
+    // Find the toggle visibility button (starts with "Mostrar" label)
+    const toggleBtn = screen.getByLabelText(/Mostrar/i);
     expect(toggleBtn).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(toggleBtn);
     });
 
-    // Button title should change to "Ocultar"
-    expect(screen.getByTitle(/Ocultar/i)).toBeInTheDocument();
+    // Button label should change to "Ocultar"
+    expect(screen.getByLabelText(/Ocultar/i)).toBeInTheDocument();
   });
 
   it("copies password to clipboard when copy button is clicked", async () => {

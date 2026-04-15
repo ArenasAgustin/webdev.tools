@@ -1,7 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { jsonService } from "./service";
+import { jsonWorkerAdapter } from "./workerClient";
 
 describe("jsonService", () => {
+  afterEach(() => {
+    jsonWorkerAdapter.terminate();
+  });
   describe("format", () => {
     it("formats valid JSON", async () => {
       const result = await jsonService.format('{"a":1}');

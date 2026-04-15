@@ -19,8 +19,10 @@
     "e2e:headed": "playwright test --headed",
     "e2e:install": "playwright install --with-deps chromium",
     "test": "vitest",
+    "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "test:coverage:run": "vitest run --coverage",
     "verify:arch": "node scripts/verify-architecture.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

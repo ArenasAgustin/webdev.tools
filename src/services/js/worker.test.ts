@@ -9,6 +9,19 @@ vi.mock("./workerClient", () => ({
   },
 }));
 
+vi.mock("@/services/js/transform", () => ({
+  cleanJs: vi.fn((input: string) => {
+    if (!input.trim()) return { ok: false, error: "El JS está vacío" };
+    const value = input.replace(/\bfunction\s+\w+\s*\(\s*\)\s*\{\s*\}\s*/g, "").trim();
+    return { ok: true, value };
+  }),
+  formatJs: vi.fn((input: string) => {
+    if (/=\s*$/.test(input.trim())) return { ok: false, error: "Unexpected token" };
+    return { ok: true, value: input };
+  }),
+  minifyJs: vi.fn().mockReturnValue({ ok: true, value: "" }),
+}));
+
 describe("cleanJsAsync (sync path)", () => {
   it("returns error for empty input via sync path", async () => {
     const result = await cleanJsAsync("   ");

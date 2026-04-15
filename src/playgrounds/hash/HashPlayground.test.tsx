@@ -68,7 +68,7 @@ describe("HashPlayground", () => {
     });
 
     // Should show file drop zone
-    expect(screen.getByText(/Arrastra un archivo aquí/i)).toBeInTheDocument();
+    expect(screen.getByText(/Arrastrá un archivo/i)).toBeInTheDocument();
   });
 
   it("generates hashes when generate button is clicked", async () => {

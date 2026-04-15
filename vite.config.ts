@@ -6,7 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     nodePolyfills(),
@@ -59,7 +59,7 @@ export default defineConfig({
   },
   define: {
     // Polyfill for php-parser and other Node.js-dependent libraries
-    "process.env": "{}",
+    "process.env.NODE_ENV": JSON.stringify(mode === "production" ? "production" : "development"),
     "process.argv": "[]",
     "process.platform": JSON.stringify("browser"),
     "process.version": JSON.stringify(""),
@@ -83,4 +83,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

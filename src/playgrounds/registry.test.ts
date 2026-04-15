@@ -1,10 +1,31 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   getPlaygroundById,
   preloadPlaygroundById,
   preloadAllPlaygrounds,
   playgroundRegistry,
 } from "./registry";
+
+// Mockear los playgrounds
+vi.mock("./json/JsonPlayground", () => ({ JsonPlayground: vi.fn() }));
+vi.mock("./js/JsPlayground", () => ({ JsPlayground: vi.fn() }));
+vi.mock("./html/HtmlPlayground", () => ({ HtmlPlayground: vi.fn() }));
+vi.mock("./css/CssPlayground", () => ({ CssPlayground: vi.fn() }));
+vi.mock("./colors/ColorsPlayground", () => ({ ColorsPlayground: vi.fn() }));
+vi.mock("./hash/HashPlayground", () => ({ HashPlayground: vi.fn() }));
+vi.mock("./password/PasswordPlayground", () => ({ PasswordPlayground: vi.fn() }));
+vi.mock("./timestamp/TimestampPlayground", () => ({ TimestampPlayground: vi.fn() }));
+vi.mock("./php/PhpPlayground", () => ({ PhpPlayground: vi.fn() }));
+
+// Mockear las funciones de preload para evitar cargar módulos reales
+vi.mock("./registry", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("./registry")>();
+  return {
+    ...mod,
+    preloadPlaygroundById: vi.fn().mockResolvedValue(undefined),
+    preloadAllPlaygrounds: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 describe("playgroundRegistry", () => {
   it("exports playground registry with correct number of playgrounds", () => {

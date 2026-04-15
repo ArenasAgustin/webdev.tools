@@ -1,7 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { jsService } from "./service";
+import { jsWorkerAdapter } from "./workerClient";
 
 describe("jsService", () => {
+  afterEach(() => {
+    jsWorkerAdapter.terminate();
+  });
   describe("format", () => {
     it("formats valid JS", async () => {
       const result = await jsService.format("const a=1");

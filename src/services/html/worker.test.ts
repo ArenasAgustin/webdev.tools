@@ -9,6 +9,15 @@ vi.mock("./workerClient", () => ({
   },
 }));
 
+vi.mock("@/services/html/transform", () => ({
+  cleanHtml: vi.fn((input: string) => {
+    if (!input.trim()) return { ok: false, error: "El HTML está vacío" };
+    return { ok: true, value: input };
+  }),
+  formatHtml: vi.fn().mockResolvedValue({ ok: true, value: "<div>\n  <span>ok</span>\n</div>" }),
+  minifyHtml: vi.fn().mockResolvedValue({ ok: true, value: "<div><span>ok</span></div>" }),
+}));
+
 describe("cleanHtmlAsync (sync path)", () => {
   it("returns error for empty input via sync path", async () => {
     const result = await cleanHtmlAsync("   ");

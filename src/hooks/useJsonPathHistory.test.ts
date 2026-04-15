@@ -1,14 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { IDBFactory } from "fake-indexeddb";
-import { useJsonPathHistory } from "./useJsonPathHistory";
-
-// Reset fake-indexeddb before each test so no state leaks between tests
-beforeEach(() => {
-  globalThis.indexedDB = new IDBFactory();
-});
+import { useJsonPathHistory, resetDbPromise } from "./useJsonPathHistory";
 
 describe("useJsonPathHistory", () => {
+  beforeEach(() => {
+    // Reset the module's dbPromise singleton AND indexedDB before each test
+    resetDbPromise();
+    globalThis.indexedDB = new IDBFactory();
+  });
+
   describe("addToHistory", () => {
     it("creates a new entry with the given expression", async () => {
       const { result } = renderHook(() => useJsonPathHistory());
@@ -166,38 +167,29 @@ describe("useJsonPathHistory", () => {
     it("discards the oldest entry when the 21st item is added", async () => {
       const { result } = renderHook(() => useJsonPathHistory());
 
-      // Add 20 unique expressions one at a time with proper waiting
-      for (let i = 1; i <= 20; i++) {
+      // Add 20 items
+      for (let i = 0; i < 20; i++) {
         await act(async () => {
           await result.current.addToHistory(`$.field${i}`);
         });
-        // Wait for each add to complete before next iteration
-        await waitFor(() => {
-          expect(result.current.history.length).toBeGreaterThanOrEqual(i);
-        });
       }
 
-      // Final wait to ensure all 20 are stored
       await waitFor(() => {
         expect(result.current.history).toHaveLength(20);
       });
 
-      const expressionsAt20 = result.current.history.map((item) => item.expression);
-      expect(expressionsAt20).toContain("$.field1");
-
-      // Add the 21st — should prune the oldest entry
+      // Add one more - should remove oldest
       await act(async () => {
-        await result.current.addToHistory("$.field21");
+        await result.current.addToHistory("$.newField");
       });
-
       await waitFor(() => {
         expect(result.current.history).toHaveLength(20);
       });
 
-      const expressions = result.current.history.map((item) => item.expression);
-      expect(expressions).toContain("$.field21");
-      // The total number of unique expressions stored stays at 20
-      expect(result.current.history).toHaveLength(20);
+      // The oldest should be gone
+      expect(result.current.history.find((h) => h.expression === "$.field0")).toBeUndefined();
+      // The newest should be there
+      expect(result.current.history.find((h) => h.expression === "$.newField")).toBeDefined();
     });
   });
 });

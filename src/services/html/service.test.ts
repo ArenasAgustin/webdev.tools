@@ -1,7 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { htmlService } from "./service";
+import { htmlWorkerAdapter } from "./workerClient";
 
 describe("htmlService", () => {
+  afterEach(() => {
+    htmlWorkerAdapter.terminate();
+  });
   describe("format", () => {
     it("formats valid HTML", async () => {
       const result = await htmlService.format("<div><p>test</p></div>");

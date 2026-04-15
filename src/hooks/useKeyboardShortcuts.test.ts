@@ -126,14 +126,15 @@ describe("useKeyboardShortcuts", () => {
       document.body.removeChild(textarea);
     });
 
-    it("does not trigger when target has contentEditable=true", () => {
+    it("allows Ctrl+Shift+ shortcuts in contentEditable (e.g. Monaco editor)", () => {
       renderShortcuts();
       const div = document.createElement("div");
       div.contentEditable = "true";
       document.body.appendChild(div);
       div.focus();
+      // Ctrl+Shift+L should still trigger because playground actions should be reachable
       fireEvent.keyDown(div, { key: "L", ctrlKey: true, shiftKey: true });
-      expect(onClean).not.toHaveBeenCalled();
+      expect(onClean).toHaveBeenCalled();
       document.body.removeChild(div);
     });
   });

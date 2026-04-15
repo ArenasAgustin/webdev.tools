@@ -71,6 +71,7 @@ describe("ToastProvider", () => {
     fireEvent.click(screen.getByText("add-error"));
     expect(screen.getByTestId("count")).toHaveTextContent("1");
 
+    // Advance timers and wrap in act to allow React to process the removal
     act(() => {
       vi.advanceTimersByTime(3000);
     });

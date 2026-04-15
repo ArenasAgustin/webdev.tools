@@ -1,7 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { cssService } from "./service";
+import { cssWorkerAdapter } from "./workerClient";
 
 describe("cssService", () => {
+  afterEach(() => {
+    cssWorkerAdapter.terminate();
+  });
   describe("format", () => {
     it("formats valid CSS", async () => {
       const result = await cssService.format(".card{color:red}");
