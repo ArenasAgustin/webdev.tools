@@ -1,6 +1,7 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { formatWithPrettier } from "@/services/formatter/prettier";
+import { parse } from "css-tree";
 
 interface CssMinifyOptions {
   removeComments?: boolean;
@@ -10,6 +11,31 @@ interface CssMinifyOptions {
 export interface CssCleanOptions {
   removeEmptyRules?: boolean;
   removeRulesWithOnlyComments?: boolean;
+}
+
+export function validateCss(
+  input: string,
+): Promise<Result<string, string>> {
+  if (!input.trim()) return Promise.resolve({ ok: true, value: "" });
+
+  let errorMessage: string | null = null;
+
+  try {
+    parse(input, {
+      onParseError(err: { message: string }) {
+        errorMessage = err.message;
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return Promise.resolve({ ok: false, error: message });
+  }
+
+  if (errorMessage !== null) {
+    return Promise.resolve({ ok: false, error: errorMessage });
+  }
+
+  return Promise.resolve({ ok: true, value: input });
 }
 
 export async function formatCss(

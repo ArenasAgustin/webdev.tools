@@ -1,6 +1,70 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
-import { formatCss, minifyCss, cleanCss } from "./transform";
+import { describe, expect, it, vi } from "vitest";
+import { formatCss, minifyCss, cleanCss, validateCss } from "./transform";
+
+vi.mock("css-tree", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("css-tree")>();
+  return { ...actual, parse: vi.fn(actual.parse) };
+});
+
+describe("validateCss", () => {
+  it("returns ok:true for valid CSS", async () => {
+    const input = ".foo { color: red; }";
+    const result = await validateCss(input);
+    expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it("returns ok:false for invalid pseudo-class", async () => {
+    const result = await validateCss(".foo:(3,3,43) { margin: 5px; }");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.length).toBeGreaterThan(0);
+  });
+
+  it("returns ok:true with empty value for empty string", async () => {
+    const result = await validateCss("");
+    expect(result).toEqual({ ok: true, value: "" });
+  });
+
+  it("returns ok:true with empty value for whitespace-only string", async () => {
+    const result = await validateCss("   ");
+    expect(result).toEqual({ ok: true, value: "" });
+  });
+
+  it("returns ok:true for CSS custom properties", async () => {
+    const input = ":root { --my-color: red; }";
+    const result = await validateCss(input);
+    expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it("returns ok:true for vendor-prefixed rules", async () => {
+    const input = ".foo { -webkit-transform: rotate(45deg); }";
+    const result = await validateCss(input);
+    expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it("returns ok:true for @media block", async () => {
+    const input = "@media (max-width: 768px) { .foo { color: red; } }";
+    const result = await validateCss(input);
+    expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it("returns ok:true for @keyframes block", async () => {
+    const input = "@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }";
+    const result = await validateCss(input);
+    expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it("catches css-tree internal throw and returns ok:false", async () => {
+    const csstree = await import("css-tree");
+    vi.mocked(csstree.parse).mockImplementationOnce(() => {
+      throw new Error("internal css-tree error");
+    });
+
+    const result = await validateCss(".foo { color: red; }");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("internal css-tree error");
+  });
+});
 
 describe("formatCss", () => {
   it("returns empty output for blank input", async () => {
