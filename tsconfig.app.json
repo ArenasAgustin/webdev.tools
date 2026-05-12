@@ -31,7 +31,6 @@
       "@/components/*": ["src/components/*"],
       "@/services/*": ["src/services/*"],
       "@/hooks/*": ["src/hooks/*"],
-      "@/store/*": ["src/store/*"],
       "@/types/*": ["src/types/*"],
       "@/utils/*": ["src/utils/*"],
       "@/playgrounds/*": ["src/playgrounds/*"]

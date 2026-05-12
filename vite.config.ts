@@ -51,7 +51,6 @@ export default defineConfig(({ mode }) => ({
       "@/components": path.resolve(__dirname, "./src/components"),
       "@/services": path.resolve(__dirname, "./src/services"),
       "@/hooks": path.resolve(__dirname, "./src/hooks"),
-      "@/store": path.resolve(__dirname, "./src/store"),
       "@/types": path.resolve(__dirname, "./src/types"),
       "@/utils": path.resolve(__dirname, "./src/utils"),
       "@/playgrounds": path.resolve(__dirname, "./src/playgrounds"),
