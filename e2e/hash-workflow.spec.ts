@@ -39,9 +39,7 @@ test.describe("Hash workflow", () => {
     const hashValue = await sha256Row.locator("code").innerText();
 
     // Paste into compare input and click compare
-    await page
-      .getByPlaceholder("Ingresa un hash para comparar...")
-      .fill(hashValue);
+    await page.getByPlaceholder("Ingresa un hash para comparar...").fill(hashValue);
     await page.getByRole("button", { name: "Comparar" }).click();
 
     await expect(page.getByText("El hash coincide")).toBeVisible();
