@@ -1,2 +1,16 @@
 # Ignore Markdown files
 **/*.md
+
+# Ignore generated files
+coverage/
+dist/
+test-results/
+
+# Ignore lockfiles and config files
+pnpm-lock.yaml
+pnpm-workspace.yaml
+*.yml
+*.yaml
+
+# Ignore JSON files (Prettier can break them)
+*.json
