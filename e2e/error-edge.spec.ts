@@ -3,7 +3,7 @@ import { openToolbar } from "./helpers";
 
 test.describe("Error handling & Edge cases", () => {
   test("large input shows graceful size limit handling", async ({ page }) => {
-    const hugeJson = `{"data":"${"x".repeat(500 * 1024 + 1)}"}`; // 500 KB + 1 byte para superar el límite
+    const hugeJson = `{"data":"${"x".repeat(1_000_000)}"}`; // 1 MB para superar el límite
 
     await page.addInitScript((value) => {
       window.localStorage.setItem("lastJson", value);

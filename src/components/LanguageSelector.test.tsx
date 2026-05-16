@@ -14,7 +14,7 @@ describe("LanguageSelector", () => {
     render(<LanguageSelector />);
 
     // The button shows current language (ES uppercase)
-    const button = screen.getByRole("button", { name: /seleccionar idioma/i });
+    const button = screen.getByRole("button", { name: "Seleccionar idioma" });
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent("ES");
   });
@@ -22,7 +22,7 @@ describe("LanguageSelector", () => {
   it("shows language dropdown when clicked", () => {
     render(<LanguageSelector />);
 
-    const button = screen.getByRole("button", { name: /seleccionar idioma/i });
+    const button = screen.getByRole("button", { name: "Seleccionar idioma" });
     fireEvent.click(button);
 
     // Both languages should be visible in dropdown
@@ -34,7 +34,7 @@ describe("LanguageSelector", () => {
   it("changes language when selecting a different option", () => {
     render(<LanguageSelector />);
 
-    const button = screen.getByRole("button", { name: /seleccionar idioma/i });
+    const button = screen.getByRole("button", { name: "Seleccionar idioma" });
     fireEvent.click(button);
 
     const englishOption = screen.getByRole("option", { name: /EN/i });
@@ -54,7 +54,7 @@ describe("LanguageSelector", () => {
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
 
     // Open dropdown
-    const button = screen.getByRole("button", { name: /seleccionar idioma/i });
+    const button = screen.getByRole("button", { name: "Seleccionar idioma" });
     fireEvent.click(button);
     expect(screen.getByRole("listbox")).toBeInTheDocument();
 
@@ -66,7 +66,7 @@ describe("LanguageSelector", () => {
   it("displays checkmark on selected language", () => {
     render(<LanguageSelector />);
 
-    const button = screen.getByRole("button", { name: /seleccionar idioma/i });
+    const button = screen.getByRole("button", { name: "Seleccionar idioma" });
     fireEvent.click(button);
 
     // Spanish is selected by default, should show checkmark (fa-check icon)
@@ -77,7 +77,7 @@ describe("LanguageSelector", () => {
   it("has proper accessibility attributes", () => {
     render(<LanguageSelector />);
 
-    const button = screen.getByRole("button", { name: /seleccionar idioma/i });
+    const button = screen.getByRole("button", { name: "Seleccionar idioma" });
     expect(button).toHaveAttribute("aria-expanded", "false");
 
     fireEvent.click(button);
