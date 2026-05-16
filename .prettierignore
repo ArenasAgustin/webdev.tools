@@ -14,3 +14,9 @@ pnpm-workspace.yaml
 
 # Ignore JSON files (Prettier can break them)
 *.json
+
+# Ignore config files that Prettier might break
+vite.config.ts
+vitest.config.ts
+eslint.config.js
+playwright.config.ts
