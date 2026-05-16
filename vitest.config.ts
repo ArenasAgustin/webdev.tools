@@ -20,7 +20,7 @@ export default defineConfig({
       threads: {
         maxThreads: 2,
         minThreads: 1,
-        memoryLimit: "512MB", // Limita la memoria por worker
+        isolate: false, // Permite compartir memoria entre workers
       },
     },
     retry: 1,
