@@ -1,4 +1,4 @@
-import { useState, type ComponentProps } from "react";
+import { useState, useCallback, type ComponentProps } from "react";
 import type { ReactNode } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
@@ -103,6 +103,17 @@ export function GenericPlayground({
   const mappedParams = engine.mapActionsParams(baseActionsParams);
   const actions = engine.useActions(mappedParams);
 
+  // Detect if JSON is minified
+  const isMinified = useCallback(() => {
+    if (engine.id !== "json") return false;
+    try {
+      const formatted = JSON.stringify(JSON.parse(ctx.input), null, 2);
+      return ctx.input.trim() !== formatted.trim();
+    } catch {
+      return false;
+    }
+  }, [ctx.input, engine.id]);
+
   // Build toolbar params based on features
   const toolbarParams = hasCleanConfig
     ? {
@@ -198,6 +209,7 @@ export function GenericPlayground({
             config={toolbarConfig as ComponentProps<typeof Toolbar>["config"]}
             shortcuts={overlays.shortcuts}
             extraContent={toolbarExtraContent}
+            isMinified={isMinified()}
           />
         }
       />

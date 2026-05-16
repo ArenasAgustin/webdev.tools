@@ -38,8 +38,16 @@ jobs:
       - name: Format check
         run: pnpm format
 
-      - name: Unit tests
-        run: pnpm test:run
+      - name: Unit tests with coverage
+        run: pnpm test:coverage --run
+
+      - name: Upload coverage summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage/coverage-summary.json
+          retention-days: 14
 
       - name: Verify architecture
         run: pnpm verify:arch

@@ -123,6 +123,19 @@ for (const lang of PLAYGROUNDS) {
   }
 }
 
+// Utility playgrounds E2E specs
+const UTILITY_PLAYGROUNDS = ["colors", "hash", "password", "timestamp"];
+console.log(bold("\nUtility playgrounds E2E\n"));
+for (const name of UTILITY_PLAYGROUNDS) {
+  const specFile = `e2e/${name}-workflow.spec.ts`;
+  if (existsSync(resolve(root, specFile))) {
+    console.log(green(`  ✓ E2E spec for ${name} playground`));
+  } else {
+    console.log(red(`  ✗ E2E spec for ${name} playground — missing: ${specFile}`));
+    violations++;
+  }
+}
+
 // Shared E2E tests
 console.log(bold("\nShared E2E tests\n"));
 const sharedE2e = [
