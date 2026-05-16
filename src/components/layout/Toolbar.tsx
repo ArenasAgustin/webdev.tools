@@ -17,6 +17,8 @@ export interface ToolbarProps {
   extraContent?: React.ReactNode;
   /** State for the keyboard shortcuts modal */
   shortcuts?: ModalState;
+  /** Indicates if the current content is minified */
+  isMinified?: boolean;
   config?:
     | {
         mode: "json";
@@ -68,7 +70,15 @@ export function Toolbar(props: ToolbarProps) {
   const { t } = useTranslation();
   const [openModal, setOpenModal] = useState<"config" | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const hasClean = !!props.config?.mode;
+
+  // Expand toolbar if content is minified and user clicks on the header
+  const handleHeaderClick = () => {
+    if (props.isMinified) {
+      setIsExpanded(!isExpanded);
+    }
+  };
 
   const toolsTitle = props.tools.title ?? t("toolbar.title");
   const genericConfig = props.config;
@@ -95,17 +105,29 @@ export function Toolbar(props: ToolbarProps) {
       <section className="mt-2 sm:mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl border border-white/5 z-10 shrink-0">
         {/* Header row — always visible, acts as mobile toggle tap target */}
         <div
-          className={cn("flex items-center justify-between gap-2", isMobileOpen ? "mb-3" : "mb-0")}
+          className={cn(
+            "flex items-center justify-between gap-2",
+            (isMobileOpen || isExpanded) ? "mb-3" : "mb-0"
+          )}
+          onClick={handleHeaderClick}
+          style={{ cursor: props.isMinified ? "pointer" : "default" }}
         >
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <i className="fas fa-tools text-yellow-400" aria-hidden="true"></i>
             {toolsTitle}
+            {props.isMinified && (
+              <i
+                className="fas fa-exclamation-circle text-yellow-400"
+                aria-hidden="true"
+                title="Contenido minificado - haz clic para expandir"
+              />
+            )}
           </h3>
           <div className="flex items-center gap-2">
             {props.tools.onOpenShortcuts && (
               <button
                 type="button"
-                onClick={props.tools.onOpenShortcuts}
+                onClick={(e) => { e.stopPropagation(); props.tools.onOpenShortcuts?.(); }}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
                 title={t("toolbar.shortcuts")}
                 aria-label={t("actions.viewShortcuts")}
@@ -116,7 +138,7 @@ export function Toolbar(props: ToolbarProps) {
             {props.tools.onOpenDiff && (
               <button
                 type="button"
-                onClick={props.tools.onOpenDiff}
+                onClick={(e) => { e.stopPropagation(); props.tools.onOpenDiff?.(); }}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-purple-300 transition-colors"
                 title={t("actions.viewDifferences")}
                 aria-label={t("actions.viewDifferences")}
@@ -127,7 +149,7 @@ export function Toolbar(props: ToolbarProps) {
             {(props.tools.onOpenConfig ?? genericConfig) && (
               <button
                 type="button"
-                onClick={() => setShowGenericConfigState(true)}
+                onClick={(e) => { e.stopPropagation(); setShowGenericConfigState(true); }}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
                 title={props.tools.configButtonTitle ?? t("actions.configure")}
                 aria-label={props.tools.configButtonTitle ?? t("actions.configure")}
@@ -137,7 +159,7 @@ export function Toolbar(props: ToolbarProps) {
             )}
             <button
               type="button"
-              onClick={() => setIsMobileOpen((v) => !v)}
+              onClick={(e) => { e.stopPropagation(); setIsMobileOpen((v) => !v); }}
               className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
               aria-label={isMobileOpen ? t("actions.hideTools") : t("actions.showTools")}
             >
@@ -153,7 +175,7 @@ export function Toolbar(props: ToolbarProps) {
         <div
           className={cn(
             "overflow-hidden transition-all duration-200",
-            isMobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+            (isMobileOpen || isExpanded) ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
           )}
         >
           <div className={gridLayoutClass}>
