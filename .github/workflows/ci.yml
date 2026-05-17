@@ -30,6 +30,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
+        env:
+          CACHE_BUSTER: ${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Typecheck
         run: pnpm typecheck
