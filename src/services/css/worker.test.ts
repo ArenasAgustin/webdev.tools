@@ -36,9 +36,8 @@ describe("formatCssAsync error via sync path", () => {
 
 defineWorkerServiceTests({
   name: "css worker async services",
-  runWorkerMock: vi.mocked(workerClient.cssWorkerAdapter.run) as unknown as {
-    mockResolvedValue: (value: unknown) => void;
-    mockRejectedValue: (value: unknown) => void;
+  runWorkerMock: {
+    mockImplementationOnce: vi.mocked(workerClient.cssWorkerAdapter.run).mockImplementationOnce,
   },
   formatAsync: (input) => formatCssAsync(input, 2),
   minifyAsync: (input) => minifyCssAsync(input),

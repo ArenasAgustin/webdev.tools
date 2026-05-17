@@ -41,9 +41,8 @@ describe("formatHtmlAsync error via sync path", () => {
 
 defineWorkerServiceTests({
   name: "html worker async services",
-  runWorkerMock: vi.mocked(workerClient.htmlWorkerAdapter.run) as unknown as {
-    mockResolvedValue: (value: unknown) => void;
-    mockRejectedValue: (value: unknown) => void;
+  runWorkerMock: {
+    mockImplementationOnce: vi.mocked(workerClient.htmlWorkerAdapter.run).mockImplementationOnce,
   },
   formatAsync: (input) => formatHtmlAsync(input, { indentSize: 2 }),
   minifyAsync: (input) =>

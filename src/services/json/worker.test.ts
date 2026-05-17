@@ -11,9 +11,8 @@ vi.mock("./workerClient", () => ({
 
 defineWorkerServiceTests({
   name: "worker async services",
-  runWorkerMock: vi.mocked(workerClient.jsonWorkerAdapter.run) as unknown as {
-    mockResolvedValue: (value: unknown) => void;
-    mockRejectedValue: (value: unknown) => void;
+  runWorkerMock: {
+    mockImplementationOnce: vi.mocked(workerClient.jsonWorkerAdapter.run).mockImplementationOnce,
   },
   formatAsync: (input) => formatJsonAsync(input, { indentSize: 2 }),
   minifyAsync: (input) => minifyJsonAsync(input),

@@ -120,8 +120,9 @@ export function defineWorkerClientTests<TPayload>(options: WorkerClientHarnessOp
 interface WorkerServiceHarnessOptions<TError> {
   name: string;
   runWorkerMock: {
-    mockResolvedValue: (value: unknown) => void;
-    mockRejectedValue: (value: unknown) => void;
+    mockImplementationOnce: (
+      implementation: () => Promise<{ id: string; ok: boolean; value?: string; error?: TError }>,
+    ) => void;
   };
   formatAsync: (input: string, options?: unknown) => Promise<Result<string, TError>>;
   minifyAsync: (input: string, options?: unknown) => Promise<Result<string, TError>>;
@@ -149,7 +150,8 @@ export function defineWorkerServiceTests<TError>(options: WorkerServiceHarnessOp
     });
 
     it("uses worker for large format input and returns success", async () => {
-      runWorkerMock.mockResolvedValue({ id: "1", ok: true, value: formatSuccessValue } as never);
+      const mockSuccessResponse = { id: "1", ok: true, value: formatSuccessValue };
+      runWorkerMock.mockImplementationOnce(() => Promise.resolve(mockSuccessResponse));
 
       const result = await formatAsync(largeInput);
 
@@ -157,15 +159,23 @@ export function defineWorkerServiceTests<TError>(options: WorkerServiceHarnessOp
     });
 
     it("returns fallback error when worker responds with error", async () => {
-      runWorkerMock.mockResolvedValue({ id: "2", ok: false, error: minifyErrorValue } as never);
+      const mockErrorResponse = {
+        id: "2",
+        ok: false,
+        error: minifyErrorValue,
+      };
+      runWorkerMock.mockImplementationOnce(() => Promise.resolve(mockErrorResponse));
 
       const result = await minifyAsync(largeInput);
 
-      expect(result).toEqual({ ok: false, error: minifyErrorValue });
+      expect(result).toEqual({
+        ok: false,
+        error: minifyErrorValue,
+      });
     });
 
     it("falls back to sync service when worker throws", async () => {
-      runWorkerMock.mockRejectedValue(new Error("boom"));
+      runWorkerMock.mockImplementationOnce(() => Promise.reject(new Error("boom")));
 
       const ops = fallbackOperations ?? [
         () => formatAsync(largeInput),
