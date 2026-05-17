@@ -25,7 +25,6 @@ export default defineConfig({
     },
     testTimeout: 30_000, // Aumentar timeout a 30 segundos
     retry: 1,
-    testTimeout: 30000,
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     coverage: {
       provider: "v8",
