@@ -15,14 +15,15 @@ export default defineConfig({
     globals: true,
     environment: "happy-dom",
     setupFiles: ["./src/test/setup.ts"],
-     pool: "threads",
+    pool: "threads",
     poolOptions: {
       threads: {
-        maxThreads: 2,
+        maxThreads: 1, // Reducir a 1 worker para evitar timeout
         minThreads: 1,
-        isolate: false, // Permite compartir memoria entre workers
+        isolate: false,
       },
     },
+    testTimeout: 30_000, // Aumentar timeout a 30 segundos
     retry: 1,
     testTimeout: 30000,
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
