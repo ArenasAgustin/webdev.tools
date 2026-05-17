@@ -14,7 +14,7 @@ test.describe("Error handling & Edge cases", () => {
     await openToolbar(page);
     await page.getByRole("button", { name: "Formatear" }).click();
 
-    await expect(page.getByText(/El contenido supera 500 KB/).first()).toBeVisible();
+    await expect(page.getByText(new RegExp(`El contenido supera ${MAX_INPUT_LABEL}`)).first()).toBeVisible();
   });
 
   test("suspicious JS loop is handled without freezing the UI", async ({ page }) => {

@@ -43,7 +43,7 @@ test.describe("JS workflow", () => {
     await openToolbar(page);
     await page.getByRole("button", { name: "Ejecutar" }).click();
 
-    await expect(page.getByRole("main").getByText(/Boom/i)).toBeVisible();
+    await expect(page.locator("#panel-output").getByText(/Boom/i)).toBeVisible();
   });
 
   test("format JS code", async ({ page }) => {
