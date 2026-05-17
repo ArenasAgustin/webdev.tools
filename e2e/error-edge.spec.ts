@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { openToolbar } from "./helpers";
+import { MAX_INPUT_BYTES } from "@/utils/constants/limits";
 
 test.describe("Error handling & Edge cases", () => {
   test("large input shows graceful size limit handling", async ({ page }) => {
-    const hugeJson = `{"data":"${"x".repeat(1_000_000)}"}`; // 1 MB para superar el límite
+    const hugeJson = `{"data":"${"x".repeat(MAX_INPUT_BYTES + 1)}"}`; // Supera el límite de MAX_INPUT_BYTES
 
     await page.addInitScript((value) => {
       window.localStorage.setItem("lastJson", value);
