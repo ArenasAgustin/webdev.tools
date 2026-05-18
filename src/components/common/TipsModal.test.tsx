@@ -1,6 +1,27 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { TipsModal, type TipItem, type QuickExample } from "./TipsModal";
+import i18n from "i18next";
+import { I18nextProvider } from "react-i18next";
+
+// Configurar i18n para los tests
+void i18n.init({
+  resources: {
+    es: {
+      translation: {
+        "modal.close": "Cerrar modal",
+        "tips.quickExamples": "Ejemplos Rápidos",
+      },
+    },
+  },
+  lng: "es",
+  fallbackLng: "es",
+  interpolation: { escapeValue: false },
+});
+
+const renderWithI18n = (component: React.ReactNode) => {
+  return render(<I18nextProvider i18n={i18n}>{component}</I18nextProvider>);
+};
 
 describe("TipsModal", () => {
   const mockTips: TipItem[] = [
@@ -37,7 +58,7 @@ describe("TipsModal", () => {
   ];
 
   it("should not render when closed", () => {
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={false}
         title="Tips"
@@ -52,7 +73,7 @@ describe("TipsModal", () => {
   });
 
   it("should render when open", () => {
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={true}
         title="JSON Path Tips"
@@ -67,7 +88,7 @@ describe("TipsModal", () => {
   });
 
   it("should render all tip categories", () => {
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"
@@ -83,7 +104,7 @@ describe("TipsModal", () => {
   });
 
   it("should render all tip items", () => {
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"
@@ -104,7 +125,7 @@ describe("TipsModal", () => {
 
   it("should call onClose when close button is clicked", () => {
     const handleClose = vi.fn();
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"
@@ -122,7 +143,7 @@ describe("TipsModal", () => {
   });
 
   it("should render quick examples when provided", () => {
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"
@@ -142,7 +163,7 @@ describe("TipsModal", () => {
   });
 
   it("should not render quick examples section when empty", () => {
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"
@@ -159,7 +180,7 @@ describe("TipsModal", () => {
 
   it("should call onTryExample when quick example button is clicked", () => {
     const handleTryExample = vi.fn();
-    render(
+    renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"
@@ -195,7 +216,7 @@ describe("TipsModal", () => {
       },
     ];
 
-    const { container } = render(
+    const { container } = renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"
@@ -220,7 +241,7 @@ describe("TipsModal", () => {
       },
     ];
 
-    const { container } = render(
+    const { container } = renderWithI18n(
       <TipsModal
         isOpen={true}
         title="Tips"

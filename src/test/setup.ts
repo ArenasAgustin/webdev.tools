@@ -123,7 +123,7 @@ void i18n.use(initReactI18next).init({
         "config.autoCopyMinify": "Copiar automáticamente",
 
         // JSONPath
-        "jsonPath.title": "Historial JSONPath",
+        "jsonPath.title": "Historial de Filtros",
         "jsonPath.empty": "Sin historial",
         "jsonPath.reuse": "Reutilizar",
         "jsonPath.delete": "Eliminar",
