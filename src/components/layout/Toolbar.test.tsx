@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
 import { Toolbar } from "./Toolbar";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
+import { renderWithI18n } from "@/test/setup";
 
 vi.mock("@/components/common/ConfigModal", () => ({
   ConfigModal: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
@@ -41,7 +42,7 @@ describe("Toolbar", () => {
     const firstAction = vi.fn();
     const secondAction = vi.fn();
 
-    render(
+    renderWithI18n(
       <Toolbar
         variant="generic"
         tools={{
@@ -65,7 +66,7 @@ describe("Toolbar", () => {
   it("renders generic config button when provided", () => {
     const onOpenConfig = vi.fn();
 
-    render(
+    renderWithI18n(
       <Toolbar
         variant="generic"
         tools={{
@@ -86,7 +87,7 @@ describe("Toolbar", () => {
   });
 
   it("renders extraContent alongside tools in two-column layout", () => {
-    render(
+    renderWithI18n(
       <Toolbar
         variant="generic"
         tools={{
@@ -102,7 +103,7 @@ describe("Toolbar", () => {
   });
 
   it("opens local config state and closes via modal callback for json mode", () => {
-    render(
+    renderWithI18n(
       <Toolbar
         variant="generic"
         tools={{
@@ -131,7 +132,7 @@ describe("Toolbar", () => {
   it("uses external config open state handlers when provided", () => {
     const onOpenChange = vi.fn();
 
-    render(
+    renderWithI18n(
       <Toolbar
         variant="generic"
         tools={{

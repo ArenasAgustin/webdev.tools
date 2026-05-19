@@ -1,10 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { JsPlayground } from "./JsPlayground";
 import { ToastProvider } from "@/context/ToastContext";
+import { renderWithI18n } from "@/test/setup";
+
+interface Storage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+  clear(): void;
+  length: number;
+  key(index: number): string | null;
+}
 
 // Mock localStorage
-const localStorageMock = (() => {
+const localStorageMock: Storage = (() => {
   let store: Record<string, string> = {};
 
   return {
@@ -18,6 +28,8 @@ const localStorageMock = (() => {
     clear: () => {
       store = {};
     },
+    length: 0,
+    key: () => null,
   };
 })();
 
@@ -68,7 +80,7 @@ describe("JsPlayground", () => {
   });
 
   const renderWithProviders = (component: React.ReactNode) => {
-    return render(<ToastProvider>{component}</ToastProvider>);
+    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
   };
 
   it("renders the example code by default", () => {

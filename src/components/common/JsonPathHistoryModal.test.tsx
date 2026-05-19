@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
 import { JsonPathHistoryModal } from "./JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
+import { renderWithI18n } from "@/test/setup";
 
 describe("JsonPathHistoryModal", () => {
   const mockHistory: JsonPathHistoryItem[] = [
@@ -20,7 +21,7 @@ describe("JsonPathHistoryModal", () => {
   ];
 
   it("should not render when closed", () => {
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={false}
         history={mockHistory}
@@ -35,7 +36,7 @@ describe("JsonPathHistoryModal", () => {
   });
 
   it("should render when open", () => {
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}
@@ -50,7 +51,7 @@ describe("JsonPathHistoryModal", () => {
   });
 
   it("should display all history items", () => {
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}
@@ -68,7 +69,7 @@ describe("JsonPathHistoryModal", () => {
   });
 
   it("should show empty state when no history", () => {
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={[]}
@@ -84,7 +85,7 @@ describe("JsonPathHistoryModal", () => {
 
   it("should call onClose when close button is clicked", () => {
     const handleClose = vi.fn();
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}
@@ -103,7 +104,7 @@ describe("JsonPathHistoryModal", () => {
 
   it("should call onReuse when history item is clicked", () => {
     const handleReuse = vi.fn();
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}
@@ -122,7 +123,7 @@ describe("JsonPathHistoryModal", () => {
 
   it("should call onReuse when reuse button is clicked", () => {
     const handleReuse = vi.fn();
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}
@@ -141,7 +142,7 @@ describe("JsonPathHistoryModal", () => {
 
   it("should call onDelete when delete button is clicked", () => {
     const handleDelete = vi.fn();
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}
@@ -160,7 +161,7 @@ describe("JsonPathHistoryModal", () => {
 
   it("should call onClearAll when clear history button is clicked", () => {
     const handleClearAll = vi.fn();
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}
@@ -178,7 +179,7 @@ describe("JsonPathHistoryModal", () => {
   });
 
   it("should display timestamps for history items", () => {
-    render(
+    renderWithI18n(
       <JsonPathHistoryModal
         isOpen={true}
         history={mockHistory}

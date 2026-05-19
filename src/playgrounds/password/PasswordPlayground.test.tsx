@@ -1,9 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { screen, fireEvent, act } from "@testing-library/react";
 import { PasswordPlayground } from "./PasswordPlayground";
 import { ToastProvider } from "@/context/ToastContext";
+import { renderWithI18n } from "@/test/setup";
 
-const localStorageMock = (() => {
+interface Storage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+  clear(): void;
+  length: number;
+  key(index: number): string | null;
+}
+
+const localStorageMock: Storage = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] ?? null,
@@ -16,6 +26,8 @@ const localStorageMock = (() => {
     clear: () => {
       store = {};
     },
+    length: 0,
+    key: () => null,
   };
 })();
 
@@ -42,7 +54,7 @@ describe("PasswordPlayground", () => {
   });
 
   const renderWithProviders = (component: React.ReactNode) => {
-    return render(<ToastProvider>{component}</ToastProvider>);
+    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
   };
 
   it("renders password input and generate button", () => {

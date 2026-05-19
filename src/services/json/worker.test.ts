@@ -12,7 +12,7 @@ vi.mock("./workerClient", () => ({
 defineWorkerServiceTests({
   name: "worker async services",
   runWorkerMock: {
-    mockImplementationOnce: vi.mocked(workerClient.jsonWorkerAdapter.run).mockImplementationOnce,
+    mockImplementationOnce: (implementation) => vi.mocked(workerClient.jsonWorkerAdapter.run).mockImplementationOnce(implementation),
   },
   formatAsync: (input) => formatJsonAsync(input, { indentSize: 2 }),
   minifyAsync: (input) => minifyJsonAsync(input),
