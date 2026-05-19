@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { HashPlayground } from "./HashPlayground";
 import { ToastProvider } from "@/context/ToastContext";
-import { renderWithI18n } from "@/test/setup";
+import i18n from "i18next";
+import { I18nextProvider, initReactI18next } from "react-i18next";
 
 interface Storage {
   getItem(key: string): string | null;
@@ -12,6 +13,58 @@ interface Storage {
   length: number;
   key(index: number): string | null;
 }
+
+// Configuración de i18n para tests
+const initI18n = async () => {
+  // Limpiar estado previo de i18n
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+
+  await i18n.use(initReactI18next).init({
+    lng: "es",
+    fallbackLng: "es",
+    interpolation: {
+      escapeValue: false,
+    },
+    resources: {
+      es: {
+        translation: {
+          "hash.text_placeholder": "texto para generar hashes",
+          "hash.text_tab": "Texto",
+          "hash.file_tab": "Archivo",
+          "hash.generate": "Generar",
+          "hash.copy": "Copiar hash",
+          "hash.results": "Resultados",
+          "hash.uppercase": "Mayúsculas",
+          "hash.compare_title": "Comparar Hash",
+          "hash.compare_placeholder": "hash para comparar",
+          "hash.compare_button": "Comparar",
+          "hash.dropzone": "Arrastrá un archivo",
+        },
+      },
+    },
+  });
+};
+
+const renderWithI18n = async (component: React.ReactNode) => {
+  await initI18n();
+  const result = {
+    ...render(
+      <I18nextProvider i18n={i18n}>{component}</I18nextProvider>
+    ),
+  };
+  return result;
+};
+
+// Limpiar i18n después de cada test
+afterEach(async () => {
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+});
 
 const localStorageMock: Storage = (() => {
   let store: Record<string, string> = {};
@@ -53,26 +106,26 @@ describe("HashPlayground", () => {
     vi.unstubAllGlobals();
   });
 
-  const renderWithProviders = (component: React.ReactNode) => {
-    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
+  const renderWithProviders = async (component: React.ReactNode) => {
+    return await renderWithI18n(<ToastProvider>{component}</ToastProvider>);
   };
 
-  it("renders with text mode by default", () => {
-    renderWithProviders(<HashPlayground />);
+  it("renders with text mode by default", async () => {
+    await renderWithProviders(<HashPlayground />);
 
     expect(screen.getByPlaceholderText(/texto para generar hashes/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Texto/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Archivo/i })).toBeInTheDocument();
   });
 
-  it("renders generate button", () => {
-    renderWithProviders(<HashPlayground />);
+  it("renders generate button", async () => {
+    await renderWithProviders(<HashPlayground />);
 
     expect(screen.getByRole("button", { name: /Generar/i })).toBeInTheDocument();
   });
 
   it("switches to file mode when file button is clicked", async () => {
-    renderWithProviders(<HashPlayground />);
+    await renderWithProviders(<HashPlayground />);
 
     const fileBtn = screen.getByRole("button", { name: /Archivo/i });
     await act(async () => {
@@ -84,7 +137,7 @@ describe("HashPlayground", () => {
   });
 
   it("generates hashes when generate button is clicked", async () => {
-    renderWithProviders(<HashPlayground />);
+    await renderWithProviders(<HashPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
     await act(async () => {
@@ -100,7 +153,7 @@ describe("HashPlayground", () => {
   });
 
   it("copies hash value to clipboard when copy button is clicked", async () => {
-    renderWithProviders(<HashPlayground />);
+    await renderWithProviders(<HashPlayground />);
 
     // Generate hashes first
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
@@ -118,7 +171,7 @@ describe("HashPlayground", () => {
   });
 
   it("toggles uppercase when checkbox is clicked", async () => {
-    renderWithProviders(<HashPlayground />);
+    await renderWithProviders(<HashPlayground />);
 
     const checkbox = screen.getByRole("checkbox", { name: /Mayúsculas/i });
     await act(async () => {
@@ -128,26 +181,26 @@ describe("HashPlayground", () => {
     expect(checkbox).toBeChecked();
   });
 
-  it("shows compare section", () => {
-    renderWithProviders(<HashPlayground />);
+  it("shows compare section", async () => {
+    await renderWithProviders(<HashPlayground />);
 
     expect(screen.getByText(/Comparar Hash/i)).toBeInTheDocument();
   });
 
-  it("shows compare input field", () => {
-    renderWithProviders(<HashPlayground />);
+  it("shows compare input field", async () => {
+    await renderWithProviders(<HashPlayground />);
 
     expect(screen.getByPlaceholderText(/hash para comparar/i)).toBeInTheDocument();
   });
 
-  it("shows compare button", () => {
-    renderWithProviders(<HashPlayground />);
+  it("shows compare button", async () => {
+    await renderWithProviders(<HashPlayground />);
 
     expect(screen.getByRole("button", { name: /Comparar/i })).toBeInTheDocument();
   });
 
   it("shows match result when comparing valid hash", async () => {
-    renderWithProviders(<HashPlayground />);
+    await renderWithProviders(<HashPlayground />);
 
     // Generate hashes first
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
@@ -164,7 +217,7 @@ describe("HashPlayground", () => {
   });
 
   it("shows no match when comparing invalid hash", async () => {
-    renderWithProviders(<HashPlayground />);
+    await renderWithProviders(<HashPlayground />);
 
     // Generate hashes first
     const generateBtn = screen.getByRole("button", { name: /Generar/i });

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { JsPlayground } from "./JsPlayground";
 import { ToastProvider } from "@/context/ToastContext";
-import { renderWithI18n } from "@/test/setup";
+import i18n from "i18next";
+import { I18nextProvider, initReactI18next } from "react-i18next";
 
 interface Storage {
   getItem(key: string): string | null;
@@ -12,6 +13,50 @@ interface Storage {
   length: number;
   key(index: number): string | null;
 }
+
+// Configuración de i18n para tests
+const initI18n = async () => {
+  // Limpiar estado previo de i18n
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+
+  await i18n.use(initReactI18next).init({
+    lng: "es",
+    fallbackLng: "es",
+    interpolation: {
+      escapeValue: false,
+    },
+    resources: {
+      es: {
+        translation: {
+          "js.run": "Ejecutar",
+          "js.format": "Formatear",
+          "js.minify": "Minificar",
+        },
+      },
+    },
+  });
+};
+
+const renderWithI18n = async (component: React.ReactNode) => {
+  await initI18n();
+  const result = {
+    ...render(
+      <I18nextProvider i18n={i18n}>{component}</I18nextProvider>
+    ),
+  };
+  return result;
+};
+
+// Limpiar i18n después de cada test
+afterEach(async () => {
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+});
 
 // Mock localStorage
 const localStorageMock: Storage = (() => {
@@ -79,12 +124,12 @@ describe("JsPlayground", () => {
     vi.restoreAllMocks();
   });
 
-  const renderWithProviders = (component: React.ReactNode) => {
-    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
+  const renderWithProviders = async (component: React.ReactNode) => {
+    return await renderWithI18n(<ToastProvider>{component}</ToastProvider>);
   };
 
-  it("renders the example code by default", () => {
-    renderWithProviders(<JsPlayground />);
+  it("renders the example code by default", async () => {
+    await renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
@@ -93,7 +138,7 @@ describe("JsPlayground", () => {
   });
 
   it("executes code and displays console output", async () => {
-    renderWithProviders(<JsPlayground />);
+    await renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
@@ -108,7 +153,7 @@ describe("JsPlayground", () => {
   });
 
   it("shows runtime errors when execution fails", async () => {
-    renderWithProviders(<JsPlayground />);
+    await renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
@@ -124,7 +169,7 @@ describe("JsPlayground", () => {
   });
 
   it("formats and minifies input code", async () => {
-    renderWithProviders(<JsPlayground />);
+    await renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
@@ -147,7 +192,7 @@ describe("JsPlayground", () => {
   });
 
   it("formats multi-line blocks", async () => {
-    renderWithProviders(<JsPlayground />);
+    await renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;
@@ -166,7 +211,7 @@ describe("JsPlayground", () => {
   });
 
   it("minifies by removing comments and whitespace", async () => {
-    renderWithProviders(<JsPlayground />);
+    await renderWithProviders(<JsPlayground />);
 
     const editors = screen.getAllByRole("textbox");
     const input = editors[0] as HTMLTextAreaElement;

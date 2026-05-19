@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { PasswordPlayground } from "./PasswordPlayground";
 import { ToastProvider } from "@/context/ToastContext";
-import { renderWithI18n } from "@/test/setup";
+import i18n from "i18next";
+import { I18nextProvider, initReactI18next } from "react-i18next";
 
 interface Storage {
   getItem(key: string): string | null;
@@ -12,6 +13,57 @@ interface Storage {
   length: number;
   key(index: number): string | null;
 }
+
+// Configuración de i18n para tests
+const initI18n = async () => {
+  // Limpiar estado previo de i18n
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+
+  await i18n.use(initReactI18next).init({
+    lng: "es",
+    fallbackLng: "es",
+    interpolation: {
+      escapeValue: false,
+    },
+    resources: {
+      es: {
+        translation: {
+          "password.placeholder": "contraseña aparecerá aquí",
+          "password.generate": "Generar",
+          "password.copy": "Copiar",
+          "password.show": "Mostrar",
+          "password.hide": "Ocultar",
+          "password.strength": "Fortaleza:",
+          "password.history": "Historial:",
+          "password.uppercase": "Mayúsculas",
+          "password.numbers": "Números",
+          "password.symbols": "Símbolos",
+        },
+      },
+    },
+  });
+};
+
+const renderWithI18n = async (component: React.ReactNode) => {
+  await initI18n();
+  const result = {
+    ...render(
+      <I18nextProvider i18n={i18n}>{component}</I18nextProvider>
+    ),
+  };
+  return result;
+};
+
+// Limpiar i18n después de cada test
+afterEach(async () => {
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+});
 
 const localStorageMock: Storage = (() => {
   let store: Record<string, string> = {};
@@ -53,19 +105,19 @@ describe("PasswordPlayground", () => {
     vi.unstubAllGlobals();
   });
 
-  const renderWithProviders = (component: React.ReactNode) => {
-    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
-  };
+const renderWithProviders = async (component: React.ReactNode) => {
+  return await renderWithI18n(<ToastProvider>{component}</ToastProvider>);
+};
 
-  it("renders password input and generate button", () => {
-    renderWithProviders(<PasswordPlayground />);
+  it("renders password input and generate button", async () => {
+    await renderWithProviders(<PasswordPlayground />);
 
     expect(screen.getByPlaceholderText(/contraseña aparecerá aquí/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Generar/i })).toBeInTheDocument();
   });
 
   it("generates a password when generate button is clicked", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
 
@@ -78,7 +130,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("toggles password visibility when eye button is clicked", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     // Generate a password first
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
@@ -99,7 +151,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("copies password to clipboard when copy button is clicked", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     // Generate a password first
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
@@ -117,7 +169,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("updates password length when slider changes", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     // Find the range input (slider)
     const slider = document.querySelector('input[type="range"]')!;
@@ -132,7 +184,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("toggles uppercase option when checkbox is clicked", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     const checkbox = screen.getByRole("checkbox", { name: /Mayúsculas/i });
     expect(checkbox).toBeChecked(); // Default is true
@@ -145,7 +197,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("toggles numbers option when checkbox is clicked", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     const checkbox = screen.getByRole("checkbox", { name: /Números/i });
     expect(checkbox).toBeChecked(); // Default is true
@@ -158,7 +210,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("toggles symbols option when checkbox is clicked", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     const checkbox = screen.getByRole("checkbox", { name: /Símbolos/i });
     expect(checkbox).not.toBeChecked(); // Default is false
@@ -171,7 +223,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("shows strength indicator after generating password", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
     await act(async () => {
@@ -183,7 +235,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("adds generated password to history", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
 
@@ -201,7 +253,7 @@ describe("PasswordPlayground", () => {
   });
 
   it("copies history password when clicked", async () => {
-    renderWithProviders(<PasswordPlayground />);
+    await renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
 

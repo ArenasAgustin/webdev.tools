@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { TimestampPlayground } from "./TimestampPlayground";
 import { ToastProvider } from "@/context/ToastContext";
-import { renderWithI18n } from "@/test/setup";
+import i18n from "i18next";
+import { I18nextProvider, initReactI18next } from "react-i18next";
 
 interface Storage {
   getItem(key: string): string | null;
@@ -12,6 +13,55 @@ interface Storage {
   length: number;
   key(index: number): string | null;
 }
+
+// Configuración de i18n para tests
+const initI18n = async () => {
+  // Limpiar estado previo de i18n
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+
+  await i18n.use(initReactI18next).init({
+    lng: "es",
+    fallbackLng: "es",
+    interpolation: {
+      escapeValue: false,
+    },
+    resources: {
+      es: {
+        translation: {
+          "timestamp.placeholder": "Unix timestamp o fecha",
+          "timestamp.convert": "Convertir",
+          "timestamp.now": "Ahora",
+          "timestamp.clear": "Limpiar",
+          "timestamp.timezone": "Zona horaria:",
+          "timestamp.copy": "Copiar",
+          "timestamp.invalid_input": "Input inválido",
+          "timestamp.future": "en el futuro",
+        },
+      },
+    },
+  });
+};
+
+const renderWithI18n = async (component: React.ReactNode) => {
+  await initI18n();
+  const result = {
+    ...render(
+      <I18nextProvider i18n={i18n}>{component}</I18nextProvider>
+    ),
+  };
+  return result;
+};
+
+// Limpiar i18n después de cada test
+afterEach(async () => {
+  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
+  i18n.services.resourceStore.data = {};
+  i18n.store.data = {};
+  i18n.isInitialized = false;
+});
 
 const localStorageMock: Storage = (() => {
   let store: Record<string, string> = {};
@@ -53,43 +103,43 @@ describe("TimestampPlayground", () => {
     vi.unstubAllGlobals();
   });
 
-  const renderWithProviders = (component: React.ReactNode) => {
-    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
+  const renderWithProviders = async (component: React.ReactNode) => {
+    return await renderWithI18n(<ToastProvider>{component}</ToastProvider>);
   };
 
-  it("renders with example timestamp", () => {
-    renderWithProviders(<TimestampPlayground />);
+  it("renders with example timestamp", async () => {
+    await renderWithProviders(<TimestampPlayground />);
 
     expect(screen.getByPlaceholderText(/Unix timestamp o fecha/i)).toBeInTheDocument();
   });
 
-  it("renders convert button", () => {
-    renderWithProviders(<TimestampPlayground />);
+  it("renders convert button", async () => {
+    await renderWithProviders(<TimestampPlayground />);
 
     expect(screen.getByRole("button", { name: /Convertir/i })).toBeInTheDocument();
   });
 
-  it("renders now button", () => {
-    renderWithProviders(<TimestampPlayground />);
+  it("renders now button", async () => {
+    await renderWithProviders(<TimestampPlayground />);
 
     expect(screen.getByRole("button", { name: /Ahora/i })).toBeInTheDocument();
   });
 
-  it("renders clear button", () => {
-    renderWithProviders(<TimestampPlayground />);
+  it("renders clear button", async () => {
+    await renderWithProviders(<TimestampPlayground />);
 
     expect(screen.getByRole("button", { name: /Limpiar/i })).toBeInTheDocument();
   });
 
-  it("renders timezone selector", () => {
-    renderWithProviders(<TimestampPlayground />);
+  it("renders timezone selector", async () => {
+    await renderWithProviders(<TimestampPlayground />);
 
     expect(screen.getByText(/Zona horaria:/i)).toBeInTheDocument();
     expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
 
   it("converts valid timestamp when convert button is clicked", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     const input = screen.getByPlaceholderText(/Unix timestamp o fecha/i);
     await act(async () => {
@@ -106,7 +156,7 @@ describe("TimestampPlayground", () => {
   });
 
   it("shows current timestamp when now button is clicked", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     const nowBtn = screen.getByRole("button", { name: /Ahora/i });
     await act(async () => {
@@ -118,7 +168,7 @@ describe("TimestampPlayground", () => {
   });
 
   it("clears input when clear button is clicked", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     const input = screen.getByPlaceholderText(/Unix timestamp o fecha/i);
     await act(async () => {
@@ -134,7 +184,7 @@ describe("TimestampPlayground", () => {
   });
 
   it("shows error for invalid timestamp", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     const input = screen.getByPlaceholderText(/Unix timestamp o fecha/i);
     await act(async () => {
@@ -150,7 +200,7 @@ describe("TimestampPlayground", () => {
   });
 
   it("changes timezone when select changes", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     const select = screen.getByRole("combobox");
     await act(async () => {
@@ -161,7 +211,7 @@ describe("TimestampPlayground", () => {
   });
 
   it("copies value to clipboard when copy button is clicked", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     // First convert a timestamp
     const input = screen.getByPlaceholderText(/Unix timestamp o fecha/i);
@@ -184,7 +234,7 @@ describe("TimestampPlayground", () => {
   });
 
   it("converts timestamp on Enter key press", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     const input = screen.getByPlaceholderText(/Unix timestamp o fecha/i);
     await act(async () => {
@@ -200,7 +250,7 @@ describe("TimestampPlayground", () => {
   });
 
   it("shows future indicator for future timestamps", async () => {
-    renderWithProviders(<TimestampPlayground />);
+    await renderWithProviders(<TimestampPlayground />);
 
     // Use a future timestamp
     const input = screen.getByPlaceholderText(/Unix timestamp o fecha/i);
