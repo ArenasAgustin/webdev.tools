@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { JsPlayground } from "./JsPlayground";
 import { ToastProvider } from "@/context/ToastContext";
-import i18n from "i18next";
-import { I18nextProvider, initReactI18next } from "react-i18next";
+import { renderWithI18n, cleanupI18n } from "@/test/test-utils";
 
 interface Storage {
   getItem(key: string): string | null;
@@ -14,48 +13,16 @@ interface Storage {
   key(index: number): string | null;
 }
 
-// Configuración de i18n para tests
-const initI18n = async () => {
-  // Limpiar estado previo de i18n
-  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
-  i18n.services.resourceStore.data = {};
-  i18n.store.data = {};
-  i18n.isInitialized = false;
-
-  await i18n.use(initReactI18next).init({
-    lng: "es",
-    fallbackLng: "es",
-    interpolation: {
-      escapeValue: false,
-    },
-    resources: {
-      es: {
-        translation: {
-          "js.run": "Ejecutar",
-          "js.format": "Formatear",
-          "js.minify": "Minificar",
-        },
-      },
-    },
-  });
-};
-
-const renderWithI18n = async (component: React.ReactNode) => {
-  await initI18n();
-  const result = {
-    ...render(
-      <I18nextProvider i18n={i18n}>{component}</I18nextProvider>
-    ),
-  };
-  return result;
+// Recursos de i18n para este test
+const i18nResources = {
+  "js.run": "Ejecutar",
+  "js.format": "Formatear",
+  "js.minify": "Minificar",
 };
 
 // Limpiar i18n después de cada test
 afterEach(async () => {
-  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
-  i18n.services.resourceStore.data = {};
-  i18n.store.data = {};
-  i18n.isInitialized = false;
+  await cleanupI18n();
 });
 
 // Mock localStorage
@@ -125,7 +92,7 @@ describe("JsPlayground", () => {
   });
 
   const renderWithProviders = async (component: React.ReactNode) => {
-    return await renderWithI18n(<ToastProvider>{component}</ToastProvider>);
+    return await renderWithI18n(<ToastProvider>{component}</ToastProvider>, i18nResources);
   };
 
   it("renders the example code by default", async () => {

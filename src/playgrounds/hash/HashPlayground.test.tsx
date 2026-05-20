@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { screen, fireEvent, act } from "@testing-library/react";
 import { HashPlayground } from "./HashPlayground";
 import { ToastProvider } from "@/context/ToastContext";
-import i18n from "i18next";
-import { I18nextProvider, initReactI18next } from "react-i18next";
+import { renderWithI18n, cleanupI18n } from "@/test/test-utils";
 
 interface Storage {
   getItem(key: string): string | null;
@@ -14,56 +13,24 @@ interface Storage {
   key(index: number): string | null;
 }
 
-// Configuración de i18n para tests
-const initI18n = async () => {
-  // Limpiar estado previo de i18n
-  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
-  i18n.services.resourceStore.data = {};
-  i18n.store.data = {};
-  i18n.isInitialized = false;
-
-  await i18n.use(initReactI18next).init({
-    lng: "es",
-    fallbackLng: "es",
-    interpolation: {
-      escapeValue: false,
-    },
-    resources: {
-      es: {
-        translation: {
-          "hash.text_placeholder": "texto para generar hashes",
-          "hash.text_tab": "Texto",
-          "hash.file_tab": "Archivo",
-          "hash.generate": "Generar",
-          "hash.copy": "Copiar hash",
-          "hash.results": "Resultados",
-          "hash.uppercase": "Mayúsculas",
-          "hash.compare_title": "Comparar Hash",
-          "hash.compare_placeholder": "hash para comparar",
-          "hash.compare_button": "Comparar",
-          "hash.dropzone": "Arrastrá un archivo",
-        },
-      },
-    },
-  });
-};
-
-const renderWithI18n = async (component: React.ReactNode) => {
-  await initI18n();
-  const result = {
-    ...render(
-      <I18nextProvider i18n={i18n}>{component}</I18nextProvider>
-    ),
-  };
-  return result;
+// Recursos de i18n para este test
+const i18nResources = {
+  "hash.text_placeholder": "texto para generar hashes",
+  "hash.text_tab": "Texto",
+  "hash.file_tab": "Archivo",
+  "hash.generate": "Generar",
+  "hash.copy": "Copiar hash",
+  "hash.results": "Resultados",
+  "hash.uppercase": "Mayúsculas",
+  "hash.compare_title": "Comparar Hash",
+  "hash.compare_placeholder": "hash para comparar",
+  "hash.compare_button": "Comparar",
+  "hash.dropzone": "Arrastrá un archivo",
 };
 
 // Limpiar i18n después de cada test
 afterEach(async () => {
-  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
-  i18n.services.resourceStore.data = {};
-  i18n.store.data = {};
-  i18n.isInitialized = false;
+  await cleanupI18n();
 });
 
 const localStorageMock: Storage = (() => {
@@ -107,7 +74,7 @@ describe("HashPlayground", () => {
   });
 
   const renderWithProviders = async (component: React.ReactNode) => {
-    return await renderWithI18n(<ToastProvider>{component}</ToastProvider>);
+    return await renderWithI18n(<ToastProvider>{component}</ToastProvider>, i18nResources);
   };
 
   it("renders with text mode by default", async () => {

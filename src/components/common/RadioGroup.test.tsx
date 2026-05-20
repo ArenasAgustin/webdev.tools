@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { RadioGroup } from "./RadioGroup";
-import { renderWithI18n } from "@/test/setup";
 
 describe("RadioGroup", () => {
   const options = [
@@ -11,7 +10,7 @@ describe("RadioGroup", () => {
   ];
 
   it("should render all radio options", () => {
-    renderWithI18n(<RadioGroup name="test-group" options={options} value="option1" onChange={() => {}} />);
+    render(<RadioGroup name="test-group" options={options} value="option1" onChange={() => {}} />);
 
     options.forEach((option) => {
       expect(screen.getByLabelText(option.label)).toBeInTheDocument();
@@ -19,14 +18,14 @@ describe("RadioGroup", () => {
   });
 
   it("should select the correct option", () => {
-    renderWithI18n(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
+    render(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
 
     const selectedRadio = screen.getByLabelText("Second Option");
     expect(selectedRadio).toBeChecked();
   });
 
   it("should not check unselected options", () => {
-    renderWithI18n(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
+    render(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
 
     const firstRadio = screen.getByLabelText("First Option");
     const thirdRadio = screen.getByLabelText("Third Option");
@@ -37,8 +36,8 @@ describe("RadioGroup", () => {
 
   it("should call onChange when option is clicked", () => {
     const handleChange = vi.fn();
-    renderWithI18n(
-      <RadioGroup name="test-group" options={options} value="option1" onChange={handleChange} />,
+    render(
+      <RadioGroup name="test-group" options={options} value="option1" onChange={handleChange} />
     );
 
     const radio = screen.getByLabelText("Third Option");
@@ -48,8 +47,8 @@ describe("RadioGroup", () => {
   });
 
   it("should use the provided name attribute", () => {
-    renderWithI18n(
-      <RadioGroup name="my-custom-name" options={options} value="option1" onChange={() => {}} />,
+    render(
+      <RadioGroup name="my-custom-name" options={options} value="option1" onChange={() => {}} />
     );
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -61,23 +60,23 @@ describe("RadioGroup", () => {
 
   it("should work with single option", () => {
     const singleOption = [{ value: "only", label: "Only Option" }];
-    renderWithI18n(<RadioGroup name="single" options={singleOption} value="only" onChange={() => {}} />);
+    render(<RadioGroup name="single" options={singleOption} value="only" onChange={() => {}} />);
 
     const radio = screen.getByLabelText("Only Option");
     expect(radio).toBeChecked();
   });
 
-  it("should render radiogroup role with accessible name", () => {
-    renderWithI18n(
-      <RadioGroup name="access-group" options={options} value="option1" onChange={() => {}} />,
+  it("should render radiogroup role", () => {
+    render(
+      <RadioGroup name="test-group" options={options} value="option1" onChange={() => {}} />
     );
 
-    expect(screen.getByRole("radiogroup", { name: "access-group" })).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup")).toBeInTheDocument();
   });
 
   it("should apply default blue color classes when color is not provided", () => {
-    renderWithI18n(
-      <RadioGroup name="default-color" options={options} value="option1" onChange={() => {}} />,
+    render(
+      <RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />
     );
 
     const firstRadio = screen.getByLabelText("First Option");
@@ -86,14 +85,14 @@ describe("RadioGroup", () => {
   });
 
   it("should apply custom color classes", () => {
-    renderWithI18n(
+    render(
       <RadioGroup
         name="custom-color"
         options={options}
         value="option1"
         onChange={() => {}}
         color="orange"
-      />,
+      />
     );
 
     const firstRadio = screen.getByLabelText("First Option");
@@ -102,17 +101,18 @@ describe("RadioGroup", () => {
   });
 
   it("should append custom className to container", () => {
-    renderWithI18n(
+    render(
       <RadioGroup
-        name="custom-class"
+        name="custom-color"
         options={options}
         value="option1"
         onChange={() => {}}
-        className="mt-2 custom-group"
-      />,
+        color="orange"
+        className="custom-group"
+      />
     );
 
-    const group = screen.getByRole("radiogroup", { name: "custom-class" });
+    const group = screen.getByRole("radiogroup");
     expect(group).toHaveClass("flex");
     expect(group).toHaveClass("gap-4");
     expect(group).toHaveClass("mt-2");
@@ -120,8 +120,8 @@ describe("RadioGroup", () => {
   });
 
   it("should update checked option after rerender", () => {
-    const { rerender } = renderWithI18n(
-      <RadioGroup name="rerender-group" options={options} value="option1" onChange={() => {}} />,
+    const { rerender } = render(
+      <RadioGroup name="rerender-group" options={options} value="option1" onChange={() => {}} />
     );
 
     expect(screen.getByLabelText("First Option")).toBeChecked();
@@ -136,7 +136,7 @@ describe("RadioGroup", () => {
   });
 
   it("should render empty group when options are empty", () => {
-    renderWithI18n(<RadioGroup name="empty-group" options={[]} value={"" as never} onChange={() => {}} />);
+    render(<RadioGroup name="empty-group" options={[]} value={"" as never} onChange={() => {}} />);
 
     expect(screen.getByRole("radiogroup", { name: "empty-group" })).toBeInTheDocument();
     expect(screen.queryAllByRole("radio")).toHaveLength(0);

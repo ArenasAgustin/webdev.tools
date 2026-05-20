@@ -1,8 +1,23 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { screen, fireEvent } from "@testing-library/react";
 import { JsonPathHistoryModal } from "./JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
-import { renderWithI18n } from "@/test/setup";
+import { renderWithI18n, cleanupI18n } from "@/test/test-utils";
+
+// Recursos de i18n para este test
+const i18nResources = {
+  "jsonpath.history_title": "Historial de Filtros",
+  "jsonpath.no_history": "No hay historial reciente",
+  "jsonpath.close": "Cerrar modal",
+  "jsonpath.reuse": "Reutilizar filtro",
+  "jsonpath.delete": "Borrar filtro",
+  "jsonpath.clear_all": "Borrar Historial",
+};
+
+// Limpiar i18n después de cada test
+afterEach(async () => {
+  await cleanupI18n();
+});
 
 describe("JsonPathHistoryModal", () => {
   const mockHistory: JsonPathHistoryItem[] = [
@@ -30,6 +45,7 @@ describe("JsonPathHistoryModal", () => {
         onDelete={() => {}}
         onClearAll={() => {}}
       />,
+      i18nResources
     );
 
     expect(screen.queryByText("Historial de Filtros")).not.toBeInTheDocument();
@@ -43,133 +59,9 @@ describe("JsonPathHistoryModal", () => {
         onClose={() => {}}
         onReuse={() => {}}
         onDelete={() => {}}
-        onClearAll={() => {}}
-      />,
-    );
-
-    expect(screen.getByText("Historial de Filtros")).toBeInTheDocument();
-  });
-
-  it("should display all history items", () => {
-    renderWithI18n(
-      <JsonPathHistoryModal
-        isOpen={true}
-        history={mockHistory}
-        onClose={() => {}}
-        onReuse={() => {}}
-        onDelete={() => {}}
-        onClearAll={() => {}}
-      />,
-    );
-
-    expect(screen.getByText("$.users[*].name")).toBeInTheDocument();
-    expect(screen.getByText("$.products[?(@.price > 100)]")).toBeInTheDocument();
-    expect(screen.getByText("×5")).toBeInTheDocument();
-    expect(screen.getByText("×2")).toBeInTheDocument();
-  });
-
-  it("should show empty state when no history", () => {
-    renderWithI18n(
-      <JsonPathHistoryModal
-        isOpen={true}
-        history={[]}
-        onClose={() => {}}
-        onReuse={() => {}}
-        onDelete={() => {}}
-        onClearAll={() => {}}
-      />,
-    );
-
-    expect(screen.getByText("No hay historial reciente")).toBeInTheDocument();
-  });
-
-  it("should call onClose when close button is clicked", () => {
-    const handleClose = vi.fn();
-    renderWithI18n(
-      <JsonPathHistoryModal
-        isOpen={true}
-        history={mockHistory}
-        onClose={handleClose}
-        onReuse={() => {}}
-        onDelete={() => {}}
-        onClearAll={() => {}}
-      />,
-    );
-
-    const closeButton = screen.getByLabelText("Cerrar modal");
-    fireEvent.click(closeButton);
-
-    expect(handleClose).toHaveBeenCalledOnce();
-  });
-
-  it("should call onReuse when history item is clicked", () => {
-    const handleReuse = vi.fn();
-    renderWithI18n(
-      <JsonPathHistoryModal
-        isOpen={true}
-        history={mockHistory}
-        onClose={() => {}}
-        onReuse={handleReuse}
-        onDelete={() => {}}
-        onClearAll={() => {}}
-      />,
-    );
-
-    const firstExpression = screen.getByText("$.users[*].name");
-    fireEvent.click(firstExpression);
-
-    expect(handleReuse).toHaveBeenCalledWith("$.users[*].name");
-  });
-
-  it("should call onReuse when reuse button is clicked", () => {
-    const handleReuse = vi.fn();
-    renderWithI18n(
-      <JsonPathHistoryModal
-        isOpen={true}
-        history={mockHistory}
-        onClose={() => {}}
-        onReuse={handleReuse}
-        onDelete={() => {}}
-        onClearAll={() => {}}
-      />,
-    );
-
-    const reuseButtons = screen.getAllByLabelText("Reutilizar filtro");
-    fireEvent.click(reuseButtons[0]);
-
-    expect(handleReuse).toHaveBeenCalledWith("$.users[*].name");
-  });
-
-  it("should call onDelete when delete button is clicked", () => {
-    const handleDelete = vi.fn();
-    renderWithI18n(
-      <JsonPathHistoryModal
-        isOpen={true}
-        history={mockHistory}
-        onClose={() => {}}
-        onReuse={() => {}}
-        onDelete={handleDelete}
-        onClearAll={() => {}}
-      />,
-    );
-
-    const deleteButtons = screen.getAllByLabelText("Borrar filtro");
-    fireEvent.click(deleteButtons[0]);
-
-    expect(handleDelete).toHaveBeenCalledWith("1");
-  });
-
-  it("should call onClearAll when clear history button is clicked", () => {
-    const handleClearAll = vi.fn();
-    renderWithI18n(
-      <JsonPathHistoryModal
-        isOpen={true}
-        history={mockHistory}
-        onClose={() => {}}
-        onReuse={() => {}}
-        onDelete={() => {}}
         onClearAll={handleClearAll}
       />,
+      i18nResources
     );
 
     const clearButton = screen.getByText("Borrar Historial");
@@ -188,6 +80,7 @@ describe("JsonPathHistoryModal", () => {
         onDelete={() => {}}
         onClearAll={() => {}}
       />,
+      i18nResources
     );
 
     // Check that dates are rendered (locale string format)

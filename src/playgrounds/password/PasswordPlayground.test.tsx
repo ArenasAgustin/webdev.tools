@@ -57,13 +57,7 @@ const renderWithI18n = async (component: React.ReactNode) => {
   return result;
 };
 
-// Limpiar i18n después de cada test
-afterEach(async () => {
-  await i18n.changeLanguage("es"); // Cambiar a un idioma inexistente para forzar limpieza
-  i18n.services.resourceStore.data = {};
-  i18n.store.data = {};
-  i18n.isInitialized = false;
-});
+// No es necesario limpiar i18n (componente no usa i18next)
 
 const localStorageMock: Storage = (() => {
   let store: Record<string, string> = {};
@@ -97,7 +91,6 @@ describe("PasswordPlayground", () => {
       clipboard: {
         writeText: vi.fn().mockResolvedValue(undefined),
       },
-    });
   });
 
   afterEach(() => {
@@ -105,19 +98,19 @@ describe("PasswordPlayground", () => {
     vi.unstubAllGlobals();
   });
 
-const renderWithProviders = async (component: React.ReactNode) => {
-  return await renderWithI18n(<ToastProvider>{component}</ToastProvider>);
-};
+  const renderWithProviders = (component: React.ReactNode) => {
+    return render(<ToastProvider>{component}</ToastProvider>);
+  };
 
-  it("renders password input and generate button", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+  it("renders password input and generate button", () => {
+    renderWithProviders(<PasswordPlayground />);
 
     expect(screen.getByPlaceholderText(/contraseña aparecerá aquí/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Generar/i })).toBeInTheDocument();
   });
 
   it("generates a password when generate button is clicked", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
 
@@ -130,7 +123,7 @@ const renderWithProviders = async (component: React.ReactNode) => {
   });
 
   it("toggles password visibility when eye button is clicked", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     // Generate a password first
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
@@ -151,7 +144,7 @@ const renderWithProviders = async (component: React.ReactNode) => {
   });
 
   it("copies password to clipboard when copy button is clicked", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     // Generate a password first
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
@@ -169,7 +162,7 @@ const renderWithProviders = async (component: React.ReactNode) => {
   });
 
   it("updates password length when slider changes", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     // Find the range input (slider)
     const slider = document.querySelector('input[type="range"]')!;
@@ -184,20 +177,32 @@ const renderWithProviders = async (component: React.ReactNode) => {
   });
 
   it("toggles uppercase option when checkbox is clicked", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
-    const checkbox = screen.getByRole("checkbox", { name: /Mayúsculas/i });
-    expect(checkbox).toBeChecked(); // Default is true
-
+    const uppercaseCheckbox = screen.getByRole("checkbox", { name: /Mayúsculas/i });
+    expect(uppercaseCheckbox).toBeChecked();
     await act(async () => {
-      fireEvent.click(checkbox);
+      fireEvent.click(uppercaseCheckbox);
     });
+    expect(uppercaseCheckbox).not.toBeChecked();
+  });
+
+  it("toggles numbers option when checkbox is clicked", async () => {
+    renderWithProviders(<PasswordPlayground />);
+
+    const numbersCheckbox = screen.getByRole("checkbox", { name: /Números/i });
+    expect(numbersCheckbox).toBeChecked();
+    await act(async () => {
+      fireEvent.click(numbersCheckbox);
+    });
+    expect(numbersCheckbox).not.toBeChecked();
+  });
 
     expect(checkbox).not.toBeChecked();
   });
 
   it("toggles numbers option when checkbox is clicked", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     const checkbox = screen.getByRole("checkbox", { name: /Números/i });
     expect(checkbox).toBeChecked(); // Default is true
@@ -210,20 +215,18 @@ const renderWithProviders = async (component: React.ReactNode) => {
   });
 
   it("toggles symbols option when checkbox is clicked", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
-    const checkbox = screen.getByRole("checkbox", { name: /Símbolos/i });
-    expect(checkbox).not.toBeChecked(); // Default is false
-
+    const symbolsCheckbox = screen.getByRole("checkbox", { name: /Símbolos/i });
+    expect(symbolsCheckbox).not.toBeChecked();
     await act(async () => {
-      fireEvent.click(checkbox);
+      fireEvent.click(symbolsCheckbox);
     });
-
-    expect(checkbox).toBeChecked();
+    expect(symbolsCheckbox).toBeChecked();
   });
 
   it("shows strength indicator after generating password", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
     await act(async () => {
@@ -235,25 +238,43 @@ const renderWithProviders = async (component: React.ReactNode) => {
   });
 
   it("adds generated password to history", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
-
-    // Generate password twice
+    await act(async () => {
+      fireEvent.click(generateBtn);
+    });
     await act(async () => {
       fireEvent.click(generateBtn);
     });
 
+    // Esperar a que el historial se muestre
+    await expect(screen.findByText(/Historial:/i)).resolves.toBeInTheDocument();
+    expect(screen.getAllByRole("button").filter(btn => btn.title)).toHaveLength(2); // Botones del historial
+  });
+
+  it("copies history password when clicked", async () => {
+    renderWithProviders(<PasswordPlayground />);
+
+    const generateBtn = screen.getByRole("button", { name: /Generar/i });
     await act(async () => {
       fireEvent.click(generateBtn);
     });
+    const historyBtn = screen.getAllByRole("button").find(btn => btn.title);
+    if (!historyBtn) throw new Error("No se encontró el botón del historial");
+    await act(async () => {
+      fireEvent.click(historyBtn);
+    });
+
+    expect(screen.getByLabelText("Contraseña copiada")).toBeInTheDocument();
+  });
 
     // Should show history section
     expect(screen.getByText(/Historial:/i)).toBeInTheDocument();
   });
 
   it("copies history password when clicked", async () => {
-    await renderWithProviders(<PasswordPlayground />);
+    renderWithProviders(<PasswordPlayground />);
 
     const generateBtn = screen.getByRole("button", { name: /Generar/i });
 
@@ -269,4 +290,3 @@ const renderWithProviders = async (component: React.ReactNode) => {
       });
     }
   });
-});

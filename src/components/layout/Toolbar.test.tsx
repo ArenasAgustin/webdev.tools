@@ -1,8 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { screen, fireEvent } from "@testing-library/react";
 import { Toolbar } from "./Toolbar";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
-import { renderWithI18n } from "@/test/setup";
+import { renderWithI18n, cleanupI18n } from "@/test/test-utils";
+
+// Recursos de i18n para este test
+const i18nResources = {
+  "toolbar.tools": "Herramientas",
+  "toolbar.configure_tools": "Configurar herramientas",
+};
+
+// Limpiar i18n después de cada test
+afterEach(async () => {
+  await cleanupI18n();
+});
 
 vi.mock("@/components/common/ConfigModal", () => ({
   ConfigModal: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
@@ -52,6 +63,7 @@ describe("Toolbar", () => {
           ],
         }}
       />,
+      i18nResources
     );
 
     expect(screen.getByText("Herramientas")).toBeInTheDocument();
@@ -77,6 +89,7 @@ describe("Toolbar", () => {
           actions: [{ label: "Only", icon: "play", variant: "primary", onClick: vi.fn() }],
         }}
       />,
+      i18nResources
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Abrir config" }));
@@ -95,6 +108,7 @@ describe("Toolbar", () => {
         }}
         extraContent={<div data-testid="extra-section">Extra Content</div>}
       />,
+      i18nResources
     );
 
     expect(screen.getByText("Format")).toBeInTheDocument();
@@ -119,6 +133,7 @@ describe("Toolbar", () => {
           onCleanChange: vi.fn(),
         }}
       />,
+      i18nResources
     );
 
     expect(screen.getByText("config-closed")).toBeInTheDocument();
@@ -150,6 +165,7 @@ describe("Toolbar", () => {
           onOpenChange,
         }}
       />,
+      i18nResources
     );
 
     expect(screen.getByText("config-open")).toBeInTheDocument();
