@@ -436,6 +436,7 @@ Eliminación de código duplicado en hooks y consolidación de patrones comunes.
 
 ## Nuevas features por implementar
 
+- [ ] Agregar DESIGN.md con el diseño del proyecto
 - [x] Agregar limpiar vacios a JS (variables, funciones, objetos vacíos), html (etiquetas vacías) y css (reglas vacías)
 - [ ] Transformación de JSON a TOON, CSV, XML, YAML
 - [x] Color transform (Color Picker con conversión HEX, RGB, HSL, HSV, CMYK)
