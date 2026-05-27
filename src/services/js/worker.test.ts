@@ -5,7 +5,7 @@ import { formatJsAsync, minifyJsAsync, cleanJsAsync } from "./worker";
 import * as workerClient from "./workerClient";
 vi.mock("./workerClient", () => ({
   jsWorkerAdapter: {
-    run: vi.fn(),
+    run: vi.fn().mockResolvedValue({ ok: true, value: "mocked" }),
   },
 }));
 

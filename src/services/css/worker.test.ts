@@ -5,7 +5,7 @@ import { formatCssAsync, minifyCssAsync, cleanCssAsync } from "./worker";
 import * as workerClient from "./workerClient";
 vi.mock("./workerClient", () => ({
   cssWorkerAdapter: {
-    run: vi.fn(),
+    run: vi.fn().mockResolvedValue({ ok: true, value: "mocked" }),
   },
 }));
 

@@ -5,7 +5,7 @@ import { formatHtmlAsync, minifyHtmlAsync, cleanHtmlAsync } from "./worker";
 import * as workerClient from "./workerClient";
 vi.mock("./workerClient", () => ({
   htmlWorkerAdapter: {
-    run: vi.fn(),
+    run: vi.fn().mockResolvedValue({ ok: true, value: "mocked" }),
   },
 }));
 
