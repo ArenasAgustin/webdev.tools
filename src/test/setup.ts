@@ -18,7 +18,9 @@ afterEach(() => {
 });
 
 // Initialize i18next for tests with Spanish locale (pins tests to es)
-void i18n.use(initReactI18next).init({
+// Guard: with shared module cache (no resetModules), i18n is the same singleton
+// across all test files — skip re-init if already initialized
+if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
   resources: {
     es: {
       translation: {

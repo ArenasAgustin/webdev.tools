@@ -18,12 +18,12 @@ export default defineConfig({
     pool: "threads",
     poolOptions: {
       threads: {
-        maxThreads: 1, // Reducir a 1 worker para evitar timeout
+        maxThreads: 1,
         minThreads: 1,
         isolate: false,
       },
     },
-    testTimeout: 30_000, // Aumentar timeout a 30 segundos
+    testTimeout: 30_000,
     retry: 1,
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     coverage: {

@@ -6,6 +6,7 @@ interface StatsProps {
   bytes: number;
   comparisonBytes?: number;
   leadingSeparator?: boolean;
+  "data-testid"?: string;
 }
 
 /**
@@ -18,6 +19,7 @@ export const Stats = memo(function Stats({
   bytes,
   comparisonBytes,
   leadingSeparator = false,
+  "data-testid": dataTestId = undefined,
 }: StatsProps) {
   const hasComparison = comparisonBytes !== undefined && comparisonBytes > 0;
 
@@ -33,7 +35,7 @@ export const Stats = memo(function Stats({
   const percentageLabel = isSmaller ? "más pequeño" : "más grande";
 
   return (
-    <span className="text-gray-400">
+    <span className="text-gray-400" data-testid={dataTestId}>
       {leadingSeparator ? "· " : ""}
       {lines} líneas · {characters.toLocaleString()} caracteres · {bytes.toLocaleString()} bytes
       {hasComparison && (

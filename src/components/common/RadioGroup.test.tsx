@@ -1,16 +1,17 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { renderWithI18n } from "@/test/test-utils";
+import { screen, fireEvent } from "@testing-library/react";
 import { RadioGroup } from "./RadioGroup";
 
 describe("RadioGroup", () => {
   const options = [
-    { value: "option1", label: "First Option" },
-    { value: "option2", label: "Second Option" },
-    { value: "option3", label: "Third Option" },
+    { value: "option1", label: "Opción 1" },
+    { value: "option2", label: "Opción 2" },
+    { value: "option3", label: "Opción 3" },
   ];
 
   it("should render all radio options", () => {
-    render(<RadioGroup name="test-group" options={options} value="option1" onChange={() => {}} />);
+    renderWithI18n(<RadioGroup name="test-group" options={options} value="option1" onChange={() => {}} />);
 
     options.forEach((option) => {
       expect(screen.getByLabelText(option.label)).toBeInTheDocument();
@@ -18,17 +19,17 @@ describe("RadioGroup", () => {
   });
 
   it("should select the correct option", () => {
-    render(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
+    renderWithI18n(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
 
-    const selectedRadio = screen.getByLabelText("Second Option");
+    const selectedRadio = screen.getByLabelText("Opción 2");
     expect(selectedRadio).toBeChecked();
   });
 
   it("should not check unselected options", () => {
-    render(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
+    renderWithI18n(<RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />);
 
-    const firstRadio = screen.getByLabelText("First Option");
-    const thirdRadio = screen.getByLabelText("Third Option");
+    const firstRadio = screen.getByLabelText("Opción 1");
+    const thirdRadio = screen.getByLabelText("Opción 3");
 
     expect(firstRadio).not.toBeChecked();
     expect(thirdRadio).not.toBeChecked();
@@ -36,18 +37,18 @@ describe("RadioGroup", () => {
 
   it("should call onChange when option is clicked", () => {
     const handleChange = vi.fn();
-    render(
+    renderWithI18n(
       <RadioGroup name="test-group" options={options} value="option1" onChange={handleChange} />
     );
 
-    const radio = screen.getByLabelText("Third Option");
+    const radio = screen.getByLabelText("Opción 3");
     fireEvent.click(radio);
 
     expect(handleChange).toHaveBeenCalledWith("option3");
   });
 
   it("should use the provided name attribute", () => {
-    render(
+    renderWithI18n(
       <RadioGroup name="my-custom-name" options={options} value="option1" onChange={() => {}} />
     );
 
@@ -59,15 +60,15 @@ describe("RadioGroup", () => {
   });
 
   it("should work with single option", () => {
-    const singleOption = [{ value: "only", label: "Only Option" }];
-    render(<RadioGroup name="single" options={singleOption} value="only" onChange={() => {}} />);
+    const singleOption = [{ value: "only", label: "Única Opción" }];
+    renderWithI18n(<RadioGroup name="single" options={singleOption} value="only" onChange={() => {}} />);
 
-    const radio = screen.getByLabelText("Only Option");
+    const radio = screen.getByLabelText("Única Opción");
     expect(radio).toBeChecked();
   });
 
   it("should render radiogroup role", () => {
-    render(
+    renderWithI18n(
       <RadioGroup name="test-group" options={options} value="option1" onChange={() => {}} />
     );
 
@@ -75,17 +76,17 @@ describe("RadioGroup", () => {
   });
 
   it("should apply default blue color classes when color is not provided", () => {
-    render(
+    renderWithI18n(
       <RadioGroup name="test-group" options={options} value="option2" onChange={() => {}} />
     );
 
-    const firstRadio = screen.getByLabelText("First Option");
+    const firstRadio = screen.getByLabelText("Opción 1");
     expect(firstRadio).toHaveClass("text-blue-500");
     expect(firstRadio).toHaveClass("focus:ring-blue-500");
   });
 
   it("should apply custom color classes", () => {
-    render(
+    renderWithI18n(
       <RadioGroup
         name="custom-color"
         options={options}
@@ -95,13 +96,13 @@ describe("RadioGroup", () => {
       />
     );
 
-    const firstRadio = screen.getByLabelText("First Option");
+    const firstRadio = screen.getByLabelText("Opción 1");
     expect(firstRadio).toHaveClass("text-orange-500");
     expect(firstRadio).toHaveClass("focus:ring-orange-500");
   });
 
   it("should append custom className to container", () => {
-    render(
+    renderWithI18n(
       <RadioGroup
         name="custom-color"
         options={options}
@@ -120,25 +121,25 @@ describe("RadioGroup", () => {
   });
 
   it("should update checked option after rerender", () => {
-    const { rerender } = render(
+    const { rerender } = renderWithI18n(
       <RadioGroup name="rerender-group" options={options} value="option1" onChange={() => {}} />
     );
 
-    expect(screen.getByLabelText("First Option")).toBeChecked();
-    expect(screen.getByLabelText("Second Option")).not.toBeChecked();
+    expect(screen.getByLabelText("Opción 1")).toBeChecked();
+    expect(screen.getByLabelText("Opción 2")).not.toBeChecked();
 
     rerender(
-      <RadioGroup name="rerender-group" options={options} value="option2" onChange={() => {}} />,
+      <RadioGroup name="rerender-group" options={options} value="option2" onChange={() => {}} />
     );
 
-    expect(screen.getByLabelText("First Option")).not.toBeChecked();
-    expect(screen.getByLabelText("Second Option")).toBeChecked();
+    expect(screen.getByLabelText("Opción 1")).not.toBeChecked();
+    expect(screen.getByLabelText("Opción 2")).toBeChecked();
   });
 
   it("should render empty group when options are empty", () => {
-    render(<RadioGroup name="empty-group" options={[]} value={"" as never} onChange={() => {}} />);
+    renderWithI18n(<RadioGroup name="grupo-vacío" options={[]} value={"" as never} onChange={() => {}} />);
 
-    expect(screen.getByRole("radiogroup", { name: "empty-group" })).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: "grupo-vacío" })).toBeInTheDocument();
     expect(screen.queryAllByRole("radio")).toHaveLength(0);
   });
 });

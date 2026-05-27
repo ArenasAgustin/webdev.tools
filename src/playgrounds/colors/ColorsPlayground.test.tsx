@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { renderWithI18n } from "@/test/test-utils";
+import { screen, fireEvent, act } from "@testing-library/react";
 import { ColorsPlayground } from "./ColorsPlayground";
 import { ToastProvider } from "@/context/ToastContext";
 
@@ -46,7 +47,7 @@ describe("ColorsPlayground", () => {
   });
 
   const renderWithProviders = (component: React.ReactNode) => {
-    return render(<ToastProvider>{component}</ToastProvider>);
+    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
   };
 
   it("renders with default color and example input", () => {

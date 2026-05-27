@@ -1,49 +1,56 @@
+import { render } from '@testing-library/react';
 import i18n from "i18next";
-import { I18nextProvider, initReactI18next } from "react-i18next";
-import { render } from "@testing-library/react";
+import { I18nextProvider } from 'react-i18next';
 
-// Configuración centralizada de i18n para tests
-const initTestI18n = async (resources: Record<string, object> = {}) => {
-  // Limpiar estado previo de i18n de manera segura
-  if (i18n.isInitialized) {
-    await i18n.changeLanguage("es");
-    i18n.services.resourceStore.data = {};
-    i18n.store.data = {};
-    i18n.isInitialized = false;
-  }
-
-  await i18n.use(initReactI18next).init({
-    lng: "es",
-    fallbackLng: "es",
-    interpolation: {
-      escapeValue: false,
-    },
-    resources: {
-      es: {
-        translation: resources,
-      },
-    },
-  });
+// Mock de i18n para tests: devuelve textos en español esperados por los tests
+const i18nMock = {
+  ...i18n,
+  t: (key: string, options?: { count?: number }) => {
+    const translations: Record<string, string | ((count: number) => string)> = {
+      // Toast
+      "close_notification": "Close notification",
+      // StatusIndicator / EditorFooter
+      "waiting_css": "Esperando CSS...",
+      "valid_css": "CSS válido",
+      "invalid_css": "CSS inválido",
+      "syntax_error": "Syntax error",
+      "input_truncated": "Input truncated",
+      "waiting_operation": "Esperando operación...",
+      "processing": "Procesando...",
+      "format_failed": "Format failed",
+      "valid_json": "JSON válido",
+      "lines": (count: number) => `${count} líneas`,
+      // InputActions
+      "import_file": "Importar archivo",
+      "clear": "Limpiar",
+      "example": "Ejemplo",
+      "download": "Descargar",
+      "expand_editor": "Expandir editor",
+      // ColorsPlayground
+      "hex_rgb_hsl_placeholder": "HEX, RGB, HSL",
+      // HtmlPlayground
+      "preview_label": "Ver vista previa",
+      // OfflineBanner
+      "offline_message": "Estás sin conexión. Algunas funciones pueden no estar disponibles.",
+    };
+    
+    // Manejar pluralización (ej: "lines")
+    if (key === "lines" && options?.count !== undefined) {
+      return translations[key]!(options.count);
+    }
+    
+    return translations[key] || key;
+  },
+  // Métodos requeridos por react-i18next
+  on: vi.fn(),
+  off: vi.fn(),
+  changeLanguage: vi.fn().mockResolvedValue(null),
 };
 
-export const renderWithI18n = async (
-  component: React.ReactNode,
-  resources: Record<string, object> = {}
-) => {
-  await initTestI18n(resources);
-  return {
-    ...render(
-      <I18nextProvider i18n={i18n}>{component}</I18nextProvider>
-    ),
-  };
-};
-
-// Limpiar i18n después de cada test
-export const cleanupI18n = async () => {
-  if (i18n.isInitialized) {
-    await i18n.changeLanguage("es");
-    i18n.services.resourceStore.data = {};
-    i18n.store.data = {};
-    i18n.isInitialized = false;
-  }
+export const renderWithI18n = (component: React.ReactNode) => {
+  return render(
+    <I18nextProvider i18n={i18nMock}>
+      {component}
+    </I18nextProvider>
+  );
 };

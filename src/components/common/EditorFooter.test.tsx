@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { renderWithI18n } from "../../test/test-utils";
 import { EditorFooter } from "./EditorFooter";
 
 const stats = { lines: 5, characters: 120, bytes: 120 };
@@ -9,7 +9,7 @@ const invalidState = { isValid: false, error: { message: "Syntax error" } };
 describe("EditorFooter", () => {
   describe("input variant", () => {
     it("renders waiting label when input is empty", () => {
-      render(
+      const renderResult = renderWithI18n(
         <EditorFooter
           variant="input"
           value=""
@@ -21,11 +21,11 @@ describe("EditorFooter", () => {
         />,
       );
 
-      expect(screen.getByText("Esperando CSS...")).toBeInTheDocument();
+      expect(renderResult.getByText("Esperando CSS...")).toBeInTheDocument();
     });
 
     it("renders valid label with stats when input is valid", () => {
-      render(
+      const renderResult = renderWithI18n(
         <EditorFooter
           variant="input"
           value="body { color: red; }"
@@ -37,13 +37,13 @@ describe("EditorFooter", () => {
         />,
       );
 
-      expect(screen.getByText(/CSS válido/)).toBeInTheDocument();
-      expect(screen.getByText(/5 líneas/)).toBeInTheDocument();
-      expect(screen.getByText(/120 caracteres/)).toBeInTheDocument();
+      expect(renderResult.getByText(/CSS válido/)).toBeInTheDocument();
+      expect(renderResult.getByText(/5 líneas/)).toBeInTheDocument();
+      expect(renderResult.getByText(/120 caracteres/)).toBeInTheDocument();
     });
 
     it("renders error message when input is invalid", () => {
-      render(
+      const renderResult = renderWithI18n(
         <EditorFooter
           variant="input"
           value="invalid {"
@@ -55,11 +55,11 @@ describe("EditorFooter", () => {
         />,
       );
 
-      expect(screen.getByText(/Syntax error/)).toBeInTheDocument();
+      expect(renderResult.getByText(/Syntax error/)).toBeInTheDocument();
     });
 
     it("renders warning when provided", () => {
-      render(
+      const renderResult = renderWithI18n(
         <EditorFooter
           variant="input"
           value="body {}"
@@ -72,13 +72,13 @@ describe("EditorFooter", () => {
         />,
       );
 
-      expect(screen.getByText("Input truncated")).toBeInTheDocument();
+      expect(renderResult.getByText("Input truncated")).toBeInTheDocument();
     });
   });
 
   describe("output variant", () => {
     it("renders waiting message when output is empty", () => {
-      render(
+      const renderResult = renderWithI18n(
         <EditorFooter
           variant="output"
           value=""
@@ -89,11 +89,11 @@ describe("EditorFooter", () => {
         />,
       );
 
-      expect(screen.getByText("Procesando...")).toBeInTheDocument();
+      expect(renderResult.getByText("Procesando...")).toBeInTheDocument();
     });
 
     it("renders error message when error is present", () => {
-      render(
+      const renderResult = renderWithI18n(
         <EditorFooter
           variant="output"
           value=""
@@ -103,11 +103,11 @@ describe("EditorFooter", () => {
         />,
       );
 
-      expect(screen.getByText(/Format failed/)).toBeInTheDocument();
+      expect(renderResult.getByText(/Format failed/)).toBeInTheDocument();
     });
 
     it("renders stats with comparison when output has content", () => {
-      render(
+      const renderResult = renderWithI18n(
         <EditorFooter
           variant="output"
           value="body{color:red}"
@@ -117,9 +117,12 @@ describe("EditorFooter", () => {
         />,
       );
 
-      expect(screen.getByText(/5 líneas/)).toBeInTheDocument();
-      expect(screen.getByText(/120 caracteres/)).toBeInTheDocument();
-      expect(screen.getByText(/120 bytes/)).toBeInTheDocument();
+      // Usar data-testid para evitar ambigüedad con otros elementos
+      const statsElement = renderResult.getByTestId("output-stats");
+      expect(statsElement).toHaveTextContent(/5 líneas/);
+      expect(statsElement).toHaveTextContent(/120 caracteres/);
+      expect(statsElement).toHaveTextContent(/120 bytes/);
+      expect(statsElement).toHaveTextContent(/20% más grande/);
     });
   });
 });

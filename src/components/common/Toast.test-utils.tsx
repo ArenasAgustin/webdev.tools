@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ToastVariant } from "@/context/toast.context";
 import { cn } from "@/utils/cn";
-import { useI18n } from "@/context/i18n.context";
 
 interface ToastProps {
   message: string;
@@ -29,7 +28,6 @@ const variantConfig = {
 };
 
 export function Toast({ message, variant, duration, onRemove }: ToastProps) {
-  const { t } = useI18n();
   const [isExiting, setIsExiting] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
   const config = variantConfig[variant];
@@ -75,9 +73,8 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
   return (
     <div
       className={cn(
-        "w-80 transform transition-all duration-300 ease-out",
-        isEntering ? "translate-x-full opacity-0" : "translate-x-0 opacity-100",
-        isExiting && "translate-x-full opacity-0",
+        "w-80 transform",
+        "translate-x-0 opacity-100", // Deshabilitar animaciones en tests
       )}
     >
       <div
@@ -88,11 +85,11 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
         )}
       >
         <i className={`fas ${config.icon}`} aria-hidden="true" />
-        <span className="text-sm font-medium flex-1" data-testid="toast-message">{message}</span>
+        <span className="text-sm font-medium flex-1">{message}</span>
         <button
           onClick={handleClose}
           className="ml-2 hover:opacity-75 transition-opacity flex-shrink-0"
-          aria-label={t("close_notification")}
+          aria-label="Close notification"
         >
           <i className="fas fa-times" aria-hidden="true" />
         </button>

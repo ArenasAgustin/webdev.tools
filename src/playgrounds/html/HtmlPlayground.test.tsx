@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithI18n } from "@/test/test-utils";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { HtmlPlayground } from "./HtmlPlayground";
 import { ToastProvider } from "@/context/ToastContext";
 
@@ -67,7 +68,7 @@ describe("HtmlPlayground", () => {
   });
 
   const renderWithProviders = (component: React.ReactNode) => {
-    return render(<ToastProvider>{component}</ToastProvider>);
+    return renderWithI18n(<ToastProvider>{component}</ToastProvider>);
   };
 
   it("renders the example HTML by default", () => {

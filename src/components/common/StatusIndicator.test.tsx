@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { renderWithI18n } from "@/test/test-utils";
 import { StatusIndicator } from "./StatusIndicator";
 
 describe("StatusIndicator", () => {
   describe("input validation mode (with isValid)", () => {
     it("renders waiting label when value is empty", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator
           value=""
           isValid={true}
@@ -14,19 +14,19 @@ describe("StatusIndicator", () => {
         />,
       );
 
-      expect(screen.getByText("Esperando CSS...")).toBeInTheDocument();
+      expect(renderResult.getByText("Esperando CSS...")).toBeInTheDocument();
     });
 
     it("renders valid label with icon when isValid is true", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator value="body { color: red; }" isValid={true} validLabel="CSS válido" />,
       );
 
-      expect(screen.getByText(/CSS válido/)).toBeInTheDocument();
+      expect(renderResult.getByText(/CSS válido/)).toBeInTheDocument();
     });
 
     it("renders error message when isValid is false with object error", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator
           value="invalid {"
           isValid={false}
@@ -35,17 +35,17 @@ describe("StatusIndicator", () => {
         />,
       );
 
-      expect(screen.getByText(/Unexpected token/)).toBeInTheDocument();
+      expect(renderResult.getByText(/Unexpected token/)).toBeInTheDocument();
     });
 
     it("renders invalidLabel when isValid is false with no error message", () => {
-      render(<StatusIndicator value="invalid {" isValid={false} invalidLabel="CSS inválido" />);
+      const renderResult = renderWithI18n(<StatusIndicator value="invalid {" isValid={false} invalidLabel="CSS inválido" />);
 
-      expect(screen.getByText(/CSS inválido/)).toBeInTheDocument();
+      expect(renderResult.getByText(/CSS inválido/)).toBeInTheDocument();
     });
 
     it("renders warning alongside status", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator
           value="body {}"
           isValid={true}
@@ -54,11 +54,11 @@ describe("StatusIndicator", () => {
         />,
       );
 
-      expect(screen.getByText("Input truncated")).toBeInTheDocument();
+      expect(renderResult.getByText("Input truncated")).toBeInTheDocument();
     });
 
     it("renders validExtra in valid state", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator
           value="body {}"
           isValid={true}
@@ -67,11 +67,11 @@ describe("StatusIndicator", () => {
         />,
       );
 
-      expect(screen.getByText("5 líneas")).toBeInTheDocument();
+      expect(renderResult.getByText("5 líneas")).toBeInTheDocument();
     });
 
     it("truncates error when truncateError is true", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator
           value="invalid"
           isValid={false}
@@ -80,26 +80,26 @@ describe("StatusIndicator", () => {
         />,
       );
 
-      const errorSpan = screen.getByTitle("Very long error message");
+      const errorSpan = renderResult.getByTitle("Very long error message");
       expect(errorSpan).toBeInTheDocument();
     });
   });
 
   describe("output mode (without isValid)", () => {
     it("renders waiting label when value is empty", () => {
-      render(<StatusIndicator value="" waitingLabel="Esperando operación..." />);
+      const renderResult = renderWithI18n(<StatusIndicator value="" waitingLabel="Esperando operación..." />);
 
-      expect(screen.getByText("Esperando operación...")).toBeInTheDocument();
+      expect(renderResult.getByText("Esperando operación...")).toBeInTheDocument();
     });
 
     it("renders string error when provided", () => {
-      render(<StatusIndicator value="" error="Format failed" />);
+      const renderResult = renderWithI18n(<StatusIndicator value="" error="Format failed" />);
 
-      expect(screen.getByText(/Format failed/)).toBeInTheDocument();
+      expect(renderResult.getByText(/Format failed/)).toBeInTheDocument();
     });
 
     it("renders validExtra when value is non-empty and no error", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator
           value="output content"
           showValidLabel={false}
@@ -107,29 +107,33 @@ describe("StatusIndicator", () => {
         />,
       );
 
-      expect(screen.getByText("3 líneas")).toBeInTheDocument();
+      expect(renderResult.getByText("3 líneas")).toBeInTheDocument();
     });
 
     it("renders valid label when showValidLabel is true", () => {
-      render(
+      const renderResult = renderWithI18n(
         <StatusIndicator value="output content" showValidLabel={true} validLabel="JSON válido" />,
       );
 
-      expect(screen.getByText(/JSON válido/)).toBeInTheDocument();
+      expect(renderResult.getByText(/JSON válido/)).toBeInTheDocument();
     });
 
-    it("hides valid label when showValidLabel is false", () => {
-      render(
-        <StatusIndicator value="output content" showValidLabel={false} validLabel="JSON válido" />,
-      );
-
-      expect(screen.queryByText(/JSON válido/)).not.toBeInTheDocument();
-    });
+  it("hides valid label when showValidLabel is false", () => {
+    const renderResult = renderWithI18n(
+      <StatusIndicator
+        value="{}"
+        error={null}
+        showValidLabel={false}
+        validLabel="JSON válido"
+      />,
+    );
+    expect(renderResult.queryByText("JSON válido")).not.toBeInTheDocument();
+  });
   });
 
   describe("wrapper", () => {
     it("wraps content in a div when withWrapper is true", () => {
-      const { container } = render(
+      const { container } = renderWithI18n(
         <StatusIndicator value="" waitingLabel="Esperando..." withWrapper />,
       );
 
@@ -139,7 +143,7 @@ describe("StatusIndicator", () => {
     });
 
     it("adds flex class when withFlex is true", () => {
-      const { container } = render(
+      const { container } = renderWithI18n(
         <StatusIndicator value="" waitingLabel="Esperando..." withWrapper withFlex />,
       );
 
