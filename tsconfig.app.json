@@ -36,5 +36,13 @@
       "@/playgrounds/*": ["src/playgrounds/*"]
     }
   },
-  "include": ["src", "vitest.shims.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.setup.ts", "vitest.shims.d.ts"],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__",
+    "**/__mocks__",
+    "src/test-utils",
+    "src/test"
+  ]
 }
