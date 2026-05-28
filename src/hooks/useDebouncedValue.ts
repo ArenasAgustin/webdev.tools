@@ -20,8 +20,9 @@ export function useDebouncedValue<T>(value: T, delayMs = 300): T {
   useEffect(() => {
     // Don't schedule timer in SSR environment
     if (typeof window === 'undefined') {
-      // Use functional update to avoid lint warning about setState in effect
-      setDebouncedValue(() => value);
+      // In SSR, set state synchronously to avoid cascading renders warning.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR has no rendering cycle
+      setDebouncedValue(value);
       return;
     }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { renderWithI18n, screen } from "@/test/test-utils";
+import { renderWithI18n } from "@/test/test-utils";
 import { Card } from "./Card";
 
 describe("Card", () => {

@@ -1,0 +1,617 @@
+{
+  "success": true,
+  "issues": [
+    {
+      "type": "file",
+      "name": "vitest.shims.d.ts",
+      "file": "vitest.shims.d.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/test-utils/editorMocks.ts",
+      "file": "src/test-utils/editorMocks.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/services/worker/createWorkerClient.ts",
+      "file": "src/services/worker/createWorkerClient.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/css/index.ts",
+      "file": "src/playgrounds/css/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/engines/index.ts",
+      "file": "src/playgrounds/engines/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/html/index.ts",
+      "file": "src/playgrounds/html/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/js/index.ts",
+      "file": "src/playgrounds/js/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/json/index.ts",
+      "file": "src/playgrounds/json/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/php/index.ts",
+      "file": "src/playgrounds/php/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/utils/constants/index.ts",
+      "file": "src/utils/constants/index.ts"
+    },
+    {
+      "type": "dependency",
+      "name": "@prettier/plugin-php",
+      "file": "package.json",
+      "line": 32
+    },
+    {
+      "type": "devDependency",
+      "name": "@testing-library/react-hooks",
+      "file": "package.json",
+      "line": 59
+    },
+    {
+      "type": "devDependency",
+      "name": "@types/react-router-dom",
+      "file": "package.json",
+      "line": 64
+    },
+    {
+      "type": "export",
+      "name": "WORKER_THRESHOLD_LABEL",
+      "file": "src/utils/constants/limits.ts",
+      "line": 4
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_CSS_TOOLS_CONFIG",
+      "file": "src/types/css.ts",
+      "line": 41
+    },
+    {
+      "type": "export",
+      "name": "dbPromise",
+      "file": "src/hooks/useJsonPathHistory.ts",
+      "line": 26
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_JSON_TOOLS_CONFIG",
+      "file": "src/types/json.ts",
+      "line": 71
+    },
+    {
+      "type": "export",
+      "name": "JsonValidationState",
+      "file": "src/types/json.ts",
+      "line": 80
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_JS_TOOLS_CONFIG",
+      "file": "src/types/js.ts",
+      "line": 45
+    },
+    {
+      "type": "export",
+      "name": "savePhpToolsConfig",
+      "file": "src/services/storage.ts",
+      "line": 292
+    },
+    {
+      "type": "export",
+      "name": "removePhpToolsConfig",
+      "file": "src/services/storage.ts",
+      "line": 297
+    },
+    {
+      "type": "export",
+      "name": "removeLastPhp",
+      "file": "src/services/storage.ts",
+      "line": 308
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_HTML_TOOLS_CONFIG",
+      "file": "src/types/html.ts",
+      "line": 47
+    },
+    {
+      "type": "export",
+      "name": "getCurrentTimestampMs",
+      "file": "src/playgrounds/timestamp/timestamp.utils.ts",
+      "line": 170
+    },
+    {
+      "type": "export",
+      "name": "shouldUseWorkerForInput",
+      "file": "src/services/worker/runtime.ts",
+      "line": 22
+    },
+    {
+      "type": "export",
+      "name": "ICON_COLORS",
+      "file": "src/utils/constants/colors.ts",
+      "line": 9
+    },
+    {
+      "type": "export",
+      "name": "ReactNode",
+      "file": "src/context/toast.context.ts",
+      "line": 20
+    },
+    {
+      "type": "export",
+      "name": "MaybePromise",
+      "file": "src/services/transform.ts",
+      "line": 7
+    },
+    {
+      "type": "export",
+      "name": "TransformFn",
+      "file": "src/services/transform.ts",
+      "line": 10
+    },
+    {
+      "type": "export",
+      "name": "JsonEngine",
+      "file": "src/playgrounds/engines/json.engine.ts",
+      "line": 80
+    },
+    {
+      "type": "export",
+      "name": "JsEngine",
+      "file": "src/playgrounds/engines/js.engine.ts",
+      "line": 67
+    },
+    {
+      "type": "export",
+      "name": "HtmlEngine",
+      "file": "src/playgrounds/engines/html.engine.ts",
+      "line": 67
+    },
+    {
+      "type": "export",
+      "name": "CssEngine",
+      "file": "src/playgrounds/engines/css.engine.ts",
+      "line": 67
+    },
+    {
+      "type": "export",
+      "name": "PhpEngine",
+      "file": "src/playgrounds/engines/php.engine.ts",
+      "line": 62
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundToast",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 66
+    },
+    {
+      "type": "export",
+      "name": "UseParserParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 74
+    },
+    {
+      "type": "export",
+      "name": "UseActionsParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 81
+    },
+    {
+      "type": "export",
+      "name": "BaseFormatConfig",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 103
+    },
+    {
+      "type": "export",
+      "name": "BaseMinifyConfig",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 104
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundFileConfig",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 110
+    },
+    {
+      "type": "export",
+      "name": "EngineActionsParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 144
+    },
+    {
+      "type": "export",
+      "name": "RenderParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 149
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundConfigSection",
+      "file": "src/types/config.ts",
+      "line": 6
+    },
+    {
+      "type": "export",
+      "name": "BaseToolConfig",
+      "file": "src/types/config.ts",
+      "line": 9
+    },
+    {
+      "type": "export",
+      "name": "AutoCopyConfig",
+      "file": "src/types/config.ts",
+      "line": 12
+    },
+    {
+      "type": "export",
+      "name": "ToolbarButtonVariant",
+      "file": "src/types/toolbar.ts",
+      "line": 9
+    },
+    {
+      "type": "export",
+      "name": "ToolbarActionHandler",
+      "file": "src/types/toolbar.ts",
+      "line": 12
+    },
+    {
+      "type": "export",
+      "name": "ToolbarIconName",
+      "file": "src/types/toolbar.ts",
+      "line": 17
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundFeature",
+      "file": "src/types/playground.ts",
+      "line": 20
+    },
+    {
+      "type": "export",
+      "name": "Playground",
+      "file": "src/types/playground.ts",
+      "line": 30
+    },
+    {
+      "type": "export",
+      "name": "CssFormatOptions",
+      "file": "src/services/css/worker.types.ts",
+      "line": 6
+    },
+    {
+      "type": "export",
+      "name": "HtmlFormatOptions",
+      "file": "src/services/html/worker.types.ts",
+      "line": 6
+    }
+  ],
+  "unusedExports": [
+    {
+      "type": "export",
+      "name": "WORKER_THRESHOLD_LABEL",
+      "file": "src/utils/constants/limits.ts",
+      "line": 4
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_CSS_TOOLS_CONFIG",
+      "file": "src/types/css.ts",
+      "line": 41
+    },
+    {
+      "type": "export",
+      "name": "dbPromise",
+      "file": "src/hooks/useJsonPathHistory.ts",
+      "line": 26
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_JSON_TOOLS_CONFIG",
+      "file": "src/types/json.ts",
+      "line": 71
+    },
+    {
+      "type": "export",
+      "name": "JsonValidationState",
+      "file": "src/types/json.ts",
+      "line": 80
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_JS_TOOLS_CONFIG",
+      "file": "src/types/js.ts",
+      "line": 45
+    },
+    {
+      "type": "export",
+      "name": "savePhpToolsConfig",
+      "file": "src/services/storage.ts",
+      "line": 292
+    },
+    {
+      "type": "export",
+      "name": "removePhpToolsConfig",
+      "file": "src/services/storage.ts",
+      "line": 297
+    },
+    {
+      "type": "export",
+      "name": "removeLastPhp",
+      "file": "src/services/storage.ts",
+      "line": 308
+    },
+    {
+      "type": "export",
+      "name": "DEFAULT_HTML_TOOLS_CONFIG",
+      "file": "src/types/html.ts",
+      "line": 47
+    },
+    {
+      "type": "export",
+      "name": "getCurrentTimestampMs",
+      "file": "src/playgrounds/timestamp/timestamp.utils.ts",
+      "line": 170
+    },
+    {
+      "type": "export",
+      "name": "shouldUseWorkerForInput",
+      "file": "src/services/worker/runtime.ts",
+      "line": 22
+    },
+    {
+      "type": "export",
+      "name": "ICON_COLORS",
+      "file": "src/utils/constants/colors.ts",
+      "line": 9
+    },
+    {
+      "type": "export",
+      "name": "ReactNode",
+      "file": "src/context/toast.context.ts",
+      "line": 20
+    },
+    {
+      "type": "export",
+      "name": "MaybePromise",
+      "file": "src/services/transform.ts",
+      "line": 7
+    },
+    {
+      "type": "export",
+      "name": "TransformFn",
+      "file": "src/services/transform.ts",
+      "line": 10
+    },
+    {
+      "type": "export",
+      "name": "JsonEngine",
+      "file": "src/playgrounds/engines/json.engine.ts",
+      "line": 80
+    },
+    {
+      "type": "export",
+      "name": "JsEngine",
+      "file": "src/playgrounds/engines/js.engine.ts",
+      "line": 67
+    },
+    {
+      "type": "export",
+      "name": "HtmlEngine",
+      "file": "src/playgrounds/engines/html.engine.ts",
+      "line": 67
+    },
+    {
+      "type": "export",
+      "name": "CssEngine",
+      "file": "src/playgrounds/engines/css.engine.ts",
+      "line": 67
+    },
+    {
+      "type": "export",
+      "name": "PhpEngine",
+      "file": "src/playgrounds/engines/php.engine.ts",
+      "line": 62
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundToast",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 66
+    },
+    {
+      "type": "export",
+      "name": "UseParserParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 74
+    },
+    {
+      "type": "export",
+      "name": "UseActionsParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 81
+    },
+    {
+      "type": "export",
+      "name": "BaseFormatConfig",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 103
+    },
+    {
+      "type": "export",
+      "name": "BaseMinifyConfig",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 104
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundFileConfig",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 110
+    },
+    {
+      "type": "export",
+      "name": "EngineActionsParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 144
+    },
+    {
+      "type": "export",
+      "name": "RenderParams",
+      "file": "src/playgrounds/engines/types.ts",
+      "line": 149
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundConfigSection",
+      "file": "src/types/config.ts",
+      "line": 6
+    },
+    {
+      "type": "export",
+      "name": "BaseToolConfig",
+      "file": "src/types/config.ts",
+      "line": 9
+    },
+    {
+      "type": "export",
+      "name": "AutoCopyConfig",
+      "file": "src/types/config.ts",
+      "line": 12
+    },
+    {
+      "type": "export",
+      "name": "ToolbarButtonVariant",
+      "file": "src/types/toolbar.ts",
+      "line": 9
+    },
+    {
+      "type": "export",
+      "name": "ToolbarActionHandler",
+      "file": "src/types/toolbar.ts",
+      "line": 12
+    },
+    {
+      "type": "export",
+      "name": "ToolbarIconName",
+      "file": "src/types/toolbar.ts",
+      "line": 17
+    },
+    {
+      "type": "export",
+      "name": "PlaygroundFeature",
+      "file": "src/types/playground.ts",
+      "line": 20
+    },
+    {
+      "type": "export",
+      "name": "Playground",
+      "file": "src/types/playground.ts",
+      "line": 30
+    },
+    {
+      "type": "export",
+      "name": "CssFormatOptions",
+      "file": "src/services/css/worker.types.ts",
+      "line": 6
+    },
+    {
+      "type": "export",
+      "name": "HtmlFormatOptions",
+      "file": "src/services/html/worker.types.ts",
+      "line": 6
+    }
+  ],
+  "unusedFiles": [
+    {
+      "type": "file",
+      "name": "vitest.shims.d.ts",
+      "file": "vitest.shims.d.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/test-utils/editorMocks.ts",
+      "file": "src/test-utils/editorMocks.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/services/worker/createWorkerClient.ts",
+      "file": "src/services/worker/createWorkerClient.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/css/index.ts",
+      "file": "src/playgrounds/css/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/engines/index.ts",
+      "file": "src/playgrounds/engines/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/html/index.ts",
+      "file": "src/playgrounds/html/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/js/index.ts",
+      "file": "src/playgrounds/js/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/json/index.ts",
+      "file": "src/playgrounds/json/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/playgrounds/php/index.ts",
+      "file": "src/playgrounds/php/index.ts"
+    },
+    {
+      "type": "file",
+      "name": "src/utils/constants/index.ts",
+      "file": "src/utils/constants/index.ts"
+    }
+  ],
+  "unusedDeps": [
+    {
+      "type": "dependency",
+      "name": "@prettier/plugin-php",
+      "file": "package.json",
+      "line": 32
+    },
+    {
+      "type": "devDependency",
+      "name": "@testing-library/react-hooks",
+      "file": "package.json",
+      "line": 59
+    },
+    {
+      "type": "devDependency",
+      "name": "@types/react-router-dom",
+      "file": "package.json",
+      "line": 64
+    }
+  ],
+  "unlistedDeps": [],
+  "summary": "Found 52 issues"
+}

@@ -32,3 +32,5 @@ coverage/
 storybook-static
 test-results/
 .lighthouseci/
+# Local Pi runtime state
+.atl/

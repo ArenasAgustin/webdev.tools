@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderWithI18n } from "@/test/test-utils";
-import { screen, fireEvent, cleanup } from "@testing-library/react";
+import { fireEvent, cleanup } from "@testing-library/react";
 import { InputActions } from "./InputActions";
 
 describe("InputActions", () => {

@@ -34,9 +34,11 @@ Object.defineProperty(globalThis, "window", {
       pathname: "/",
     },
     localStorage: localStorageMock,
-    addEventListener: (_event: string, _listener: EventListener) => {},
-    removeEventListener: (_event: string, _listener: EventListener) => {},
-    dispatchEvent: (event: Event) => true,
+    // eslint-disable-next-line @typescript-eslint/no-empty-function -- Mock implementation for tests
+    addEventListener: () => {},
+    // eslint-disable-next-line @typescript-eslint/no-empty-function -- Mock implementation for tests
+    removeEventListener: () => {},
+    dispatchEvent: () => true,
     document: {
       createElement: vi.fn(() => ({})),
       addEventListener: vi.fn(),

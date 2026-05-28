@@ -21,7 +21,7 @@
     "test": "NODE_OPTIONS='--max-old-space-size=4096' vitest",
     "test:run": "NODE_OPTIONS='--max-old-space-size=4096' vitest run",
     "test:ui": "NODE_OPTIONS='--max-old-space-size=4096' vitest --ui",
-    "test:coverage": "NODE_OPTIONS='--max-old-space-size=4096' vitest --coverage",
+    "test:coverage": "vitest --coverage",
     "test:coverage:run": "NODE_OPTIONS='--max-old-space-size=4096' vitest run --coverage",
     "verify:arch": "node scripts/verify-architecture.js",
     "storybook": "storybook dev -p 6006",
