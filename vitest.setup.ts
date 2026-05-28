@@ -51,7 +51,17 @@ Object.defineProperty(globalThis, "navigator", {
 // Mock para i18next
 vi.mock("i18next", () => ({
   default: {
-    t: (key: string) => key, // Por defecto, devolver la key como texto
+    t: (key: string) => {
+      // Devolver el texto esperado para keys conocidas
+      const translations: Record<string, string> = {
+        "error_boundary.title": "Algo salió mal",
+        "error_boundary.message": "Ocurrió un error inesperado. Puedes intentar recargar el playground o volver al inicio.",
+        "error_boundary.retry": "Reintentar",
+        "error_boundary.home": "Inicio",
+        "error_boundary.named_fallback": "Error en {name}",
+      };
+      return translations[key] || key;
+    },
     use: vi.fn(),
     init: vi.fn(),
     on: vi.fn(),

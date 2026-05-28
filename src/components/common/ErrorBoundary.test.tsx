@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
+import { renderWithI18n } from "@/test/test-utils";
 import { ErrorBoundary } from "./ErrorBoundary";
+
+const render = renderWithI18n; // Alias para renderWithI18n
 
 function BrokenComponent({ shouldThrow }: { shouldThrow: boolean }) {
   if (shouldThrow) {
@@ -19,7 +22,7 @@ describe("ErrorBoundary", () => {
   });
 
   it("renders children when there is no error", () => {
-    render(
+renderWithI18n(
       <ErrorBoundary>
         <BrokenComponent shouldThrow={false} />
       </ErrorBoundary>,
@@ -29,7 +32,7 @@ describe("ErrorBoundary", () => {
   });
 
   it("renders fallback UI when a child throws", () => {
-    render(
+    renderWithI18n(
       <ErrorBoundary>
         <BrokenComponent shouldThrow={true} />
       </ErrorBoundary>,
@@ -42,7 +45,7 @@ describe("ErrorBoundary", () => {
   });
 
   it("renders named fallback when name prop is provided", () => {
-    render(
+    renderWithI18n(
       <ErrorBoundary name="CSS Playground">
         <BrokenComponent shouldThrow={true} />
       </ErrorBoundary>,
@@ -52,13 +55,14 @@ describe("ErrorBoundary", () => {
   });
 
   it("resets state when Reintentar is clicked", () => {
-    const { rerender } = render(
+    const { rerender } = renderWithI18n(
       <ErrorBoundary>
         <BrokenComponent shouldThrow={true} />
       </ErrorBoundary>,
     );
 
     expect(screen.getByText("Algo salió mal")).toBeInTheDocument();
+    const retryButton = screen.getByRole("button", { name: /Reintentar/i });
 
     // Update child props first so re-render after reset doesn't throw again
     rerender(
@@ -67,13 +71,13 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /Reintentar/i }));
+    fireEvent.click(retryButton);
 
     expect(screen.getByText("Contenido OK")).toBeInTheDocument();
   });
 
   it("logs error to console on componentDidCatch", () => {
-    render(
+    renderWithI18n(
       <ErrorBoundary>
         <BrokenComponent shouldThrow={true} />
       </ErrorBoundary>,
