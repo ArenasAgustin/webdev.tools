@@ -34,9 +34,22 @@ Object.defineProperty(globalThis, "window", {
       pathname: "/",
     },
     localStorage: localStorageMock,
-    addEventListener: (event: string, listener: EventListener) => {},
-    removeEventListener: (event: string, listener: EventListener) => {},
+    addEventListener: (_event: string, _listener: EventListener) => {},
+    removeEventListener: (_event: string, _listener: EventListener) => {},
     dispatchEvent: (event: Event) => true,
+    document: {
+      createElement: vi.fn(() => ({})),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    },
+    navigator: {
+      onLine: true,
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    },
+    requestAnimationFrame: vi.fn(),
+    cancelAnimationFrame: vi.fn(),
   },
   writable: true,
 });
@@ -50,45 +63,76 @@ Object.defineProperty(globalThis, "navigator", {
 
 // Mock para i18next
 vi.mock("i18next", () => ({
-  default: {
-    t: (key: string) => {
-      // Devolver el texto esperado para keys conocidas
+  t: (key: string) => {
+    const translations: Record<string, string> = {
+      "error.title": "Error",
+      "error.retry": "Reintentar",
+      "error.copy": "Copiar error",
+      "error.boundary.title": "Algo salió mal",
+      "error.boundary.description": "Se produjo un error inesperado.",
+      "toggle_button_group.checkbox": "Checkbox",
+      "playground_layout.editors": "Editors content",
+      "playground_layout.toolbar": "Toolbar content",
+      "playground_layout.panel": "Panel content",
+      "shortcuts.title": "Atajos de teclado",
+      "shortcuts.cleanEmpty": "Limpiar vacíos",
+      "shortcuts.transform": "Transformar",
+      "shortcuts.format": "Formatear código",
+      "shortcuts.minify": "Minificar código",
+      "shortcuts.result": "Resultado",
+      "shortcuts.copyResult": "Copiar resultado",
+      "shortcuts.clearInput": "Limpiar entrada",
+      "shortcuts.interface": "Interfaz",
+      "shortcuts.openConfig": "Abrir configuración",
+      "shortcuts.viewShortcuts": "Ver atajos",
+      "shortcuts.viewDifferences": "Ver diferencias",
+      "timestamp.placeholder": "Unix timestamp o fecha",
+      "timestamp.convert": "Convertir",
+      "timestamp.now": "Ahora",
+      "timestamp.clear": "Limpiar",
+      "timestamp.timezone": "Zona horaria:",
+      "timestamp.copy": "Copiar",
+      "timestamp.invalid_input": "Input inválido",
+      "timestamp.future": "en el futuro",
+    };
+    return translations[key] || key;
+  },
+}));
+
+// Mock react-i18next para que useTranslation devuelva el mock de i18next
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: vi.fn((key: string) => {
       const translations: Record<string, string> = {
-        "error_boundary.title": "Algo salió mal",
-        "error_boundary.message": "Ocurrió un error inesperado. Puedes intentar recargar el playground o volver al inicio.",
-        "error_boundary.retry": "Reintentar",
-        "error_boundary.home": "Inicio",
-        "error_boundary.named_fallback": "Error en {name}",
-        "2 spaces": "2 spaces",
-        "4 spaces": "4 spaces",
-        "Tab": "Tab",
-        "CSS Editor": "CSS Editor",
-        "Copy": "Copy",
-        "3 líneas": "3 líneas",
-        "Editors content": "Editors content",
-        "Toolbar content": "Toolbar content",
-        "Panel content": "Panel content",
-        "Cargando CSS Tools": "Cargando CSS Tools",
-        "Preparando el playground...": "Preparando el playground...",
-        "Test content": "Test content",
-        "Content only": "Content only",
-        "Atajos de teclado": "Atajos de teclado",
-        "Limpiar vacíos": "Limpiar vacíos",
+        "error.title": "Error",
+        "error.retry": "Reintentar",
+        "error.copy": "Copiar error",
+        "error.boundary.title": "Algo salió mal",
+        "error.boundary.description": "Se produjo un error inesperado.",
+        "toggle_button_group.checkbox": "Checkbox",
+        "playground_layout.editors": "Editors content",
+        "playground_layout.toolbar": "Toolbar content",
+        "playground_layout.panel": "Panel content",
+        "shortcuts.title": "Atajos de teclado",
+        "shortcuts.cleanEmpty": "Limpiar vacíos",
+        "shortcuts.transform": "Transformar",
+        "shortcuts.format": "Formatear código",
+        "shortcuts.minify": "Minificar código",
+        "shortcuts.result": "Resultado",
+        "shortcuts.copyResult": "Copiar resultado",
+        "shortcuts.clearInput": "Limpiar entrada",
+        "shortcuts.interface": "Interfaz",
+        "shortcuts.openConfig": "Abrir configuración",
+        "shortcuts.viewShortcuts": "Ver atajos",
+        "shortcuts.viewDifferences": "Ver diferencias",
       };
       return translations[key] || key;
+    }),
+    i18n: {
+      language: "es",
+      changeLanguage: vi.fn(),
     },
-    use: vi.fn(),
-    init: vi.fn(),
-    on: vi.fn(),
-    off: vi.fn(),
-    changeLanguage: vi.fn().mockResolvedValue(null),
-    getFixedT: vi.fn(() => (key: string) => key),
-    language: 'es',
-    languages: ['es'],
-    isInitialized: true,
-    exists: vi.fn(),
-    hasLoadedNamespace: vi.fn().mockReturnValue(true),
-  },
+  }),
 }));
 
 // Mock para react-i18next
