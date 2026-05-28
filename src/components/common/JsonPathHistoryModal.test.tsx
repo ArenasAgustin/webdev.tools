@@ -1,8 +1,41 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, beforeEach } from "vitest";
 import { screen, fireEvent } from "@testing-library/react";
 import { JsonPathHistoryModal } from "./JsonPathHistoryModal";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 import { renderWithI18n, cleanupI18n } from "@/test/test-utils";
+
+// Mock para localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+beforeEach(() => {
+  // Asignar localStorage mock
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+  });
+  
+  // Limpiar localStorage antes de cada test
+  localStorage.clear();
+});
+
+afterEach(() => {
+  // Limpiar localStorage después de cada test
+  localStorage.clear();
+});
 
 // Recursos de i18n para este test
 const i18nResources = {
@@ -20,6 +53,7 @@ afterEach(async () => {
 });
 
 describe("JsonPathHistoryModal", () => {
+  const handleClearAll = vi.fn();
   const mockHistory: JsonPathHistoryItem[] = [
     {
       id: "1",
@@ -44,8 +78,7 @@ describe("JsonPathHistoryModal", () => {
         onReuse={() => {}}
         onDelete={() => {}}
         onClearAll={() => {}}
-      />,
-      i18nResources
+      />
     );
 
     expect(screen.queryByText("Historial de Filtros")).not.toBeInTheDocument();
@@ -60,12 +93,11 @@ describe("JsonPathHistoryModal", () => {
         onReuse={() => {}}
         onDelete={() => {}}
         onClearAll={handleClearAll}
-      />,
-      i18nResources
+      />
     );
 
-    const clearButton = screen.getByText("Borrar Historial");
-    fireEvent.click(clearButton);
+    const clearButtons = screen.getAllByText("Borrar Historial");
+    fireEvent.click(clearButtons[0]); // Usar el primer botón
 
     expect(handleClearAll).toHaveBeenCalledOnce();
   });
@@ -79,8 +111,7 @@ describe("JsonPathHistoryModal", () => {
         onReuse={() => {}}
         onDelete={() => {}}
         onClearAll={() => {}}
-      />,
-      i18nResources
+      />
     );
 
     // Check that dates are rendered (locale string format)
