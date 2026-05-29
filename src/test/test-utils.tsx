@@ -1,5 +1,4 @@
 import { render } from '@testing-library/react';
-import i18n from "i18next";
 import { I18nextProvider } from 'react-i18next';
 import { vi } from "vitest";
 
@@ -24,15 +23,6 @@ const translations: Record<string, string | ((count: number) => string)> = {
   "example": "Ejemplo",
   "download": "Descargar",
   "expand_editor": "Expandir editor",
-  // ColorsPlayground
-  "hex_rgb_hsl_placeholder": "HEX, RGB, HSL",
-  // HtmlPlayground
-  "preview_label": "Ver vista previa",
-  // OfflineBanner
-  "offline_message": "Estás sin conexión. Algunas funciones pueden no estar disponibles.",
-  // PlaygroundLoader
-  "playground_loader.loading": "Cargando {name} Tools",
-  "playground_loader.preparing": "Preparando el playground...",
   // Checkbox
   "checkbox.label": "Enable feature",
   // Panel
@@ -43,12 +33,14 @@ const translations: Record<string, string | ((count: number) => string)> = {
   "playground_layout.editors": "Editors content",
   "playground_layout.toolbar": "Toolbar content",
   "playground_layout.panel": "Panel content",
+  // PlaygroundLoader
+  "playground_loader.loading": "Cargando {name} Tools",
+  "playground_loader.preparing": "Preparando el playground...",
   // Common
   "common.test_content": "Test content",
   "common.content_only": "Content only",
   "common.action": "action",
   "common.footer": "footer",
-  "checkbox.label": "Enable feature",
   // ErrorBoundary
   "error_boundary.title": "Algo salió mal",
   "error_boundary.message": "Ocurrió un error inesperado. Puedes intentar recargar el playground o volver al inicio.",
@@ -58,17 +50,6 @@ const translations: Record<string, string | ((count: number) => string)> = {
   // ExpandedEditorModal
   "expanded_editor.title": "Editor Test",
   "expanded_editor.placeholder": "Contenido de Editor Test...",
-  // PlaygroundLayout
-  "playground_layout.editors": "Editors content",
-  "playground_layout.toolbar": "Toolbar content",
-  "playground_layout.panel": "Panel content",
-  // PlaygroundLoader
-  "playground_loader.loading": "Cargando {name} Tools",
-  "playground_loader.preparing": "Preparando el playground...",
-  // Panel
-  "panel.title": "CSS Editor",
-  "panel.actions.copy": "Copy",
-  "panel.footer": "3 líneas",
   // JsonPathHistoryModal
   "json_path_history.clear": "Borrar Historial",
   // PasswordPlayground
@@ -80,15 +61,15 @@ const translations: Record<string, string | ((count: number) => string)> = {
   "timestamp_playground.clear": "Limpiar",
   "timestamp_playground.timezone_label": "Zona horaria:",
   "timestamp_playground.placeholder": "Unix timestamp o fecha",
-  // Common
-  "common.test_content": "Test content",
-  "common.content_only": "Content only",
-  "common.action": "action",
-  "common.footer": "footer",
+  // OfflineBanner
+  "offline_message": "Estás sin conexión. Algunas funciones pueden no estar disponibles.",
+  // HtmlPlayground
+  "preview_label": "Ver vista previa",
+  // ColorsPlayground
+  "hex_rgb_hsl_placeholder": "HEX, RGB, HSL",
 };
 
 // Mock simplificado de i18n para tests
-// Para TimestampPlayground: devuelve textos en español directamente si se buscan los literales
 const timestampPlaygroundTexts: Record<string, string> = {
   "Convertir": "Convertir",
   "Ahora": "Ahora",
@@ -100,15 +81,12 @@ const timestampPlaygroundTexts: Record<string, string> = {
 
 export const i18nMock = {
   t: (key: string) => {
-    // Si es una key de translations, devolver el valor
     if (translations[key]) {
       return typeof translations[key] === 'function' ? translations[key](1) : translations[key];
     }
-    // Si es un texto literal de TimestampPlayground, devolverlo directamente
     if (timestampPlaygroundTexts[key]) {
       return timestampPlaygroundTexts[key];
     }
-    // Si no, devolver la key (comportamiento por defecto)
     return key;
   },
   use: vi.fn(),
@@ -121,12 +99,12 @@ export const i18nMock = {
   languages: ['es'],
   isInitialized: true,
   exists: vi.fn(),
-  hasLoadedNamespace: vi.fn().mockReturnValue(true), // Mock para evitar el error en tests
+  hasLoadedNamespace: vi.fn().mockReturnValue(true),
 };
 
 export const renderWithI18n = (component: React.ReactNode) => {
   return render(
-    <I18nextProvider i18n={i18n}>
+    <I18nextProvider i18n={i18nMock}>
       {component}
     </I18nextProvider>
   );

@@ -1,6 +1,3 @@
-import { I18nextProvider } from 'react-i18next';
-import i18n from "i18next";
-
 import { I18nContext } from '@/context/i18n.context';
 
 // Mock de i18n para tests
