@@ -7,5 +7,6 @@
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "vitest.setup.ts"
-  ]
+  ],
+  "exclude": []
 }
