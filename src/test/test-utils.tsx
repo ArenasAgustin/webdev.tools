@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
+import type { i18n } from 'i18next';
 import { vi } from "vitest";
 
 // Mock de i18n para tests: devuelve textos en español esperados por los tests
@@ -104,7 +105,7 @@ export const i18nMock = {
 
 export const renderWithI18n = (component: React.ReactNode) => {
   return render(
-    <I18nextProvider i18n={i18nMock}>
+    <I18nextProvider i18n={i18nMock as unknown as i18n}>
       {component}
     </I18nextProvider>
   );
