@@ -49,7 +49,8 @@ describe("validateCss", () => {
   });
 
   it("returns ok:true for @keyframes block", async () => {
-    const input = "@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }";
+    const input =
+      "@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }";
     const result = await validateCss(input);
     expect(result).toEqual({ ok: true, value: input });
   });

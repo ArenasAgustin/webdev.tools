@@ -107,7 +107,7 @@ export function Toolbar(props: ToolbarProps) {
         <div
           className={cn(
             "flex items-center justify-between gap-2",
-            (isMobileOpen || isExpanded) ? "mb-3" : "mb-0"
+            isMobileOpen || isExpanded ? "mb-3" : "mb-0",
           )}
           onClick={handleHeaderClick}
           style={{ cursor: props.isMinified ? "pointer" : "default" }}
@@ -127,7 +127,10 @@ export function Toolbar(props: ToolbarProps) {
             {props.tools.onOpenShortcuts && (
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); props.tools.onOpenShortcuts?.(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  props.tools.onOpenShortcuts?.();
+                }}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
                 title={t("toolbar.shortcuts")}
                 aria-label={t("actions.viewShortcuts")}
@@ -138,7 +141,10 @@ export function Toolbar(props: ToolbarProps) {
             {props.tools.onOpenDiff && (
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); props.tools.onOpenDiff?.(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  props.tools.onOpenDiff?.();
+                }}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-purple-300 transition-colors"
                 title={t("actions.viewDifferences")}
                 aria-label={t("actions.viewDifferences")}
@@ -149,7 +155,10 @@ export function Toolbar(props: ToolbarProps) {
             {(props.tools.onOpenConfig ?? genericConfig) && (
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); setShowGenericConfigState(true); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowGenericConfigState(true);
+                }}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-yellow-300 transition-colors"
                 title={props.tools.configButtonTitle ?? t("actions.configure")}
                 aria-label={props.tools.configButtonTitle ?? t("actions.configure")}
@@ -159,7 +168,10 @@ export function Toolbar(props: ToolbarProps) {
             )}
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setIsMobileOpen((v) => !v); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMobileOpen((v) => !v);
+              }}
               className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
               aria-label={isMobileOpen ? t("actions.hideTools") : t("actions.showTools")}
             >
@@ -175,7 +187,7 @@ export function Toolbar(props: ToolbarProps) {
         <div
           className={cn(
             "overflow-hidden transition-all duration-200",
-            (isMobileOpen || isExpanded) ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+            isMobileOpen || isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
           )}
         >
           <div className={gridLayoutClass}>

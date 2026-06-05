@@ -72,14 +72,15 @@ export const EditorFooter = memo(function EditorFooter(props: EditorFooterProps)
       showValidLabel={false}
       withWrapper
       className="min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
-      validExtra={
-        <Stats
-          lines={props.stats.lines}
-          characters={props.stats.characters}
-          bytes={props.stats.bytes}
-          comparisonBytes={props.comparisonBytes}
-        />
-      }
+       validExtra={
+         <Stats
+           data-testid="output-stats"
+           lines={props.stats.lines}
+           characters={props.stats.characters}
+           bytes={props.stats.bytes}
+           comparisonBytes={props.comparisonBytes}
+         />
+       }
     />
   );
 });

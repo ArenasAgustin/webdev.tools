@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ToastVariant } from "@/context/toast.context";
 import { cn } from "@/utils/cn";
+import { useI18n } from "@/context/i18n.context";
 
 interface ToastProps {
   message: string;
@@ -28,6 +29,7 @@ const variantConfig = {
 };
 
 export function Toast({ message, variant, duration, onRemove }: ToastProps) {
+  const { t } = useI18n();
   const [isExiting, setIsExiting] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
   const config = variantConfig[variant];
@@ -86,11 +88,11 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
         )}
       >
         <i className={`fas ${config.icon}`} aria-hidden="true" />
-        <span className="text-sm font-medium flex-1">{message}</span>
+        <span className="text-sm font-medium flex-1" data-testid="toast-message">{message}</span>
         <button
           onClick={handleClose}
           className="ml-2 hover:opacity-75 transition-opacity flex-shrink-0"
-          aria-label="Close notification"
+          aria-label={t("close_notification")}
         >
           <i className="fas fa-times" aria-hidden="true" />
         </button>

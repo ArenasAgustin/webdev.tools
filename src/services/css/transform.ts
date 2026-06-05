@@ -13,9 +13,7 @@ export interface CssCleanOptions {
   removeRulesWithOnlyComments?: boolean;
 }
 
-export function validateCss(
-  input: string,
-): Promise<Result<string, string>> {
+export function validateCss(input: string): Promise<Result<string, string>> {
   if (!input.trim()) return Promise.resolve({ ok: true, value: "" });
 
   let errorMessage: string | null = null;

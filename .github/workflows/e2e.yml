@@ -2,7 +2,7 @@ name: E2E
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: ["**"]
     paths:
       - "src/**"
       - "e2e/**"
@@ -14,7 +14,7 @@ on:
       - "pnpm-lock.yaml"
       - ".github/workflows/e2e.yml"
   push:
-    branches: [main, develop]
+    branches: ["**"]
 
 env:
   BUDGET_KB: 3584

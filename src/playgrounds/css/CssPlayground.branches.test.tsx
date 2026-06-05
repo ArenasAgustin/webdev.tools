@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import { MAX_INPUT_BYTES } from "@/utils/constants/limits";
 
 const {
   toastMocks,
@@ -85,7 +86,7 @@ vi.mock("@/components/editor/GenericEditors", () => ({
       <p data-testid="warning">{inputWarning}</p>
       <button onClick={() => onInputChange(".card{color:red}")}>set-input</button>
       <button onClick={() => onInputChange("")}>set-empty</button>
-      <button onClick={() => onInputChange("x".repeat(500_001))}>set-huge</button>
+      <button onClick={() => onInputChange("x".repeat(MAX_INPUT_BYTES + 1))}>set-huge</button>
       <button onClick={onClearInput}>clear-input</button>
       <button onClick={onLoadExample}>load-example</button>
       <button onClick={onCopyOutput}>copy-output</button>
@@ -156,6 +157,7 @@ import { CssPlayground } from "./CssPlayground";
 
 describe("CssPlayground branches", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     formatCssMock.mockResolvedValue({ ok: true, value: ".card { color: red; }" });
     minifyCssMock.mockResolvedValue({ ok: true, value: ".card{color:red}" });
@@ -168,6 +170,7 @@ describe("CssPlayground branches", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -188,16 +191,18 @@ describe("CssPlayground branches", () => {
     expect(downloadFileMock).toHaveBeenCalledWith(".card{color:red}", "styles.css", "text/css");
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("output-css").textContent).toBe(".card { color: red; }");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(screen.getByTestId("output-css").textContent).toBe(".card { color: red; }");
 
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    await waitFor(() => {
-      expect(clipboardWriteTextMock).toHaveBeenCalledWith(".card { color: red; }");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(clipboardWriteTextMock).toHaveBeenCalledWith(".card { color: red; }");
     expect(downloadFileMock).toHaveBeenCalledWith(
       ".card { color: red; }",
       "result.css",
@@ -214,18 +219,20 @@ describe("CssPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "enable-minify-autocopy" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
-    await waitFor(() => {
-      expect(formatCssMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("CSS formateado correctamente");
-      expect(screen.getByTestId("output-css").textContent).toBe(".card { color: red; }");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(formatCssMock).toHaveBeenCalled();
+    expect(toastMocks.success).toHaveBeenCalledWith("CSS formateado correctamente");
+    expect(screen.getByTestId("output-css").textContent).toBe(".card { color: red; }");
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
-    await waitFor(() => {
-      expect(minifyCssMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("CSS minificado correctamente");
-      expect(screen.getByTestId("output-css").textContent).toBe(".card{color:red}");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(minifyCssMock).toHaveBeenCalled();
+    expect(toastMocks.success).toHaveBeenCalledWith("CSS minificado correctamente");
+    expect(screen.getByTestId("output-css").textContent).toBe(".card{color:red}");
 
     formatCssMock.mockResolvedValueOnce({ ok: false, error: "format fail" });
     minifyCssMock.mockResolvedValueOnce({ ok: false, error: "minify fail" });
@@ -233,10 +240,11 @@ describe("CssPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
-    await waitFor(() => {
-      expect(toastMocks.error).toHaveBeenCalledWith("format fail");
-      expect(toastMocks.error).toHaveBeenCalledWith("minify fail");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(toastMocks.error).toHaveBeenCalledWith("format fail");
+    expect(toastMocks.error).toHaveBeenCalledWith("minify fail");
   });
 
   it("guards operations when input exceeds max size", async () => {
@@ -244,11 +252,12 @@ describe("CssPlayground branches", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "set-huge" }));
 
-    await waitFor(() => {
-      expect(toastMocks.info).toHaveBeenCalledWith(
-        "El contenido supera 500 KB. Algunas operaciones pueden ser lentas.",
-      );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(toastMocks.info).toHaveBeenCalledWith(
+      "El contenido supera 2 MB. Algunas operaciones pueden ser lentas.",
+    );
 
     const formatCallsBeforeGuard = formatCssMock.mock.calls.length;
     const minifyCallsBeforeGuard = minifyCssMock.mock.calls.length;
@@ -257,7 +266,7 @@ describe("CssPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
     expect(toastMocks.error).toHaveBeenCalledWith(
-      "El contenido supera 500 KB. Reduce el tamano para procesarlo.",
+      "El contenido supera 2 MB. Reduce el tamano para procesarlo.",
     );
     expect(formatCssMock.mock.calls.length).toBe(formatCallsBeforeGuard);
     expect(minifyCssMock.mock.calls.length).toBe(minifyCallsBeforeGuard);

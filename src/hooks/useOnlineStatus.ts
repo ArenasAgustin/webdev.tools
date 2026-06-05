@@ -11,6 +11,7 @@ export function useOnlineStatus(): boolean {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
+    // Usar window para compatibilidad con tests
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 

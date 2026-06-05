@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ConfigModal } from "./ConfigModal";
+import { saveJsonToolsConfig, removeJsonToolsConfig, saveJsToolsConfig, removeJsToolsConfig } from "@/services/storage";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 import {
   DEFAULT_JS_FORMAT_CONFIG,
@@ -262,8 +263,7 @@ describe("ConfigModal", () => {
       expect(onClose).toHaveBeenCalledOnce();
     });
 
-    it("should reset all configs to default when reset button is clicked", async () => {
-      const { removeJsonToolsConfig } = await import("@/services/storage");
+    it("should reset all configs to default when reset button is clicked", () => {
       const onFormatConfigChange = vi.fn();
       const onMinifyConfigChange = vi.fn();
       const onCleanConfigChange = vi.fn();
@@ -286,8 +286,7 @@ describe("ConfigModal", () => {
       expect(removeJsonToolsConfig).toHaveBeenCalled();
     });
 
-    it("should save config when modal is closed", async () => {
-      const { saveJsonToolsConfig } = await import("@/services/storage");
+    it("should save config when modal is closed", () => {
       const onClose = vi.fn();
 
       render(<ConfigModal {...defaultProps} onClose={onClose} />);
@@ -363,8 +362,7 @@ describe("ConfigModal", () => {
       });
     });
 
-    it("resets and persists JS config", async () => {
-      const { removeJsToolsConfig, saveJsToolsConfig } = await import("@/services/storage");
+    it("resets and persists JS config", () => {
       const onFormatConfigChange = vi.fn();
       const onMinifyConfigChange = vi.fn();
       const onCleanConfigChange = vi.fn();

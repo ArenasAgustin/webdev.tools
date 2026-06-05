@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import { MAX_INPUT_BYTES } from "@/utils/constants/limits";
 
 const {
   toastMocks,
@@ -83,7 +84,7 @@ vi.mock("@/components/editor/GenericEditors", () => ({
       <button onClick={() => onInputChange('throw new Error("Boom")')}>set-error</button>
       <button onClick={() => onInputChange("const x = 1;")}>set-input</button>
       <button onClick={() => onInputChange("")}>set-empty</button>
-      <button onClick={() => onInputChange("x".repeat(500_001))}>set-huge</button>
+      <button onClick={() => onInputChange("x".repeat(MAX_INPUT_BYTES + 1))}>set-huge</button>
       <button onClick={onClearInput}>clear-input</button>
       <button onClick={onLoadExample}>load-example</button>
       <button onClick={onCopyOutput}>copy-output</button>
@@ -159,28 +160,33 @@ describe("JsPlayground branches", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
   it("executes code and handles runtime errors", async () => {
+    vi.useFakeTimers();
     render(<JsPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-return" }));
     fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("output-code").textContent).toBe("2");
-      expect(toastMocks.success).toHaveBeenCalledWith("Código ejecutado correctamente");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(screen.getByTestId("output-code").textContent).toBe("2");
+    expect(toastMocks.success).toHaveBeenCalledWith("Código ejecutado correctamente");
 
     fireEvent.click(screen.getByRole("button", { name: "set-error" }));
     fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("error-code").textContent).toBe("Boom");
-      expect(toastMocks.error).toHaveBeenCalledWith("Boom");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(screen.getByTestId("error-code").textContent).toBe("Boom");
+    expect(toastMocks.error).toHaveBeenCalledWith("Boom");
   });
 
   it("handles copy and download input and output branches", async () => {
+    vi.useFakeTimers();
     render(<JsPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-empty" }));
@@ -203,27 +209,25 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "set-return" }));
     fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
 
-    await waitFor(() => {
-      expect(screen.getByTestId("output-code").textContent).toBe("2");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
-    await waitFor(() => {
-      expect(toastMocks.success).toHaveBeenCalledWith("Código ejecutado correctamente");
-    });
+    expect(screen.getByTestId("output-code").textContent).toBe("2");
+    expect(toastMocks.success).toHaveBeenCalledWith("Código ejecutado correctamente");
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
-      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(100);
     });
 
-    await waitFor(() => {
-      expect(clipboardWriteTextMock).toHaveBeenCalledWith("2");
-    });
+    expect(clipboardWriteTextMock).toHaveBeenCalledWith("2");
 
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
     expect(downloadFileMock).toHaveBeenCalledWith("2", "output.txt", "application/javascript");
   });
 
   it("runs format and minify success and error flows", async () => {
+    vi.useFakeTimers();
     render(<JsPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-input" }));
@@ -232,18 +236,20 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "enable-minify-autocopy" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
-    await waitFor(() => {
-      expect(formatJsAsyncMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("Código formateado correctamente");
-      expect(screen.getByTestId("output-code").textContent).toBe("const x = 1;");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(formatJsAsyncMock).toHaveBeenCalled();
+    expect(toastMocks.success).toHaveBeenCalledWith("Código formateado correctamente");
+    expect(screen.getByTestId("output-code").textContent).toBe("const x = 1;");
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
-    await waitFor(() => {
-      expect(minifyJsAsyncMock).toHaveBeenCalled();
-      expect(toastMocks.success).toHaveBeenCalledWith("Código minificado correctamente");
-      expect(screen.getByTestId("output-code").textContent).toBe("const x=1;");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(minifyJsAsyncMock).toHaveBeenCalled();
+    expect(toastMocks.success).toHaveBeenCalledWith("Código minificado correctamente");
+    expect(screen.getByTestId("output-code").textContent).toBe("const x=1;");
 
     formatJsAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: "format fail" } });
     minifyJsAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: "minify fail" } });
@@ -251,22 +257,25 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
-    await waitFor(() => {
-      expect(toastMocks.error).toHaveBeenCalledWith("format fail");
-      expect(toastMocks.error).toHaveBeenCalledWith("minify fail");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(toastMocks.error).toHaveBeenCalledWith("format fail");
+    expect(toastMocks.error).toHaveBeenCalledWith("minify fail");
   });
 
   it("guards operations when input exceeds max size", async () => {
+    vi.useFakeTimers();
     render(<JsPlayground />);
 
     fireEvent.click(screen.getByRole("button", { name: "set-huge" }));
 
-    await waitFor(() => {
-      expect(toastMocks.info).toHaveBeenCalledWith(
-        "El contenido supera 500 KB. Algunas operaciones pueden ser lentas.",
-      );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
+    expect(toastMocks.info).toHaveBeenCalledWith(
+      "El contenido supera 2 MB. Algunas operaciones pueden ser lentas.",
+    );
 
     const formatCallsBeforeGuard = formatJsAsyncMock.mock.calls.length;
     const minifyCallsBeforeGuard = minifyJsAsyncMock.mock.calls.length;
@@ -276,7 +285,7 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
     expect(toastMocks.error).toHaveBeenCalledWith(
-      "El contenido supera 500 KB. Reduce el tamano para procesarlo.",
+      "El contenido supera 2 MB. Reduce el tamano para procesarlo.",
     );
     expect(formatJsAsyncMock.mock.calls.length).toBe(formatCallsBeforeGuard);
     expect(minifyJsAsyncMock.mock.calls.length).toBe(minifyCallsBeforeGuard);

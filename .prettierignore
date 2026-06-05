@@ -1,4 +1,22 @@
-dist
-node_modules
-coverage
+# Ignore Markdown files
+**/*.md
+
+# Ignore generated files
+coverage/
+dist/
+test-results/
+
+# Ignore lockfiles and config files
 pnpm-lock.yaml
+pnpm-workspace.yaml
+*.yml
+*.yaml
+
+# Ignore JSON files (Prettier can break them)
+*.json
+
+# Ignore config files that Prettier might break
+vite.config.ts
+vitest.config.ts
+eslint.config.js
+playwright.config.ts

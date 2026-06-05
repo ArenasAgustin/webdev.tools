@@ -7,6 +7,17 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
+  test: {
+    globals: true,
+    environment: "ssr", // Entorno SSR para compatibilidad con el resto de los tests
+    setupFiles: "./vitest.setup.ts", // Archivo de setup para mocks globales
+    pool: 'forks', // Usar forks para evitar problemas de memoria
+    poolOptions: {
+      forks: {
+        maxForks: 1, // Limitar a 1 worker para evitar errores de memoria
+      },
+    },
+  },
   plugins: [
     react(),
     nodePolyfills(),

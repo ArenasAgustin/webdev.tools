@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "files": {
+    "src\\playgrounds\\password\\PasswordPlayground.sdd.test.tsx": {
+      "latest": {
+        "commit": "bb58719",
+        "timestamp": "2026-05-21T03:10:43.618Z",
+        "mi": 41.6,
+        "cognitive": 3,
+        "nesting": 4,
+        "lines": 62,
+        "maxCyclomatic": 2,
+        "entropy": 5.34
+      },
+      "history": [
+        {
+          "commit": "bb58719",
+          "timestamp": "2026-05-21T03:10:43.618Z",
+          "mi": 41.6,
+          "cognitive": 3,
+          "nesting": 4,
+          "lines": 62,
+          "maxCyclomatic": 2,
+          "entropy": 5.34
+        }
+      ],
+      "trend": "stable"
+    },
+    "src\\playgrounds\\hash\\HashPlayground.test.tsx": {
+      "latest": {
+        "commit": "bb58719",
+        "timestamp": "2026-05-21T10:13:37.762Z",
+        "mi": 32.7,
+        "cognitive": 0,
+        "nesting": 3,
+        "lines": 155,
+        "maxCyclomatic": 3,
+        "entropy": 5.65
+      },
+      "history": [
+        {
+          "commit": "bb58719",
+          "timestamp": "2026-05-21T10:13:37.762Z",
+          "mi": 32.7,
+          "cognitive": 0,
+          "nesting": 3,
+          "lines": 155,
+          "maxCyclomatic": 3,
+          "entropy": 5.65
+        }
+      ],
+      "trend": "stable"
+    },
+    "src\\playgrounds\\js\\JsPlayground.branches.test.tsx": {
+      "latest": {
+        "commit": "bb58719",
+        "timestamp": "2026-05-21T10:13:46.317Z",
+        "mi": 21,
+        "cognitive": 5,
+        "nesting": 3,
+        "lines": 257,
+        "maxCyclomatic": 3,
+        "entropy": 5.98
+      },
+      "history": [
+        {
+          "commit": "bb58719",
+          "timestamp": "2026-05-21T10:13:46.317Z",
+          "mi": 21,
+          "cognitive": 5,
+          "nesting": 3,
+          "lines": 257,
+          "maxCyclomatic": 3,
+          "entropy": 5.98
+        }
+      ],
+      "trend": "stable"
+    },
+    "src\\playgrounds\\timestamp\\TimestampPlayground.test.tsx": {
+      "latest": {
+        "commit": "bb58719",
+        "timestamp": "2026-05-21T10:14:07.473Z",
+        "mi": 28.7,
+        "cognitive": 0,
+        "nesting": 3,
+        "lines": 178,
+        "maxCyclomatic": 3,
+        "entropy": 5.66
+      },
+      "history": [
+        {
+          "commit": "bb58719",
+          "timestamp": "2026-05-21T10:14:07.473Z",
+          "mi": 28.7,
+          "cognitive": 0,
+          "nesting": 3,
+          "lines": 178,
+          "maxCyclomatic": 3,
+          "entropy": 5.66
+        }
+      ],
+      "trend": "stable"
+    },
+    "src\\test-utils\\renderWithHistory.tsx": {
+      "latest": {
+        "commit": "bb58719",
+        "timestamp": "2026-05-21T20:53:41.426Z",
+        "mi": 58.5,
+        "cognitive": 4,
+        "nesting": 5,
+        "lines": 38,
+        "maxCyclomatic": 3,
+        "entropy": 4.68
+      },
+      "history": [
+        {
+          "commit": "bb58719",
+          "timestamp": "2026-05-21T20:53:41.426Z",
+          "mi": 58.5,
+          "cognitive": 4,
+          "nesting": 5,
+          "lines": 38,
+          "maxCyclomatic": 3,
+          "entropy": 4.68
+        }
+      ],
+      "trend": "stable"
+    }
+  },
+  "capturedAt": "2026-05-21T20:53:46.440Z"
+}

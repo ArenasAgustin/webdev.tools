@@ -117,6 +117,7 @@ export function JsonPlayground() {
       extraActionsParams={extraActionsParams}
       renderToolbarExtra={renderToolbarExtra}
       renderModals={renderModals}
+
     />
   );
 }

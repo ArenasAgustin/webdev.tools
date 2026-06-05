@@ -1,41 +1,41 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { renderWithI18n } from "@/test/test-utils";
 import { Card } from "./Card";
 
 describe("Card", () => {
   it("should render children content", () => {
-    render(
+    const { getByText } = renderWithI18n(
       <Card>
         <p>Test content</p>
       </Card>,
     );
 
-    expect(screen.getByText("Test content")).toBeInTheDocument();
+    expect(getByText("Test content")).toBeInTheDocument();
   });
 
   it("should render with title when provided", () => {
-    render(
+    const { getByText } = renderWithI18n(
       <Card title="Test Title">
         <p>Content</p>
       </Card>,
     );
 
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
-    expect(screen.getByText("Content")).toBeInTheDocument();
+    expect(getByText("Test Title")).toBeInTheDocument();
+    expect(getByText("Content")).toBeInTheDocument();
   });
 
   it("should render without title when not provided", () => {
-    render(
+    const { getByText } = renderWithI18n(
       <Card>
         <p>Content only</p>
       </Card>,
     );
 
-    expect(screen.getByText("Content only")).toBeInTheDocument();
+    expect(getByText("Content only")).toBeInTheDocument();
   });
 
   it("should apply correct styling classes", () => {
-    const { container } = render(
+    const { container } = renderWithI18n(
       <Card title="Styled Card">
         <div>Content</div>
       </Card>,
@@ -48,7 +48,7 @@ describe("Card", () => {
   });
 
   it("should apply custom className", () => {
-    const { container } = render(
+    const { container } = renderWithI18n(
       <Card className="bg-gray-800">
         <p>Content</p>
       </Card>,

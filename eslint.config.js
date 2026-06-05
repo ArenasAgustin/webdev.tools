@@ -15,7 +15,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig([
-  globalIgnores(["dist", "node_modules", "coverage", "coverage2"]),
+  globalIgnores(["dist", "node_modules", "coverage", "coverage2", "src/test-utils/**/*", "src/test/**/*"]),
   {
     files: ["**/*.{ts,tsx}"],
     ignores: [".storybook/**"],
@@ -31,7 +31,9 @@ export default defineConfig([
       ecmaVersion: 2022,
       globals: globals.browser,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ["tsconfig.json", "tsconfig.app.json", "tsconfig.node.json", "tsconfig.vitest.json"],
+        },
         tsconfigRootDir: __dirname,
       },
     },
