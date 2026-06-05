@@ -21,6 +21,13 @@ const DB_NAME = "webdev.tools";
 const DB_VERSION = 2;
 const STORE_NAME = "jsonPathHistory";
 
+let lastTimestamp = 0;
+const monotonicNow = () => {
+  const now = Date.now();
+  lastTimestamp = now > lastTimestamp ? now : lastTimestamp + 1;
+  return lastTimestamp;
+};
+
 // Singleton promise — only one IDBDatabase connection is ever opened per page load.
 // Exported for testing purposes only
 export let dbPromise: Promise<IDBDatabase> | null = null;
@@ -203,16 +210,18 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
         getRequest.onsuccess = () => {
           const existing = (getRequest.result as JsonPathHistoryItem | undefined) ?? null;
           if (existing) {
+            const ts = monotonicNow();
             store.put({
               ...existing,
               frequency: existing.frequency + 1,
-              timestamp: Date.now(),
+              timestamp: ts,
             });
           } else {
+            const ts = monotonicNow();
             store.add({
-              id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+              id: `${ts}-${Math.random().toString(36).slice(2, 9)}`,
               expression,
-              timestamp: Date.now(),
+              timestamp: ts,
               frequency: 1,
             });
           }
