@@ -73,11 +73,8 @@ export function Toolbar(props: ToolbarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasClean = !!props.config?.mode;
 
-  // Expand toolbar if content is minified and user clicks on the header
   const handleHeaderClick = () => {
-    if (props.isMinified) {
-      setIsExpanded(!isExpanded);
-    }
+    setIsExpanded(!isExpanded);
   };
 
   const toolsTitle = props.tools.title ?? t("toolbar.title");
@@ -110,7 +107,7 @@ export function Toolbar(props: ToolbarProps) {
             isMobileOpen || isExpanded ? "mb-3" : "mb-0",
           )}
           onClick={handleHeaderClick}
-          style={{ cursor: props.isMinified ? "pointer" : "default" }}
+          style={{ cursor: "pointer" }}
         >
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <i className="fas fa-tools text-yellow-400" aria-hidden="true"></i>
