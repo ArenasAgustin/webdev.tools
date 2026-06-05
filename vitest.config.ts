@@ -16,11 +16,6 @@ export default defineConfig({
     environment: "happy-dom",
     setupFiles: ["./src/test/setup.ts"],
     pool: "threads",
-    poolOptions: {
-      threads: {
-        isolate: false,
-      },
-    },
     testTimeout: 30_000,
     retry: 1,
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
