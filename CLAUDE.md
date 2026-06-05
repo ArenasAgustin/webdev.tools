@@ -43,7 +43,6 @@ pnpm verify:arch
 
 - **Unit tests:** `pnpm test --run`
 - **Con coverage:** `pnpm test:coverage --run`
-- **E2E:** `pnpm build && pnpm e2e` (requiere build previo)
 
 Los tests flaky de IndexedDB en CI son conocidos — si fallan solo en CI pero local pasan, puede ser timing. Verificá con `pnpm test:coverage --run` varias veces.
 
