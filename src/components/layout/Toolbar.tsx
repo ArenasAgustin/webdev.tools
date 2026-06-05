@@ -112,13 +112,6 @@ export function Toolbar(props: ToolbarProps) {
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <i className="fas fa-tools text-yellow-400" aria-hidden="true"></i>
             {toolsTitle}
-            {props.isMinified && (
-              <i
-                className="fas fa-exclamation-circle text-yellow-400"
-                aria-hidden="true"
-                title="Contenido minificado - haz clic para expandir"
-              />
-            )}
           </h3>
           <div className="flex items-center gap-2">
             {props.tools.onOpenShortcuts && (
