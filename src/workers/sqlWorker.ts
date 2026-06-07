@@ -8,6 +8,7 @@ import type { SqlWorkerRequest, SqlWorkerResponse } from "@/services/sql/worker.
 import { ROW_CAP } from "@/services/sql/worker.types";
 import { formatSql, validateSql, minifySql } from "@/services/sql/transform";
 import type { Database } from "sql.js";
+import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
 const ctx = self as unknown as {
   postMessage: (message: SqlWorkerResponse) => void;
@@ -20,7 +21,7 @@ let dbPromise: Promise<Database> | null = null;
 async function getDb(): Promise<Database> {
   dbPromise ??= (async () => {
     const initSqlJs = (await import("sql.js")).default;
-    const SQL = await initSqlJs();
+    const SQL = await initSqlJs({ locateFile: () => sqlWasmUrl });
     return new SQL.Database();
   })();
   return dbPromise;

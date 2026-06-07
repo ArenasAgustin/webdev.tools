@@ -4,6 +4,7 @@ import { jsEngine } from "./js.engine";
 import { htmlEngine } from "./html.engine";
 import { cssEngine } from "./css.engine";
 import { phpEngine } from "./php.engine";
+import { sqlEngine } from "./sql.engine";
 
 describe("Playground Engines", () => {
   describe("jsonEngine", () => {
@@ -203,6 +204,52 @@ describe("Playground Engines", () => {
     });
   });
 
+  describe("sqlEngine", () => {
+    it("has correct id and config", () => {
+      expect(sqlEngine.id).toBe("sql");
+      expect(sqlEngine.editorLanguage).toBe("sql");
+      expect(sqlEngine.features).toContain("validate");
+      expect(sqlEngine.features).toContain("minify");
+      expect(sqlEngine.features).toContain("execute");
+    });
+
+    it("maps base params to sql-specific params", () => {
+      const baseParams = {
+        input: "SELECT 1",
+        setInput: () => {},
+        output: "",
+        setOutput: () => {},
+        setError: () => {},
+        formatConfig: { dialect: "sql" as const, tabWidth: 2 },
+        minifyConfig: { autoCopy: false },
+        inputTooLarge: false,
+        inputTooLargeMessage: "Too large",
+        toast: { success: () => {}, error: () => {} },
+      };
+
+      const mapped = sqlEngine.mapActionsParams(baseParams);
+
+      expect((mapped as { inputSql: string }).inputSql).toBe(baseParams.input);
+      expect((mapped as { setInputSql: (v: string) => void }).setInputSql).toBe(baseParams.setInput);
+      expect((mapped as { formatConfig: object }).formatConfig).toBe(baseParams.formatConfig);
+    });
+
+    it("has correct file config", () => {
+      expect(sqlEngine.fileConfig.inputFileName).toBe("query.sql");
+      expect(sqlEngine.fileConfig.outputFileName).toBe("result.json");
+      expect(sqlEngine.fileConfig.mimeType).toBe("application/sql");
+    });
+
+    it("preload does not throw", () => {
+      expect(() => sqlEngine.preload()).not.toThrow();
+    });
+
+    it("has renderOutputPanel defined on the engine", () => {
+      expect(typeof sqlEngine.renderOutputPanel).toBe("function");
+    });
+
+  });
+
   describe("all engines", () => {
     it("calls preload without throwing", () => {
       expect(() => jsonEngine.preload()).not.toThrow();
@@ -210,10 +257,11 @@ describe("Playground Engines", () => {
       expect(() => htmlEngine.preload()).not.toThrow();
       expect(() => cssEngine.preload()).not.toThrow();
       expect(() => phpEngine.preload()).not.toThrow();
+      expect(() => sqlEngine.preload()).not.toThrow();
     });
 
     it("have required properties", () => {
-      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine, phpEngine];
+      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine, phpEngine, sqlEngine];
 
       for (const engine of engines) {
         expect(engine.id).toBeDefined();
@@ -234,7 +282,7 @@ describe("Playground Engines", () => {
     });
 
     it("have valid file configs with all required fields", () => {
-      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine, phpEngine];
+      const engines = [jsonEngine, jsEngine, htmlEngine, cssEngine, phpEngine, sqlEngine];
 
       for (const engine of engines) {
         const { fileConfig } = engine;

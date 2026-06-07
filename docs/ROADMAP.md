@@ -36,12 +36,13 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 
 ## En progreso
 
-_(vacío)_
+- [ ] SQL — format, minify, execute (SQLite WASM via sql.js) — PR 2 en revisión
 
 ---
 
 ## Próximo
 
+- [ ] SQL playground v2: dialect selector UI, tabular result view, schema visualization, query history
 - [ ] Más playgrounds (Base64, URL encoder/decoder, Regex tester, JWT decoder)
 - [ ] Compartir snippets por URL (estado serializado en query params)
 - [ ] Temas claro/oscuro
