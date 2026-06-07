@@ -43,3 +43,6 @@
 - [ ] Regex tester con visualización de grupos
 - [ ] Playground Typescript
 - [ ] Playground de SASS/SCSS/LESS
+- [ ] Arreglar error para abrir/cerrar toolbar (no funciona si abris desde el medio y cerras con boton)
+- [ ] Hacer que si el palyground no tiene configs para modal no se coloque el boton
+- [ ] Agregar modal configs para php y sql

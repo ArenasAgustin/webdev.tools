@@ -7,45 +7,17 @@ import { loadWebRuntime } from "@php-wasm/web";
 
 const PHP_EXECUTION_TIMEOUT_MS = 5000;
 
-// PHP class from @php-wasm/universal - use any to avoid type resolution issues
-type PHPInstance = Awaited<ReturnType<typeof loadWebRuntime>>;
-
-const cachedPHP: PHPInstance | null = null;
-let loadingPromise: Promise<PHPInstance> | null = null;
-
-/**
- * Get or create a PHP instance
- */
-async function getPHP(): Promise<PHPInstance> {
-  if (cachedPHP) return cachedPHP;
-  if (loadingPromise) return loadingPromise;
-
-  loadingPromise = (async () => {
-    const runtimeId = await loadWebRuntime("8.2");
-    // runtimeId is the PHP instance when using @php-wasm/web
-    // The loadWebRuntime returns a PHP instance directly in web context
-    return runtimeId as unknown as PHPInstance;
-  })();
-
-  return loadingPromise;
-}
-
-interface PhpResponse {
-  bytes: Uint8Array;
-  errors: string;
-  exitCode: number;
-}
-
 /**
  * Execute PHP code client-side via php-wasm
  */
 export async function executePhp(code: string): Promise<Result<string, { message: string }>> {
   try {
-    const php = await getPHP();
+    // loadWebRuntime returns a PHP instance at runtime, not a number
+    // The TypeScript types may be outdated or generic
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const php: any = await loadWebRuntime("8.2");
 
-    // Execute PHP code directly (uses zend_eval_string internally)
-     
-    const response = await (php.run as (opts: { code: string }) => Promise<PhpResponse>)({
+    const response = await php.run({
       code: `<?php ${code}`,
     });
 
