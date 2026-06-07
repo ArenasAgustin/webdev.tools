@@ -75,6 +75,9 @@ export default defineConfig(({ mode }) => ({
     "process.version": JSON.stringify(""),
   },
   assetsInclude: ["**/*.wasm"],
+  worker: {
+    format: "es",
+  },
   build: {
     target: "esnext",
     rollupOptions: {

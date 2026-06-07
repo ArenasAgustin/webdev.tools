@@ -2,6 +2,7 @@ import type { CssWorkerPayload, CssWorkerResponse } from "@/services/css/worker.
 import { createWorkerAdapter } from "@/services/worker/adapter";
 
 export const cssWorkerAdapter = createWorkerAdapter<CssWorkerPayload, CssWorkerResponse>({
-  workerUrl: new URL("../../workers/cssWorker.ts", import.meta.url),
+  workerFactory: () =>
+    new Worker(new URL("../../workers/cssWorker.ts", import.meta.url), { type: "module" }),
   idPrefix: "css-worker",
 });

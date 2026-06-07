@@ -5,7 +5,7 @@ interface CreatePlaygroundWorkerAdapterOptions<
   TPayload extends WorkerPayloadBase,
   TRequest extends WorkerRequest<TPayload>,
 > {
-  workerUrl: URL;
+  workerFactory: () => Worker;
   idPrefix: string;
   unavailableMessage?: string;
   buildRequest?: (id: string, payload: TPayload) => TRequest;
@@ -28,7 +28,7 @@ export function createPlaygroundWorkerAdapter<
   options: CreatePlaygroundWorkerAdapterOptions<TPayload, TRequest>,
 ): PlaygroundWorkerAdapter<TPayload, TResponse> {
   const run = createWorkerClient<TPayload, TRequest, TResponse>({
-    workerUrl: options.workerUrl,
+    workerFactory: options.workerFactory,
     idPrefix: options.idPrefix,
     unavailableMessage: options.unavailableMessage,
     buildRequest:
@@ -53,6 +53,6 @@ export function createPlaygroundWorkerAdapter<
 export function createWorkerAdapter<
   TPayload extends WorkerPayloadBase,
   TResponse extends WorkerResponse,
->(options: { workerUrl: URL; idPrefix: string }): PlaygroundWorkerAdapter<TPayload, TResponse> {
+>(options: { workerFactory: () => Worker; idPrefix: string }): PlaygroundWorkerAdapter<TPayload, TResponse> {
   return createPlaygroundWorkerAdapter<TPayload, WorkerRequest<TPayload>, TResponse>(options);
 }
