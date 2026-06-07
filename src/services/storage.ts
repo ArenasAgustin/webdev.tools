@@ -8,6 +8,7 @@ import type { JsToolsConfig } from "@/types/js";
 import type { HtmlToolsConfig } from "@/types/html";
 import type { PhpToolsConfig } from "@/types/php";
 import type { CssToolsConfig } from "@/types/css";
+import type { SqlToolsConfig } from "@/types/sql";
 
 const getStorage = (): Storage | null => {
   if (typeof window !== "undefined" && window.localStorage) {
@@ -41,6 +42,8 @@ export const STORAGE_KEYS = {
   LAST_CSS: "lastCss",
   JSONPATH_HISTORY: "jsonPathHistory",
   PWA_INSTALL_DISMISSED: "pwaInstallDismissed",
+  LAST_SQL: "lastSql",
+  SQL_TOOLS_CONFIG: "sqlToolsConfig",
 } as const;
 
 /**
@@ -306,3 +309,39 @@ export const saveLastPhp = (value: string) => saveLastInput(STORAGE_KEYS.LAST_PH
 
 /** Remove last PHP from localStorage */
 export const removeLastPhp = () => removeItem(STORAGE_KEYS.LAST_PHP);
+
+// ============================================
+// SQL Playground storage helpers
+// ============================================
+
+/** Maximum buffer size (1MB) before skipping localStorage write to avoid quota errors */
+const SQL_BUFFER_CAP_BYTES = 1_048_576; // 1MB
+
+/** Load last SQL input from localStorage */
+export const loadLastSql = () => loadLastInput(STORAGE_KEYS.LAST_SQL, "SQL");
+
+/** Save last SQL input to localStorage (capped at 1MB) */
+export const saveLastSql = (value: string): boolean => {
+  if (new TextEncoder().encode(value).length > SQL_BUFFER_CAP_BYTES) {
+    return false;
+  }
+  return saveLastInput(STORAGE_KEYS.LAST_SQL, "SQL", value);
+};
+
+/** Remove last SQL from localStorage */
+export const removeLastSql = () => removeItem(STORAGE_KEYS.LAST_SQL);
+
+/** Load SQL tools configuration from localStorage */
+export function loadSqlToolsConfig(): Partial<SqlToolsConfig> | null {
+  return getItem<Partial<SqlToolsConfig>>(STORAGE_KEYS.SQL_TOOLS_CONFIG);
+}
+
+/** Save SQL tools configuration to localStorage */
+export function saveSqlToolsConfig(config: Partial<SqlToolsConfig>): boolean {
+  return setItem(STORAGE_KEYS.SQL_TOOLS_CONFIG, config);
+}
+
+/** Remove SQL tools configuration from localStorage */
+export function removeSqlToolsConfig(): boolean {
+  return removeItem(STORAGE_KEYS.SQL_TOOLS_CONFIG);
+}
