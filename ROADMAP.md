@@ -19,6 +19,7 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 - [x] Testing matrix estricta — verify-architecture.js valida 12 archivos requeridos por playground
 - [x] Coverage threshold — lines 88%, functions 79%, branches 86%
 - [x] CI hardening + E2E gap fill for colors/hash/password/timestamp playgrounds
+- [X] Arreglar error para abrir/cerrar toolbar (no funciona si abris desde el medio y cerras con boton)
 
 ### Playgrounds
 
@@ -64,6 +65,5 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 - [ ] Regex tester con visualización de grupos
 - [ ] Playground Typescript
 - [ ] Playground de SASS/SCSS/LESS
-- [ ] Arreglar error para abrir/cerrar toolbar (no funciona si abris desde el medio y cerras con boton)
 - [ ] Hacer que si el palyground no tiene configs para modal no se coloque el boton
 - [ ] Agregar modal configs para php y sql
