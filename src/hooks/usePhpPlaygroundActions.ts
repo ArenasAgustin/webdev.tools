@@ -122,7 +122,7 @@ export function usePhpPlaygroundActions({
         generic.setIsProcessing(false);
         setError(message);
       },
-    });
+    })();
   }, [generic, inputPhp, setError, setOutput, toast]);
 
   return {
