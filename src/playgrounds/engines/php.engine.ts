@@ -31,15 +31,17 @@ export const phpEngine = {
   id: "php",
   config: phpPlaygroundConfig,
   editorLanguage: "php" as const,
-  features: ["validate"] as const,
+  features: ["validate", "execute"] as const,
   defaultFormatConfig: DEFAULT_PHP_FORMAT_CONFIG,
   defaultMinifyConfig: { autoCopy: false },
   loadToolsConfig: loadPhpToolsConfig,
   loadLastInput: loadLastPhp,
   saveLastInput: saveLastPhp,
   preload: () => {
-    // PHP parser loads synchronously
+    // Lazy: only import the module, don't load php-wasm until needed
+    // php-wasm (~15MB) loads lazily on first format/execute call
     void import("@/services/php/transform");
+    void import("@/services/php/phpWasmLoader");
   },
   useParser: usePhpParser,
   useActions: usePhpPlaygroundActions,
@@ -54,6 +56,11 @@ export const phpEngine = {
     formatRunner: formatPhp,
     minifyRunner: async () => {
       throw new Error("Minify no está disponible para PHP");
+    },
+    executeRunner: async (input: string) => {
+      const { executePhp } = await import("@/services/php/phpExecutor");
+      const result = await executePhp(input);
+      return result.ok ? result.value : Promise.reject(new Error(result.error.message));
     },
   },
 };

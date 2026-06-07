@@ -4,6 +4,8 @@ import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -19,6 +21,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
+    wasm(),
+    topLevelAwait(),
     react(),
     nodePolyfills(),
     VitePWA({
@@ -81,6 +85,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: "esnext",
     rollupOptions: {
+      external: [
+        /@php-wasm/,
+      ],
       output: {
         manualChunks: (id) => {
           if (id.includes("@monaco-editor/react")) return "monaco";

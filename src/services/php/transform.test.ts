@@ -226,6 +226,96 @@ echo "test";
       expect(result.value.endsWith("\n")).toBe(false);
     }
   });
+
+  it("handles heredoc syntax correctly", () => {
+    const input = `<?php
+$sql = <<<SQL
+SELECT * FROM users
+WHERE id = {$userId}
+AND status = 'active';
+SQL;
+echo "done";`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // The heredoc content should NOT affect brace counting
+      expect(result.value).toContain("SELECT * FROM users");
+      expect(result.value).toContain("echo \"done\";");
+    }
+  });
+
+  it("handles nowdoc syntax correctly", () => {
+    const input = `<?php
+$code = <<<'CODE'
+function test() {
+  return "nested {$value}";
+}
+CODE;
+echo "end";`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // Nowdoc content preserved, outer braces handled correctly
+      expect(result.value).toContain("function test()");
+      expect(result.value).toContain("echo \"end\";");
+    }
+  });
+
+  it("handles interpolated strings with {$var}", () => {
+    const input = `<?php
+$name = "test";
+echo "Hello {$name}!";`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // The {$name} should not be counted as a brace
+      expect(result.value).toContain("echo \"Hello {$name}!\";");
+    }
+  });
+
+  it("handles block comments with braces", () => {
+    const input = `<?php
+function test() {
+  /* This is a { block } comment */
+  return 1;
+}`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // Block comment with braces should not affect indentation
+      expect(result.value).toContain("/* This is a { block } comment */");
+    }
+  });
+
+  it("handles nested interpolation in strings", () => {
+    const input = `<?php
+$arr = ["key" => "value"];
+echo "{$arr["key"]}";`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("handles heredoc with closing brace in content", () => {
+    const input = `<?php
+$template = <<<HTML
+<div class="container">
+  <p>Message}</p>
+</div>
+HTML;
+echo "done";`;
+    const result = formatPhp(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // The } inside heredoc should not close the function
+      expect(result.value).toContain("echo \"done\";");
+    }
+  });
 });
 
 describe("validatePhp", () => {
