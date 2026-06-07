@@ -10,8 +10,13 @@ describe("Types", () => {
     });
 
     it("includes all existing modes", () => {
-      type AllModes = "json" | "js" | "html" | "css" | "php";
+      type AllModes = "json" | "js" | "html" | "css" | "php" | "sql";
       expectTypeOf<PlaygroundMode>().toEqualTypeOf<AllModes>();
+    });
+
+    it("includes 'sql' as a valid mode", () => {
+      type IsSqlInMode = "sql" extends PlaygroundMode ? true : false;
+      expectTypeOf<IsSqlInMode>().toEqualTypeOf<true>();
     });
   });
 
@@ -22,8 +27,13 @@ describe("Types", () => {
     });
 
     it("includes all expected languages", () => {
-      type AllLangs = "json" | "javascript" | "html" | "css" | "php";
+      type AllLangs = "json" | "javascript" | "html" | "css" | "php" | "sql";
       expectTypeOf<MonacoLanguage>().toEqualTypeOf<AllLangs>();
+    });
+
+    it("includes 'sql' as a valid language", () => {
+      type IsSqlInLang = "sql" extends MonacoLanguage ? true : false;
+      expectTypeOf<IsSqlInLang>().toEqualTypeOf<true>();
     });
   });
 

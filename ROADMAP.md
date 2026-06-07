@@ -60,5 +60,10 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 - [ ] Transformación de JSON a TOML, CSV, XML, YAML
 - [ ] Convertidor de unidades de CSS
 - [ ] Generador de QR codes
-- [ ] Temas claro/oscuro
-- [ ] Keyboard shortcuts globales configurables por usuario
+- [ ] Playground de Markdown con preview
+- [ ] Regex tester con visualización de grupos
+- [ ] Playground Typescript
+- [ ] Playground de SASS/SCSS/LESS
+- [ ] Arreglar error para abrir/cerrar toolbar (no funciona si abris desde el medio y cerras con boton)
+- [ ] Hacer que si el palyground no tiene configs para modal no se coloque el boton
+- [ ] Agregar modal configs para php y sql

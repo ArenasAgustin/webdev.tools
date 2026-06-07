@@ -140,7 +140,7 @@ export function defineWorkerServiceTests<TError>(options: WorkerServiceHarnessOp
     minifyAsync,
     largeInput,
     formatSuccessValue,
-    minifyErrorValue,
+    minifyErrorValue: _minifyErrorValue,
     fallbackOperations,
   } = options;
 

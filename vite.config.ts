@@ -4,6 +4,8 @@ import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -19,6 +21,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
+    wasm(),
+    topLevelAwait(),
     react(),
     nodePolyfills(),
     VitePWA({
@@ -74,9 +78,16 @@ export default defineConfig(({ mode }) => ({
     "process.platform": JSON.stringify("browser"),
     "process.version": JSON.stringify(""),
   },
+  assetsInclude: ["**/*.wasm"],
+  worker: {
+    format: "es",
+  },
   build: {
     target: "esnext",
     rollupOptions: {
+      external: [
+        /@php-wasm/,
+      ],
       output: {
         manualChunks: (id) => {
           if (id.includes("@monaco-editor/react")) return "monaco";
@@ -87,6 +98,11 @@ export default defineConfig(({ mode }) => ({
             id.includes("node_modules/i18next-browser-languagedetector")
           )
             return "i18n";
+          if (
+            id.includes("node_modules/sql-formatter") ||
+            id.includes("node_modules/sql.js")
+          )
+            return "sql";
           if (id.includes("node_modules/react") || id.includes("node_modules/scheduler"))
             return "vendor";
         },

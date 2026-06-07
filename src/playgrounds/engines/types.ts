@@ -5,12 +5,12 @@ import type { ValidationState } from "@/hooks/useAsyncValidator";
 /**
  * Playground mode - identifies which playground is active
  */
-export type PlaygroundMode = "json" | "js" | "html" | "css" | "php";
+export type PlaygroundMode = "json" | "js" | "html" | "css" | "php" | "sql";
 
 /**
  * Monaco editor language identifiers
  */
-export type MonacoLanguage = "json" | "javascript" | "html" | "css" | "php";
+export type MonacoLanguage = "json" | "javascript" | "html" | "css" | "php" | "sql";
 
 /**
  * Playground features - what special capabilities each playground supports
