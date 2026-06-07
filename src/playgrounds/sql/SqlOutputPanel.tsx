@@ -106,13 +106,14 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
     );
   }
 
-  // Success state — JSON Monaco viewer
+  // Success state — detect language from content
   let parsed: { truncated?: boolean } | null = null;
   try {
     parsed = JSON.parse(output) as { truncated?: boolean };
   } catch {
     parsed = null;
   }
+  const isJsonOutput = parsed !== null;
   const isTruncated = parsed?.truncated === true;
 
   return (
@@ -150,7 +151,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
       )}
       <LazyCodeEditor
         value={output}
-        language="json"
+        language={isJsonOutput ? "json" : "sql"}
         readOnly={true}
         placeholder="El resultado se mostrará aquí..."
       />

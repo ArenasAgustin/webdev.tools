@@ -79,6 +79,9 @@ export default defineConfig(({ mode }) => ({
     "process.version": JSON.stringify(""),
   },
   assetsInclude: ["**/*.wasm"],
+  optimizeDeps: {
+    exclude: ["@php-wasm/web"],
+  },
   worker: {
     format: "es",
   },
@@ -87,6 +90,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       external: [
         /@php-wasm/,
+        "env",
       ],
       output: {
         manualChunks: (id) => {

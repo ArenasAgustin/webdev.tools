@@ -3,8 +3,6 @@
  * Loads the WASM runtime only when needed (not on page load)
  */
 
-import { loadWebRuntime } from "@php-wasm/web";
-
 type PHPVersion = "8.0" | "8.1" | "8.2" | "8.3" | "8.4" | "next";
 
 let cachedRuntime: unknown = null;
@@ -47,6 +45,7 @@ export async function loadPhpWasm(
 
   loadingPromise = (async () => {
     try {
+      const { loadWebRuntime } = await import("@php-wasm/web");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const runtime: any = await loadWebRuntime(phpVersion, {
         onPhpLoaderModuleLoaded: (module) => {
