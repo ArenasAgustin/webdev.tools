@@ -7,19 +7,25 @@ import { loadWebRuntime } from "@php-wasm/web";
 
 const PHP_EXECUTION_TIMEOUT_MS = 5000;
 
+interface PhpResponse {
+  bytes: ArrayBuffer;
+  errors: string;
+  exitCode: number;
+}
+
+type PhpRunFunction = (opts: { code: string }) => Promise<PhpResponse>;
+
 /**
  * Execute PHP code client-side via php-wasm
  */
 export async function executePhp(code: string): Promise<Result<string, { message: string }>> {
   try {
-    // loadWebRuntime returns a PHP instance at runtime, not a number
-    // The TypeScript types may be outdated or generic
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const php: any = await loadWebRuntime("8.2");
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const run: PhpRunFunction = php.run as PhpRunFunction;
 
-    const response = await php.run({
-      code: `<?php ${code}`,
-    });
+    const response = await run({ code: `<?php ${code}` });
 
     const output = new TextDecoder().decode(response.bytes);
     const stderr = response.errors;

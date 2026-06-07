@@ -7,17 +7,14 @@ import { loadWebRuntime } from "@php-wasm/web";
 
 type PHPVersion = "8.0" | "8.1" | "8.2" | "8.3" | "8.4" | "next";
 
-// php-wasm returns PHP instance at runtime (typed as any internally)
-type PhpRuntime = Parameters<typeof loadWebRuntime>[0] extends string ? unknown : unknown;
-
-let cachedRuntime: PhpRuntime | null = null;
-let loadingPromise: Promise<PhpRuntime> | null = null;
+let cachedRuntime: unknown = null;
+let loadingPromise: Promise<unknown> | null = null;
 
 export type PhpWasmLoaderState = "idle" | "loading" | "ready" | "error";
 
 interface PhpWasmLoader {
   state: PhpWasmLoaderState;
-  runtime: PhpRuntime | null;
+  runtime: unknown;
   error: string | null;
 }
 
@@ -36,7 +33,7 @@ const loaderStatus: PhpWasmLoader = {
  */
 export async function loadPhpWasm(
   phpVersion: PHPVersion = "8.2"
-): Promise<PhpRuntime> {
+): Promise<unknown> {
   if (loaderStatus.state === "ready" && cachedRuntime) {
     return cachedRuntime;
   }
@@ -50,7 +47,6 @@ export async function loadPhpWasm(
 
   loadingPromise = (async () => {
     try {
-      // loadWebRuntime returns a PHP instance at runtime
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const runtime: any = await loadWebRuntime(phpVersion, {
         onPhpLoaderModuleLoaded: (module) => {
