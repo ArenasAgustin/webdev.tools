@@ -1,8 +1,7 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { phpPlaygroundConfig } from "@/playgrounds/php/php.config";
 import { phpService } from "@/services/php/service";
 import { createTransformHandler } from "@/utils/createTransformHandler";
-import { PHP_FORMATTER_WARNING_DISCLAIMER } from "@/services/php/transform";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
@@ -68,8 +67,6 @@ export function usePhpPlaygroundActions({
     },
   });
 
-  const disclaimerShown = useRef(false);
-
   // Extensión: formatear código PHP con validación
   const handleFormat = useCallback(() => {
     createTransformHandler({
@@ -79,10 +76,6 @@ export function usePhpPlaygroundActions({
           indentSize: formatConfig.indentSize,
         });
         if (!result.ok) throw new Error(result.error ?? "Error al formatear código PHP");
-        if (!disclaimerShown.current) {
-          disclaimerShown.current = true;
-          if (toast?.info) toast.info(PHP_FORMATTER_WARNING_DISCLAIMER);
-        }
         return result.value;
       },
       setOutput,
@@ -91,7 +84,7 @@ export function usePhpPlaygroundActions({
       successMessage: "PHP formateado correctamente",
       errorMessage: "Error al formatear PHP",
     });
-  }, [generic.runTransformAction, inputPhp, formatConfig, setError, setOutput, toast]);
+  }, [generic.runTransformAction, inputPhp, formatConfig, setError, setOutput]);
 
   return {
     ...generic,

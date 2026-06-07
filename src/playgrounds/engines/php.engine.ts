@@ -38,8 +38,10 @@ export const phpEngine = {
   loadLastInput: loadLastPhp,
   saveLastInput: saveLastPhp,
   preload: () => {
-    // PHP parser loads synchronously
+    // Lazy: only import the module, don't load php-wasm until needed
+    // php-wasm (~15MB) loads lazily on first format/execute call
     void import("@/services/php/transform");
+    void import("@/services/php/phpWasmLoader");
   },
   useParser: usePhpParser,
   useActions: usePhpPlaygroundActions,
