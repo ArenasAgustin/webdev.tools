@@ -12,9 +12,7 @@ import type {
   OutputPanelProps,
 } from "./engines/types";
 
-type PlaygroundMode = "json" | "js" | "html" | "css";
-
-import type { PlaygroundActions } from "./engines/types";
+import type { PlaygroundMode, PlaygroundActions } from "./engines/types";
 
 interface GenericPlaygroundExtraProps {
   /** Extra params for actions (jsonPathExpression, etc.) */
