@@ -2,6 +2,6 @@ import type { JsonWorkerPayload, JsonWorkerResponse } from "@/services/json/work
 import { createWorkerAdapter } from "@/services/worker/adapter";
 
 export const jsonWorkerAdapter = createWorkerAdapter<JsonWorkerPayload, JsonWorkerResponse>({
-  workerUrl: new URL("../../workers/jsonWorker.ts?worker", import.meta.url),
+  workerUrl: new URL("../../workers/jsonWorker.ts", import.meta.url),
   idPrefix: "json-worker",
 });

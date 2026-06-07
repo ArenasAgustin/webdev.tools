@@ -2,6 +2,6 @@ import type { JsWorkerPayload, JsWorkerResponse } from "@/services/js/worker.typ
 import { createWorkerAdapter } from "@/services/worker/adapter";
 
 export const jsWorkerAdapter = createWorkerAdapter<JsWorkerPayload, JsWorkerResponse>({
-  workerUrl: new URL("../../workers/jsWorker.ts?worker", import.meta.url),
+  workerUrl: new URL("../../workers/jsWorker.ts", import.meta.url),
   idPrefix: "js-worker",
 });

@@ -9,7 +9,7 @@ import type { WorkerRequest } from "@/services/worker/types";
  */
 const run = createWorkerClient<SqlWorkerPayload, WorkerRequest<SqlWorkerPayload>, SqlWorkerResponse>(
   {
-    workerUrl: new URL("../../workers/sqlWorker.ts?worker", import.meta.url),
+    workerUrl: new URL("../../workers/sqlWorker.ts", import.meta.url),
     idPrefix: "sql-worker",
     buildRequest: (id, payload) => ({ id, ...payload }),
   },
