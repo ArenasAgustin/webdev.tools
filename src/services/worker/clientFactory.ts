@@ -12,7 +12,7 @@ interface WorkerResponseBase {
 }
 
 interface CreateWorkerClientOptions<TPayload, TRequest extends WorkerRequestBase> {
-  workerUrl: URL;
+  workerFactory: () => Worker;
   idPrefix: string;
   buildRequest: (id: string, payload: TPayload) => TRequest;
   unavailableMessage?: string;
@@ -40,7 +40,7 @@ export function createWorkerClient<
     }
 
     if (!worker) {
-      worker = new Worker(options.workerUrl, { type: "module" });
+      worker = options.workerFactory();
 
       worker.onmessage = (event: MessageEvent<TResponse>) => {
         const response = event.data;

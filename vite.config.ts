@@ -74,6 +74,10 @@ export default defineConfig(({ mode }) => ({
     "process.platform": JSON.stringify("browser"),
     "process.version": JSON.stringify(""),
   },
+  assetsInclude: ["**/*.wasm"],
+  worker: {
+    format: "es",
+  },
   build: {
     target: "esnext",
     rollupOptions: {
@@ -87,6 +91,11 @@ export default defineConfig(({ mode }) => ({
             id.includes("node_modules/i18next-browser-languagedetector")
           )
             return "i18n";
+          if (
+            id.includes("node_modules/sql-formatter") ||
+            id.includes("node_modules/sql.js")
+          )
+            return "sql";
           if (id.includes("node_modules/react") || id.includes("node_modules/scheduler"))
             return "vendor";
         },
