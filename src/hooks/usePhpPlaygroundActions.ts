@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { phpPlaygroundConfig } from "@/playgrounds/php/php.config";
 import { phpService } from "@/services/php/service";
 import { createTransformHandler } from "@/utils/createTransformHandler";
+import { createValidatedHandler } from "@/utils/handlerFactory";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
@@ -86,8 +87,47 @@ export function usePhpPlaygroundActions({
     });
   }, [generic.runTransformAction, inputPhp, formatConfig, setError, setOutput]);
 
+  // Extensión: ejecutar código PHP
+  const handleExecute = useCallback(() => {
+    createValidatedHandler({
+      validate: generic.baseActions.createInputValidator,
+      run: async () => {
+        generic.setIsProcessing(true);
+        setError(null);
+        setOutput("");
+
+        const { executePhp, isSharedArrayBufferSupported } = await import(
+          "@/services/php/phpExecutor"
+        );
+
+        if (!isSharedArrayBufferSupported()) {
+          throw new Error(
+            "Tu navegador no soporta SharedArrayBuffer, necesario para ejecutar PHP. " +
+              "Probá con Chrome o Firefox actualizado."
+          );
+        }
+
+        const result = await executePhp(inputPhp);
+        generic.setIsProcessing(false);
+
+        if (!result.ok) {
+          throw new Error(result.error.message);
+        }
+
+        setOutput(result.value);
+      },
+      toast,
+      successMessage: "Código PHP ejecutado correctamente",
+      onError: (message) => {
+        generic.setIsProcessing(false);
+        setError(message);
+      },
+    });
+  }, [generic, inputPhp, setError, setOutput, toast]);
+
   return {
     ...generic,
     handleFormat,
+    handleExecute,
   };
 }

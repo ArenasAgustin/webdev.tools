@@ -31,7 +31,7 @@ export const phpEngine = {
   id: "php",
   config: phpPlaygroundConfig,
   editorLanguage: "php" as const,
-  features: ["validate"] as const,
+  features: ["validate", "execute"] as const,
   defaultFormatConfig: DEFAULT_PHP_FORMAT_CONFIG,
   defaultMinifyConfig: { autoCopy: false },
   loadToolsConfig: loadPhpToolsConfig,
@@ -56,6 +56,11 @@ export const phpEngine = {
     formatRunner: formatPhp,
     minifyRunner: async () => {
       throw new Error("Minify no está disponible para PHP");
+    },
+    executeRunner: async (input: string) => {
+      const { executePhp } = await import("@/services/php/phpExecutor");
+      const result = await executePhp(input);
+      return result.ok ? result.value : Promise.reject(new Error(result.error.message));
     },
   },
 };
