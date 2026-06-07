@@ -69,12 +69,11 @@ export interface ToolbarProps {
 export function Toolbar(props: ToolbarProps) {
   const { t } = useTranslation();
   const [openModal, setOpenModal] = useState<"config" | null>(null);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const hasClean = !!props.config?.mode;
 
   const handleHeaderClick = () => {
-    setIsExpanded(!isExpanded);
+    setIsExpanded((v) => !v);
   };
 
   const toolsTitle = props.tools.title ?? t("toolbar.title");
@@ -104,7 +103,7 @@ export function Toolbar(props: ToolbarProps) {
         <div
           className={cn(
             "flex items-center justify-between gap-2",
-            isMobileOpen || isExpanded ? "mb-3" : "mb-0",
+            isExpanded ? "mb-3" : "mb-0",
           )}
           onClick={handleHeaderClick}
           style={{ cursor: "pointer" }}
@@ -160,13 +159,13 @@ export function Toolbar(props: ToolbarProps) {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsMobileOpen((v) => !v);
+                setIsExpanded((v) => !v);
               }}
               className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
-              aria-label={isMobileOpen ? t("actions.hideTools") : t("actions.showTools")}
+              aria-label={isExpanded ? t("actions.hideTools") : t("actions.showTools")}
             >
               <i
-                className={`fas fa-chevron-${isMobileOpen ? "down" : "up"}`}
+                className={`fas fa-chevron-${isExpanded ? "down" : "up"}`}
                 aria-hidden="true"
               ></i>
             </button>
@@ -177,7 +176,7 @@ export function Toolbar(props: ToolbarProps) {
         <div
           className={cn(
             "overflow-hidden transition-all duration-200",
-            isMobileOpen || isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+            isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
           )}
         >
           <div className={gridLayoutClass}>
