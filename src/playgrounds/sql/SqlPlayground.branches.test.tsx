@@ -216,7 +216,7 @@ describe("SqlPlayground branches", () => {
 
   it("renders the SQL playground with idle output panel when no query has been run", () => {
     render(<SqlPlayground />);
-    expect(screen.getByText("Run a query to see results")).toBeInTheDocument();
+    expect(screen.getByText("editor.outputIdle")).toBeInTheDocument();
   });
 
   it("format success → output updated", async () => {

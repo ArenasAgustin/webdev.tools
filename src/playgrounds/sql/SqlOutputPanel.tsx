@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { OutputActions } from "@/components/editor/OutputActions";
@@ -20,6 +21,7 @@ export interface SqlOutputPanelProps extends OutputPanelProps {
  * - Success: output present → Monaco read-only JSON viewer (with optional truncation banner)
  */
 export function SqlOutputPanel(props: SqlOutputPanelProps) {
+  const { t } = useTranslation();
   const {
     output,
     error,
@@ -99,7 +101,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
         <div className="flex h-full min-h-[220px] items-center justify-center">
           <div className="flex flex-col items-center gap-2 text-white/40">
             <i className="fas fa-database text-2xl" aria-hidden="true"></i>
-            <span className="text-sm">Run a query to see results</span>
+            <span className="text-sm">{t("editor.outputIdle")}</span>
           </div>
         </div>
       </Panel>

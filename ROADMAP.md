@@ -58,7 +58,6 @@ _(vacío)_
 - [ ] Markdown playground con preview
 - [ ] TypeScript playground
 - [ ] SASS/SCSS/LESS playground
-- [ ] Compartir snippets por URL (estado serializado en query params)
 - [ ] Transformación de JSON a TOML, CSV, XML, YAML
 - [ ] Convertidor de unidades de CSS
 - [ ] Generador de QR codes

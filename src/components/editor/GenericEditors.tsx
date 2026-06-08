@@ -47,6 +47,8 @@ interface GenericEditorsProps {
   onImportFile?: (file: File) => void;
   /** Accepted file extensions for the hidden file input (e.g. ".json" or ".js,.ts") */
   acceptExtensions?: string;
+  /** FontAwesome icon class for the idle output state (e.g. "fab fa-php") */
+  outputIcon?: string;
   outputPanel?: (props: {
     input: string;
     output: string;
@@ -86,6 +88,7 @@ export const GenericEditors = memo(function GenericEditors({
   diffModal,
   editorState,
   outputPanel,
+  outputIcon,
   onImportFile,
   acceptExtensions,
 }: GenericEditorsProps) {
@@ -170,15 +173,24 @@ export const GenericEditors = memo(function GenericEditors({
       title="Resultado"
       icon="terminal"
       iconColor="green-400"
-      actions={outputActions(() => editor.expand("output"))}
+      actions={output ? outputActions(() => editor.expand("output")) : undefined}
       footer={outputFooter}
     >
-      <LazyCodeEditor
-        value={output}
-        language={language}
-        readOnly={true}
-        placeholder={outputPlaceholder}
-      />
+      {output ? (
+        <LazyCodeEditor
+          value={output}
+          language={language}
+          readOnly={true}
+          placeholder={outputPlaceholder}
+        />
+      ) : (
+        <div className="flex h-full min-h-[220px] items-center justify-center">
+          <div className="flex flex-col items-center gap-2 text-white/40">
+            <i className={`${outputIcon ?? "fas fa-terminal"} text-2xl`} aria-hidden="true" />
+            <span className="text-sm">{t("editor.outputIdle")}</span>
+          </div>
+        </div>
+      )}
     </Panel>
   );
 

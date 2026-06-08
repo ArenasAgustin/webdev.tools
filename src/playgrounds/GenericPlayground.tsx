@@ -196,6 +196,7 @@ export function GenericPlayground({
             editorState={overlays.editor}
             onImportFile={actions.handleImportFile}
             acceptExtensions={actions.acceptExtensions}
+            outputIcon={engine.config.icon}
             extraOutputActions={outputActions}
             outputPanel={outputPanelRender}
           />

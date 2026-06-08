@@ -113,6 +113,7 @@
     "bytes": "bytes",
     "input": "Input",
     "output": "Output",
-    "dropFileHere": "Drop file here"
+    "dropFileHere": "Drop file here",
+    "outputIdle": "Format, minify, or run to see a result"
   }
 }

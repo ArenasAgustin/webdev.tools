@@ -113,6 +113,7 @@
     "bytes": "bytes",
     "input": "Entrada",
     "output": "Salida",
-    "dropFileHere": "Soltar archivo aquí"
+    "dropFileHere": "Soltar archivo aquí",
+    "outputIdle": "Formateá, minificá o ejecutá para ver un resultado"
   }
 }
