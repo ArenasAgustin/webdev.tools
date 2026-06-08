@@ -50,12 +50,9 @@ _(vacío)_
 
 ## Próximo
 
-- [ ] PHP formatter — mejorar soporte de heredocs/strings complejos
 - [ ] Base64 encoder/decoder
 - [ ] URL encoder/decoder
 - [ ] JWT decoder
-- [ ] Regex tester con visualización de grupos
-- [ ] Markdown playground con preview
 - [ ] TypeScript playground
 - [ ] SASS/SCSS/LESS playground
 - [ ] Transformación de JSON a TOML, CSV, XML, YAML
