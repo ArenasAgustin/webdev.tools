@@ -3,7 +3,6 @@
  */
 
 import type { Result } from "@/types/common";
-import { loadWebRuntime } from "@php-wasm/web";
 
 const PHP_EXECUTION_TIMEOUT_MS = 5000;
 
@@ -20,6 +19,7 @@ type PhpRunFunction = (opts: { code: string }) => Promise<PhpResponse>;
  */
 export async function executePhp(code: string): Promise<Result<string, { message: string }>> {
   try {
+    const { loadWebRuntime } = await import("@php-wasm/web");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const php: any = await loadWebRuntime("8.2");
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

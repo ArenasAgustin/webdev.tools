@@ -27,9 +27,9 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 - [x] JavaScript — format, minify, transform
 - [x] HTML — format, minify, clean
 - [x] CSS — format, minify, validate (css-tree)
-- [x] PHP — format, validate, parse, highlight errors
-  - Stack: `php-parser` (AST/validate) + formatter heurístico propio
-  - Servicios en `services/php/transform.ts`, adapter `usePhpPlaygroundActions`, página `PhpPlayground.tsx`
+- [x] PHP — format, validate, parse, highlight errors, execute (client-side via `@php-wasm/web`, lazy load ~15MB)
+  - Stack: `php-parser` (AST/validate) + formatter heurístico propio + `@php-wasm/web` para ejecución
+  - Servicios en `services/php/transform.ts`, `services/php/phpExecutor.ts`, adapter `usePhpPlaygroundActions`, página `PhpPlayground.tsx`
 - [x] SQL — format, validate, minify, execute (SQLite WASM via sql.js)
 - [x] Colors — conversión entre formatos de color
 - [x] Hash — generación de hashes
@@ -42,14 +42,13 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 
 ## En progreso
 
-- [ ] **PHP — ejecución client-side** via `@php-wasm/web` (~15MB WASM, lazy load)
-  - Output capture (stdout/stderr) resuelto por php-wasm automáticamente
-  - Mejorar formatter (limitaciones actuales en heredocs/strings complejos)
+_(vacío)_
 
 ---
 
 ## Próximo
 
+- [ ] PHP formatter — mejorar soporte de heredocs/strings complejos
 - [ ] Base64 encoder/decoder
 - [ ] URL encoder/decoder
 - [ ] JWT decoder
