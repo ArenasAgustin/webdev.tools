@@ -64,5 +64,3 @@ _(vacío)_
 - [ ] Generador de QR codes
 - [ ] Playground de Markdown con preview
 - [ ] Regex tester con visualización de grupos
-- [ ] Playground Typescript
-- [ ] Playground de SASS/SCSS/LESS
