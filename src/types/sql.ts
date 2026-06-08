@@ -9,6 +9,7 @@ export type SqlDialect = "sql";
 export interface SqlFormatConfig {
   dialect: SqlDialect;
   tabWidth?: number; // default: 2
+  autoCopy?: boolean;
 }
 
 export interface SqlMinifyConfig {

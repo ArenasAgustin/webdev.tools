@@ -186,7 +186,7 @@ export function ConfigModal(props: ConfigModalProps) {
       props.onFormatConfigChange({ indentSize: 2, autoCopy: false });
       removePhpToolsConfig();
     } else if (props.mode === "sql") {
-      props.onFormatConfigChange({ dialect: "sql", tabWidth: 2 });
+      props.onFormatConfigChange({ dialect: "sql", tabWidth: 2, autoCopy: false });
       props.onMinifyConfigChange({ autoCopy: false });
       removeSqlToolsConfig();
     } else {
@@ -293,17 +293,15 @@ export function ConfigModal(props: ConfigModalProps) {
               </div>
             )}
 
-            {!sqlProps && (
-              <div>
-                <label className="block text-gray-300 mb-1">{t("config.autoCopy")}</label>
-                <Checkbox
-                  checked={(props.formatConfig as { autoCopy?: boolean }).autoCopy ?? false}
-                  onChange={(checked) => updateFormat({ autoCopy: checked })}
-                  label={t("config.enableAutoCopy")}
-                  color="blue"
-                />
-              </div>
-            )}
+            <div>
+              <label className="block text-gray-300 mb-1">{t("config.autoCopy")}</label>
+              <Checkbox
+                checked={(props.formatConfig as { autoCopy?: boolean }).autoCopy ?? false}
+                onChange={(checked) => updateFormat({ autoCopy: checked })}
+                label={t("config.enableAutoCopy")}
+                color="blue"
+              />
+            </div>
           </div>
         </Card>
 
