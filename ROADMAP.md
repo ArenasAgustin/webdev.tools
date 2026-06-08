@@ -37,6 +37,8 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 - [x] Timestamp — conversión de timestamps
 - [x] Limpiar vacíos — JS / HTML / CSS
 - [x] DESIGN.md con el diseño del proyecto
+- [x] Config modal para PHP y SQL (indentSize, tabWidth, autoCopy)
+- [x] Ocultar botón config cuando el playground no tiene modal (`hasConfigModal` en engine)
 
 ---
 
@@ -64,5 +66,3 @@ _(vacío)_
 - [ ] Regex tester con visualización de grupos
 - [ ] Playground Typescript
 - [ ] Playground de SASS/SCSS/LESS
-- [ ] Hacer que si el palyground no tiene configs para modal no se coloque el boton
-- [ ] Agregar modal configs para php y sql
