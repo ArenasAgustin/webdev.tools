@@ -43,6 +43,7 @@ export const cssEngine = {
   loadToolsConfig: loadCssToolsConfig,
   loadLastInput: loadLastCss,
   saveLastInput: saveLastCss,
+  hasConfigModal: true,
   preload: () => {
     void import("@/services/formatter/prettier");
     void import("@/services/css/transform");

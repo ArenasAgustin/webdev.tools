@@ -37,6 +37,7 @@ export const phpEngine = {
   loadToolsConfig: loadPhpToolsConfig,
   loadLastInput: loadLastPhp,
   saveLastInput: saveLastPhp,
+  hasConfigModal: true,
   preload: () => {
     // Lazy: only import the module, don't load php-wasm until needed
     // php-wasm (~15MB) loads lazily on first format/execute call

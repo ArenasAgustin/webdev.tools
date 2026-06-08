@@ -204,6 +204,9 @@ export interface PlaygroundEngine {
   /** Extra modals to render (TipsModal, JsonPathHistoryModal, etc.) */
   renderModals?: (params: RenderParams) => ReactNode[];
 
+  /** Whether this engine has a config modal (shows the gear button in toolbar) */
+  hasConfigModal?: boolean;
+
   /** File configuration for downloads */
   fileConfig: PlaygroundFileConfig;
 }

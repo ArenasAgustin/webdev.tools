@@ -43,6 +43,7 @@ export const jsEngine = {
   loadToolsConfig: loadJsToolsConfig,
   loadLastInput: loadLastJs,
   saveLastInput: saveLastJs,
+  hasConfigModal: true,
   preload: () => {
     void import("@/services/formatter/prettier");
     void import("@/services/js/transform");

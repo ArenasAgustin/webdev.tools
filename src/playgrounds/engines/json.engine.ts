@@ -55,6 +55,7 @@ export const jsonEngine = {
   loadToolsConfig: loadJsonToolsConfig,
   loadLastInput: loadLastJson,
   saveLastInput: saveLastJson,
+  hasConfigModal: true,
   preload: () => {
     void import("@/services/formatter/prettier");
     void import("@/services/json/transform");

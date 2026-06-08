@@ -52,6 +52,7 @@ export const sqlEngine = {
   loadToolsConfig: loadSqlToolsConfig,
   loadLastInput: loadLastSql,
   saveLastInput: saveLastSql,
+  hasConfigModal: true,
   preload: () => {
     void import("@/services/sql/transform");
     void import("@/services/sql/workerClient");

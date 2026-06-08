@@ -43,6 +43,7 @@ export const htmlEngine = {
   loadToolsConfig: loadHtmlToolsConfig,
   loadLastInput: loadLastHtml,
   saveLastInput: saveLastHtml,
+  hasConfigModal: true,
   preload: () => {
     void import("@/services/formatter/prettier");
     void import("@/services/html/transform");

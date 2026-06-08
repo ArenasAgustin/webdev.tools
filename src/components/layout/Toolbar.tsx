@@ -9,6 +9,8 @@ import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/type
 import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig, HtmlCleanConfig } from "@/types/html";
 import type { CssFormatConfig, CssMinifyConfig, CssCleanConfig } from "@/types/css";
+import type { PhpFormatConfig } from "@/types/php";
+import type { SqlFormatConfig, SqlMinifyConfig } from "@/types/sql";
 import type { ToolbarConfig } from "@/types/toolbar";
 
 export interface ToolbarProps {
@@ -61,6 +63,24 @@ export interface ToolbarProps {
         onMinifyChange: (config: CssMinifyConfig) => void;
         clean: CssCleanConfig;
         onCleanChange: (config: CssCleanConfig) => void;
+        isOpen?: boolean;
+        onOpenChange?: (isOpen: boolean) => void;
+      }
+    | {
+        mode: "php";
+        format: PhpFormatConfig;
+        onFormatChange: (config: PhpFormatConfig) => void;
+        minify: { autoCopy?: boolean };
+        onMinifyChange: (config: { autoCopy?: boolean }) => void;
+        isOpen?: boolean;
+        onOpenChange?: (isOpen: boolean) => void;
+      }
+    | {
+        mode: "sql";
+        format: SqlFormatConfig;
+        onFormatChange: (config: SqlFormatConfig) => void;
+        minify: SqlMinifyConfig;
+        onMinifyChange: (config: SqlMinifyConfig) => void;
         isOpen?: boolean;
         onOpenChange?: (isOpen: boolean) => void;
       };
@@ -262,6 +282,28 @@ export function Toolbar(props: ToolbarProps) {
           onMinifyConfigChange={genericConfig.onMinifyChange}
           cleanConfig={genericConfig.clean}
           onCleanConfigChange={genericConfig.onCleanChange}
+        />
+      )}
+
+      {genericConfig?.mode === "php" && (
+        <ConfigModal
+          mode="php"
+          isOpen={showGenericConfig}
+          onClose={() => setShowGenericConfigState(false)}
+          formatConfig={genericConfig.format}
+          onFormatConfigChange={genericConfig.onFormatChange}
+        />
+      )}
+
+      {genericConfig?.mode === "sql" && (
+        <ConfigModal
+          mode="sql"
+          isOpen={showGenericConfig}
+          onClose={() => setShowGenericConfigState(false)}
+          formatConfig={genericConfig.format}
+          onFormatConfigChange={genericConfig.onFormatChange}
+          minifyConfig={genericConfig.minify}
+          onMinifyConfigChange={genericConfig.onMinifyChange}
         />
       )}
 

@@ -204,7 +204,7 @@ export function GenericPlayground({
           <Toolbar
             variant="generic"
             tools={toolbarTools}
-            config={toolbarConfig as ComponentProps<typeof Toolbar>["config"]}
+            config={engine.hasConfigModal ? (toolbarConfig as ComponentProps<typeof Toolbar>["config"]) : undefined}
             shortcuts={overlays.shortcuts}
             extraContent={toolbarExtraContent}
             isMinified={isMinified()}

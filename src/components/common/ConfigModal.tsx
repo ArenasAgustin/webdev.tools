@@ -9,6 +9,8 @@ import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/type
 import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
 import type { HtmlFormatConfig, HtmlMinifyConfig, HtmlCleanConfig } from "@/types/html";
 import type { CssFormatConfig, CssMinifyConfig, CssCleanConfig } from "@/types/css";
+import type { PhpFormatConfig } from "@/types/php";
+import type { SqlFormatConfig, SqlMinifyConfig } from "@/types/sql";
 import { INDENT_OPTIONS } from "@/types/format";
 import {
   DEFAULT_JSON_FORMAT_CONFIG,
@@ -39,6 +41,10 @@ import {
   removeHtmlToolsConfig,
   saveCssToolsConfig,
   removeCssToolsConfig,
+  savePhpToolsConfig,
+  removePhpToolsConfig,
+  saveSqlToolsConfig,
+  removeSqlToolsConfig,
 } from "@/services/storage";
 
 interface JsonConfigModalProps {
@@ -89,17 +95,39 @@ interface CssConfigModalProps {
   onCleanConfigChange: (config: CssCleanConfig) => void;
 }
 
+interface PhpConfigModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  mode: "php";
+  formatConfig: PhpFormatConfig;
+  onFormatConfigChange: (config: PhpFormatConfig) => void;
+}
+
+interface SqlConfigModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  mode: "sql";
+  formatConfig: SqlFormatConfig;
+  onFormatConfigChange: (config: SqlFormatConfig) => void;
+  minifyConfig: SqlMinifyConfig;
+  onMinifyConfigChange: (config: SqlMinifyConfig) => void;
+}
+
 type ConfigModalProps =
   | JsonConfigModalProps
   | JsConfigModalProps
   | HtmlConfigModalProps
-  | CssConfigModalProps;
+  | CssConfigModalProps
+  | PhpConfigModalProps
+  | SqlConfigModalProps;
 
 const MODE_LABELS: Record<string, string> = {
   json: "JSON",
   js: "JavaScript",
   html: "HTML",
   css: "CSS",
+  php: "PHP",
+  sql: "SQL",
 };
 
 export function ConfigModal(props: ConfigModalProps) {
@@ -112,6 +140,8 @@ export function ConfigModal(props: ConfigModalProps) {
   const htmlProps = mode === "html" ? (props as HtmlConfigModalProps) : null;
   const jsProps = mode === "js" ? (props as JsConfigModalProps) : null;
   const cssProps = mode === "css" ? (props as CssConfigModalProps) : null;
+  const phpProps = mode === "php" ? (props as PhpConfigModalProps) : null;
+  const sqlProps = mode === "sql" ? (props as SqlConfigModalProps) : null;
   const jsCssProps =
     mode === "js" || mode === "css" ? (props as JsConfigModalProps | CssConfigModalProps) : null;
 
@@ -122,14 +152,18 @@ export function ConfigModal(props: ConfigModalProps) {
     if (props.mode === "js") props.onFormatConfigChange(updated as JsFormatConfig);
     else if (props.mode === "html") props.onFormatConfigChange(updated as HtmlFormatConfig);
     else if (props.mode === "css") props.onFormatConfigChange(updated as CssFormatConfig);
+    else if (props.mode === "php") props.onFormatConfigChange(updated as PhpFormatConfig);
+    else if (props.mode === "sql") props.onFormatConfigChange(updated as SqlFormatConfig);
     else props.onFormatConfigChange(updated as JsonFormatConfig);
   };
   const updateMinify = (patch: Record<string, unknown>) => {
-    const updated = { ...props.minifyConfig, ...patch };
-    if (props.mode === "js") props.onMinifyConfigChange(updated as JsMinifyConfig);
-    else if (props.mode === "html") props.onMinifyConfigChange(updated as HtmlMinifyConfig);
-    else if (props.mode === "css") props.onMinifyConfigChange(updated as CssMinifyConfig);
-    else props.onMinifyConfigChange(updated as JsonMinifyConfig);
+    if (props.mode === "php") return;
+    const updated = { ...(props as SqlConfigModalProps | JsonConfigModalProps).minifyConfig, ...patch };
+    if (props.mode === "js") (props).onMinifyConfigChange(updated as JsMinifyConfig);
+    else if (props.mode === "html") (props).onMinifyConfigChange(updated as HtmlMinifyConfig);
+    else if (props.mode === "css") (props).onMinifyConfigChange(updated as CssMinifyConfig);
+    else if (props.mode === "sql") (props).onMinifyConfigChange(updated as SqlMinifyConfig);
+    else (props).onMinifyConfigChange(updated as JsonMinifyConfig);
   };
 
   const handleReset = () => {
@@ -148,6 +182,13 @@ export function ConfigModal(props: ConfigModalProps) {
       props.onMinifyConfigChange(DEFAULT_CSS_MINIFY_CONFIG);
       props.onCleanConfigChange(DEFAULT_CSS_CLEAN_CONFIG);
       removeCssToolsConfig();
+    } else if (props.mode === "php") {
+      props.onFormatConfigChange({ indentSize: 2, autoCopy: false });
+      removePhpToolsConfig();
+    } else if (props.mode === "sql") {
+      props.onFormatConfigChange({ dialect: "sql", tabWidth: 2 });
+      props.onMinifyConfigChange({ autoCopy: false });
+      removeSqlToolsConfig();
     } else {
       props.onFormatConfigChange(DEFAULT_JSON_FORMAT_CONFIG);
       props.onMinifyConfigChange(DEFAULT_JSON_MINIFY_CONFIG);
@@ -158,29 +199,17 @@ export function ConfigModal(props: ConfigModalProps) {
 
   const handleClose = () => {
     if (props.mode === "js") {
-      saveJsToolsConfig({
-        format: props.formatConfig,
-        minify: props.minifyConfig,
-        clean: props.cleanConfig,
-      });
+      saveJsToolsConfig({ format: props.formatConfig, minify: props.minifyConfig, clean: props.cleanConfig });
     } else if (props.mode === "html") {
-      saveHtmlToolsConfig({
-        format: props.formatConfig,
-        minify: props.minifyConfig,
-        clean: props.cleanConfig,
-      });
+      saveHtmlToolsConfig({ format: props.formatConfig, minify: props.minifyConfig, clean: props.cleanConfig });
     } else if (props.mode === "css") {
-      saveCssToolsConfig({
-        format: props.formatConfig,
-        minify: props.minifyConfig,
-        clean: props.cleanConfig,
-      });
+      saveCssToolsConfig({ format: props.formatConfig, minify: props.minifyConfig, clean: props.cleanConfig });
+    } else if (props.mode === "php") {
+      savePhpToolsConfig({ format: props.formatConfig });
+    } else if (props.mode === "sql") {
+      saveSqlToolsConfig({ format: props.formatConfig, minify: props.minifyConfig });
     } else {
-      saveJsonToolsConfig({
-        format: props.formatConfig,
-        minify: props.minifyConfig,
-        clean: props.cleanConfig,
-      });
+      saveJsonToolsConfig({ format: props.formatConfig, minify: props.minifyConfig, clean: props.cleanConfig });
     }
     props.onClose();
   };
@@ -210,14 +239,27 @@ export function ConfigModal(props: ConfigModalProps) {
           headerClassName="text-blue-400"
         >
           <div className="space-y-3">
-            <div>
-              <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
-              <ToggleButtonGroup
-                options={INDENT_OPTIONS}
-                value={props.formatConfig.indentSize}
-                onChange={(indentSize) => updateFormat({ indentSize })}
-              />
-            </div>
+            {!sqlProps && (
+              <div>
+                <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
+                <ToggleButtonGroup
+                  options={INDENT_OPTIONS}
+                  value={(props.formatConfig as { indentSize?: number }).indentSize ?? 2}
+                  onChange={(indentSize) => updateFormat({ indentSize })}
+                />
+              </div>
+            )}
+
+            {sqlProps && (
+              <div>
+                <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
+                <ToggleButtonGroup
+                  options={INDENT_OPTIONS}
+                  value={sqlProps.formatConfig.tabWidth ?? 2}
+                  onChange={(tabWidth) => updateFormat({ tabWidth })}
+                />
+              </div>
+            )}
 
             {jsonProps && (
               <div>
@@ -251,20 +293,22 @@ export function ConfigModal(props: ConfigModalProps) {
               </div>
             )}
 
-            <div>
-              <label className="block text-gray-300 mb-1">{t("config.autoCopy")}</label>
-              <Checkbox
-                checked={props.formatConfig.autoCopy}
-                onChange={(checked) => updateFormat({ autoCopy: checked })}
-                label={t("config.enableAutoCopy")}
-                color="blue"
-              />
-            </div>
+            {!sqlProps && (
+              <div>
+                <label className="block text-gray-300 mb-1">{t("config.autoCopy")}</label>
+                <Checkbox
+                  checked={(props.formatConfig as { autoCopy?: boolean }).autoCopy ?? false}
+                  onChange={(checked) => updateFormat({ autoCopy: checked })}
+                  label={t("config.enableAutoCopy")}
+                  color="blue"
+                />
+              </div>
+            )}
           </div>
         </Card>
 
-        {/* Minificar */}
-        <Card
+        {/* Minificar — PHP no tiene minify */}
+        {!phpProps && <Card
           title={`${t("config.minify")} ${modeLabel}`}
           icon="compress"
           className="bg-purple-500/10 border-purple-500/20"
@@ -341,14 +385,14 @@ export function ConfigModal(props: ConfigModalProps) {
             <div>
               <label className="block text-gray-300 mb-1">{t("config.autoCopyMinify")}</label>
               <Checkbox
-                checked={props.minifyConfig.autoCopy}
+                checked={(props as SqlConfigModalProps | JsonConfigModalProps).minifyConfig?.autoCopy ?? false}
                 onChange={(checked) => updateMinify({ autoCopy: checked })}
                 label={t("config.enableAutoCopy")}
                 color="purple"
               />
             </div>
           </div>
-        </Card>
+        </Card>}
 
         {/* Limpiar vacíos - JSON */}
         {jsonProps && (
