@@ -12,6 +12,7 @@ describe("useKeyboardShortcuts", () => {
   let onOpenConfig: ReturnType<typeof vi.fn<() => void>>;
   let onOpenShortcuts: ReturnType<typeof vi.fn<() => void>>;
   let onOpenDiff: ReturnType<typeof vi.fn<() => void>>;
+  let onExecute: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
     onFormat = vi.fn<() => void>();
@@ -22,6 +23,7 @@ describe("useKeyboardShortcuts", () => {
     onOpenConfig = vi.fn<() => void>();
     onOpenShortcuts = vi.fn<() => void>();
     onOpenDiff = vi.fn<() => void>();
+    onExecute = vi.fn<() => void>();
   });
 
   afterEach(() => {
@@ -39,6 +41,7 @@ describe("useKeyboardShortcuts", () => {
         onOpenConfig,
         onOpenShortcuts,
         onOpenDiff,
+        onExecute,
         ...overrides,
       }),
     );
@@ -90,6 +93,18 @@ describe("useKeyboardShortcuts", () => {
       renderShortcuts();
       fireEvent.keyDown(window, { key: "D", ctrlKey: true, shiftKey: true });
       expect(onOpenDiff).toHaveBeenCalledTimes(1);
+    });
+
+    it("Ctrl+Enter triggers onExecute", () => {
+      renderShortcuts();
+      fireEvent.keyDown(window, { key: "Enter", ctrlKey: true });
+      expect(onExecute).toHaveBeenCalledTimes(1);
+    });
+
+    it("Cmd+Enter (metaKey) also triggers onExecute", () => {
+      renderShortcuts();
+      fireEvent.keyDown(window, { key: "Enter", metaKey: true });
+      expect(onExecute).toHaveBeenCalledTimes(1);
     });
 
     it("Cmd+Shift+F (metaKey) also triggers onFormat", () => {
@@ -155,6 +170,20 @@ describe("useKeyboardShortcuts", () => {
       expect(onOpenConfig).not.toHaveBeenCalled();
       expect(onOpenShortcuts).not.toHaveBeenCalled();
       expect(onOpenDiff).not.toHaveBeenCalled();
+      expect(onExecute).not.toHaveBeenCalled();
+    });
+
+    it("plain Enter (no Ctrl/Cmd) does not trigger onExecute", () => {
+      renderShortcuts();
+      fireEvent.keyDown(window, { key: "Enter" });
+      expect(onExecute).not.toHaveBeenCalled();
+    });
+
+    it("Ctrl+Enter without onExecute does not preventDefault nor throw", () => {
+      renderHook(() => useKeyboardShortcuts({ onFormat }));
+      const event = new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, cancelable: true });
+      expect(() => window.dispatchEvent(event)).not.toThrow();
+      expect(event.defaultPrevented).toBe(false);
     });
 
     it("removes the listener on unmount", () => {

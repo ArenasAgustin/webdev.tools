@@ -28,9 +28,15 @@ interface ShortcutsModalProps {
   isOpen: boolean;
   onClose: () => void;
   hasClean?: boolean;
+  hasExecute?: boolean;
 }
 
-export function ShortcutsModal({ isOpen, onClose, hasClean = false }: ShortcutsModalProps) {
+export function ShortcutsModal({
+  isOpen,
+  onClose,
+  hasClean = false,
+  hasExecute = false,
+}: ShortcutsModalProps) {
   const { t } = useTranslation();
   return (
     <Modal
@@ -65,6 +71,9 @@ export function ShortcutsModal({ isOpen, onClose, hasClean = false }: ShortcutsM
             <i className="fas fa-terminal" aria-hidden="true"></i> {t("shortcuts.result")}
           </h4>
           <div>
+            {hasExecute && (
+              <ShortcutRow keys={["Ctrl/⌘", "Enter"]} description={t("shortcuts.execute")} />
+            )}
             <ShortcutRow keys={["Ctrl/⌘", "Shift", "C"]} description={t("shortcuts.copyResult")} />
             <ShortcutRow
               keys={["Ctrl/⌘", "Shift", "Supr"]}
