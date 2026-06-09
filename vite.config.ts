@@ -44,6 +44,11 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
         cleanupOutdatedCaches: true,
+        // Auto-activate a new SW without waiting for a client SKIP_WAITING message.
+        // Without this, a fresh SW can stay stuck in "waiting" while a stale SW keeps
+        // serving the old precached index.html (and its broken chunks) forever.
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /cdnjs\.cloudflare\.com/,
