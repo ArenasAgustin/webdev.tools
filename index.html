@@ -71,11 +71,12 @@
       }
     </style>
 
+    <!--
+      Companion to VitePWA autoUpdate: force an SW update check on load, and
+      reload when a fresh SW takes control so open tabs pick up the new chunks.
+    -->
     <script>
       if ("serviceWorker" in navigator) {
-        // Force SW update check on every load. When a new SW activates
-        // (controllerchange), reload so new chunks are served — this breaks
-        // the crash loop caused by stale cached chunks with wrong exports.
         navigator.serviceWorker.addEventListener("controllerchange", function () {
           window.location.reload();
         });
