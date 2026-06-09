@@ -5,7 +5,6 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -36,7 +35,6 @@ export default defineConfig(({ mode }) => ({
       },
     },
     wasm(),
-    topLevelAwait(),
     react(),
     nodePolyfills(),
     VitePWA({
