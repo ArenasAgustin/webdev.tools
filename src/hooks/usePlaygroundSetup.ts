@@ -172,6 +172,7 @@ export function usePlaygroundToolbar<
     onOpenConfig: configModal.open,
     onOpenShortcuts,
     onOpenDiff,
+    onExecute: handleExecute,
   });
 
   const toolbarParams = {

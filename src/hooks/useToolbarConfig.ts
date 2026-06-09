@@ -83,6 +83,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
     const actions: ToolbarAction[] = [];
     if (handleExecute) {
       actions.push({
+        id: "execute",
         label: "Ejecutar",
         icon: "play",
         variant: "orange",

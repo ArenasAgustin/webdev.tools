@@ -61,6 +61,7 @@
     "format": "Format",
     "minify": "Minify",
     "cleanEmpty": "Clean empty",
+    "execute": "Execute",
     "copyResult": "Copy result",
     "clearInput": "Clear input",
     "openConfig": "Open settings",

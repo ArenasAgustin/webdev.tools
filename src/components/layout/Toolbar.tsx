@@ -91,6 +91,7 @@ export function Toolbar(props: ToolbarProps) {
   const [openModal, setOpenModal] = useState<"config" | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const hasClean = !!props.config?.mode;
+  const hasExecute = props.tools.actions.some((action) => action.id === "execute");
 
   const handleHeaderClick = () => {
     setIsExpanded((v) => !v);
@@ -312,6 +313,7 @@ export function Toolbar(props: ToolbarProps) {
           isOpen={props.shortcuts.isOpen}
           onClose={props.shortcuts.close}
           hasClean={hasClean}
+          hasExecute={hasExecute}
         />
       )}
     </>
