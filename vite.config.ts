@@ -43,6 +43,7 @@ export default defineConfig(({ mode }) => ({
       manifest: false,
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /cdnjs\.cloudflare\.com/,

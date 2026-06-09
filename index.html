@@ -71,6 +71,19 @@
       }
     </style>
 
+    <script>
+      if ("serviceWorker" in navigator) {
+        // Force SW update check on every load. When a new SW activates
+        // (controllerchange), reload so new chunks are served — this breaks
+        // the crash loop caused by stale cached chunks with wrong exports.
+        navigator.serviceWorker.addEventListener("controllerchange", function () {
+          window.location.reload();
+        });
+        navigator.serviceWorker.getRegistration().then(function (reg) {
+          if (reg) reg.update();
+        });
+      }
+    </script>
     <script type="importmap">
       {
         "imports": {
