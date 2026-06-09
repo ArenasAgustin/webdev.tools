@@ -21,6 +21,20 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
+    {
+      name: "php-wasm-as-url",
+      enforce: "pre" as const,
+      resolveId(id: string, importer: string | undefined) {
+        if (id.endsWith(".wasm") && !id.includes("?") && importer?.includes("@php-wasm")) {
+          if (id.startsWith(".") && importer) {
+            // Bypass vite-plugin-wasm by resolving directly — this.resolve() would
+            // delegate to vite-plugin-wasm which returns a virtual \0 ID, then
+            // appending ?url to that virtual ID causes a 500.
+            return path.resolve(path.dirname(importer), id) + "?url";
+          }
+        }
+      },
+    },
     wasm(),
     topLevelAwait(),
     react(),
@@ -60,8 +74,20 @@ export default defineConfig(({ mode }) => ({
       filename: "dist/stats.html",
     }) as never,
   ],
+  server: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
+  },
   resolve: {
     alias: {
+      "ini": path.resolve(__dirname, "./src/shims/ini.js"),
+      // pnpm strict mode doesn't hoist transitive deps — alias to .pnpm path directly
+      "@php-wasm/universal": path.resolve(
+        __dirname,
+        "./node_modules/.pnpm/@php-wasm+universal@3.1.36/node_modules/@php-wasm/universal"
+      ),
       "@": path.resolve(__dirname, "./src"),
       "@/components": path.resolve(__dirname, "./src/components"),
       "@/services": path.resolve(__dirname, "./src/services"),
@@ -80,7 +106,7 @@ export default defineConfig(({ mode }) => ({
   },
   assetsInclude: ["**/*.wasm"],
   optimizeDeps: {
-    exclude: ["@php-wasm/web"],
+    exclude: ["@php-wasm/web", "@php-wasm/universal"],
   },
   worker: {
     format: "es",

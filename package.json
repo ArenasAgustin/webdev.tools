@@ -46,6 +46,7 @@
     "@babel/types": "7.29.0",
     "@chromatic-com/storybook": "5.0.1",
     "@eslint/js": "9.39.2",
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "@php-wasm/web": "3.1.36",
     "@storybook/addon-a11y": "10.2.9",
     "@storybook/addon-docs": "10.2.9",

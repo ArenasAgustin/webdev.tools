@@ -6,49 +6,32 @@ import type { Result } from "@/types/common";
 
 const PHP_EXECUTION_TIMEOUT_MS = 5000;
 
-interface PhpResponse {
-  bytes: ArrayBuffer;
-  errors: string;
-  exitCode: number;
-}
-
-type PhpRunFunction = (opts: { code: string }) => Promise<PhpResponse>;
-
 /**
  * Execute PHP code client-side via php-wasm
  */
 export async function executePhp(code: string): Promise<Result<string, { message: string }>> {
   try {
-    const { loadWebRuntime } = await import("@php-wasm/web");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const php: any = await loadWebRuntime("8.2");
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const run: PhpRunFunction = php.run as PhpRunFunction;
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+    const { loadWebRuntime } = (await import("@php-wasm/web")) as any;
+    const { PHP } = (await import("@php-wasm/universal")) as any;
+    const runtimeId = await loadWebRuntime("8.2");
+    const php = new PHP(runtimeId);
+    const trimmed = code.trim();
+    const phpCode = trimmed.startsWith("<?") ? trimmed : `<?php\n${trimmed}`;
+    const response = await php.run({ code: phpCode });
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
-    const response = await run({ code: `<?php ${code}` });
+    const output: string = (response as { text?: string }).text ?? "";
+    const stderr: string = (response as { errors?: string }).errors ?? "";
 
-    const output = new TextDecoder().decode(response.bytes);
-    const stderr = response.errors;
-
-    if (response.exitCode !== 0) {
-      return {
-        ok: false,
-        error: {
-          message: stderr ?? `PHP exited con código ${response.exitCode}`,
-        },
-      };
+    if (!output && stderr) {
+      return { ok: false, error: { message: stderr } };
     }
 
-    return {
-      ok: true,
-      value: output || "(sin salida)",
-    };
+    return { ok: true, value: output || "(sin salida)" };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return {
-      ok: false,
-      error: { message },
-    };
+    return { ok: false, error: { message } };
   }
 }
 
@@ -77,7 +60,7 @@ export async function executePhpWithTimeout(
  */
 export function isSharedArrayBufferSupported(): boolean {
   try {
-    return typeof SharedArrayBuffer !== "undefined";
+    return typeof SharedArrayBuffer !== "undefined" && window.crossOriginIsolated === true;
   } catch {
     return false;
   }
