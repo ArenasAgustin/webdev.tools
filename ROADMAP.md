@@ -60,3 +60,4 @@ _(vacío)_
 - [ ] Generador de QR codes
 - [ ] Playground de Markdown con preview
 - [ ] Regex tester con visualización de grupos
+- [ ] Visor de SQL (ANALIZAR ANTES)
