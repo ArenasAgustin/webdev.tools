@@ -3,31 +3,28 @@
  */
 
 import type { Result } from "@/types/common";
-import { jspi } from "wasm-feature-detect";
-import { phpWasmLocateFile } from "./phpWasmUrl";
 
 const PHP_EXECUTION_TIMEOUT_MS = 5000;
 
-/** PHP version we ship the (self-hosted) wasm binaries for. */
+/** PHP version we bundle the wasm binaries for. */
 export const PHP_VERSION = "7.4";
 
 /**
  * Execute PHP code client-side via php-wasm.
  *
- * The wasm binary is served same-origin (see the `php-wasm-assets` Vite plugin),
- * so we point Emscripten's `locateFile` at our own origin instead of letting it
- * fetch cross-origin from a CDN (which COEP `require-corp` blocks).
+ * Vite bundles the wasm as a same-origin hashed asset and sets the loader's
+ * `dependencyFilename` to its absolute URL (e.g. "/assets/php_7_4-HASH.wasm").
+ * We return that URL unchanged from `locateFile` so Emscripten fetches it
+ * same-origin — cross-origin loads from a CDN are blocked by COEP `require-corp`.
  */
 export async function executePhp(code: string): Promise<Result<string, { message: string }>> {
   try {
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const { loadWebRuntime } = (await import("@php-wasm/web")) as any;
     const { PHP } = (await import("@php-wasm/universal")) as any;
-    const mode = (await jspi()) ? "jspi" : "asyncify";
     const runtimeId = await loadWebRuntime(PHP_VERSION, {
       emscriptenOptions: {
-        locateFile: (filePath: string) =>
-          phpWasmLocateFile(mode, filePath, window.location.origin) ?? filePath,
+        locateFile: (filePath: string) => filePath,
       },
     });
     const php = new PHP(runtimeId);

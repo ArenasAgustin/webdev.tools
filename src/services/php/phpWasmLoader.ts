@@ -3,9 +3,6 @@
  * Loads the WASM runtime only when needed (not on page load)
  */
 
-import { jspi } from "wasm-feature-detect";
-import { phpWasmLocateFile } from "./phpWasmUrl";
-
 type PHPVersion = "5.2" | "7.4" | "8.0" | "8.1" | "8.2" | "8.3" | "8.4" | "next";
 
 let cachedRuntime: unknown = null;
@@ -49,12 +46,11 @@ export async function loadPhpWasm(
   loadingPromise = (async () => {
     try {
       const { loadWebRuntime } = await import("@php-wasm/web");
-      const mode = (await jspi()) ? "jspi" : "asyncify";
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const runtime: any = await loadWebRuntime(phpVersion, {
         emscriptenOptions: {
-          locateFile: (filePath: string) =>
-            phpWasmLocateFile(mode, filePath, window.location.origin) ?? filePath,
+          // Vite bundles the wasm same-origin; return its URL unchanged.
+          locateFile: (filePath: string) => filePath,
         },
         onPhpLoaderModuleLoaded: (module) => {
           console.debug("[php-wasm] Loader module loaded", module);

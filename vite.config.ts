@@ -5,7 +5,6 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import wasm from "vite-plugin-wasm";
-import { phpWasmAssets } from "./src/build/phpWasmAssetsPlugin";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -36,7 +35,6 @@ export default defineConfig(({ mode }) => ({
       },
     },
     wasm(),
-    phpWasmAssets(),
     react(),
     nodePolyfills(),
     VitePWA({
