@@ -23,17 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
-.agents/
-.trae/
-.windsurf/
 .husky/
 coverage/
 *storybook.log
 storybook-static
 test-results/
 .lighthouseci/
-# Local Pi runtime state
-.atl/
 
 # Claude Code
 .claude/worktrees/
