@@ -4,7 +4,7 @@ import { phpPlaygroundConfig } from "./php.config";
 describe("phpPlaygroundConfig", () => {
   it("has correct id and name", () => {
     expect(phpPlaygroundConfig.id).toBe("php");
-    expect(phpPlaygroundConfig.name).toBe("PHP tools");
+    expect(phpPlaygroundConfig.name).toBe("PHP 7.4 tools");
   });
 
   it("has php as language", () => {

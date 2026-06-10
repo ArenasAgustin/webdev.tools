@@ -61,7 +61,7 @@ describe("playgroundRegistry", () => {
   it("contains php playground", () => {
     const phpPlayground = playgroundRegistry.find((p) => p.id === "php");
     expect(phpPlayground).toBeDefined();
-    expect(phpPlayground?.name).toBe("PHP tools");
+    expect(phpPlayground?.name).toBe("PHP 7.4 tools");
   });
 
   it("contains colors playground", () => {

@@ -5,6 +5,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import wasm from "vite-plugin-wasm";
+import { phpWasmAssets } from "./src/build/phpWasmAssetsPlugin";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -35,6 +36,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     wasm(),
+    phpWasmAssets(),
     react(),
     nodePolyfills(),
     VitePWA({
@@ -108,9 +110,10 @@ export default defineConfig(({ mode }) => ({
     "process.platform": JSON.stringify("browser"),
     "process.version": JSON.stringify(""),
   },
-  assetsInclude: ["**/*.wasm"],
+  // .dat = php-wasm ICU data (binary); treat as asset so Rollup doesn't parse it as JS
+  assetsInclude: ["**/*.wasm", "**/*.dat"],
   optimizeDeps: {
-    exclude: ["@php-wasm/web", "@php-wasm/universal"],
+    exclude: ["@php-wasm/web", "@php-wasm/universal", "@php-wasm/web-7-4"],
   },
   worker: {
     format: "es",
@@ -119,7 +122,8 @@ export default defineConfig(({ mode }) => ({
     target: "esnext",
     rollupOptions: {
       external: [
-        /@php-wasm/,
+        // php-wasm is bundled and served same-origin (see phpWasmAssets plugin).
+        // Only the synthetic emscripten "env" import stays external.
         "env",
       ],
       output: {
