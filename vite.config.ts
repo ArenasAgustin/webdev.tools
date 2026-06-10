@@ -108,9 +108,10 @@ export default defineConfig(({ mode }) => ({
     "process.platform": JSON.stringify("browser"),
     "process.version": JSON.stringify(""),
   },
-  assetsInclude: ["**/*.wasm"],
+  // .dat = php-wasm ICU data (binary); treat as asset so Rollup doesn't parse it as JS
+  assetsInclude: ["**/*.wasm", "**/*.dat"],
   optimizeDeps: {
-    exclude: ["@php-wasm/web", "@php-wasm/universal"],
+    exclude: ["@php-wasm/web", "@php-wasm/universal", "@php-wasm/web-7-4"],
   },
   worker: {
     format: "es",
@@ -119,7 +120,8 @@ export default defineConfig(({ mode }) => ({
     target: "esnext",
     rollupOptions: {
       external: [
-        /@php-wasm/,
+        // php-wasm is bundled and served same-origin (see phpWasmAssets plugin).
+        // Only the synthetic emscripten "env" import stays external.
         "env",
       ],
       output: {

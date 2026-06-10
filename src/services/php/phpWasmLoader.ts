@@ -3,7 +3,7 @@
  * Loads the WASM runtime only when needed (not on page load)
  */
 
-type PHPVersion = "8.0" | "8.1" | "8.2" | "8.3" | "8.4" | "next";
+type PHPVersion = "5.2" | "7.4" | "8.0" | "8.1" | "8.2" | "8.3" | "8.4" | "next";
 
 let cachedRuntime: unknown = null;
 let loadingPromise: Promise<unknown> | null = null;
@@ -30,7 +30,7 @@ const loaderStatus: PhpWasmLoader = {
  * @returns Promise resolving to PHP instance
  */
 export async function loadPhpWasm(
-  phpVersion: PHPVersion = "8.2"
+  phpVersion: PHPVersion = "7.4"
 ): Promise<unknown> {
   if (loaderStatus.state === "ready" && cachedRuntime) {
     return cachedRuntime;
@@ -48,6 +48,10 @@ export async function loadPhpWasm(
       const { loadWebRuntime } = await import("@php-wasm/web");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const runtime: any = await loadWebRuntime(phpVersion, {
+        emscriptenOptions: {
+          // Vite bundles the wasm same-origin; return its URL unchanged.
+          locateFile: (filePath: string) => filePath,
+        },
         onPhpLoaderModuleLoaded: (module) => {
           console.debug("[php-wasm] Loader module loaded", module);
         },
