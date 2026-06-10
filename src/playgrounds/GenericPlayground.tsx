@@ -1,4 +1,4 @@
-import { useState, useCallback, type ComponentProps } from "react";
+import { useState, useCallback, useEffect, useMemo, type ComponentProps } from "react";
 import type { ReactNode } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
@@ -101,6 +101,43 @@ export function GenericPlayground({
   const mappedParams = engine.mapActionsParams(baseActionsParams);
   const actions = engine.useActions(mappedParams);
 
+  // Track whether the current output came from executing code rather than a
+  // size transformation. Execution output hides the size comparison percentage.
+  const [outputFromExecution, setOutputFromExecution] = useState(false);
+
+  // A fresh input edit makes the comparison relevant again for the next action.
+  useEffect(() => {
+    setOutputFromExecution(false);
+  }, [ctx.input]);
+
+  const trackOutput = useCallback(
+    (handler: (() => void) | undefined, fromExecution: boolean) =>
+      handler
+        ? () => {
+            setOutputFromExecution(fromExecution);
+            handler();
+          }
+        : undefined,
+    [],
+  );
+
+  const trackedExecute = useMemo(
+    () => trackOutput(actions.handleExecute, true),
+    [trackOutput, actions.handleExecute],
+  );
+  const trackedFormat = useMemo(
+    () => trackOutput(actions.handleFormat, false) ?? actions.handleFormat,
+    [trackOutput, actions.handleFormat],
+  );
+  const trackedMinify = useMemo(
+    () => trackOutput(actions.handleMinify, false),
+    [trackOutput, actions.handleMinify],
+  );
+  const trackedClean = useMemo(
+    () => trackOutput(actions.handleClean, false),
+    [trackOutput, actions.handleClean],
+  );
+
   // Detect if JSON is minified
   const isMinified = useCallback(() => {
     if (engine.id !== "json") return false;
@@ -115,10 +152,10 @@ export function GenericPlayground({
   // Build toolbar params based on features
   const toolbarParams = hasCleanConfig
     ? {
-        handleFormat: actions.handleFormat,
-        handleMinify: hasMinify ? actions.handleMinify : undefined,
-        handleClean: actions.handleClean!,
-        handleExecute: actions.handleExecute,
+        handleFormat: trackedFormat,
+        handleMinify: hasMinify ? trackedMinify : undefined,
+        handleClean: trackedClean!,
+        handleExecute: trackedExecute,
         handleCopyOutput: actions.handleCopyOutput,
         handleClearInput: actions.handleClearInput,
         configModal: ctx.configModal,
@@ -135,9 +172,9 @@ export function GenericPlayground({
         onOpenDiff: overlays.diff.open,
       }
     : {
-        handleFormat: actions.handleFormat,
-        handleMinify: hasMinify ? actions.handleMinify : undefined,
-        handleExecute: hasExecute ? actions.handleExecute : undefined,
+        handleFormat: trackedFormat,
+        handleMinify: hasMinify ? trackedMinify : undefined,
+        handleExecute: hasExecute ? trackedExecute : undefined,
         handleCopyOutput: actions.handleCopyOutput,
         handleClearInput: actions.handleClearInput,
         configModal: ctx.configModal,
@@ -199,6 +236,7 @@ export function GenericPlayground({
             outputIcon={engine.config.icon}
             extraOutputActions={outputActions}
             outputPanel={outputPanelRender}
+            outputFromExecution={outputFromExecution}
           />
         }
         toolbar={
