@@ -49,6 +49,11 @@ interface GenericEditorsProps {
   acceptExtensions?: string;
   /** FontAwesome icon class for the idle output state (e.g. "fab fa-php") */
   outputIcon?: string;
+  /**
+   * When true, the output is the result of executing code (not a size
+   * transformation), so the input/output size comparison percentage is hidden.
+   */
+  outputFromExecution?: boolean;
   outputPanel?: (props: {
     input: string;
     output: string;
@@ -91,6 +96,7 @@ export const GenericEditors = memo(function GenericEditors({
   outputIcon,
   onImportFile,
   acceptExtensions,
+  outputFromExecution = false,
 }: GenericEditorsProps) {
   const { t } = useTranslation();
   const ownEditor = useExpandedEditor();
@@ -145,6 +151,11 @@ export const GenericEditors = memo(function GenericEditors({
     />
   );
 
+  // Execution output isn't a size transformation of the input, so the
+  // comparison percentage is meaningless — pass 0 to hide it (Stats only
+  // shows the percentage when comparisonBytes > 0).
+  const comparisonBytes = outputFromExecution ? 0 : inputStats.bytes;
+
   const outputFooter = (
     <EditorFooter
       variant="output"
@@ -152,7 +163,7 @@ export const GenericEditors = memo(function GenericEditors({
       error={error}
       isProcessing={isProcessing}
       stats={outputStats}
-      comparisonBytes={inputStats.bytes}
+      comparisonBytes={comparisonBytes}
     />
   );
 
@@ -305,7 +316,7 @@ export const GenericEditors = memo(function GenericEditors({
                 output,
                 error,
                 outputStats,
-                comparisonBytes: inputStats.bytes,
+                comparisonBytes,
                 expandOutput: () => editor.expand("output"),
                 onCopyOutput,
                 onDownloadOutput,

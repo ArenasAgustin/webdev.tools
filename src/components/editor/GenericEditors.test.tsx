@@ -163,6 +163,36 @@ describe("GenericEditors — features", () => {
     expect(screen.getByText("custom-output")).toBeInTheDocument();
     expect(screen.queryByText("Resultado")).not.toBeInTheDocument();
   });
+
+  it("passes the input bytes as comparison for transformation output", () => {
+    let received: number | undefined;
+    render(
+      <GenericEditors
+        {...baseProps}
+        outputPanel={({ comparisonBytes }) => {
+          received = comparisonBytes;
+          return <div>panel</div>;
+        }}
+      />,
+    );
+    // useTextStats mock returns bytes: 10 for input
+    expect(received).toBe(10);
+  });
+
+  it("zeroes the comparison when output is from execution (hides percentage)", () => {
+    let received: number | undefined;
+    render(
+      <GenericEditors
+        {...baseProps}
+        outputFromExecution
+        outputPanel={({ comparisonBytes }) => {
+          received = comparisonBytes;
+          return <div>panel</div>;
+        }}
+      />,
+    );
+    expect(received).toBe(0);
+  });
 });
 
 // --- Parametrized tests: each playground language config ---

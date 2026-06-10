@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { formatBytes } from "@/utils/formatBytes";
 
 interface StatsProps {
   lines: number;
@@ -37,7 +38,7 @@ export const Stats = memo(function Stats({
   return (
     <span className="text-gray-400" data-testid={dataTestId}>
       {leadingSeparator ? "· " : ""}
-      {lines} líneas · {characters.toLocaleString()} caracteres · {bytes.toLocaleString()} bytes
+      {lines} líneas · {characters.toLocaleString()} caracteres · {formatBytes(bytes)}
       {hasComparison && (
         <span className={`ml-1 ${percentageColor}`}>
           ({Math.abs(percentage)}% {percentageLabel})
