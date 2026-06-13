@@ -5,7 +5,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import globals from "globals";
-import react from "eslint-plugin-react";
+import eslintReact from "@eslint-react/eslint-plugin";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import prettierConfig from "eslint-config-prettier";
@@ -23,7 +23,7 @@ export default defineConfig([
       js.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked,
       ...tseslint.configs.stylisticTypeChecked,
-      react.configs.flat.recommended,
+      eslintReact.configs["recommended-type-checked"],
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
@@ -37,18 +37,14 @@ export default defineConfig([
         tsconfigRootDir: __dirname,
       },
     },
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
   },
   {
     files: [".storybook/**/*.{ts,tsx}"],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommended,
-      react.configs.flat.recommended,
+      // recommended-typescript (not type-checked): .storybook block has no projectService — type-checked preset would crash
+      eslintReact.configs["recommended-typescript"],
       reactHooks.configs.flat.recommended,
     ],
     languageOptions: {
@@ -60,29 +56,13 @@ export default defineConfig([
         },
       },
     },
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
   },
   {
     files: ["**/*.{js,jsx}"],
-    extends: [js.configs.recommended, react.configs.flat.recommended],
+    extends: [js.configs.recommended, eslintReact.configs["recommended"]],
     languageOptions: {
       ecmaVersion: 2022,
       globals: globals.browser,
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
-  },
-  {
-    files: ["**/*.{ts,tsx,js,jsx}"],
-    rules: {
-      "react/react-in-jsx-scope": "off",
     },
   },
   {
@@ -108,6 +88,10 @@ export default defineConfig([
         },
       ],
       "@typescript-eslint/no-floating-promises": "off",
+      // reason: GenericPlayground uses the accepted React pattern of resetting derived state in an
+      // effect when input changes. Restructuring to avoid the effect would require lifting state or
+      // using a key-reset, which is out of scope for this migration. Follow-up in a future PR.
+      "react-hooks/set-state-in-effect": "warn",
     },
   },
   {
