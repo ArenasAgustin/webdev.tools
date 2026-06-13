@@ -68,7 +68,7 @@ export async function loadPhpWasm(
       loaderStatus.state = "error";
       loaderStatus.error = message;
       loadingPromise = null;
-      throw new Error(`Failed to load php-wasm: ${message}`);
+      throw new Error(`Failed to load php-wasm: ${message}`, { cause: error });
     }
   })();
 

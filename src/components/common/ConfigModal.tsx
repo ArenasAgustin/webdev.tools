@@ -162,7 +162,7 @@ export function ConfigModal(props: ConfigModalProps) {
     if (props.mode === "js") (props).onMinifyConfigChange(updated as JsMinifyConfig);
     else if (props.mode === "html") (props).onMinifyConfigChange(updated as HtmlMinifyConfig);
     else if (props.mode === "css") (props).onMinifyConfigChange(updated as CssMinifyConfig);
-    else if (props.mode === "sql") (props).onMinifyConfigChange(updated as SqlMinifyConfig);
+    else if (props.mode === "sql") (props).onMinifyConfigChange(updated);
     else (props).onMinifyConfigChange(updated as JsonMinifyConfig);
   };
 

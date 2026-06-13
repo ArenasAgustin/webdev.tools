@@ -7,7 +7,12 @@ import { useEffect, useRef } from "react";
  */
 export function useIdleCallback(fn: () => void, opts?: IdleRequestOptions): void {
   const fnRef = useRef(fn);
-  fnRef.current = fn;
+  const optsRef = useRef(opts);
+
+  useEffect(() => {
+    fnRef.current = fn;
+    optsRef.current = opts;
+  });
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -17,6 +22,7 @@ export function useIdleCallback(fn: () => void, opts?: IdleRequestOptions): void
       fnRef.current();
     };
 
+    const opts = optsRef.current;
     const requestIdle = globalThis.requestIdleCallback;
     const cancelIdle = globalThis.cancelIdleCallback;
 
@@ -34,6 +40,5 @@ export function useIdleCallback(fn: () => void, opts?: IdleRequestOptions): void
         globalThis.clearTimeout(timeoutId);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

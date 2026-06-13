@@ -36,23 +36,23 @@ export function usePlaygroundInputLifecycle({
   const inputStats = useTextStats(input);
   const inputTooLarge = inputStats.bytes > maxInputBytes;
   const inputWarning = inputTooLarge ? inputWarningMessage : null;
-  const sizeWarningShown = useRef(false);
+  const sizeWarningShownRef = useRef(false);
 
   useEffect(() => {
     saveInput(debouncedInput);
   }, [debouncedInput, saveInput]);
 
   useEffect(() => {
-    if (inputTooLarge && !sizeWarningShown.current) {
+    if (inputTooLarge && !sizeWarningShownRef.current) {
       toast?.info(
         inputTooLargeToastMessage ??
           `El contenido supera ${maxInputLabel}. Algunas operaciones pueden ser lentas.`,
       );
-      sizeWarningShown.current = true;
+      sizeWarningShownRef.current = true;
     }
 
     if (!inputTooLarge) {
-      sizeWarningShown.current = false;
+      sizeWarningShownRef.current = false;
     }
   }, [inputTooLarge, toast, inputTooLargeToastMessage, maxInputLabel]);
 

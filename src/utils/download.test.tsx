@@ -10,12 +10,12 @@ describe("downloadFile", () => {
     mockLink = {
       href: "",
       download: "",
-      click: clickSpy as unknown as () => void,
-    } as HTMLAnchorElement;
+      click: clickSpy,
+    } as unknown as HTMLAnchorElement;
 
-    vi.spyOn(document, "createElement").mockReturnValue(mockLink as HTMLElement);
-    vi.spyOn(document.body, "appendChild").mockReturnValue(mockLink as HTMLElement);
-    vi.spyOn(document.body, "removeChild").mockReturnValue(mockLink as HTMLElement);
+    vi.spyOn(document, "createElement").mockReturnValue(mockLink);
+    vi.spyOn(document.body, "appendChild").mockReturnValue(mockLink);
+    vi.spyOn(document.body, "removeChild").mockReturnValue(mockLink);
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-url");
     vi.spyOn(URL, "revokeObjectURL");
   });

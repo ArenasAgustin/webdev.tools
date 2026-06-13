@@ -102,7 +102,7 @@ export const Modal = memo(function Modal({
         </div>
 
         {/* Footer */}
-        {footer && <div className="p-4 border-t border-white/10 bg-white/5">{footer}</div>}
+        {footer != null ? <div className="p-4 border-t border-white/10 bg-white/5">{footer}</div> : null}
       </div>
     </div>
   );

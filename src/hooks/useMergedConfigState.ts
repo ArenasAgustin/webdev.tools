@@ -4,8 +4,10 @@ export function useMergedConfigState<TConfig extends object>(
   defaults: TConfig,
   saved?: Partial<TConfig> | null,
 ) {
-  return useState<TConfig>(() => ({
+  const [config, setConfig] = useState<TConfig>(() => ({
     ...defaults,
     ...(saved ?? {}),
   }));
+
+  return [config, setConfig] as const;
 }

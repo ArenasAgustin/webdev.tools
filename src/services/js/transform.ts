@@ -165,7 +165,7 @@ function findEmptyConstructs(input: string, options: JsCleanOptions): RangeToRem
   const ranges: RangeToRemove[] = [];
   const { removeEmptyObject, removeEmptyArray, removeEmptyFunction, removeEmptyString } = options;
 
-  let ast: babelParser.ParseResult | null = null;
+  let ast: babelParser.ParseResult | null;
   try {
     ast = babelParser.parse(input, {
       sourceType: "module",

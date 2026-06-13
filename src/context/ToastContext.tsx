@@ -36,9 +36,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     if (toasts.length === 0) return;
 
     const timers = toasts.map((toast) => {
-      return setTimeout(() => {
+      // eslint-disable-next-line @eslint-react/web-api-no-leaked-timeout -- every timer is collected in `timers` and cleared in the cleanup below
+      const timerId = setTimeout(() => {
         removeToast(toast.id);
       }, toast.duration);
+      return timerId;
     });
 
     return () => {
@@ -47,8 +49,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [toasts, removeToast]);
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext value={{ toasts, addToast, removeToast }}>
       {children}
-    </ToastContext.Provider>
+    </ToastContext>
   );
 }

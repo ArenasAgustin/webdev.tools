@@ -187,9 +187,9 @@ export function PasswordPlayground() {
         <div className="flex flex-col gap-2">
           <h3 className="text-gray-300 text-sm">Historial:</h3>
           <div className="flex flex-wrap gap-2">
-            {history.map((pwd, index) => (
+            {history.map((pwd) => (
               <button
-                key={`${index}-${pwd}`}
+                key={pwd}
                 type="button"
                 onClick={() => handleHistoryClick(pwd)}
                 className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 text-sm font-mono rounded-lg transition-colors truncate max-w-32"

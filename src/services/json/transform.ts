@@ -50,7 +50,7 @@ export function parseJson(input: string): Result<JsonValue, JsonError> {
  */
 export function sortJsonKeys(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {
-    return value.map(sortJsonKeys) as JsonValue;
+    return value.map(sortJsonKeys);
   }
   if (value && typeof value === "object") {
     const sorted: Record<string, JsonValue> = {};
@@ -59,7 +59,7 @@ export function sortJsonKeys(value: JsonValue): JsonValue {
       .forEach((key) => {
         sorted[key] = sortJsonKeys((value as Record<string, JsonValue>)[key]);
       });
-    return sorted as JsonValue;
+    return sorted;
   }
   return value;
 }

@@ -51,14 +51,14 @@ export function Container({
           <i className={`fas fa-${icon} ${iconColorClass}`} aria-hidden="true"></i>
           {title}
         </h2>
-        {actions && <div className="flex gap-2">{actions}</div>}
+        {actions != null ? <div className="flex gap-2">{actions}</div> : null}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-h-0 w-full">{children}</div>
 
       {/* Footer */}
-      {footer && <div className="mt-2 text-xs h-4">{footer}</div>}
+      {footer != null ? <div className="mt-2 text-xs h-4">{footer}</div> : null}
     </section>
   );
 }

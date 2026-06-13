@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
  */
 export function useFocusTrap(isActive: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!isActive || !containerRef.current) return;
@@ -16,7 +16,7 @@ export function useFocusTrap(isActive: boolean) {
     const container = containerRef.current;
 
     // Guardar el elemento activo anterior
-    previousActiveElement.current = document.activeElement as HTMLElement;
+    previousActiveElementRef.current = document.activeElement as HTMLElement;
 
     // Enfocar el primer elemento enfocable en el contenedor
     const getFocusableElements = () =>
@@ -63,7 +63,7 @@ export function useFocusTrap(isActive: boolean) {
     // Cleanup: restaurar foco al elemento anterior
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
-      if (previousActiveElement.current?.isConnected) previousActiveElement.current.focus();
+      if (previousActiveElementRef.current?.isConnected) previousActiveElementRef.current.focus();
     };
   }, [isActive]);
 

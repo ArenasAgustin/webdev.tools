@@ -85,8 +85,8 @@ export const TipsModal = memo(function TipsModal({
             headerClassName={color.text}
           >
             <ul className="space-y-1 text-gray-300">
-              {tip.items.map((item, idx) => (
-                <li key={idx}>
+              {tip.items.map((item) => (
+                <li key={item.code}>
                   <code className={`bg-gray-800 px-1 rounded ${color.code}`}>{item.code}</code> -{" "}
                   {item.description}
                 </li>
