@@ -109,7 +109,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
   }
 
   // Success state — detect language from content
-  let parsed: { truncated?: boolean } | null = null;
+  let parsed: { truncated?: boolean } | null;
   try {
     parsed = JSON.parse(output) as { truncated?: boolean };
   } catch {

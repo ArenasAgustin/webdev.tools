@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { Toolbar } from "./Toolbar";
-import type { ToolbarProps } from "./Toolbar";
 import {
   DEFAULT_JSON_FORMAT_CONFIG,
   DEFAULT_JSON_MINIFY_CONFIG,
@@ -57,7 +56,7 @@ export const JsonWithExtraContent: Story = {
         </div>
       </div>
     ),
-  } as ToolbarProps,
+  },
 };
 
 export const JsonMinimal: Story = {
@@ -81,7 +80,7 @@ export const JsonMinimal: Story = {
       clean: DEFAULT_JSON_CLEAN_CONFIG,
       onCleanChange: fn(),
     },
-  } as ToolbarProps,
+  },
 };
 
 export const GenericVariant: Story = {
@@ -98,7 +97,7 @@ export const GenericVariant: Story = {
       configButtonTitle: "Configurar JS",
       gridClassName: "grid grid-cols-3 gap-2",
     },
-  } as ToolbarProps,
+  },
 };
 
 export const GenericMinimal: Story = {
@@ -110,7 +109,7 @@ export const GenericMinimal: Story = {
         { label: "Acción 2", icon: "heart", variant: "danger" as const, onClick: fn() },
       ],
     },
-  } as ToolbarProps,
+  },
 };
 
 export const GenericManyActions: Story = {
@@ -129,7 +128,7 @@ export const GenericManyActions: Story = {
       onOpenConfig: fn(),
       gridClassName: "grid grid-cols-3 gap-2",
     },
-  } as ToolbarProps,
+  },
   parameters: {
     docs: {
       description: {
@@ -160,7 +159,7 @@ export const GenericWithLongLabels: Story = {
       ],
       onOpenConfig: fn(),
     },
-  } as ToolbarProps,
+  },
   parameters: {
     docs: {
       description: {

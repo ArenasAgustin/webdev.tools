@@ -359,16 +359,16 @@ describe("sortJsonKeys", () => {
   });
 
   it("should sort object keys inside arrays", () => {
-    const input: JsonValue = [{ c: 1, a: 2 } as JsonValue, { z: 3, x: 4 } as JsonValue];
+    const input: JsonValue = [{ c: 1, a: 2 }, { z: 3, x: 4 }];
     const result = sortJsonKeys(input) as Record<string, number>[];
     expect(Object.keys(result[0])).toEqual(["a", "c"]);
     expect(Object.keys(result[1])).toEqual(["x", "z"]);
   });
 
   it("should handle primitive values", () => {
-    expect(sortJsonKeys(42 as JsonValue)).toBe(42);
-    expect(sortJsonKeys("hello" as JsonValue)).toBe("hello");
-    expect(sortJsonKeys(true as JsonValue)).toBe(true);
+    expect(sortJsonKeys(42)).toBe(42);
+    expect(sortJsonKeys("hello")).toBe("hello");
+    expect(sortJsonKeys(true)).toBe(true);
     expect(sortJsonKeys(null as JsonValue)).toBe(null);
   });
 

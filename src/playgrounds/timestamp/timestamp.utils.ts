@@ -75,7 +75,7 @@ function getRelativeTime(date: Date, lang = "es"): string {
   // Determine value and unit first
   let value: number;
   let unit: string;
-  let isSingular = false;
+  let isSingular: boolean;
 
   if (years > 0) {
     value = years;

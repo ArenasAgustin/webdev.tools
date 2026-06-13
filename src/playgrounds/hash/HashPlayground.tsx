@@ -50,7 +50,7 @@ export function HashPlayground() {
             hash: await generateHashFromFile(fileInput, algorithm, outputCase),
           })),
         );
-        setResults(hashes as HashResult[]);
+        setResults(hashes);
       } else {
         setResults([]);
         setIsProcessing(false);

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, type ComponentProps } from "react";
+import { useState, useCallback, useMemo, type ComponentProps } from "react";
 import type { ReactNode } from "react";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
@@ -106,9 +106,13 @@ export function GenericPlayground({
   const [outputFromExecution, setOutputFromExecution] = useState(false);
 
   // A fresh input edit makes the comparison relevant again for the next action.
-  useEffect(() => {
+  // Reset during render when input changes (React's "adjust state on prop change"
+  // pattern) instead of an effect, avoiding a cascading re-render.
+  const [prevInput, setPrevInput] = useState(ctx.input);
+  if (ctx.input !== prevInput) {
+    setPrevInput(ctx.input);
     setOutputFromExecution(false);
-  }, [ctx.input]);
+  }
 
   const trackOutput = useCallback(
     (handler: (() => void) | undefined, fromExecution: boolean) =>

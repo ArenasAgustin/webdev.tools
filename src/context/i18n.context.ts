@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, use } from 'react';
 
 // Tipo para la función de traducción
 type TranslateFunction = (key: string) => string;
@@ -13,7 +13,7 @@ const I18nContext = createContext<I18nContextType>({ t: (key) => key });
 
 // Hook para usar el contexto
 export const useI18n = () => {
-  return useContext(I18nContext);
+  return use(I18nContext);
 };
 
 // Exportar el contexto

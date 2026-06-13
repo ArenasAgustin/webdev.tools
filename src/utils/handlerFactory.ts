@@ -34,7 +34,7 @@ function isResultLike(value: unknown): value is ResultLike {
     return false;
   }
 
-  return "ok" in value && typeof (value as { ok: unknown }).ok === "boolean";
+  return "ok" in value && typeof (value).ok === "boolean";
 }
 
 function toErrorMessage(error: unknown, fallback = "Ha ocurrido un error"): string {

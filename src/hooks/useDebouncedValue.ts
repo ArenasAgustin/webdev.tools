@@ -21,7 +21,7 @@ export function useDebouncedValue<T>(value: T, delayMs = 300): T {
     // Don't schedule timer in SSR environment
     if (typeof window === 'undefined') {
       // In SSR, set state synchronously to avoid cascading renders warning.
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR has no rendering cycle
+      // eslint-disable-next-line react-hooks/set-state-in-effect, @eslint-react/set-state-in-effect -- SSR has no rendering cycle
       setDebouncedValue(value);
       return;
     }

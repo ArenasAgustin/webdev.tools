@@ -53,40 +53,41 @@ export function usePlaygroundOverlays(options?: UsePlaygroundOverlaysOptions) {
     [],
   );
 
+  const isShortcutsActive = active === "shortcuts";
+  const isDiffActive = active === "diff";
+  const isConfigActive = active === "config";
+
   const shortcuts: ModalState = useMemo(
     () => ({
-      isOpen: active === "shortcuts",
+      isOpen: isShortcutsActive,
       open: openShortcuts,
       close: closeAll,
       toggle: toggleShortcuts,
       setIsOpen: makeSetIsOpen("shortcuts"),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [active === "shortcuts", openShortcuts, closeAll, toggleShortcuts, makeSetIsOpen],
+    [isShortcutsActive, openShortcuts, closeAll, toggleShortcuts, makeSetIsOpen],
   );
 
   const diff: ModalState = useMemo(
     () => ({
-      isOpen: active === "diff",
+      isOpen: isDiffActive,
       open: openDiff,
       close: closeAll,
       toggle: toggleDiff,
       setIsOpen: makeSetIsOpen("diff"),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [active === "diff", openDiff, closeAll, toggleDiff, makeSetIsOpen],
+    [isDiffActive, openDiff, closeAll, toggleDiff, makeSetIsOpen],
   );
 
   const config: ModalState = useMemo(
     () => ({
-      isOpen: active === "config",
+      isOpen: isConfigActive,
       open: openConfig,
       close: closeAll,
       toggle: toggleConfig,
       setIsOpen: makeSetIsOpen("config"),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [active === "config", openConfig, closeAll, toggleConfig, makeSetIsOpen],
+    [isConfigActive, openConfig, closeAll, toggleConfig, makeSetIsOpen],
   );
 
   const editor: UseExpandedEditorReturn = useMemo(

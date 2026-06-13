@@ -226,7 +226,7 @@ export function Toolbar(props: ToolbarProps) {
                 </Button>
               ))}
             </div>
-            {props.extraContent && <div>{props.extraContent}</div>}
+            {props.extraContent != null ? <div>{props.extraContent}</div> : null}
           </div>
         </div>
       </section>

@@ -70,7 +70,7 @@ const encode = (obj, opt = {}) => {
 function splitSections (str, separator) {
   var lastMatchIndex = 0
   var lastSeparatorIndex = 0
-  var nextIndex = 0
+  var nextIndex
   var sections = []
 
   do {
@@ -97,7 +97,7 @@ const decode = (str, opt = {}) => {
   opt.bracketedArray = opt.bracketedArray !== false
   const out = Object.create(null)
   let p = out
-  let section = null
+  let section
   const re = /^\[([^\]]*)\]\s*$|^([^=]+)(=(.*))?$/i
   const lines = str.split(/[\r\n]+/g)
   const duplicates = {}
