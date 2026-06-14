@@ -114,10 +114,18 @@ export interface PlaygroundFileConfig {
   language: string;
   acceptExtensions: string;
   exampleContent: string;
+  // NOTE: `...args: any[]` is intentional. Each engine assigns a concrete
+  // runner with a different required config param (HtmlFormatConfig,
+  // CssMinifyConfig, php's no-arg minify, etc.). Narrowing the rest params to
+  // `unknown[]` would break those assignments via parameter contravariance —
+  // genericizing PlaygroundFileConfig is the only safe tightening and would
+  // cascade across every engine. The return type IS tightened to `unknown`:
+  // these fileConfig runners are never invoked for their value (only checked
+  // as functions), so callers don't depend on the result type.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  formatRunner: (input: string, ...args: any[]) => any;
+  formatRunner: (input: string, ...args: any[]) => unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  minifyRunner: (input: string, ...args: any[]) => any;
+  minifyRunner: (input: string, ...args: any[]) => unknown;
 }
 
 /**
@@ -185,9 +193,15 @@ export interface PlaygroundEngine {
   /** Parser hook */
   useParser: (input: string) => ValidationState;
 
-  /** Actions hook - returns the playground actions */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useActions: (params: any) => PlaygroundActions;
+  /**
+   * Actions hook - returns the playground actions.
+   * Written as a method signature (not a field) so it is checked bivariantly:
+   * each engine assigns a hook with its own concrete params interface
+   * (JsonActionsParams, HtmlActionsParams, ...). The params are the result of
+   * `mapActionsParams`, so they are always an `EngineActionsParams` at the call
+   * site — no `any` required.
+   */
+  useActions(params: EngineActionsParams): PlaygroundActions;
 
   /** Map generic params to engine-specific params */
   mapActionsParams: (params: BaseActionsParams) => EngineActionsParams;

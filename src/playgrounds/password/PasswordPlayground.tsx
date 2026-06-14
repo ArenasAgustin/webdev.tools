@@ -10,7 +10,7 @@ export function PasswordPlayground() {
   const [options, setOptions] = useState<PasswordOptions>(defaultPasswordOptions);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<{ id: string; value: string }[]>([]);
   const [copied, setCopied] = useState(false);
   const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -27,7 +27,7 @@ export function PasswordPlayground() {
 
     // Add to history (keep last 5)
     setHistory((prev) => {
-      const newHistory = [result.password, ...prev];
+      const newHistory = [{ id: crypto.randomUUID(), value: result.password }, ...prev];
       return newHistory.slice(0, 5);
     });
   }, [options]);
@@ -187,15 +187,15 @@ export function PasswordPlayground() {
         <div className="flex flex-col gap-2">
           <h3 className="text-gray-300 text-sm">Historial:</h3>
           <div className="flex flex-wrap gap-2">
-            {history.map((pwd) => (
+            {history.map((entry) => (
               <button
-                key={pwd}
+                key={entry.id}
                 type="button"
-                onClick={() => handleHistoryClick(pwd)}
+                onClick={() => handleHistoryClick(entry.value)}
                 className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 text-sm font-mono rounded-lg transition-colors truncate max-w-32"
-                title={pwd}
+                title={entry.value}
               >
-                {pwd.slice(0, 8)}...
+                {entry.value.slice(0, 8)}...
               </button>
             ))}
           </div>

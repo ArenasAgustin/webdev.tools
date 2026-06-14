@@ -15,7 +15,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig([
-  globalIgnores(["dist", "node_modules", "coverage", "coverage2", "src/test-utils/**/*", "src/test/**/*", "src/playgrounds/engines/sql.engine.tsx"]),
+  globalIgnores(["dist", "node_modules", "coverage", "coverage2", "src/test-utils/**/*", "src/test/**/*"]),
   {
     files: ["**/*.{ts,tsx}"],
     ignores: [".storybook/**"],

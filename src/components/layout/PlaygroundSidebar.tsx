@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { playgroundRegistry } from "@/playgrounds/registry";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { getLocalizedString } from "@/types/playground";
 
 interface PlaygroundSidebarProps {
   currentPlaygroundId: string;
@@ -14,17 +15,13 @@ export function PlaygroundSidebar({
   isOpen,
   onClose,
 }: PlaygroundSidebarProps) {
-  const { i18n, t } = useTranslation();
-
-  const getLocalizedName = (name: string | Record<string, string>): string => {
-    if (typeof name === "string") return name;
-    return name[i18n.language] || name.es || Object.values(name)[0] || "";
-  };
+  const { t } = useTranslation();
 
   return (
     <aside
       aria-label={t("sidebar.navigation")}
       aria-hidden={!isOpen}
+      inert={!isOpen}
       className={`fixed inset-y-0 right-0 z-40 w-64 transform border-l border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur-xl transition duration-300 lg:rounded-l-2xl ${
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
@@ -87,7 +84,7 @@ export function PlaygroundSidebar({
                     >
                       <i className={`${playground.icon} text-sm`}></i>
                     </span>
-                    <span className="font-medium">{getLocalizedName(playground.name)}</span>
+                    <span className="font-medium">{getLocalizedString(playground.name)}</span>
                   </Link>
                 </li>
               );

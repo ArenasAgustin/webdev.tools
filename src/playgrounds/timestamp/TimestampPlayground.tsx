@@ -40,9 +40,9 @@ export function TimestampPlayground() {
     setError(null);
   }, []);
 
-  const copyToClipboard = useCallback((value: string) => {
+  const copyToClipboard = useCallback(async (value: string) => {
     try {
-      navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value);
     } catch (err) {
       console.warn("Clipboard write failed:", err);
     }

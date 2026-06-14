@@ -25,19 +25,25 @@ export function ColorsPlayground() {
   }, []);
 
   function getAllFormatsFromHex(hex: string): ColorFormats {
-    const cleanHex = hex.startsWith("#") ? hex : "#" + hex;
-    const r = parseInt(cleanHex.slice(1, 3), 16);
-    const g = parseInt(cleanHex.slice(3, 5), 16);
-    const b = parseInt(cleanHex.slice(5, 7), 16);
+    const cleanHex = hex.startsWith("#") ? hex.slice(1) : hex;
+    if (!/^[0-9a-fA-F]{6}$/.test(cleanHex)) {
+      return getAllFormats({ r: 0, g: 0, b: 0 });
+    }
+    const r = parseInt(cleanHex.slice(0, 2), 16);
+    const g = parseInt(cleanHex.slice(2, 4), 16);
+    const b = parseInt(cleanHex.slice(4, 6), 16);
+    if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) {
+      return getAllFormats({ r: 0, g: 0, b: 0 });
+    }
     return getAllFormats({ r, g, b });
   }
 
   const parsed = convertColor(input);
   const displayFormats = parsed ?? getAllFormatsFromHex(color);
 
-  const copyToClipboard = useCallback((value: string) => {
+  const copyToClipboard = useCallback(async (value: string) => {
     try {
-      navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value);
     } catch (err) {
       console.warn("Clipboard write failed:", err);
     }

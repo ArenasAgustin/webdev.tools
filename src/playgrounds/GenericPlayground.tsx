@@ -32,6 +32,20 @@ interface GenericPlaygroundProps extends GenericPlaygroundExtraProps {
 }
 
 /**
+ * Type guard: narrows an engine to one that carries a clean config.
+ * Lets the compiler verify the clean-config access instead of relying on
+ * non-null assertions or `as` casts.
+ */
+function hasCleanConfigEngine(engine: PlaygroundEngine): engine is PlaygroundEngineWithClean {
+  return engine.features.includes("clean") && engine.cleanConfig !== undefined;
+}
+
+/** Stable no-op used only as a compiler-satisfying fallback; never runs at runtime. */
+const noop = (): void => {
+  /* intentionally empty */
+};
+
+/**
  * Generic Playground - A unified component that renders any playground engine
  * All UI and state is defined in the engine configuration
  */
@@ -44,24 +58,17 @@ export function GenericPlayground({
   renderModals,
 }: GenericPlaygroundProps) {
   // Check features
-  const hasClean = engine.features.includes("clean");
   const hasExecute = engine.features.includes("execute");
   const hasMinify = engine.features.includes("minify");
 
-  // Handle clean config
-  const hasCleanConfig =
-    hasClean &&
-    "cleanConfig" in engine &&
-    (engine as PlaygroundEngineWithClean).cleanConfig !== undefined;
-  const engineWithClean = engine as PlaygroundEngineWithClean;
-  const [savedCleanConfig] = useState(() =>
-    hasCleanConfig ? engineWithClean.loadToolsConfig()?.clean : undefined,
-  );
-  const defaultCleanConfig =
-    hasCleanConfig && engineWithClean.cleanConfig ? engineWithClean.cleanConfig : {};
+  // Handle clean config — the type guard narrows the engine so the clean
+  // config is accessed without non-null assertions or `as` casts.
+  const cleanEngine = hasCleanConfigEngine(engine) ? engine : null;
+  const [savedCleanConfig] = useState(() => cleanEngine?.loadToolsConfig()?.clean ?? undefined);
+  const defaultCleanConfig = cleanEngine?.cleanConfig ?? {};
 
   const [cleanConfig, setCleanConfig] = useMergedConfigState(defaultCleanConfig, savedCleanConfig);
-  const effectiveCleanConfig = hasCleanConfig ? cleanConfig : undefined;
+  const effectiveCleanConfig = cleanEngine ? cleanConfig : undefined;
 
   const overlays = usePlaygroundOverlays({
     onCloseExtra: () => {
@@ -143,7 +150,7 @@ export function GenericPlayground({
   );
 
   // Detect if JSON is minified
-  const isMinified = useCallback(() => {
+  const isMinified = useMemo(() => {
     if (engine.id !== "json") return false;
     try {
       const formatted = JSON.stringify(JSON.parse(ctx.input), null, 2);
@@ -154,11 +161,13 @@ export function GenericPlayground({
   }, [ctx.input, engine.id]);
 
   // Build toolbar params based on features
-  const toolbarParams = hasCleanConfig
+  const toolbarParams = cleanEngine
     ? {
         handleFormat: trackedFormat,
         handleMinify: hasMinify ? trackedMinify : undefined,
-        handleClean: trackedClean!,
+        // Clean engines always expose handleClean; the no-op fallback only
+        // satisfies the compiler and never runs at runtime.
+        handleClean: trackedClean ?? noop,
         handleExecute: trackedExecute,
         handleCopyOutput: actions.handleCopyOutput,
         handleClearInput: actions.handleClearInput,
@@ -168,7 +177,7 @@ export function GenericPlayground({
         setFormatConfig: ctx.setFormatConfig,
         minifyConfig: ctx.minifyConfig,
         setMinifyConfig: ctx.setMinifyConfig,
-        cleanConfig: effectiveCleanConfig!,
+        cleanConfig,
         setCleanConfig: setCleanConfig as (config: unknown) => void,
         gridClassName: "grid grid-cols-2 sm:grid-cols-4 gap-2",
         isProcessing: actions.isProcessing,
@@ -250,7 +259,7 @@ export function GenericPlayground({
             config={engine.hasConfigModal ? (toolbarConfig as ComponentProps<typeof Toolbar>["config"]) : undefined}
             shortcuts={overlays.shortcuts}
             extraContent={toolbarExtraContent}
-            isMinified={isMinified()}
+            isMinified={isMinified}
           />
         }
       />

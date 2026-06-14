@@ -1,6 +1,6 @@
 export function PlaygroundLoader({ name }: { name: string }) {
   return (
-    <div className="col-start-1 row-start-2 flex items-center justify-center min-h-[400px]">
+    <div className="flex items-center justify-center min-h-[400px]">
       <div className="text-center space-y-4">
         <div className="inline-block w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         <div className="space-y-2">
