@@ -78,7 +78,7 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
   return (
     <div
       className={cn(
-        "w-80 transform transition-all duration-300 ease-out",
+        "w-80 max-w-[calc(100vw-2rem)] transform transition-all duration-300 ease-out",
         isEntering ? "translate-x-full opacity-0" : "translate-x-0 opacity-100",
         isExiting && "translate-x-full opacity-0",
       )}
@@ -91,7 +91,7 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
         )}
       >
         <i className={`fas ${config.icon}`} aria-hidden="true" />
-        <span className="text-sm font-medium flex-1" data-testid="toast-message">{message}</span>
+        <span className="text-sm font-medium flex-1 min-w-0 break-all line-clamp-4 overflow-hidden" data-testid="toast-message">{message}</span>
         <button
           onClick={handleClose}
           className="ml-2 hover:opacity-75 transition-opacity flex-shrink-0"
