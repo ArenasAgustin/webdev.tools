@@ -63,7 +63,5 @@ export function useAsyncValidator(
     };
   }, [source, validateFn, fallbackError]);
 
-  if (!source) return EMPTY;
-
-  return validation;
+  return !source ? EMPTY : validation;
 }

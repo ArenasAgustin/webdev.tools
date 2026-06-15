@@ -91,7 +91,9 @@ export function parseColor(input: string): RGB | null {
     const h = parseInt(hslMatch[1], 10);
     const s = parseInt(hslMatch[2], 10);
     const l = parseInt(hslMatch[3], 10);
-    return hslToRgb(h, s, l);
+    if (h >= 0 && h <= 360 && s >= 0 && s <= 100 && l >= 0 && l <= 100) {
+      return hslToRgb(h, s, l);
+    }
   }
 
   // HSV format
@@ -100,7 +102,9 @@ export function parseColor(input: string): RGB | null {
     const h = parseInt(hsvMatch[1], 10);
     const s = parseInt(hsvMatch[2], 10);
     const v = parseInt(hsvMatch[3], 10);
-    return hsvToRgb(h, s, v);
+    if (h >= 0 && h <= 360 && s >= 0 && s <= 100 && v >= 0 && v <= 100) {
+      return hsvToRgb(h, s, v);
+    }
   }
 
   // CMYK format
@@ -112,7 +116,9 @@ export function parseColor(input: string): RGB | null {
     const m = parseInt(cmykMatch[2], 10);
     const y = parseInt(cmykMatch[3], 10);
     const k = parseInt(cmykMatch[4], 10);
-    return cmykToRgb(c, m, y, k);
+    if (c >= 0 && c <= 100 && m >= 0 && m <= 100 && y >= 0 && y <= 100 && k >= 0 && k <= 100) {
+      return cmykToRgb(c, m, y, k);
+    }
   }
 
   return null;

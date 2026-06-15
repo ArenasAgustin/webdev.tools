@@ -64,7 +64,7 @@ export function useFocusTrap(isActive: boolean) {
     // Cleanup: restaurar foco al elemento anterior
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
-      if (previousActiveElementRef.current?.isConnected !== false) previousActiveElementRef.current?.focus();
+      if (previousActiveElementRef.current?.isConnected === true) previousActiveElementRef.current?.focus();
     };
   }, [isActive]);
 

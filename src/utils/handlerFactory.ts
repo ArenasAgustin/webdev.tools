@@ -72,13 +72,9 @@ export function createValidatedHandler<TResult>(
     const succeed = (result: TResult) => {
       const effect = onSuccess?.(result);
       if (isPromiseLike<void>(effect)) {
-        void effect;
-        effect.then(() => {
-          finalizeSuccess();
-        })
-          .catch((error) => {
-            fail(toErrorMessage(error, errorMessage));
-          });
+        effect.then(finalizeSuccess).catch((error) => {
+          fail(toErrorMessage(error, errorMessage));
+        });
         return;
       }
 

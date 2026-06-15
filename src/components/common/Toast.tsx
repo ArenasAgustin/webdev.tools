@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ToastVariant } from "@/context/toast.context";
 import { cn } from "@/utils/cn";
-import { useI18n } from "@/context/i18n.context";
+import { useTranslation } from "react-i18next";
 
 interface ToastProps {
   message: string;
@@ -29,7 +29,7 @@ const variantConfig = {
 };
 
 export function Toast({ message, variant, duration, onRemove }: ToastProps) {
-  const { t } = useI18n();
+  const { t } = useTranslation();
   const [isExiting, setIsExiting] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
   const config = variantConfig[variant];
