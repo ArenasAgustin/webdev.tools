@@ -32,6 +32,7 @@ export function useFocusTrap(isActive: boolean) {
     // Manejar Tab para hacer trap del foco.
     // Re-query on every keypress so the list is never stale if the DOM changes.
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isActive) return; // Early return if trap is no longer active
       if (event.key !== "Tab") return;
 
       const focusableElements = getFocusableElements();
@@ -63,7 +64,7 @@ export function useFocusTrap(isActive: boolean) {
     // Cleanup: restaurar foco al elemento anterior
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
-      if (previousActiveElementRef.current?.isConnected) previousActiveElementRef.current.focus();
+      if (previousActiveElementRef.current?.isConnected !== false) previousActiveElementRef.current?.focus();
     };
   }, [isActive]);
 

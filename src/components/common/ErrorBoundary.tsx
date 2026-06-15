@@ -24,6 +24,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     console.error("[ErrorBoundary]", error, info.componentStack);
   }
 
+  componentDidUpdate(_prevProps: ErrorBoundaryProps, prevState: ErrorBoundaryState) {
+    if (this.state.hasError && !prevState.hasError) {
+      // Focus the error heading for keyboard/screen reader users
+      const heading = document.querySelector(".text-lg.font-semibold.text-white");
+      if (heading instanceof HTMLElement) heading.focus();
+    }
+  }
+
   handleReset = () => {
     this.setState({ hasError: false, error: null });
   };
@@ -37,9 +45,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <i className="fas fa-triangle-exclamation text-2xl text-red-400" aria-hidden="true"></i>
           </div>
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-white">
-              {name ? `Error en ${name}` : "Algo salió mal"}
-            </h2>
+             <h2 className="text-lg font-semibold text-white" title={this.state.error?.message}>
+               {name ? `Error en ${name}` : "Algo salió mal"}
+             </h2>
             <p className="max-w-sm text-sm text-white/60">
               Ocurrió un error inesperado. Puedes intentar recargar el playground o volver al
               inicio.

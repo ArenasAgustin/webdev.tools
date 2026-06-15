@@ -36,7 +36,8 @@ export function RadioGroup<T extends string>({
   const colorClasses = colorMap[color];
 
   return (
-     <div className={cn("flex gap-4 mt-2", className)} role="radiogroup" aria-label={name}>
+    <fieldset className={cn("flex gap-4 mt-2", className)}>
+      <legend className="sr-only">{name}</legend>
       {options.map((option) => (
         <label key={option.value} className="flex items-center gap-2 cursor-pointer">
           <input
@@ -49,6 +50,6 @@ export function RadioGroup<T extends string>({
           <span className="text-gray-400">{option.label}</span>
         </label>
       ))}
-    </div>
+    </fieldset>
   );
 }

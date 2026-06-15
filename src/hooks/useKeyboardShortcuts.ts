@@ -44,7 +44,7 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
         return;
       }
-      if (target.contentEditable === "true" && !ctrlKey) {
+      if (target.contentEditable !== "false" && !ctrlKey) {
         return;
       }
       const normalizedKey = event.key.length === 1 ? event.key.toUpperCase() : event.key;

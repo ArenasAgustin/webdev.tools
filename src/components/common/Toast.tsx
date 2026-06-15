@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ToastVariant } from "@/context/toast.context";
 import { cn } from "@/utils/cn";
 import { useI18n } from "@/context/i18n.context";
@@ -35,9 +35,11 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
   const config = variantConfig[variant];
 
   // Capture latest onRemove in a ref so the timer effect never needs to re-run
-  // when the caller passes a new function reference on each render
+  // when the caller passes a new function reference on each render.
+  // This is intentional and safe: we want the latest onRemove, and the effect
+  // has no dependencies so it runs on every render to keep the ref up-to-date.
   const onRemoveRef = useRef(onRemove);
-  useLayoutEffect(() => {
+  useEffect(() => {
     onRemoveRef.current = onRemove;
   });
 
@@ -68,6 +70,7 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
   }, [duration]);
 
   const handleClose = () => {
+    if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current);
     setIsExiting(true);
     closeTimerRef.current = setTimeout(() => onRemoveRef.current(), 200);
   };

@@ -17,8 +17,8 @@ void i18n
         translation: enTranslations,
       },
     },
-    fallbackLng: "es",
-    lng: "es",
+    fallbackLng: "en",
+    // lng is auto-detected by LanguageDetector; omit to respect user preference
     interpolation: {
       escapeValue: false,
     },

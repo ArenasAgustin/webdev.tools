@@ -1,4 +1,4 @@
-import { type ReactNode, memo, useState } from "react";
+import { type ReactNode, memo, useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
@@ -108,35 +108,40 @@ export const GenericEditors = memo(function GenericEditors({
   const [prevOutput, setPrevOutput] = useState(output);
 
   // Auto-switch to output tab on first result (empty → non-empty transition only).
-  // Uses the React "store previous prop" pattern — safe setState during render.
-  if (prevOutput !== output) {
-    setPrevOutput(output);
-    if (prevOutput === "" && output !== "") {
-      setActiveTab("output");
-    }
-  }
-
-  const dragHandlers = onImportFile
-    ? {
-        onDragOver: (e: React.DragEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsDragOver(true);
-        },
-        onDragLeave: (e: React.DragEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsDragOver(false);
-        },
-        onDrop: (e: React.DragEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsDragOver(false);
-          const file = e.dataTransfer.files[0];
-          if (file) onImportFile(file);
-        },
+  useEffect(() => {
+    if (prevOutput !== output) {
+      setPrevOutput(output);
+      if (prevOutput === "" && output !== "") {
+        setActiveTab("output");
       }
-    : {};
+    }
+  }, [output, prevOutput]);
+
+  const dragHandlers = useMemo(
+    () =>
+      onImportFile
+        ? {
+            onDragOver: (e: React.DragEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragOver(true);
+            },
+            onDragLeave: (e: React.DragEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragOver(false);
+            },
+            onDrop: (e: React.DragEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragOver(false);
+              const file = e.dataTransfer.files[0];
+              if (file) onImportFile(file);
+            },
+          }
+        : {},
+    [onImportFile]
+  );
 
   const inputFooter = (
     <EditorFooter

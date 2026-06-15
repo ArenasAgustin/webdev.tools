@@ -26,6 +26,14 @@ export function EditorTabBar({
       e.preventDefault();
       onTabChange("input");
       inputRef.current?.focus();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      onTabChange("input");
+      inputRef.current?.focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      onTabChange("output");
+      outputRef.current?.focus();
     }
   };
 

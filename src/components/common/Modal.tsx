@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useId, memo } from "react";
+import { type ReactNode, useEffect, useId, useRef, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { getIconColorClass, type IconColorKey } from "@/utils/constants/colors";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -30,13 +30,16 @@ export const Modal = memo(function Modal({
   const focusTrapRef = useFocusTrap(isOpen);
 
   // Return focus to the element that opened the modal when it closes
+  const openerRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (isOpen) {
-      const opener = document.activeElement as HTMLElement | null;
-      return () => {
-        opener?.focus();
-      };
+      // Capture the opener only when modal opens (not on every effect re-run)
+      openerRef.current = document.activeElement as HTMLElement | null;
     }
+    // Cleanup always runs when isOpen becomes false or component unmounts
+    return () => {
+      openerRef.current?.focus();
+    };
   }, [isOpen]);
 
   // Handle ESC key to close modal
@@ -56,12 +59,13 @@ export const Modal = memo(function Modal({
 
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "";
-      };
     }
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
