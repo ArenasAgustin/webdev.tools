@@ -108,6 +108,25 @@
   "language": {
     "select": "Seleccionar idioma"
   },
+  "timestamp": {
+    "timezoneLabel": "Zona horaria",
+    "searchTimezone": "Buscar zona horaria...",
+    "convert": "Convertir",
+    "now": "Ahora",
+    "placeholder": "Unix timestamp o fecha (ISO 8601, RFC 2822)...",
+    "invalidInput": "Input inválido. Ingresá un timestamp o fecha válida.",
+    "futureDate": "Esta fecha es en el futuro",
+    "copied": "Copiado al portapapeles",
+    "noResults": "Sin resultados",
+    "formats": {
+      "unixSeconds": "Unix (s)",
+      "unixMilliseconds": "Unix (ms)",
+      "iso8601": "ISO 8601",
+      "rfc2822": "RFC 2822",
+      "humanReadable": "Local",
+      "relative": "Relativo"
+    }
+  },
   "editor": {
     "lines": "líneas",
     "characters": "caracteres",

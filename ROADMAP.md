@@ -62,3 +62,4 @@ _(vacío)_
 - [ ] Playground de Markdown con preview
 - [ ] Regex tester con visualización de grupos
 - [ ] Visor de SQL (ANALIZAR ANTES)
+- [ ] Share URL — compartir playground con contenido pre-cargado via query params (`?input=...`) para facilitar colaboración (ANALIZAR ANTES: tamaño máximo de URL, encoding, compresión)

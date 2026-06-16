@@ -1,8 +1,31 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { timestampConfig } from "./timestamp.config";
 import { convertTimestamp, getCurrentTimestamp, type TimestampResult } from "./timestamp.utils";
+import { useToast } from "@/hooks/useToast";
+import { SearchableSelect } from "@/components/common/SearchableSelect";
+
+const ALL_TIMEZONES: string[] =
+  typeof Intl.supportedValuesOf === "function"
+    ? Intl.supportedValuesOf("timeZone")
+    : [
+        "UTC",
+        "America/New_York",
+        "America/Chicago",
+        "America/Los_Angeles",
+        "America/Argentina/Buenos_Aires",
+        "Europe/London",
+        "Europe/Paris",
+        "Asia/Kolkata",
+        "Asia/Singapore",
+        "Asia/Shanghai",
+        "Asia/Tokyo",
+        "Australia/Sydney",
+      ];
 
 export function TimestampPlayground() {
+  const { t } = useTranslation();
+  const toast = useToast();
   const [input, setInput] = useState(timestampConfig.example);
   const [result, setResult] = useState<TimestampResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +43,10 @@ export function TimestampPlayground() {
     if (converted) {
       setResult(converted);
     } else {
-      setError("Input inválido. Ingresa un timestamp o fecha válida.");
+      setError(t("timestamp.invalidInput"));
       setResult(null);
     }
-  }, [input, timezone]);
+  }, [input, timezone, t]);
 
   const handleNow = useCallback(() => {
     const now = getCurrentTimestamp();
@@ -40,22 +63,29 @@ export function TimestampPlayground() {
     setError(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (value: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-    }
-  }, []);
+  const copyToClipboard = useCallback(
+    async (value: string) => {
+      try {
+        await navigator.clipboard.writeText(value);
+        toast.success(t("timestamp.copied"));
+      } catch {
+        toast.error(t("common.copy"));
+      }
+    },
+    [toast, t],
+  );
 
-  const formatLabels: { key: keyof TimestampResult; label: string }[] = [
-    { key: "unixSeconds", label: "Unix (s)" },
-    { key: "unixMilliseconds", label: "Unix (ms)" },
-    { key: "iso8601", label: "ISO 8601" },
-    { key: "rfc2822", label: "RFC 2822" },
-    { key: "humanReadable", label: "Local" },
-    { key: "relative", label: "Relativo" },
-  ];
+  const formatLabels: { key: keyof TimestampResult; label: string }[] = useMemo(
+    () => [
+      { key: "unixSeconds", label: t("timestamp.formats.unixSeconds") },
+      { key: "unixMilliseconds", label: t("timestamp.formats.unixMilliseconds") },
+      { key: "iso8601", label: t("timestamp.formats.iso8601") },
+      { key: "rfc2822", label: t("timestamp.formats.rfc2822") },
+      { key: "humanReadable", label: t("timestamp.formats.humanReadable") },
+      { key: "relative", label: t("timestamp.formats.relative") },
+    ],
+    [t],
+  );
 
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-4">
@@ -66,32 +96,21 @@ export function TimestampPlayground() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleConvert()}
-          placeholder="Unix timestamp o fecha (ISO 8601, RFC 2822)..."
+          placeholder={t("timestamp.placeholder")}
           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-3 text-white font-mono focus:outline-none focus:ring-1 focus:ring-cyan-400"
           spellCheck={false}
         />
 
         {/* Timezone selector */}
         <div className="flex items-center gap-2">
-          <label className="text-gray-300 text-sm">Zona horaria:</label>
-          <select
+          <label className="text-gray-300 text-sm">{t("timestamp.timezoneLabel")}:</label>
+          <SearchableSelect
             value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            className="bg-gray-900 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400 cursor-pointer"
-          >
-            <option value="UTC">UTC</option>
-            <option value="America/New_York">New York (EST/EDT)</option>
-            <option value="America/Chicago">Chicago (CST/CDT)</option>
-            <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
-            <option value="America/Argentina/Buenos_Aires">Buenos Aires (ART)</option>
-            <option value="Europe/London">London (GMT/BST)</option>
-            <option value="Europe/Paris">Paris (CET/CEST)</option>
-            <option value="Asia/Kolkata">India (IST)</option>
-            <option value="Asia/Singapore">Singapore (SGT)</option>
-            <option value="Asia/Shanghai">Shanghai (CST)</option>
-            <option value="Asia/Tokyo">Tokyo (JST)</option>
-            <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
-          </select>
+            onChange={setTimezone}
+            options={ALL_TIMEZONES}
+            placeholder={t("timestamp.searchTimezone")}
+            noResultsLabel={t("timestamp.noResults")}
+          />
         </div>
 
         {/* Actions */}
@@ -102,7 +121,7 @@ export function TimestampPlayground() {
             className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
           >
             <i className="fas fa-exchange-alt mr-2"></i>
-            Convertir
+            {t("timestamp.convert")}
           </button>
           <button
             type="button"
@@ -110,7 +129,7 @@ export function TimestampPlayground() {
             className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors"
           >
             <i className="fas fa-clock mr-2"></i>
-            Ahora
+            {t("timestamp.now")}
           </button>
           <button
             type="button"
@@ -118,7 +137,7 @@ export function TimestampPlayground() {
             className="px-4 py-2 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg font-medium transition-colors"
           >
             <i className="fas fa-trash-alt mr-2"></i>
-            Limpiar
+            {t("common.clear")}
           </button>
         </div>
       </div>
@@ -133,10 +152,9 @@ export function TimestampPlayground() {
       {/* Results */}
       {result && (
         <div className="flex flex-col gap-2">
-          {/* Future indicator */}
           {result.isFuture && (
             <div className="p-2 bg-cyan-500/20 border border-cyan-500/50 rounded-lg text-cyan-300 text-sm">
-              ⏱️ Esta fecha es en el futuro
+              ⏱️ {t("timestamp.futureDate")}
             </div>
           )}
 
@@ -153,8 +171,8 @@ export function TimestampPlayground() {
                 type="button"
                 onClick={() => copyToClipboard(String(result[key]))}
                 className="ml-3 text-gray-400 hover:text-white transition-colors"
-                title="Copiar"
-                aria-label={`Copiar ${label}`}
+                title={t("common.copy")}
+                aria-label={`${t("common.copy")} ${label}`}
               >
                 <i className="fas fa-copy"></i>
               </button>
