@@ -6,7 +6,7 @@ export function TimestampPlayground() {
   const [input, setInput] = useState(timestampConfig.example);
   const [result, setResult] = useState<TimestampResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [timezone, setTimezone] = useState("America/Argentina/Buenos_Aires");
 
   const handleConvert = useCallback(() => {
     setError(null);
@@ -77,16 +77,20 @@ export function TimestampPlayground() {
           <select
             value={timezone}
             onChange={(e) => setTimezone(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400"
+            className="bg-gray-900 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400 cursor-pointer"
           >
             <option value="UTC">UTC</option>
             <option value="America/New_York">New York (EST/EDT)</option>
+            <option value="America/Chicago">Chicago (CST/CDT)</option>
             <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
+            <option value="America/Argentina/Buenos_Aires">Buenos Aires (ART)</option>
             <option value="Europe/London">London (GMT/BST)</option>
             <option value="Europe/Paris">Paris (CET/CEST)</option>
-            <option value="Europe/Madrid">Madrid (CET/CEST)</option>
-            <option value="Asia/Tokyo">Tokyo (JST)</option>
+            <option value="Asia/Kolkata">India (IST)</option>
+            <option value="Asia/Singapore">Singapore (SGT)</option>
             <option value="Asia/Shanghai">Shanghai (CST)</option>
+            <option value="Asia/Tokyo">Tokyo (JST)</option>
+            <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
           </select>
         </div>
 
