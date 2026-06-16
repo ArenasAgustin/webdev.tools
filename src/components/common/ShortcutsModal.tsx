@@ -72,7 +72,7 @@ export function ShortcutsModal({
           </h4>
           <div>
             {hasExecute && (
-              <ShortcutRow keys={["Ctrl/⌘", "Enter"]} description={t("shortcuts.execute")} />
+              <ShortcutRow keys={["Ctrl/⌘", "Shift", "Enter"]} description={t("shortcuts.execute")} />
             )}
             <ShortcutRow keys={["Ctrl/⌘", "Shift", "C"]} description={t("shortcuts.copyResult")} />
             <ShortcutRow

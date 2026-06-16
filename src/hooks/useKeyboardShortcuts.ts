@@ -20,7 +20,7 @@ interface KeyboardShortcutsConfig {
  * - Ctrl+Shift+L / Cmd+Shift+L: Clean
  * - Ctrl+Shift+C / Cmd+Shift+C: Copy output
  * - Ctrl+Shift+Delete / Cmd+Shift+Delete: Clear input
- * - Ctrl+Enter / Cmd+Enter: Execute (only when onExecute is provided)
+ * - Ctrl+Shift+Enter / Cmd+Shift+Enter: Execute (only when onExecute is provided)
  * - Ctrl+, / Cmd+,: Open config
  */
 export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
@@ -79,9 +79,10 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
         config.onClearInput?.();
       }
 
-      // Ctrl/Cmd+Enter: Execute. Only preventDefault when a handler exists so
+      // Ctrl/Cmd+Shift+Enter: Execute. Only preventDefault when a handler exists so
       // playgrounds without execute don't swallow the Enter key.
-      if (ctrlKey && !event.shiftKey && event.key === "Enter" && config.onExecute) {
+      // Uses Shift to avoid Monaco's built-in Ctrl+Enter ("Insert Line Below").
+      if (ctrlKey && event.shiftKey && event.key === "Enter" && config.onExecute) {
         event.preventDefault();
         config.onExecute();
       }

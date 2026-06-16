@@ -95,15 +95,15 @@ describe("useKeyboardShortcuts", () => {
       expect(onOpenDiff).toHaveBeenCalledTimes(1);
     });
 
-    it("Ctrl+Enter triggers onExecute", () => {
+    it("Ctrl+Shift+Enter triggers onExecute", () => {
       renderShortcuts();
-      fireEvent.keyDown(window, { key: "Enter", ctrlKey: true });
+      fireEvent.keyDown(window, { key: "Enter", ctrlKey: true, shiftKey: true });
       expect(onExecute).toHaveBeenCalledTimes(1);
     });
 
-    it("Cmd+Enter (metaKey) also triggers onExecute", () => {
+    it("Cmd+Shift+Enter (metaKey) also triggers onExecute", () => {
       renderShortcuts();
-      fireEvent.keyDown(window, { key: "Enter", metaKey: true });
+      fireEvent.keyDown(window, { key: "Enter", metaKey: true, shiftKey: true });
       expect(onExecute).toHaveBeenCalledTimes(1);
     });
 
@@ -179,9 +179,15 @@ describe("useKeyboardShortcuts", () => {
       expect(onExecute).not.toHaveBeenCalled();
     });
 
-    it("Ctrl+Enter without onExecute does not preventDefault nor throw", () => {
+    it("Ctrl+Enter (without Shift) does not trigger onExecute", () => {
+      renderShortcuts();
+      fireEvent.keyDown(window, { key: "Enter", ctrlKey: true });
+      expect(onExecute).not.toHaveBeenCalled();
+    });
+
+    it("Ctrl+Shift+Enter without onExecute does not preventDefault nor throw", () => {
       renderHook(() => useKeyboardShortcuts({ onFormat }));
-      const event = new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, cancelable: true });
+      const event = new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, shiftKey: true, cancelable: true });
       expect(() => window.dispatchEvent(event)).not.toThrow();
       expect(event.defaultPrevented).toBe(false);
     });
