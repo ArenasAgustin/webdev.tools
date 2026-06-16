@@ -12,26 +12,25 @@ export function ToastContainer() {
   }
 
   return (
-    <div className="fixed top-4 left-4 z-50 flex flex-col-reverse gap-2 pointer-events-none">
-      {/* Visually hidden status region for empty state */}
-      {context.toasts.length === 0 ? (
-        <div role="status" aria-live="polite" className="sr-only">
-          {t("noNotifications")}
-        </div>
-      ) : (
-        <div role="status" aria-live="polite" aria-label={t("notifications")}>
-          {context.toasts.map((toast) => (
-            <div key={toast.id} className="pointer-events-auto">
-              <Toast
-                message={toast.message}
-                variant={toast.variant}
-                duration={toast.duration}
-                onRemove={() => context.removeToast(toast.id)}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="fixed top-4 left-4 z-50 pointer-events-none">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-label={t("notifications")}
+        aria-atomic="false"
+        className="flex flex-col gap-2"
+      >
+        {context.toasts.map((toast) => (
+          <div key={toast.id} className="pointer-events-auto">
+            <Toast
+              message={toast.message}
+              variant={toast.variant}
+              duration={toast.duration}
+              onRemove={() => context.removeToast(toast.id)}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

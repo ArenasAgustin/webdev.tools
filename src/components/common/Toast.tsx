@@ -79,8 +79,8 @@ export function Toast({ message, variant, duration, onRemove }: ToastProps) {
     <div
       className={cn(
         "w-80 max-w-[calc(100vw-2rem)] transform transition-all duration-300 ease-out",
-        isEntering ? "translate-x-full opacity-0" : "translate-x-0 opacity-100",
-        isExiting && "translate-x-full opacity-0",
+        isEntering ? "-translate-x-full opacity-0" : "translate-x-0 opacity-100",
+        isExiting && "-translate-x-full opacity-0",
       )}
     >
       <div
