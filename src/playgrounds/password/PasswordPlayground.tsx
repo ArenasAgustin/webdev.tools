@@ -1,13 +1,22 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import {
   generatePasswordWithStrength,
   defaultPasswordOptions,
   calculateStrength,
   type PasswordOptions,
 } from "./password.utils";
+import { usePersistedState } from "@/hooks/usePersistedState";
+import { STORAGE_KEYS } from "@/services/storage";
 
 export function PasswordPlayground() {
-  const [options, setOptions] = useState<PasswordOptions>(defaultPasswordOptions);
+  const [storedOptions, setOptions] = usePersistedState<PasswordOptions>(
+    STORAGE_KEYS.PASSWORD_OPTIONS,
+    defaultPasswordOptions,
+  );
+  const options = useMemo(
+    () => ({ ...defaultPasswordOptions, ...storedOptions }),
+    [storedOptions],
+  );
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [history, setHistory] = useState<{ id: string; value: string }[]>([]);
@@ -47,7 +56,7 @@ export function PasswordPlayground() {
 
   const handleOptionChange = useCallback((key: keyof PasswordOptions, value: boolean | number) => {
     setOptions((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  }, [setOptions]);
 
   const handleHistoryClick = useCallback((pwd: string) => {
     setPassword(pwd);

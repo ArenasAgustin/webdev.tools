@@ -2,10 +2,15 @@ import { useState, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
 import { colorsConfig } from "./colors.config";
 import { convertColor, getAllFormats, type ColorFormats } from "@/utils/colorConverter";
+import { usePersistedState } from "@/hooks/usePersistedState";
+import { getItem, STORAGE_KEYS } from "@/services/storage";
 
 export function ColorsPlayground() {
-  const [input, setInput] = useState(colorsConfig.example);
-  const [color, setColor] = useState("#3498db");
+  const [input, setInput] = usePersistedState(STORAGE_KEYS.COLORS_INPUT, colorsConfig.example);
+  const [color, setColor] = useState<string>(() => {
+    const saved = getItem<string>(STORAGE_KEYS.COLORS_INPUT);
+    return saved ? (convertColor(saved)?.hex ?? "#3498db") : "#3498db";
+  });
 
   const handleInputChange = useCallback((value: string) => {
     setInput(value);
@@ -17,12 +22,12 @@ export function ColorsPlayground() {
     } catch (err) {
       console.warn("Invalid color input:", err);
     }
-  }, []);
+  }, [setInput]);
 
   const handleColorChange = useCallback((newColor: string) => {
     setColor(newColor);
     setInput(newColor);
-  }, []);
+  }, [setInput]);
 
   function getAllFormatsFromHex(hex: string): ColorFormats {
     const cleanHex = hex.startsWith("#") ? hex.slice(1) : hex;

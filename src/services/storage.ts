@@ -44,6 +44,13 @@ export const STORAGE_KEYS = {
   PWA_INSTALL_DISMISSED: "pwaInstallDismissed",
   LAST_SQL: "lastSql",
   SQL_TOOLS_CONFIG: "sqlToolsConfig",
+  TIMESTAMP_INPUT: "timestampInput",
+  TIMESTAMP_TIMEZONE: "timestampTimezone",
+  COLORS_INPUT: "colorsInput",
+  HASH_TEXT_INPUT: "hashTextInput",
+  HASH_OUTPUT_CASE: "hashOutputCase",
+  HASH_INPUT_MODE: "hashInputMode",
+  PASSWORD_OPTIONS: "passwordOptions",
 } as const;
 
 /**

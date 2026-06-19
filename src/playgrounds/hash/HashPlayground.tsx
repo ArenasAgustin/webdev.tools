@@ -6,15 +6,16 @@ import {
   type HashAlgorithm,
   type HashResult,
   type HashOutputCase,
+  type InputMode,
 } from "./hash.utils";
-
-type InputMode = "text" | "file";
+import { usePersistedState } from "@/hooks/usePersistedState";
+import { STORAGE_KEYS } from "@/services/storage";
 
 export function HashPlayground() {
-  const [inputMode, setInputMode] = useState<InputMode>("text");
-  const [textInput, setTextInput] = useState(hashConfig.example);
+  const [inputMode, setInputMode] = usePersistedState<InputMode>(STORAGE_KEYS.HASH_INPUT_MODE, "text");
+  const [textInput, setTextInput] = usePersistedState(STORAGE_KEYS.HASH_TEXT_INPUT, hashConfig.example);
   const [fileInput, setFileInput] = useState<File | null>(null);
-  const [outputCase, setOutputCase] = useState<HashOutputCase>("lowercase");
+  const [outputCase, setOutputCase] = usePersistedState<HashOutputCase>(STORAGE_KEYS.HASH_OUTPUT_CASE, "lowercase");
   const [results, setResults] = useState<HashResult[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [compareValue, setCompareValue] = useState("");

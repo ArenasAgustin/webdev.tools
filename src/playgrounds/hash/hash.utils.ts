@@ -1,5 +1,7 @@
 export type HashAlgorithm = "sha1" | "sha256" | "sha512";
 
+export type InputMode = "text" | "file";
+
 export interface HashResult {
   algorithm: HashAlgorithm;
   hash: string;

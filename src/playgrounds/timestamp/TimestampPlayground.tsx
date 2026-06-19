@@ -4,6 +4,8 @@ import { timestampConfig } from "./timestamp.config";
 import { convertTimestamp, getCurrentTimestamp, type TimestampResult } from "./timestamp.utils";
 import { useToast } from "@/hooks/useToast";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
+import { usePersistedState } from "@/hooks/usePersistedState";
+import { STORAGE_KEYS } from "@/services/storage";
 
 const ALL_TIMEZONES: string[] =
   typeof Intl.supportedValuesOf === "function"
@@ -26,10 +28,10 @@ const ALL_TIMEZONES: string[] =
 export function TimestampPlayground() {
   const { t } = useTranslation();
   const toast = useToast();
-  const [input, setInput] = useState(timestampConfig.example);
+  const [input, setInput] = usePersistedState(STORAGE_KEYS.TIMESTAMP_INPUT, timestampConfig.example);
   const [result, setResult] = useState<TimestampResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [timezone, setTimezone] = useState("America/Argentina/Buenos_Aires");
+  const [timezone, setTimezone] = usePersistedState(STORAGE_KEYS.TIMESTAMP_TIMEZONE, "America/Argentina/Buenos_Aires");
 
   const handleConvert = useCallback(() => {
     setError(null);
@@ -55,13 +57,13 @@ export function TimestampPlayground() {
 
     const converted = convertTimestamp(String(now), timezone);
     setResult(converted);
-  }, [timezone]);
+  }, [timezone, setInput]);
 
   const handleClear = useCallback(() => {
     setInput("");
     setResult(null);
     setError(null);
-  }, []);
+  }, [setInput]);
 
   const copyToClipboard = useCallback(
     async (value: string) => {
