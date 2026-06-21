@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, type ComponentProps } from "react";
+import { useState, useCallback, useMemo, type ComponentProps } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Toolbar } from "@/components/layout/Toolbar";
@@ -118,12 +118,10 @@ export function GenericPlayground({
   // Reset during render when input changes (React's "adjust state on prop change"
   // pattern) instead of an effect, avoiding a cascading re-render.
   const [prevInput, setPrevInput] = useState(ctx.input);
-  useEffect(() => {
-    if (ctx.input !== prevInput) {
-      setPrevInput(ctx.input);
-      setOutputFromExecution(false);
-    }
-  }, [ctx.input, prevInput]);
+  if (prevInput !== ctx.input) {
+    setPrevInput(ctx.input);
+    setOutputFromExecution(false);
+  }
 
   const trackOutput = useCallback(
     (handler: (() => void) | undefined, fromExecution: boolean) =>

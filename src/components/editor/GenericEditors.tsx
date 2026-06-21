@@ -1,4 +1,4 @@
-import { type ReactNode, memo, useState, useEffect, useMemo } from "react";
+import { type ReactNode, memo, useState, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
@@ -106,17 +106,16 @@ export const GenericEditors = memo(function GenericEditors({
   const outputStats = useTextStats(output);
   const [isDragOver, setIsDragOver] = useState(false);
   const [activeTab, setActiveTab] = useState<"input" | "output">("input");
-  const [prevOutput, setPrevOutput] = useState(output);
+  const prevOutputRef = useRef(output);
 
   // Auto-switch to output tab on first result (empty → non-empty transition only).
   useEffect(() => {
-    if (prevOutput !== output) {
-      setPrevOutput(output);
-      if (prevOutput === "" && output !== "") {
-        setActiveTab("output");
-      }
+    const prev = prevOutputRef.current;
+    prevOutputRef.current = output;
+    if (prev === "" && output !== "") {
+      setActiveTab("output");
     }
-  }, [output, prevOutput]);
+  }, [output]);
 
   const dragHandlers = useMemo(
     () =>
