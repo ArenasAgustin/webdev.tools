@@ -1,4 +1,5 @@
 import { Suspense, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useParams } from "react-router-dom";
 import { PlaygroundLoader } from "@/components/common/PlaygroundLoader";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
@@ -9,6 +10,7 @@ import { useIdleCallback } from "@/hooks/useIdleCallback";
 import { getLocalizedString } from "@/types/playground";
 
 export function PlaygroundPage() {
+  const { t } = useTranslation();
   const { playgroundId } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const playground = getPlaygroundById(playgroundId ?? "");
@@ -24,15 +26,15 @@ export function PlaygroundPage() {
   );
 
   useDocumentMeta({
-    title: name ?? "Playground",
+    title: name ?? t("page.playground"),
     description: playground
-      ? `${description}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.`
-      : "Herramientas de desarrollo web online",
+      ? t("page.meta.description", { description })
+      : t("page.meta.descriptionFallback"),
     keywords:
       playground?.keywords ??
       (playground
-        ? `${name}, ${description}, herramientas desarrollo web online`
-        : "herramientas desarrollo web"),
+        ? t("page.meta.keywords", { name, description })
+        : t("page.meta.keywordsFallback")),
     ogUrl: playground
       ? `https://webdev.tools/playground/${playground.id}`
       : "https://webdev.tools/",
@@ -70,7 +72,7 @@ export function PlaygroundPage() {
           type="button"
           className="fixed inset-0 z-30 bg-black/50"
           onClick={() => setSidebarOpen(false)}
-          aria-label="Close sidebar overlay"
+          aria-label={t("page.closeSidebarOverlay")}
         ></button>
       ) : null}
 
@@ -78,7 +80,7 @@ export function PlaygroundPage() {
         type="button"
         className="fixed right-4 top-4 z-30 rounded-lg border border-white/10 bg-white/10 px-4 py-3 text-white/90 backdrop-blur-lg transition hover:bg-white/20"
         onClick={() => setSidebarOpen(true)}
-        aria-label="Open sidebar"
+        aria-label={t("page.openSidebar")}
       >
         <i className="fas fa-bars" aria-hidden="true"></i>
       </button>
@@ -87,7 +89,7 @@ export function PlaygroundPage() {
         <div className="container mx-auto flex flex-1 min-h-0 max-w-7xl flex-col gap-4 px-2 py-3 sm:px-4 sm:py-5">
           <header className="rounded-xl border border-white/5 bg-white/10 px-4 py-2 sm:py-3 shadow-2xl shadow-black/30 backdrop-blur-md">
             <p className="hidden sm:block text-xs uppercase tracking-[0.3em] text-cyan-200/70">
-              Playground
+              {t("page.playground")}
             </p>
             <div className="mt-1 sm:mt-2 flex items-center gap-3">
               <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-white/10 text-cyan-100">

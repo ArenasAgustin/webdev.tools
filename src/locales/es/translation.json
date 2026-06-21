@@ -134,7 +134,14 @@
     "input": "Entrada",
     "output": "Salida",
     "dropFileHere": "Soltar archivo aquí",
-    "outputIdle": "Formateá, minificá o ejecutá para ver un resultado"
+    "outputIdle": "Formateá, minificá o ejecutá para ver un resultado",
+    "inputPlaceholder": "Escribí tu {{language}} aquí...",
+    "waitingLabel": "Esperando {{language}}...",
+    "validLabel": "{{language}} válido",
+    "invalidLabel": "{{language}} inválido",
+    "outputPlaceholder": "El resultado se mostrará aquí...",
+    "closeDiff": "Cerrar",
+    "expandedTitle": "Resultado"
   },
   "password": {
     "aria": {
@@ -142,6 +149,120 @@
       "lowercase": "Incluir letras minúsculas",
       "numbers": "Incluir números",
       "symbols": "Incluir símbolos"
+    },
+    "placeholder": "Tu contraseña aparecerá aquí",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "generate": "Generar",
+    "copyPassword": "Copiar contraseña",
+    "copied": "Contraseña copiada",
+    "options": "Opciones",
+    "length": "Longitud:",
+    "charsetUppercase": "Mayúsculas (A-Z)",
+    "charsetLowercase": "Minúsculas (a-z)",
+    "charsetNumbers": "Números (0-9)",
+    "charsetSymbols": "Símbolos (!@#$%)",
+    "strength": "Fortaleza:",
+    "history": "Historial:"
+  },
+  "notifications": "Notificaciones",
+  "close_notification": "Cerrar notificación",
+  "stats": {
+    "smaller": "más pequeño",
+    "larger": "más grande",
+    "summary": "{{lines}} líneas · {{characters}} caracteres · {{bytes}}"
+  },
+  "home": {
+    "tagline": "Herramientas para desarrolladores web",
+    "headline": "Formatea, valida y transforma tu código al instante.",
+    "description": "Herramientas optimizadas para JSON, JavaScript, HTML y CSS. Sin instalación, 100% en el navegador.",
+    "meta": {
+      "description": "Suite de herramientas online para desarrolladores: formatear, minificar y filtrar JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador.",
+      "keywords": "JSON formatter, JSON minifier, JSONPath, JavaScript playground, herramientas desarrollo web, formatear JSON online"
     }
+  },
+  "error": {
+    "title": "Error en {{name}}",
+    "titleDefault": "Algo salió mal",
+    "message": "Ocurrió un error inesperado. Podés intentar recargar el playground o volver al inicio.",
+    "retry": "Reintentar",
+    "backToHome": "Inicio"
+  },
+  "hash": {
+    "inputTypeText": "Texto",
+    "inputTypeFile": "Archivo",
+    "inputPlaceholder": "Ingresá el texto para generar hashes...",
+    "fileDropLabel": "Seleccionar archivo — clic o arrastrar aquí",
+    "changeFile": "Cambiar archivo",
+    "dropFileHere": "Arrastrá un archivo o hacé clic aquí",
+    "uppercase": "Mayúsculas",
+    "generate": "Generar",
+    "results": "Resultados",
+    "copyHash": "Copiar hash {{algorithm}}",
+    "copyError": "No se pudo copiar al portapapeles",
+    "compareTitle": "Comparar Hash",
+    "comparePlaceholder": "Ingresá un hash para comparar...",
+    "compareAction": "Comparar",
+    "matchSuccess": "El hash coincide",
+    "matchFail": "El hash NO coincide"
+  },
+  "colors": {
+    "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
+    "copy": "Copiar {{format}}"
+  },
+  "html": {
+    "previewLabel": "Vista previa",
+    "resultLabel": "Resultado",
+    "domInspection": "Inspección DOM",
+    "noElements": "Sin elementos para inspeccionar",
+    "viewPreview": "Ver vista previa",
+    "viewResult": "Ver resultado"
+  },
+  "sql": {
+    "result": "Resultado",
+    "loading": "Cargando motor SQLite...",
+    "executionError": "Error de ejecución",
+    "sqlError": "Error SQL",
+    "truncated": "Resultado truncado a {{count}} filas"
+  },
+  "json": {
+    "filterTitle": "Filtro JSONPath",
+    "filterHistory": "Historial de filtros",
+    "filterTips": "Ver tips de filtros",
+    "filterExpression": "Expresion JSONPath",
+    "filterPlaceholder": "Ej: $.users[0].name",
+    "applyFilter": "Aplicar filtro JSONPath",
+    "tipsTitle": "Tips para Filtros JSONPath",
+    "noHistory": "No hay historial reciente",
+    "reuseFilter": "Reutilizar filtro",
+    "deleteFilter": "Borrar filtro",
+    "historyTitle": "Historial de Filtros",
+    "clearHistory": "Borrar Historial"
+  },
+  "loader": {
+    "loading": "Cargando {{name}} Tools",
+    "preparing": "Preparando el playground..."
+  },
+  "card": {
+    "playground": "Playground"
+  },
+  "page": {
+    "playground": "Playground",
+    "closeSidebarOverlay": "Cerrar overlay del panel",
+    "openSidebar": "Abrir panel",
+    "meta": {
+      "description": "{{description}}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.",
+      "descriptionFallback": "Herramientas de desarrollo web online",
+      "keywords": "{{name}}, {{description}}, herramientas desarrollo web online",
+      "keywordsFallback": "herramientas desarrollo web"
+    }
+  },
+  "offline": {
+    "message": "Sin conexión — las herramientas siguen funcionando localmente"
+  },
+  "install": {
+    "title": "Instalar webdev.tools",
+    "action": "Instalar",
+    "dismiss": "Descartar"
   }
 }
