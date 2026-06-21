@@ -76,7 +76,7 @@ export const GenericEditors = memo(function GenericEditors({
   language,
   inputTitle,
   inputPlaceholder,
-  outputPlaceholder = "El resultado se mostrará aquí...",
+  outputPlaceholder: outputPlaceholderProp,
   waitingLabel,
   validLabel,
   invalidLabel,
@@ -99,6 +99,7 @@ export const GenericEditors = memo(function GenericEditors({
   outputFromExecution = false,
 }: GenericEditorsProps) {
   const { t } = useTranslation();
+  const outputPlaceholder = outputPlaceholderProp ?? t("editor.outputPlaceholder");
   const ownEditor = useExpandedEditor();
   const editor = editorState ?? ownEditor;
   const inputStats = useTextStats(input);
@@ -186,7 +187,7 @@ export const GenericEditors = memo(function GenericEditors({
 
   const defaultOutputPanel = (
     <Panel
-      title="Resultado"
+      title={t("editor.expandedTitle")}
       icon="terminal"
       iconColor="green-400"
       actions={output ? outputActions(() => editor.expand("output")) : undefined}
@@ -219,7 +220,7 @@ export const GenericEditors = memo(function GenericEditors({
           language={language}
           onClose={diffModal.close}
           actions={
-            <Button variant="primary" onClick={diffModal.close} aria-label="Cerrar">
+            <Button variant="primary" onClick={diffModal.close} aria-label={t("editor.closeDiff")}>
               <i className="fas fa-times" aria-hidden="true"></i>
             </Button>
           }
@@ -252,7 +253,7 @@ export const GenericEditors = memo(function GenericEditors({
 
       {editor.isExpanded("output") && (
         <ExpandedEditorModal
-          title="Resultado"
+          title={t("editor.expandedTitle")}
           icon="terminal"
           iconColor="green-400"
           onClose={editor.collapse}

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { hashConfig } from "./hash.config";
 import {
   generateAllHashes,
@@ -12,6 +13,7 @@ import { usePersistedState } from "@/hooks/usePersistedState";
 import { STORAGE_KEYS } from "@/services/storage";
 
 export function HashPlayground() {
+  const { t } = useTranslation();
   const [inputMode, setInputMode] = usePersistedState<InputMode>(STORAGE_KEYS.HASH_INPUT_MODE, "text");
   const [textInput, setTextInput] = usePersistedState(STORAGE_KEYS.HASH_TEXT_INPUT, hashConfig.example);
   const [fileInput, setFileInput] = useState<File | null>(null);
@@ -109,7 +111,7 @@ export function HashPlayground() {
               : "bg-white/10 text-gray-300 hover:bg-white/20"
           }`}
         >
-          Texto
+          {t("hash.inputTypeText")}
         </button>
         <button
           type="button"
@@ -120,7 +122,7 @@ export function HashPlayground() {
               : "bg-white/10 text-gray-300 hover:bg-white/20"
           }`}
         >
-          Archivo
+          {t("hash.inputTypeFile")}
         </button>
       </div>
 
@@ -130,7 +132,7 @@ export function HashPlayground() {
           <textarea
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
-            placeholder="Ingresa el texto para generar hashes..."
+            placeholder={t("hash.inputPlaceholder")}
             className="w-full h-32 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono resize-none focus:outline-none focus:ring-1 focus:ring-cyan-400"
             spellCheck={false}
           />
@@ -160,7 +162,7 @@ export function HashPlayground() {
                 },
                 role: "button" as const,
                 tabIndex: 0,
-                "aria-label": "Seleccionar archivo — clic o arrastrar aquí",
+                "aria-label": t("hash.fileDropLabel"),
               })}
               className="w-full h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-400"
             >
@@ -176,13 +178,13 @@ export function HashPlayground() {
                     }}
                     className="text-cyan-400 text-sm mt-2 hover:underline"
                   >
-                    Cambiar archivo
+                    {t("hash.changeFile")}
                   </button>
                 </div>
               ) : (
                 <>
                   <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                  <p className="text-gray-400">Arrastrá un archivo o hacé clic aquí</p>
+                  <p className="text-gray-400">{t("hash.dropFileHere")}</p>
                 </>
               )}
             </div>
@@ -198,7 +200,7 @@ export function HashPlayground() {
               onChange={(e) => setOutputCase(e.target.checked ? "uppercase" : "lowercase")}
               className="w-4 h-4 rounded bg-white/10 border-white/20"
             />
-            Mayúsculas
+            {t("hash.uppercase")}
           </label>
 
           <button
@@ -212,7 +214,7 @@ export function HashPlayground() {
             ) : (
               <i className="fas fa-cog mr-2"></i>
             )}
-            Generar
+            {t("hash.generate")}
           </button>
         </div>
       </div>
@@ -220,7 +222,7 @@ export function HashPlayground() {
       {/* Results */}
       {results.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-white font-medium">Resultados</h3>
+          <h3 className="text-white font-medium">{t("hash.results")}</h3>
           {results.map((result) => (
             <div
               key={result.algorithm}
@@ -236,8 +238,8 @@ export function HashPlayground() {
                 type="button"
                 onClick={() => copyToClipboard(result.hash)}
                 className="ml-3 text-gray-400 hover:text-white transition-colors"
-                title="Copiar"
-                aria-label={`Copiar hash ${result.algorithm}`}
+                title={t("hash.copyHash", { algorithm: result.algorithm })}
+                aria-label={t("hash.copyHash", { algorithm: result.algorithm })}
               >
                 <i className="fas fa-copy"></i>
               </button>
@@ -247,17 +249,17 @@ export function HashPlayground() {
       )}
 
       {/* Clipboard error feedback */}
-      {clipboardError && <p className="text-red-400 text-sm">No se pudo copiar al portapapeles</p>}
+      {clipboardError && <p className="text-red-400 text-sm">{t("hash.copyError")}</p>}
 
       {/* Compare Section */}
       <div className="flex flex-col gap-2 mt-4 p-4 bg-white/5 rounded-lg">
-        <h3 className="text-white font-medium">Comparar Hash</h3>
+        <h3 className="text-white font-medium">{t("hash.compareTitle")}</h3>
         <div className="flex gap-2">
           <input
             type="text"
             value={compareValue}
             onChange={(e) => setCompareValue(e.target.value)}
-            placeholder="Ingresa un hash para comparar..."
+            placeholder={t("hash.comparePlaceholder")}
             className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400"
           />
           <button
@@ -265,12 +267,12 @@ export function HashPlayground() {
             onClick={handleCompare}
             className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors"
           >
-            Comparar
+            {t("hash.compareAction")}
           </button>
         </div>
         {compareResult !== null && (
           <p className={`text-sm font-medium ${compareResult ? "text-green-400" : "text-red-400"}`}>
-            {compareResult ? "✅ El hash coincide" : "❌ El hash NO coincide"}
+            {compareResult ? `✅ ${t("hash.matchSuccess")}` : `❌ ${t("hash.matchFail")}`}
           </p>
         )}
       </div>

@@ -48,7 +48,7 @@ describe("HashPlayground persistence", () => {
     render(<HashPlayground />);
 
     // The hash textarea is identified by its placeholder
-    const textarea = screen.getByPlaceholderText(/ingresa el texto/i);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
     expect(textarea).toHaveValue("hello world");
 
     // outputCase uppercase → checkbox "Mayúsculas" should be checked

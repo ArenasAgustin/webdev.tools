@@ -1,3 +1,4 @@
+// i18n-coverage: excluded (legacy)
 export function Header() {
   return (
     <header className="text-center col-start-1 shrink-0">

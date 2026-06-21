@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { GenericPlayground } from "../GenericPlayground";
 import { htmlEngine } from "../engines/html.engine";
 import { Panel } from "@/components/layout/Panel";
@@ -38,6 +39,7 @@ function inspectDom(source: string): string | null {
  * HTML Playground - Uses GenericPlayground with custom output panel
  */
 export function HtmlPlayground() {
+  const { t } = useTranslation();
   const [showPreview, setShowPreview] = useState(false);
 
   const renderOutputActions = useCallback(() => {
@@ -45,13 +47,13 @@ export function HtmlPlayground() {
       <Button
         variant="cyan"
         onClick={() => setShowPreview(true)}
-        aria-label="Ver vista previa"
-        title="Ver vista previa"
+        aria-label={t("html.viewPreview")}
+        title={t("html.viewPreview")}
       >
         <i className="fas fa-eye"></i>
       </Button>
     );
-  }, []);
+  }, [t]);
 
   const renderOutputPanel = useCallback(
     (props: {
@@ -71,15 +73,15 @@ export function HtmlPlayground() {
       if (showPreview) {
         return (
           <Panel
-            title="Vista previa"
+            title={t("html.previewLabel")}
             icon="eye"
             iconColor="cyan-400"
             actions={
               <Button
                 variant="primary"
                 onClick={() => setShowPreview(false)}
-                aria-label="Ver resultado"
-                title="Ver resultado"
+                aria-label={t("html.viewResult")}
+                title={t("html.viewResult")}
               >
                 <i className="fas fa-terminal"></i>
               </Button>
@@ -87,17 +89,17 @@ export function HtmlPlayground() {
           >
             <div className="flex h-full min-h-[220px] flex-col gap-2">
               <iframe
-                title="Vista previa HTML"
+                title={t("html.previewLabel")}
                 srcDoc={previewSource}
                 sandbox="allow-scripts"
                 className="h-full min-h-[150px] w-full rounded-lg border border-white/10 bg-white"
               />
               <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80">
-                <div className="mb-1 font-medium text-cyan-300">Inspección DOM</div>
+                <div className="mb-1 font-medium text-cyan-300">{t("html.domInspection")}</div>
                 {domInspection ? (
                   <span data-testid="dom-inspection-summary">{domInspection}</span>
                 ) : (
-                  <span className="text-gray-400">Sin elementos para inspeccionar</span>
+                  <span className="text-gray-400">{t("html.noElements")}</span>
                 )}
               </div>
             </div>
@@ -107,7 +109,7 @@ export function HtmlPlayground() {
 
       return (
         <Panel
-          title="Resultado"
+          title={t("html.resultLabel")}
           icon="terminal"
           iconColor="green-400"
           actions={
@@ -121,8 +123,8 @@ export function HtmlPlayground() {
               <Button
                 variant="cyan"
                 onClick={() => setShowPreview(true)}
-                aria-label="Ver vista previa"
-                title="Ver vista previa"
+                aria-label={t("html.viewPreview")}
+                title={t("html.viewPreview")}
               >
                 <i className="fas fa-eye"></i>
               </Button>
@@ -143,12 +145,12 @@ export function HtmlPlayground() {
             value={props.output}
             language="html"
             readOnly={true}
-            placeholder="El resultado se mostrará aquí..."
+            placeholder={t("editor.outputPlaceholder")}
           />
         </Panel>
       );
     },
-    [showPreview],
+    [showPreview, t],
   );
 
   return (

@@ -83,14 +83,14 @@ export function PasswordPlayground() {
             type={showPassword ? "text" : "password"}
             value={password}
             readOnly
-            placeholder="Tu contraseña aparecerá aquí"
+            placeholder={t("password.placeholder")}
             className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-3 text-white font-mono text-lg focus:outline-none focus:ring-1 focus:ring-cyan-400"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="p-3 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-colors"
-            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            aria-label={showPassword ? t("password.hidePassword") : t("password.showPassword")}
           >
             <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
           </button>
@@ -100,7 +100,7 @@ export function PasswordPlayground() {
             className="px-4 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
           >
             <i className="fas fa-sync-alt mr-2"></i>
-            Generar
+            {t("password.generate")}
           </button>
           <button
             type="button"
@@ -109,7 +109,7 @@ export function PasswordPlayground() {
             className={`p-3 rounded-lg transition-colors ${
               copied ? "bg-green-500 text-white" : "bg-white/10 hover:bg-white/20 text-gray-300"
             }`}
-            aria-label={copied ? "Contraseña copiada" : "Copiar contraseña"}
+            aria-label={copied ? t("password.copied") : t("password.copyPassword")}
           >
             <i className={`fas ${copied ? "fa-check" : "fa-copy"}`}></i>
           </button>
@@ -118,11 +118,11 @@ export function PasswordPlayground() {
 
       {/* Options */}
       <div className="flex flex-col gap-4">
-        <h3 className="text-white font-medium">Opciones</h3>
+        <h3 className="text-white font-medium">{t("password.options")}</h3>
 
         {/* Length Slider */}
         <div className="flex items-center gap-4">
-          <label className="text-gray-300 w-24">Longitud:</label>
+          <label className="text-gray-300 w-24">{t("password.length")}</label>
           <input
             type="range"
             min="8"
@@ -144,7 +144,7 @@ export function PasswordPlayground() {
               className="w-4 h-4 rounded bg-white/10 border-white/20"
               aria-label={t("password.aria.uppercase")}
             />
-            Mayúsculas (A-Z)
+            {t("password.charsetUppercase")}
           </label>
           <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
             <input
@@ -154,7 +154,7 @@ export function PasswordPlayground() {
               className="w-4 h-4 rounded bg-white/10 border-white/20"
               aria-label={t("password.aria.lowercase")}
             />
-            Minúsculas (a-z)
+            {t("password.charsetLowercase")}
           </label>
           <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
             <input
@@ -164,7 +164,7 @@ export function PasswordPlayground() {
               className="w-4 h-4 rounded bg-white/10 border-white/20"
               aria-label={t("password.aria.numbers")}
             />
-            Números (0-9)
+            {t("password.charsetNumbers")}
           </label>
           <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
             <input
@@ -174,7 +174,7 @@ export function PasswordPlayground() {
               className="w-4 h-4 rounded bg-white/10 border-white/20"
               aria-label={t("password.aria.symbols")}
             />
-            Símbolos (!@#$%)
+            {t("password.charsetSymbols")}
           </label>
         </div>
       </div>
@@ -183,7 +183,7 @@ export function PasswordPlayground() {
       {password && strengthResult && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <span className="text-gray-300">Fortaleza:</span>
+            <span className="text-gray-300">{t("password.strength")}</span>
             <div className="flex-1 h-2 bg-white/10 rounded-lg overflow-hidden">
               <div
                 className={`h-full ${getStrengthColor(strengthResult.strength)} transition-all`}
@@ -200,7 +200,7 @@ export function PasswordPlayground() {
       {/* History */}
       {history.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-gray-300 text-sm">Historial:</h3>
+          <h3 className="text-gray-300 text-sm">{t("password.history")}</h3>
           <div className="flex flex-wrap gap-2">
             {history.map((entry) => (
               <button

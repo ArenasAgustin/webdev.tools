@@ -70,6 +70,52 @@ const translations: Record<string, string | ((count: number) => string)> = {
   "hex_rgb_hsl_placeholder": "HEX, RGB, HSL",
 };
 
+// New i18n keys added by i18n-coverage change
+const newI18nKeys: Record<string, string | ((vars?: Record<string, unknown>) => string)> = {
+  // Stats
+  "stats.smaller": "más pequeño",
+  "stats.larger": "más grande",
+  "stats.summary": (vars?: Record<string, unknown>) =>
+    `${vars?.lines ?? ""} líneas · ${vars?.characters ?? ""} caracteres · ${vars?.bytes ?? ""}`,
+  // Toast / notifications
+  "notifications": "Notificaciones",
+  "close_notification": "Cerrar notificación",
+  // Editor
+  "editor.outputPlaceholder": "El resultado se mostrará aquí...",
+  "editor.closeDiff": "Cerrar",
+  "editor.expandedTitle": "Resultado",
+  "editor.inputPlaceholder": (vars?: Record<string, unknown>) => `Escribí tu ${vars?.language ?? ""} aquí...`,
+  "editor.waitingLabel": (vars?: Record<string, unknown>) => `Esperando ${vars?.language ?? ""}...`,
+  "editor.validLabel": (vars?: Record<string, unknown>) => `${vars?.language ?? ""} válido`,
+  "editor.invalidLabel": (vars?: Record<string, unknown>) => `${vars?.language ?? ""} inválido`,
+  // JSON
+  "json.historyTitle": "Historial de Filtros",
+  "json.clearHistory": "Borrar Historial",
+  "json.noHistory": "No hay historial reciente",
+  "json.reuseFilter": "Reutilizar filtro",
+  "json.deleteFilter": "Borrar filtro",
+  "json.filterTitle": "Filtro JSONPath",
+  "json.filterHistory": "Historial de filtros",
+  "json.filterTips": "Ver tips de filtros",
+  "json.filterExpression": "Expresion JSONPath",
+  "json.filterPlaceholder": "Ej: $.users[0].name",
+  "json.applyFilter": "Aplicar filtro JSONPath",
+  "json.tipsTitle": "Tips para Filtros JSONPath",
+  // SQL
+  "sql.result": "Resultado",
+  "sql.loading": "Cargando motor SQLite...",
+  "sql.executionError": "Error de ejecución",
+  "sql.sqlError": "Error SQL",
+  "sql.truncated": (vars?: Record<string, unknown>) => `Resultado truncado a ${vars?.count ?? 1000} filas`,
+  // HTML
+  "html.previewLabel": "Vista previa",
+  "html.resultLabel": "Resultado",
+  "html.domInspection": "Inspección DOM",
+  "html.noElements": "Sin elementos para inspeccionar",
+  "html.viewPreview": "Ver vista previa",
+  "html.viewResult": "Ver resultado",
+};
+
 // Mock simplificado de i18n para tests
 const timestampPlaygroundTexts: Record<string, string> = {
   "Convertir": "Convertir",
@@ -81,9 +127,13 @@ const timestampPlaygroundTexts: Record<string, string> = {
 };
 
 export const i18nMock = {
-  t: (key: string) => {
+  t: (key: string, vars?: Record<string, unknown>) => {
+    if (newI18nKeys[key]) {
+      const val = newI18nKeys[key];
+      return typeof val === 'function' ? (val as (v?: Record<string, unknown>) => string)(vars) : val;
+    }
     if (translations[key]) {
-      return typeof translations[key] === 'function' ? translations[key](1) : translations[key];
+      return typeof translations[key] === 'function' ? (translations[key] as (count: number) => string)(1) : translations[key] as string;
     }
     if (timestampPlaygroundTexts[key]) {
       return timestampPlaygroundTexts[key];

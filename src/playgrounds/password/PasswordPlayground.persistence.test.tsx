@@ -20,8 +20,25 @@ vi.mock("@/services/storage", () => ({
   },
 }));
 
+const esTranslations: Record<string, string> = {
+  "password.placeholder": "Tu contraseña aparecerá aquí",
+  "password.showPassword": "Mostrar contraseña",
+  "password.hidePassword": "Ocultar contraseña",
+  "password.generate": "Generar",
+  "password.copyPassword": "Copiar contraseña",
+  "password.copied": "Contraseña copiada",
+  "password.options": "Opciones",
+  "password.length": "Longitud:",
+  "password.charsetUppercase": "Mayúsculas (A-Z)",
+  "password.charsetLowercase": "Minúsculas (a-z)",
+  "password.charsetNumbers": "Números (0-9)",
+  "password.charsetSymbols": "Símbolos (!@#$%)",
+  "password.strength": "Fortaleza:",
+  "password.history": "Historial:",
+};
+
 vi.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (k: string) => k }),
+  useTranslation: () => ({ t: (k: string) => esTranslations[k] ?? k }),
 }));
 
 vi.mock("@/hooks/useDebouncedValue", () => ({
