@@ -137,6 +137,127 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "editor.error": "Error",
         "editor.valid": "Válido",
         "editor.invalid": "Inválido",
+        "editor.lines": "líneas",
+        "editor.characters": "caracteres",
+        "editor.bytes": "bytes",
+        "editor.input": "Entrada",
+        "editor.outputIdle": "Formateá, minificá o ejecutá para ver un resultado",
+        "editor.dropFileHere": "Soltar archivo aquí",
+        "editor.inputPlaceholder": "Escribí tu {{language}} aquí...",
+        "editor.waitingLabel": "Esperando {{language}}...",
+        "editor.validLabel": "{{language}} válido",
+        "editor.invalidLabel": "{{language}} inválido",
+        "editor.outputPlaceholder": "El resultado se mostrará aquí...",
+        "editor.closeDiff": "Cerrar",
+        "editor.expandedTitle": "Resultado",
+
+        // Notifications / Toast
+        "notifications": "Notificaciones",
+        "close_notification": "Cerrar notificación",
+
+        // Stats
+        "stats.smaller": "más pequeño",
+        "stats.larger": "más grande",
+        "stats.summary": "{{lines}} líneas · {{characters}} caracteres · {{bytes}}",
+
+        // Home
+        "home.tagline": "Herramientas para desarrolladores web",
+        "home.headline": "Formatea, valida y transforma tu código al instante.",
+        "home.description": "Herramientas optimizadas para JSON, JavaScript, HTML y CSS. Sin instalación, 100% en el navegador.",
+
+        // Error
+        "error.title": "Error en {{name}}",
+        "error.titleDefault": "Algo salió mal",
+        "error.message": "Ocurrió un error inesperado. Podés intentar recargar el playground o volver al inicio.",
+        "error.retry": "Reintentar",
+        "error.backToHome": "Inicio",
+
+        // Hash
+        "hash.inputTypeText": "Texto",
+        "hash.inputTypeFile": "Archivo",
+        "hash.inputPlaceholder": "Ingresá el texto para generar hashes...",
+        "hash.fileDropLabel": "Seleccionar archivo — clic o arrastrar aquí",
+        "hash.changeFile": "Cambiar archivo",
+        "hash.dropFileHere": "Arrastrá un archivo o hacé clic aquí",
+        "hash.uppercase": "Mayúsculas",
+        "hash.generate": "Generar",
+        "hash.results": "Resultados",
+        "hash.copyHash": "Copiar hash {{algorithm}}",
+        "hash.copyError": "No se pudo copiar al portapapeles",
+        "hash.compareTitle": "Comparar Hash",
+        "hash.comparePlaceholder": "Ingresá un hash para comparar...",
+        "hash.compareAction": "Comparar",
+        "hash.matchSuccess": "El hash coincide",
+        "hash.matchFail": "El hash NO coincide",
+
+        // Password
+        "password.placeholder": "Tu contraseña aparecerá aquí",
+        "password.showPassword": "Mostrar contraseña",
+        "password.hidePassword": "Ocultar contraseña",
+        "password.generate": "Generar",
+        "password.copyPassword": "Copiar contraseña",
+        "password.copied": "Contraseña copiada",
+        "password.options": "Opciones",
+        "password.length": "Longitud:",
+        "password.charsetUppercase": "Mayúsculas (A-Z)",
+        "password.charsetLowercase": "Minúsculas (a-z)",
+        "password.charsetNumbers": "Números (0-9)",
+        "password.charsetSymbols": "Símbolos (!@#$%)",
+        "password.strength": "Fortaleza:",
+        "password.history": "Historial:",
+        "password.aria.uppercase": "Incluir letras mayúsculas",
+        "password.aria.lowercase": "Incluir letras minúsculas",
+        "password.aria.numbers": "Incluir números",
+        "password.aria.symbols": "Incluir símbolos",
+
+        // Colors
+        "colors.placeholder": "HEX, RGB, HSL, HSV, CMYK...",
+        "colors.copy": "Copiar {{format}}",
+
+        // HTML
+        "html.previewLabel": "Vista previa",
+        "html.resultLabel": "Resultado",
+        "html.domInspection": "Inspección DOM",
+        "html.noElements": "Sin elementos para inspeccionar",
+        "html.viewPreview": "Ver vista previa",
+        "html.viewResult": "Ver resultado",
+
+        // SQL
+        "sql.result": "Resultado",
+        "sql.loading": "Cargando motor SQLite...",
+        "sql.executionError": "Error de ejecución",
+        "sql.sqlError": "Error SQL",
+        "sql.truncated": "Resultado truncado a {{count}} filas",
+
+        // JSON
+        "json.filterTitle": "Filtro JSONPath",
+        "json.filterHistory": "Historial de filtros",
+        "json.filterTips": "Ver tips de filtros",
+        "json.filterExpression": "Expresion JSONPath",
+        "json.filterPlaceholder": "Ej: $.users[0].name",
+        "json.applyFilter": "Aplicar filtro JSONPath",
+        "json.tipsTitle": "Tips para Filtros JSONPath",
+        "json.noHistory": "No hay historial reciente",
+        "json.reuseFilter": "Reutilizar filtro",
+        "json.deleteFilter": "Borrar filtro",
+        "json.historyTitle": "Historial de Filtros",
+        "json.clearHistory": "Borrar Historial",
+
+        // Loader
+        "loader.loading": "Cargando {{name}} Tools",
+        "loader.preparing": "Preparando el playground...",
+
+        // Card / Page
+        "card.playground": "Playground",
+        "page.playground": "Playground",
+        "page.closeSidebarOverlay": "Cerrar overlay del panel",
+        "page.openSidebar": "Abrir panel",
+
+        // Offline / Install
+        "offline.message": "Sin conexión — las herramientas siguen funcionando localmente",
+        "install.title": "Instalar webdev.tools",
+        "install.action": "Instalar",
+        "install.dismiss": "Descartar",
 
         // Language
         "language.select": "Seleccionar idioma",
@@ -257,6 +378,127 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "editor.error": "Error",
         "editor.valid": "Valid",
         "editor.invalid": "Invalid",
+        "editor.lines": "lines",
+        "editor.characters": "characters",
+        "editor.bytes": "bytes",
+        "editor.input": "Input",
+        "editor.outputIdle": "Format, minify, or run to see a result",
+        "editor.dropFileHere": "Drop file here",
+        "editor.inputPlaceholder": "Write your {{language}} here...",
+        "editor.waitingLabel": "Waiting for {{language}}...",
+        "editor.validLabel": "{{language}} valid",
+        "editor.invalidLabel": "{{language}} invalid",
+        "editor.outputPlaceholder": "The result will appear here...",
+        "editor.closeDiff": "Close",
+        "editor.expandedTitle": "Result",
+
+        // Notifications / Toast
+        "notifications": "Notifications",
+        "close_notification": "Close notification",
+
+        // Stats
+        "stats.smaller": "smaller",
+        "stats.larger": "larger",
+        "stats.summary": "{{lines}} lines · {{characters}} characters · {{bytes}}",
+
+        // Home
+        "home.tagline": "Web developer tools",
+        "home.headline": "Format, validate and transform your code instantly.",
+        "home.description": "Optimized tools for JSON, JavaScript, HTML and CSS. No installation, 100% in the browser.",
+
+        // Error
+        "error.title": "Error in {{name}}",
+        "error.titleDefault": "Something went wrong",
+        "error.message": "An unexpected error occurred. You can try reloading the playground or return to the home page.",
+        "error.retry": "Retry",
+        "error.backToHome": "Home",
+
+        // Hash
+        "hash.inputTypeText": "Text",
+        "hash.inputTypeFile": "File",
+        "hash.inputPlaceholder": "Enter text to generate hashes...",
+        "hash.fileDropLabel": "Select file — click or drag here",
+        "hash.changeFile": "Change file",
+        "hash.dropFileHere": "Drag a file or click here",
+        "hash.uppercase": "Uppercase",
+        "hash.generate": "Generate",
+        "hash.results": "Results",
+        "hash.copyHash": "Copy hash {{algorithm}}",
+        "hash.copyError": "Could not copy to clipboard",
+        "hash.compareTitle": "Compare Hash",
+        "hash.comparePlaceholder": "Enter a hash to compare...",
+        "hash.compareAction": "Compare",
+        "hash.matchSuccess": "Hash matches",
+        "hash.matchFail": "Hash does NOT match",
+
+        // Password
+        "password.placeholder": "Your password will appear here",
+        "password.showPassword": "Show password",
+        "password.hidePassword": "Hide password",
+        "password.generate": "Generate",
+        "password.copyPassword": "Copy password",
+        "password.copied": "Password copied",
+        "password.options": "Options",
+        "password.length": "Length:",
+        "password.charsetUppercase": "Uppercase (A-Z)",
+        "password.charsetLowercase": "Lowercase (a-z)",
+        "password.charsetNumbers": "Numbers (0-9)",
+        "password.charsetSymbols": "Symbols (!@#$%)",
+        "password.strength": "Strength:",
+        "password.history": "History:",
+        "password.aria.uppercase": "Include uppercase letters",
+        "password.aria.lowercase": "Include lowercase letters",
+        "password.aria.numbers": "Include numbers",
+        "password.aria.symbols": "Include symbols",
+
+        // Colors
+        "colors.placeholder": "HEX, RGB, HSL, HSV, CMYK...",
+        "colors.copy": "Copy {{format}}",
+
+        // HTML
+        "html.previewLabel": "Preview",
+        "html.resultLabel": "Result",
+        "html.domInspection": "DOM Inspection",
+        "html.noElements": "No elements to inspect",
+        "html.viewPreview": "View preview",
+        "html.viewResult": "View result",
+
+        // SQL
+        "sql.result": "Result",
+        "sql.loading": "Loading SQLite engine...",
+        "sql.executionError": "Execution Error",
+        "sql.sqlError": "SQL Error",
+        "sql.truncated": "Result truncated to {{count}} rows",
+
+        // JSON
+        "json.filterTitle": "JSONPath Filter",
+        "json.filterHistory": "Filter history",
+        "json.filterTips": "View filter tips",
+        "json.filterExpression": "JSONPath expression",
+        "json.filterPlaceholder": "E.g.: $.users[0].name",
+        "json.applyFilter": "Apply JSONPath filter",
+        "json.tipsTitle": "Tips for JSONPath Filters",
+        "json.noHistory": "No recent history",
+        "json.reuseFilter": "Reuse filter",
+        "json.deleteFilter": "Delete filter",
+        "json.historyTitle": "Filter History",
+        "json.clearHistory": "Clear History",
+
+        // Loader
+        "loader.loading": "Loading {{name}} Tools",
+        "loader.preparing": "Preparing the playground...",
+
+        // Card / Page
+        "card.playground": "Playground",
+        "page.playground": "Playground",
+        "page.closeSidebarOverlay": "Close sidebar overlay",
+        "page.openSidebar": "Open sidebar",
+
+        // Offline / Install
+        "offline.message": "No connection — tools continue working locally",
+        "install.title": "Install webdev.tools",
+        "install.action": "Install",
+        "install.dismiss": "Dismiss",
 
         // Language
         "language.select": "Select language",

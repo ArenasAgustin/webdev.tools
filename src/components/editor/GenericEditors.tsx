@@ -1,4 +1,4 @@
-import { type ReactNode, memo, useState, useEffect, useMemo } from "react";
+import { type ReactNode, memo, useState, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Panel } from "@/components/layout/Panel";
 import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
@@ -76,7 +76,7 @@ export const GenericEditors = memo(function GenericEditors({
   language,
   inputTitle,
   inputPlaceholder,
-  outputPlaceholder = "El resultado se mostrará aquí...",
+  outputPlaceholder: outputPlaceholderProp,
   waitingLabel,
   validLabel,
   invalidLabel,
@@ -99,23 +99,23 @@ export const GenericEditors = memo(function GenericEditors({
   outputFromExecution = false,
 }: GenericEditorsProps) {
   const { t } = useTranslation();
+  const outputPlaceholder = outputPlaceholderProp ?? t("editor.outputPlaceholder");
   const ownEditor = useExpandedEditor();
   const editor = editorState ?? ownEditor;
   const inputStats = useTextStats(input);
   const outputStats = useTextStats(output);
   const [isDragOver, setIsDragOver] = useState(false);
   const [activeTab, setActiveTab] = useState<"input" | "output">("input");
-  const [prevOutput, setPrevOutput] = useState(output);
+  const prevOutputRef = useRef(output);
 
   // Auto-switch to output tab on first result (empty → non-empty transition only).
   useEffect(() => {
-    if (prevOutput !== output) {
-      setPrevOutput(output);
-      if (prevOutput === "" && output !== "") {
-        setActiveTab("output");
-      }
+    const prev = prevOutputRef.current;
+    prevOutputRef.current = output;
+    if (prev === "" && output !== "") {
+      setActiveTab("output");
     }
-  }, [output, prevOutput]);
+  }, [output]);
 
   const dragHandlers = useMemo(
     () =>
@@ -186,7 +186,7 @@ export const GenericEditors = memo(function GenericEditors({
 
   const defaultOutputPanel = (
     <Panel
-      title="Resultado"
+      title={t("editor.expandedTitle")}
       icon="terminal"
       iconColor="green-400"
       actions={output ? outputActions(() => editor.expand("output")) : undefined}
@@ -219,7 +219,7 @@ export const GenericEditors = memo(function GenericEditors({
           language={language}
           onClose={diffModal.close}
           actions={
-            <Button variant="primary" onClick={diffModal.close} aria-label="Cerrar">
+            <Button variant="primary" onClick={diffModal.close} aria-label={t("editor.closeDiff")}>
               <i className="fas fa-times" aria-hidden="true"></i>
             </Button>
           }
@@ -252,7 +252,7 @@ export const GenericEditors = memo(function GenericEditors({
 
       {editor.isExpanded("output") && (
         <ExpandedEditorModal
-          title="Resultado"
+          title={t("editor.expandedTitle")}
           icon="terminal"
           iconColor="green-400"
           onClose={editor.collapse}

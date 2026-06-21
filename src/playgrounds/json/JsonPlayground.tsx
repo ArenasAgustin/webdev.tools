@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { GenericPlayground } from "../GenericPlayground";
 import { jsonEngine } from "../engines/json.engine";
 import { TipsModal } from "@/components/common/TipsModal";
@@ -11,6 +12,7 @@ import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
  * JSON Playground - Uses GenericPlayground with JSONPath features
  */
 export function JsonPlayground() {
+  const { t } = useTranslation();
   const [jsonPathExpression, setJsonPathExpression] = useState("");
   const [jsonPathModal, setJsonPathModal] = useState<"tips" | "history" | null>(null);
   const jsonPathHistory = useJsonPathHistory();
@@ -33,14 +35,14 @@ export function JsonPlayground() {
       return (
         <div>
           <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <i className="fas fa-filter text-cyan-400"></i> Filtro JSONPath
+            <i className="fas fa-filter text-cyan-400"></i> {t("json.filterTitle")}
             <div className="ml-auto flex gap-2">
               <button
                 type="button"
                 onClick={handleShowHistory}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-cyan-300 transition-colors"
-                title="Historial de filtros"
-                aria-label="Historial de filtros"
+                title={t("json.filterHistory")}
+                aria-label={t("json.filterHistory")}
               >
                 <i className="fas fa-history" aria-hidden="true"></i>
               </button>
@@ -48,8 +50,8 @@ export function JsonPlayground() {
                 type="button"
                 onClick={handleShowTips}
                 className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-cyan-300 transition-colors"
-                title="Ver tips de filtros"
-                aria-label="Ver tips de filtros"
+                title={t("json.filterTips")}
+                aria-label={t("json.filterTips")}
               >
                 <i className="fas fa-question-circle" aria-hidden="true"></i>
               </button>
@@ -60,16 +62,16 @@ export function JsonPlayground() {
               type="text"
               value={jsonPathExpression}
               onChange={(e) => setJsonPathExpression(e.target.value)}
-              aria-label="Expresion JSONPath"
+              aria-label={t("json.filterExpression")}
               className="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
-              placeholder="Ej: $.users[0].name"
+              placeholder={t("json.filterPlaceholder")}
             />
             <Button
               variant="cyan"
               size="md"
               onClick={actions.handleApplyJsonPath}
-              aria-label="Aplicar filtro JSONPath"
-              title="Aplicar filtro JSONPath"
+              aria-label={t("json.applyFilter")}
+              title={t("json.applyFilter")}
             >
               <i className="fas fa-search" aria-hidden="true"></i>
             </Button>
@@ -77,7 +79,7 @@ export function JsonPlayground() {
         </div>
       );
     },
-    [jsonPathExpression, handleShowHistory, handleShowTips],
+    [jsonPathExpression, handleShowHistory, handleShowTips, t],
   );
 
   const renderModals = useCallback(() => {
@@ -85,7 +87,7 @@ export function JsonPlayground() {
       <TipsModal
         key="tips"
         isOpen={jsonPathModal === "tips"}
-        title="Tips para Filtros JSONPath"
+        title={t("json.tipsTitle")}
         icon="lightbulb"
         iconColor="yellow-400"
         tips={jsonPathTips}
@@ -109,7 +111,7 @@ export function JsonPlayground() {
         onClearAll={jsonPathHistory.clearHistory}
       />,
     ];
-  }, [jsonPathModal, jsonPathHistory, handleCloseJsonPathModal]);
+  }, [jsonPathModal, jsonPathHistory, handleCloseJsonPathModal, t]);
 
   return (
     <GenericPlayground

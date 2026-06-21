@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { HexColorPicker } from "react-colorful";
 import { colorsConfig } from "./colors.config";
 import { convertColor, getAllFormats, type ColorFormats } from "@/utils/colorConverter";
@@ -6,6 +7,7 @@ import { usePersistedState } from "@/hooks/usePersistedState";
 import { STORAGE_KEYS } from "@/services/storage";
 
 export function ColorsPlayground() {
+  const { t } = useTranslation();
   const [input, setInput] = usePersistedState(STORAGE_KEYS.COLORS_INPUT, colorsConfig.example);
   // Derive initial color from `input` (already loaded by usePersistedState above).
   // React guarantees sequential useState execution, so `input` is populated before
@@ -64,7 +66,7 @@ export function ColorsPlayground() {
           value={input}
           onChange={(e) => handleInputChange(e.target.value)}
           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono text-center focus:outline-none focus:ring-1 focus:ring-cyan-400"
-          placeholder="HEX, RGB, HSL, HSV, CMYK..."
+          placeholder={t("colors.placeholder")}
           spellCheck={false}
         />
         {/* Preview swatch */}
@@ -90,8 +92,8 @@ export function ColorsPlayground() {
                 type="button"
                 onClick={() => copyToClipboard(value)}
                 className="ml-3 text-gray-400 hover:text-white transition-colors"
-                title="Copiar"
-                aria-label={`Copiar ${format}`}
+                title={t("colors.copy", { format })}
+                aria-label={t("colors.copy", { format })}
               >
                 <i className="fas fa-copy"></i>
               </button>

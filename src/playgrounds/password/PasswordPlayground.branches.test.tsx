@@ -23,9 +23,28 @@ vi.mock("@/hooks/useDebouncedValue", () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));
 
+const esTranslations: Record<string, string> = {
+  "password.placeholder": "Tu contraseña aparecerá aquí",
+  "password.showPassword": "Mostrar contraseña",
+  "password.hidePassword": "Ocultar contraseña",
+  "password.generate": "Generar",
+  "password.copyPassword": "Copiar contraseña",
+  "password.copied": "Contraseña copiada",
+  "password.options": "Opciones",
+  "password.length": "Longitud:",
+  "password.charsetUppercase": "Mayúsculas (A-Z)",
+  "password.charsetLowercase": "Minúsculas (a-z)",
+  "password.charsetNumbers": "Números (0-9)",
+  "password.charsetSymbols": "Símbolos (!@#$%)",
+  "password.strength": "Fortaleza:",
+  "password.history": "Historial:",
+  // password.aria.* intentionally omitted — tests query checkboxes by key literal
+  // (mock falls back to key, so t("password.aria.uppercase") === "password.aria.uppercase")
+};
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (k: string) => k,
+    t: (k: string) => esTranslations[k] ?? k,
   }),
 }));
 

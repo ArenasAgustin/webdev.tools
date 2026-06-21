@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
 /**
@@ -5,6 +6,7 @@ import { useInstallPrompt } from "@/hooks/useInstallPrompt";
  * Appears when the browser fires beforeinstallprompt.
  */
 export function InstallPromptBanner() {
+  const { t } = useTranslation();
   const { canInstall, install, dismiss } = useInstallPrompt();
 
   if (!canInstall) return null;
@@ -12,22 +14,22 @@ export function InstallPromptBanner() {
   return (
     <div
       role="complementary"
-      aria-label="Instalar aplicación"
+      aria-label={t("install.title")}
       className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/5 rounded-2xl shadow-2xl shadow-black/30 px-4 py-3 animate-fade-in"
     >
       <i className="fas fa-download text-blue-400" aria-hidden="true" />
-      <span className="text-sm text-white/90">Instalar webdev.tools</span>
+      <span className="text-sm text-white/90">{t("install.title")}</span>
       <button
         type="button"
         onClick={install}
         className="px-3 py-1 text-xs rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 transition-colors"
       >
-        Instalar
+        {t("install.action")}
       </button>
       <button
         type="button"
         onClick={dismiss}
-        aria-label="Descartar"
+        aria-label={t("install.dismiss")}
         className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
       >
         <i className="fas fa-times text-xs" aria-hidden="true" />

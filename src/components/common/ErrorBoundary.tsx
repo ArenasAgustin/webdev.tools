@@ -1,16 +1,19 @@
 import { Component, type ReactNode } from "react";
+import { withTranslation, type WithTranslation } from "react-i18next";
 
-interface ErrorBoundaryProps {
+interface ErrorBoundaryOwnProps {
   children: ReactNode;
   name?: string;
 }
+
+type ErrorBoundaryProps = ErrorBoundaryOwnProps & WithTranslation;
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundaryBase extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -37,8 +40,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   render() {
+    const { t, name } = this.props;
+
     if (this.state.hasError) {
-      const { name } = this.props;
       return (
         <div className="flex min-h-[400px] flex-col items-center justify-center gap-6 rounded-xl border border-red-500/20 bg-red-500/5 p-8 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10">
@@ -46,11 +50,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
           <div className="space-y-2">
              <h2 className="text-lg font-semibold text-white" title={this.state.error?.message}>
-               {name ? `Error en ${name}` : "Algo salió mal"}
+               {name ? t("error.title", { name }) : t("error.titleDefault")}
              </h2>
             <p className="max-w-sm text-sm text-white/60">
-              Ocurrió un error inesperado. Puedes intentar recargar el playground o volver al
-              inicio.
+              {t("error.message")}
             </p>
             {this.state.error && (
               <p className="mt-2 max-w-sm truncate font-mono text-xs text-red-400/80">
@@ -65,14 +68,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm text-white transition hover:bg-white/20"
             >
               <i className="fas fa-rotate-right mr-2" aria-hidden="true"></i>
-              Reintentar
+              {t("error.retry")}
             </button>
             <a
               href="/"
               className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm text-white transition hover:bg-white/20"
             >
               <i className="fas fa-house mr-2" aria-hidden="true"></i>
-              Inicio
+              {t("error.backToHome")}
             </a>
           </div>
         </div>
@@ -82,3 +85,5 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return this.props.children;
   }
 }
+
+export const ErrorBoundary = withTranslation()(ErrorBoundaryBase);

@@ -1,5 +1,6 @@
 import { Modal } from "./Modal";
 import { memo, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { JsonPathHistoryItem } from "@/hooks/useJsonPathHistory";
 
 interface JsonPathHistoryModalProps {
@@ -19,11 +20,13 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
   onDelete,
   onClearAll,
 }: JsonPathHistoryModalProps) {
+  const { t } = useTranslation();
+
   const renderedHistory = useMemo(
     () =>
       history.length === 0 ? (
         <div className="text-center text-gray-500 italic py-4 text-xs">
-          No hay historial reciente
+          {t("json.noHistory")}
         </div>
       ) : (
         history.map((item) => (
@@ -35,7 +38,7 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
               type="button"
               onClick={() => onReuse(item.expression)}
               className="flex-1 text-left"
-              title="Reutilizar filtro"
+              title={t("json.reuseFilter")}
             >
               <code className="text-cyan-300 text-xs font-mono block mb-1 break-all">
                 {item.expression}
@@ -51,8 +54,8 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
                 type="button"
                 onClick={() => onReuse(item.expression)}
                 className="text-gray-600 group-hover:text-cyan-400 transition-colors text-xs"
-                title="Reutilizar"
-                aria-label="Reutilizar filtro"
+                title={t("json.reuseFilter")}
+                aria-label={t("json.reuseFilter")}
               >
                 <i className="fas fa-chevron-right" aria-hidden="true"></i>
               </button>
@@ -60,8 +63,8 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
                 type="button"
                 onClick={() => onDelete(item.id)}
                 className="text-gray-600 hover:text-red-400 transition-colors text-xs"
-                title="Borrar"
-                aria-label="Borrar filtro"
+                title={t("json.deleteFilter")}
+                aria-label={t("json.deleteFilter")}
               >
                 <i className="fas fa-trash" aria-hidden="true"></i>
               </button>
@@ -69,13 +72,13 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
           </div>
         ))
       ),
-    [history, onReuse, onDelete],
+    [history, onReuse, onDelete, t],
   );
 
   return (
     <Modal
       isOpen={isOpen}
-      title="Historial de Filtros"
+      title={t("json.historyTitle")}
       icon="history"
       iconColor="cyan-400"
       onClose={onClose}
@@ -86,7 +89,7 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
             onClick={onClearAll}
             className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors border border-red-500/30 text-xs"
           >
-            <i className="fas fa-trash-alt mr-1"></i> Borrar Historial
+            <i className="fas fa-trash-alt mr-1"></i> {t("json.clearHistory")}
           </button>
         </div>
       }

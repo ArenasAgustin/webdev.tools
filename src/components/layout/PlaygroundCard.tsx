@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { PlaygroundConfig } from "@/types/playground";
 import { getLocalizedString } from "@/types/playground";
 
@@ -6,6 +7,7 @@ interface PlaygroundCardProps {
 }
 
 export function PlaygroundCard({ playground }: PlaygroundCardProps) {
+  const { t } = useTranslation();
   const name = getLocalizedString(playground.name);
   const description = getLocalizedString(playground.description);
 
@@ -21,7 +23,7 @@ export function PlaygroundCard({ playground }: PlaygroundCardProps) {
             <i className={`${playground.icon} text-xl`}></i>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">Playground</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/70">{t("card.playground")}</p>
             <h3 className="text-xl font-semibold text-white">{name}</h3>
           </div>
         </div>

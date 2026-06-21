@@ -68,22 +68,22 @@ describe("HashPlayground branches", () => {
     render(<HashPlayground />);
 
     // Default is text mode — textarea visible
-    expect(screen.getByPlaceholderText(/ingresa el texto/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ingres[aá] el texto/i)).toBeInTheDocument();
 
     // Switch to file mode
     fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
-    expect(screen.queryByPlaceholderText(/ingresa el texto/i)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/ingres[aá] el texto/i)).not.toBeInTheDocument();
 
     // Switch back to text mode
     fireEvent.click(screen.getByRole("button", { name: /texto/i }));
-    expect(screen.getByPlaceholderText(/ingresa el texto/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ingres[aá] el texto/i)).toBeInTheDocument();
   });
 
   it("empty text guard returns early without calling generateAllHashes", async () => {
     render(<HashPlayground />);
 
     // Clear the textarea
-    const textarea = screen.getByPlaceholderText(/ingresa el texto/i);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
     fireEvent.change(textarea, { target: { value: "" } });
 
     await act(async () => {
@@ -96,7 +96,7 @@ describe("HashPlayground branches", () => {
   it("text mode: generates hashes and displays results", async () => {
     render(<HashPlayground />);
 
-    const textarea = screen.getByPlaceholderText(/ingresa el texto/i);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
     fireEvent.change(textarea, { target: { value: "hello" } });
 
     await act(async () => {
@@ -112,7 +112,7 @@ describe("HashPlayground branches", () => {
   it("outputCase toggle changes case argument passed to generateAllHashes", async () => {
     render(<HashPlayground />);
 
-    const textarea = screen.getByPlaceholderText(/ingresa el texto/i);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
     fireEvent.change(textarea, { target: { value: "test" } });
 
     // Enable uppercase
@@ -138,7 +138,7 @@ describe("HashPlayground branches", () => {
   it("clipboard copy success: copies hash value", async () => {
     render(<HashPlayground />);
 
-    const textarea = screen.getByPlaceholderText(/ingresa el texto/i);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
     fireEvent.change(textarea, { target: { value: "copy-test" } });
 
     await act(async () => {
@@ -158,7 +158,7 @@ describe("HashPlayground branches", () => {
 
     render(<HashPlayground />);
 
-    const textarea = screen.getByPlaceholderText(/ingresa el texto/i);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
     fireEvent.change(textarea, { target: { value: "error-test" } });
 
     await act(async () => {
@@ -182,14 +182,14 @@ describe("HashPlayground branches", () => {
   it("compare logic: shows match/no-match result", async () => {
     render(<HashPlayground />);
 
-    const textarea = screen.getByPlaceholderText(/ingresa el texto/i);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
     fireEvent.change(textarea, { target: { value: "compare-test" } });
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /generar/i }));
     });
 
-    const compareInput = screen.getByPlaceholderText(/ingresa un hash para comparar/i);
+    const compareInput = screen.getByPlaceholderText(/ingres[aá] un hash para comparar/i);
 
     // Compare with matching hash (sha1)
     fireEvent.change(compareInput, { target: { value: "aabbcc" } });

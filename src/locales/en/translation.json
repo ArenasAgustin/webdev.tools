@@ -134,7 +134,14 @@
     "input": "Input",
     "output": "Output",
     "dropFileHere": "Drop file here",
-    "outputIdle": "Format, minify, or run to see a result"
+    "outputIdle": "Format, minify, or run to see a result",
+    "inputPlaceholder": "Write your {{language}} here...",
+    "waitingLabel": "Waiting for {{language}}...",
+    "validLabel": "{{language}} valid",
+    "invalidLabel": "{{language}} invalid",
+    "outputPlaceholder": "The result will appear here...",
+    "closeDiff": "Close",
+    "expandedTitle": "Result"
   },
   "password": {
     "aria": {
@@ -142,6 +149,120 @@
       "lowercase": "Include lowercase letters",
       "numbers": "Include numbers",
       "symbols": "Include symbols"
+    },
+    "placeholder": "Your password will appear here",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "generate": "Generate",
+    "copyPassword": "Copy password",
+    "copied": "Password copied",
+    "options": "Options",
+    "length": "Length:",
+    "charsetUppercase": "Uppercase (A-Z)",
+    "charsetLowercase": "Lowercase (a-z)",
+    "charsetNumbers": "Numbers (0-9)",
+    "charsetSymbols": "Symbols (!@#$%)",
+    "strength": "Strength:",
+    "history": "History:"
+  },
+  "notifications": "Notifications",
+  "close_notification": "Close notification",
+  "stats": {
+    "smaller": "smaller",
+    "larger": "larger",
+    "summary": "{{lines}} lines · {{characters}} characters · {{bytes}}"
+  },
+  "home": {
+    "tagline": "Web developer tools",
+    "headline": "Format, validate and transform your code instantly.",
+    "description": "Optimized tools for JSON, JavaScript, HTML and CSS. No installation, 100% in the browser.",
+    "meta": {
+      "description": "Online tools for web developers: format, minify and filter JSON, run JavaScript, and more. No installation, 100% in the browser.",
+      "keywords": "JSON formatter, JSON minifier, JSONPath, JavaScript playground, web developer tools, format JSON online"
     }
+  },
+  "error": {
+    "title": "Error in {{name}}",
+    "titleDefault": "Something went wrong",
+    "message": "An unexpected error occurred. You can try reloading the playground or return to the home page.",
+    "retry": "Retry",
+    "backToHome": "Home"
+  },
+  "hash": {
+    "inputTypeText": "Text",
+    "inputTypeFile": "File",
+    "inputPlaceholder": "Enter text to generate hashes...",
+    "fileDropLabel": "Select file — click or drag here",
+    "changeFile": "Change file",
+    "dropFileHere": "Drag a file or click here",
+    "uppercase": "Uppercase",
+    "generate": "Generate",
+    "results": "Results",
+    "copyHash": "Copy hash {{algorithm}}",
+    "copyError": "Could not copy to clipboard",
+    "compareTitle": "Compare Hash",
+    "comparePlaceholder": "Enter a hash to compare...",
+    "compareAction": "Compare",
+    "matchSuccess": "Hash matches",
+    "matchFail": "Hash does NOT match"
+  },
+  "colors": {
+    "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
+    "copy": "Copy {{format}}"
+  },
+  "html": {
+    "previewLabel": "Preview",
+    "resultLabel": "Result",
+    "domInspection": "DOM Inspection",
+    "noElements": "No elements to inspect",
+    "viewPreview": "View preview",
+    "viewResult": "View result"
+  },
+  "sql": {
+    "result": "Result",
+    "loading": "Loading SQLite engine...",
+    "executionError": "Execution Error",
+    "sqlError": "SQL Error",
+    "truncated": "Result truncated to {{count}} rows"
+  },
+  "json": {
+    "filterTitle": "JSONPath Filter",
+    "filterHistory": "Filter history",
+    "filterTips": "View filter tips",
+    "filterExpression": "JSONPath expression",
+    "filterPlaceholder": "E.g.: $.users[0].name",
+    "applyFilter": "Apply JSONPath filter",
+    "tipsTitle": "Tips for JSONPath Filters",
+    "noHistory": "No recent history",
+    "reuseFilter": "Reuse filter",
+    "deleteFilter": "Delete filter",
+    "historyTitle": "Filter History",
+    "clearHistory": "Clear History"
+  },
+  "loader": {
+    "loading": "Loading {{name}} Tools",
+    "preparing": "Preparing the playground..."
+  },
+  "card": {
+    "playground": "Playground"
+  },
+  "page": {
+    "playground": "Playground",
+    "closeSidebarOverlay": "Close sidebar overlay",
+    "openSidebar": "Open sidebar",
+    "meta": {
+      "description": "{{description}}. Online tool for developers, no installation required. Part of webdev.tools.",
+      "descriptionFallback": "Online web development tools",
+      "keywords": "{{name}}, {{description}}, web developer tools online",
+      "keywordsFallback": "web developer tools"
+    }
+  },
+  "offline": {
+    "message": "No connection — tools continue working locally"
+  },
+  "install": {
+    "title": "Install webdev.tools",
+    "action": "Install",
+    "dismiss": "Dismiss"
   }
 }

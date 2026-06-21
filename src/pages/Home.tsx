@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { PlaygroundCard } from "@/components/layout/PlaygroundCard";
 import {
   playgroundRegistry,
@@ -9,12 +10,12 @@ import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
 
 export function Home() {
+  const { t } = useTranslation();
+
   useDocumentMeta({
     title: "webdev.tools",
-    description:
-      "Suite de herramientas online para desarrolladores: formatear, minificar y filtrar JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador.",
-    keywords:
-      "JSON formatter, JSON minifier, JSONPath, JavaScript playground, herramientas desarrollo web, formatear JSON online",
+    description: t("home.meta.description"),
+    keywords: t("home.meta.keywords"),
     ogUrl: "https://webdev.tools/",
   });
 
@@ -34,14 +35,13 @@ export function Home() {
         <div className="relative container mx-auto px-4 py-14 sm:py-20 h-full">
           <header className="mx-auto max-w-3xl text-center">
             <p className="text-xs uppercase tracking-[0.35em] text-cyan-200/70">
-              Herramientas para desarrolladores web
+              {t("home.tagline")}
             </p>
             <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              Formatea, valida y transforma tu código al instante.
+              {t("home.headline")}
             </h1>
             <p className="mt-4 text-base text-white/70 sm:text-lg">
-              Herramientas optimizadas para JSON, JavaScript, HTML y CSS. Sin instalación, 100% en
-              el navegador.
+              {t("home.description")}
             </p>
           </header>
 

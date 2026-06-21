@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo, useEffect, type ComponentProps } from "react";
+import { useState, useCallback, useMemo, type ComponentProps } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { PlaygroundLayout } from "@/components/layout/PlaygroundLayout";
 import { GenericEditors } from "@/components/editor/GenericEditors";
@@ -57,6 +58,7 @@ export function GenericPlayground({
   renderOutputPanel,
   renderModals,
 }: GenericPlaygroundProps) {
+  const { t } = useTranslation();
   // Check features
   const hasExecute = engine.features.includes("execute");
   const hasMinify = engine.features.includes("minify");
@@ -116,12 +118,10 @@ export function GenericPlayground({
   // Reset during render when input changes (React's "adjust state on prop change"
   // pattern) instead of an effect, avoiding a cascading re-render.
   const [prevInput, setPrevInput] = useState(ctx.input);
-  useEffect(() => {
-    if (ctx.input !== prevInput) {
-      setPrevInput(ctx.input);
-      setOutputFromExecution(false);
-    }
-  }, [ctx.input, prevInput]);
+  if (prevInput !== ctx.input) {
+    setPrevInput(ctx.input);
+    setOutputFromExecution(false);
+  }
 
   const trackOutput = useCallback(
     (handler: (() => void) | undefined, fromExecution: boolean) =>
@@ -231,10 +231,10 @@ export function GenericPlayground({
             inputWarning={ctx.inputWarning}
             language={engine.editorLanguage}
             inputTitle={engine.fileConfig.language}
-            inputPlaceholder={`Escribe tu ${engine.fileConfig.language} aquí...`}
-            waitingLabel={`Esperando ${engine.fileConfig.language}...`}
-            validLabel={`${engine.fileConfig.language} válido`}
-            invalidLabel={`${engine.fileConfig.language} inválido`}
+            inputPlaceholder={t("editor.inputPlaceholder", { language: engine.fileConfig.language })}
+            waitingLabel={t("editor.waitingLabel", { language: engine.fileConfig.language })}
+            validLabel={t("editor.validLabel", { language: engine.fileConfig.language })}
+            invalidLabel={t("editor.invalidLabel", { language: engine.fileConfig.language })}
             onInputChange={ctx.setInput}
             onClearInput={actions.handleClearInput}
             onLoadExample={actions.handleLoadExample}

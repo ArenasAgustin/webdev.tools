@@ -40,14 +40,14 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
   // Loading state: first run and currently executing
   if (isFirstRun && isExecuting) {
     return (
-      <Panel title="Resultado" icon="terminal" iconColor="green-400">
+      <Panel title={t("sql.result")} icon="terminal" iconColor="green-400">
         <div
           className="flex h-full min-h-[220px] items-center justify-center"
           data-testid="sql-loading"
         >
           <div className="flex flex-col items-center gap-3 text-white/70">
             <i className="fas fa-spinner fa-spin text-2xl text-green-400" aria-hidden="true"></i>
-            <span>Loading SQLite engine…</span>
+            <span>{t("sql.loading")}</span>
           </div>
         </div>
       </Panel>
@@ -58,7 +58,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
   if (error && !output) {
     return (
       <Panel
-        title="Error de ejecución"
+        title={t("sql.executionError")}
         icon="exclamation-triangle"
         iconColor="red-400"
         actions={
@@ -86,7 +86,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
         >
           <div className="flex items-center gap-2 text-sm font-medium text-red-400">
             <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
-            <span>SQL Error</span>
+            <span>{t("sql.sqlError")}</span>
           </div>
           <pre className="whitespace-pre-wrap break-words text-sm text-red-300">{error}</pre>
         </div>
@@ -97,7 +97,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
   // Idle state (no output, no error)
   if (!output) {
     return (
-      <Panel title="Resultado" icon="terminal" iconColor="green-400">
+      <Panel title={t("sql.result")} icon="terminal" iconColor="green-400">
         <div className="flex h-full min-h-[220px] items-center justify-center">
           <div className="flex flex-col items-center gap-2 text-white/40">
             <i className="fas fa-database text-2xl" aria-hidden="true"></i>
@@ -120,7 +120,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
 
   return (
     <Panel
-      title="Resultado"
+      title={t("sql.result")}
       icon="terminal"
       iconColor="green-400"
       actions={
@@ -148,14 +148,14 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
           data-testid="sql-truncation-banner"
         >
           <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
-          <span>Result truncated to 1000 rows</span>
+          <span>{t("sql.truncated", { count: 1000 })}</span>
         </div>
       )}
       <LazyCodeEditor
         value={output}
         language={isJsonOutput ? "json" : "sql"}
         readOnly={true}
-        placeholder="El resultado se mostrará aquí..."
+        placeholder={t("editor.outputPlaceholder")}
       />
     </Panel>
   );

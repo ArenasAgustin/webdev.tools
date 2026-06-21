@@ -216,7 +216,7 @@ describe("SqlPlayground branches", () => {
 
   it("renders the SQL playground with idle output panel when no query has been run", () => {
     render(<SqlPlayground />);
-    expect(screen.getByText("editor.outputIdle")).toBeInTheDocument();
+    expect(screen.getByText(/formateá|ejecutá|ver un resultado|outputIdle/i)).toBeInTheDocument();
   });
 
   it("format success → output updated", async () => {
@@ -326,7 +326,7 @@ describe("SqlPlayground branches", () => {
 
     // While loading
     expect(screen.getByTestId("sql-loading")).toBeInTheDocument();
-    expect(screen.getByTestId("sql-loading").textContent).toContain("Loading SQLite engine…");
+    expect(screen.getByTestId("sql-loading").textContent).toMatch(/[Ll]oading SQLite engine|[Cc]argando motor SQLite/);
 
     // Resolve the promise
     await act(async () => {
