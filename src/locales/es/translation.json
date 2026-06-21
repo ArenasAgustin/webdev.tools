@@ -135,5 +135,13 @@
     "output": "Salida",
     "dropFileHere": "Soltar archivo aquí",
     "outputIdle": "Formateá, minificá o ejecutá para ver un resultado"
+  },
+  "password": {
+    "aria": {
+      "uppercase": "Incluir letras mayúsculas",
+      "lowercase": "Incluir letras minúsculas",
+      "numbers": "Incluir números",
+      "symbols": "Incluir símbolos"
+    }
   }
 }

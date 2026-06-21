@@ -135,5 +135,13 @@
     "output": "Output",
     "dropFileHere": "Drop file here",
     "outputIdle": "Format, minify, or run to see a result"
+  },
+  "password": {
+    "aria": {
+      "uppercase": "Include uppercase letters",
+      "lowercase": "Include lowercase letters",
+      "numbers": "Include numbers",
+      "symbols": "Include symbols"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   generatePasswordWithStrength,
   defaultPasswordOptions,
@@ -9,6 +10,7 @@ import { usePersistedState } from "@/hooks/usePersistedState";
 import { STORAGE_KEYS } from "@/services/storage";
 
 export function PasswordPlayground() {
+  const { t } = useTranslation();
   const [storedOptions, setOptions] = usePersistedState<PasswordOptions>(
     STORAGE_KEYS.PASSWORD_OPTIONS,
     defaultPasswordOptions,
@@ -140,6 +142,7 @@ export function PasswordPlayground() {
               checked={options.includeUppercase}
               onChange={(e) => handleOptionChange("includeUppercase", e.target.checked)}
               className="w-4 h-4 rounded bg-white/10 border-white/20"
+              aria-label={t("password.aria.uppercase")}
             />
             Mayúsculas (A-Z)
           </label>
@@ -149,6 +152,7 @@ export function PasswordPlayground() {
               checked={options.includeLowercase}
               onChange={(e) => handleOptionChange("includeLowercase", e.target.checked)}
               className="w-4 h-4 rounded bg-white/10 border-white/20"
+              aria-label={t("password.aria.lowercase")}
             />
             Minúsculas (a-z)
           </label>
@@ -158,6 +162,7 @@ export function PasswordPlayground() {
               checked={options.includeNumbers}
               onChange={(e) => handleOptionChange("includeNumbers", e.target.checked)}
               className="w-4 h-4 rounded bg-white/10 border-white/20"
+              aria-label={t("password.aria.numbers")}
             />
             Números (0-9)
           </label>
@@ -167,6 +172,7 @@ export function PasswordPlayground() {
               checked={options.includeSymbols}
               onChange={(e) => handleOptionChange("includeSymbols", e.target.checked)}
               className="w-4 h-4 rounded bg-white/10 border-white/20"
+              aria-label={t("password.aria.symbols")}
             />
             Símbolos (!@#$%)
           </label>

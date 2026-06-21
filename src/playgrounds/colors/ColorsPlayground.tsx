@@ -3,14 +3,14 @@ import { HexColorPicker } from "react-colorful";
 import { colorsConfig } from "./colors.config";
 import { convertColor, getAllFormats, type ColorFormats } from "@/utils/colorConverter";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { getItem, STORAGE_KEYS } from "@/services/storage";
+import { STORAGE_KEYS } from "@/services/storage";
 
 export function ColorsPlayground() {
   const [input, setInput] = usePersistedState(STORAGE_KEYS.COLORS_INPUT, colorsConfig.example);
-  const [color, setColor] = useState<string>(() => {
-    const saved = getItem<string>(STORAGE_KEYS.COLORS_INPUT);
-    return saved ? (convertColor(saved)?.hex ?? "#3498db") : "#3498db";
-  });
+  // Derive initial color from `input` (already loaded by usePersistedState above).
+  // React guarantees sequential useState execution, so `input` is populated before
+  // this lazy initializer runs. Avoids a redundant getItem call.
+  const [color, setColor] = useState<string>(() => convertColor(input)?.hex ?? "#3498db");
 
   const handleInputChange = useCallback((value: string) => {
     setInput(value);

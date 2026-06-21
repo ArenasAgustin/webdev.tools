@@ -20,6 +20,10 @@ vi.mock("@/services/storage", () => ({
   },
 }));
 
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (k: string) => k }),
+}));
+
 vi.mock("@/hooks/useDebouncedValue", () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));
@@ -82,14 +86,12 @@ describe("PasswordPlayground persistence", () => {
     const slider = screen.getByRole("slider");
     expect(slider).toHaveValue("32");
 
-    // Checkboxes order matches render: includeUppercase[0], includeLowercase[1], includeNumbers[2], includeSymbols[3]
     // includeLowercase default is true → must be checked even though it was absent from storage
-    const checkboxes = screen.getAllByRole("checkbox");
-    const lowercaseCheckbox = checkboxes[1]; // includeLowercase is the second checkbox
+    const lowercaseCheckbox = screen.getByRole("checkbox", { name: "password.aria.lowercase" });
     expect(lowercaseCheckbox).toBeChecked();
 
     // includeSymbols default is false → must be unchecked
-    const symbolsCheckbox = checkboxes[3]; // includeSymbols is the fourth checkbox
+    const symbolsCheckbox = screen.getByRole("checkbox", { name: "password.aria.symbols" });
     expect(symbolsCheckbox).not.toBeChecked();
   });
 
