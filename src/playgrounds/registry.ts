@@ -16,122 +16,85 @@ export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
 };
 
-const loadJsonPlayground = () => import("./json/JsonPlayground");
-const loadJsPlayground = () => import("./js/JsPlayground");
-const loadHtmlPlayground = () => import("./html/HtmlPlayground");
-const loadCssPlayground = () => import("./css/CssPlayground");
-const loadColorsPlayground = () => import("./colors/ColorsPlayground");
-const loadHashPlayground = () => import("./hash/HashPlayground");
-const loadPasswordPlayground = () => import("./password/PasswordPlayground");
-const loadTimestampPlayground = () => import("./timestamp/TimestampPlayground");
-const loadPhpPlayground = () => import("./php/PhpPlayground");
-const loadSqlPlayground = () => import("./sql/SqlPlayground");
+interface RegistryEntry {
+  config: PlaygroundConfig;
+  load: () => Promise<{ default: ComponentType }>;
+}
 
-const playgroundLoaders: Record<string, () => Promise<unknown>> = {
-  [jsonPlaygroundConfig.id]: loadJsonPlayground,
-  [jsPlaygroundConfig.id]: loadJsPlayground,
-  [htmlPlaygroundConfig.id]: loadHtmlPlayground,
-  [cssPlaygroundConfig.id]: loadCssPlayground,
-  [colorsConfig.id]: loadColorsPlayground,
-  [hashConfig.id]: loadHashPlayground,
-  [passwordConfig.id]: loadPasswordPlayground,
-  [timestampConfig.id]: loadTimestampPlayground,
-  [phpPlaygroundConfig.id]: loadPhpPlayground,
-  [sqlPlaygroundConfig.id]: loadSqlPlayground,
-};
-
-export const playgroundRegistry: PlaygroundRegistryItem[] = [
+const entries: RegistryEntry[] = [
   {
-    ...jsonPlaygroundConfig,
-    component: lazy(() =>
-      loadJsonPlayground().then((module) => ({
-        default: module.JsonPlayground,
-      })),
-    ),
+    config: jsonPlaygroundConfig,
+    load: () =>
+      import("./json/JsonPlayground").then((m) => ({ default: m.JsonPlayground })),
   },
   {
-    ...jsPlaygroundConfig,
-    component: lazy(() =>
-      loadJsPlayground().then((module) => ({
-        default: module.JsPlayground,
-      })),
-    ),
+    config: jsPlaygroundConfig,
+    load: () =>
+      import("./js/JsPlayground").then((m) => ({ default: m.JsPlayground })),
   },
   {
-    ...htmlPlaygroundConfig,
-    component: lazy(() =>
-      loadHtmlPlayground().then((module) => ({
-        default: module.HtmlPlayground,
-      })),
-    ),
+    config: htmlPlaygroundConfig,
+    load: () =>
+      import("./html/HtmlPlayground").then((m) => ({ default: m.HtmlPlayground })),
   },
   {
-    ...cssPlaygroundConfig,
-    component: lazy(() =>
-      loadCssPlayground().then((module) => ({
-        default: module.CssPlayground,
-      })),
-    ),
+    config: cssPlaygroundConfig,
+    load: () =>
+      import("./css/CssPlayground").then((m) => ({ default: m.CssPlayground })),
   },
   {
-    ...phpPlaygroundConfig,
-    component: lazy(() =>
-      loadPhpPlayground().then((module) => ({
-        default: module.PhpPlayground,
-      })),
-    ),
+    config: phpPlaygroundConfig,
+    load: () =>
+      import("./php/PhpPlayground").then((m) => ({ default: m.PhpPlayground })),
   },
   {
-    ...sqlPlaygroundConfig,
-    component: lazy(() =>
-      loadSqlPlayground().then((module) => ({
-        default: module.SqlPlayground,
-      })),
-    ),
+    config: sqlPlaygroundConfig,
+    load: () =>
+      import("./sql/SqlPlayground").then((m) => ({ default: m.SqlPlayground })),
   },
   {
-    ...colorsConfig,
-    component: lazy(() =>
-      loadColorsPlayground().then((module) => ({
-        default: module.ColorsPlayground,
-      })),
-    ),
+    config: colorsConfig,
+    load: () =>
+      import("./colors/ColorsPlayground").then((m) => ({ default: m.ColorsPlayground })),
   },
   {
-    ...hashConfig,
-    component: lazy(() =>
-      loadHashPlayground().then((module) => ({
-        default: module.HashPlayground,
-      })),
-    ),
+    config: hashConfig,
+    load: () =>
+      import("./hash/HashPlayground").then((m) => ({ default: m.HashPlayground })),
   },
   {
-    ...passwordConfig,
-    component: lazy(() =>
-      loadPasswordPlayground().then((module) => ({
-        default: module.PasswordPlayground,
+    config: passwordConfig,
+    load: () =>
+      import("./password/PasswordPlayground").then((m) => ({
+        default: m.PasswordPlayground,
       })),
-    ),
   },
   {
-    ...timestampConfig,
-    component: lazy(() =>
-      loadTimestampPlayground().then((module) => ({
-        default: module.TimestampPlayground,
+    config: timestampConfig,
+    load: () =>
+      import("./timestamp/TimestampPlayground").then((m) => ({
+        default: m.TimestampPlayground,
       })),
-    ),
   },
 ];
+
+export const playgroundRegistry: PlaygroundRegistryItem[] = entries.map(
+  ({ config, load }) => ({
+    ...config,
+    component: lazy(load),
+  }),
+);
+
+const playgroundLoaders: Record<string, () => Promise<unknown>> = Object.fromEntries(
+  entries.map(({ config, load }) => [config.id, load]),
+);
 
 export const getPlaygroundById = (id: string) =>
   playgroundRegistry.find((playground) => playground.id === id);
 
 export const preloadPlaygroundById = async (id: string): Promise<void> => {
   const loader = playgroundLoaders[id];
-  if (!loader) {
-    return;
-  }
-
+  if (!loader) return;
   await loader();
 };
 

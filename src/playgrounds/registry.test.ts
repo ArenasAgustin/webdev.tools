@@ -16,6 +16,7 @@ vi.mock("./hash/HashPlayground", () => ({ HashPlayground: vi.fn() }));
 vi.mock("./password/PasswordPlayground", () => ({ PasswordPlayground: vi.fn() }));
 vi.mock("./timestamp/TimestampPlayground", () => ({ TimestampPlayground: vi.fn() }));
 vi.mock("./php/PhpPlayground", () => ({ PhpPlayground: vi.fn() }));
+vi.mock("./sql/SqlPlayground", () => ({ SqlPlayground: vi.fn() }));
 
 // Mockear las funciones de preload para evitar cargar módulos reales
 vi.mock("./registry", async (importOriginal) => {
@@ -31,7 +32,12 @@ describe("playgroundRegistry", () => {
   it("exports playground registry with correct number of playgrounds", () => {
     expect(playgroundRegistry).toBeDefined();
     expect(Array.isArray(playgroundRegistry)).toBe(true);
-    expect(playgroundRegistry.length).toBeGreaterThan(0);
+    expect(playgroundRegistry).toHaveLength(10);
+  });
+
+  it("contains sql playground", () => {
+    const sqlPlayground = playgroundRegistry.find((p) => p.id === "sql");
+    expect(sqlPlayground).toBeDefined();
   });
 
   it("contains json playground", () => {
