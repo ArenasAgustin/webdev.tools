@@ -51,7 +51,7 @@ _(vacío)_
 
 ## Próximo
 
-- [ ] Base64 encoder/decoder
+- [x] Base64 encoder/decoder
 - [ ] URL encoder/decoder
 - [ ] JWT decoder
 - [ ] TypeScript playground

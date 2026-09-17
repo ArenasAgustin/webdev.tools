@@ -27,15 +27,21 @@ const esTranslations: Record<string, string> = {
   "base64.modeAutoDetected": "Auto ({{mode}})",
   "base64.modeEncode": "Codificar",
   "base64.modeDecode": "Decodificar",
+  "base64.inputTypeText": "Texto",
+  "base64.inputTypeFile": "Archivo",
   "base64.inputLabel": "Entrada",
   "base64.inputPlaceholderEncode": "Ingresá el texto para codificar...",
   "base64.inputPlaceholderDecode": "Ingresá el Base64 para decodificar...",
   "base64.outputLabel": "Salida",
   "base64.outputPlaceholder": "El resultado aparecerá aquí",
+  "base64.fileDropLabel": "Seleccionar archivo — clic o arrastrar aquí",
+  "base64.dropFileHere": "Arrastrá un archivo o hacé clic aquí",
+  "base64.changeFile": "Cambiar archivo",
   "base64.urlSafe": "URL-safe",
   "base64.padding": "Padding",
   "base64.copy": "Copiar",
   "base64.copyError": "No se pudo copiar al portapapeles",
+  "base64.swap": "Intercambiar",
   "base64.clear": "Limpiar",
   "base64.errorInvalidCharacter": "La entrada contiene un carácter fuera del alfabeto Base64",
   "base64.errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
@@ -203,5 +209,104 @@ describe("Base64Playground branches (text mode)", () => {
 
     expect(input.value).toBe("");
     expect(output.value).toBe("");
+  });
+
+  it("swap exchanges input and output and flips the mode", () => {
+    render(<Base64Playground />);
+
+    const input = screen.getByLabelText<HTMLTextAreaElement>("Entrada");
+    const output = screen.getByLabelText<HTMLTextAreaElement>("Salida");
+    fireEvent.change(input, { target: { value: "Hello World" } });
+    expect(output.value).toBe("SGVsbG8gV29ybGQ=");
+
+    fireEvent.click(screen.getByRole("button", { name: /^intercambiar$/i }));
+
+    expect(input.value).toBe("SGVsbG8gV29ybGQ=");
+    expect(screen.getByRole("button", { name: /^decodificar$/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(output.value).toBe("Hello World");
+  });
+
+  it("swap button is disabled when output is empty or the result has an error", () => {
+    render(<Base64Playground />);
+
+    const input = screen.getByLabelText<HTMLTextAreaElement>("Entrada");
+    const swapBtn = screen.getByRole("button", { name: /^intercambiar$/i });
+
+    fireEvent.change(input, { target: { value: "" } });
+    expect(swapBtn).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /^decodificar$/i }));
+    fireEvent.change(input, { target: { value: "abc$" } });
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(swapBtn).toBeDisabled();
+  });
+});
+
+describe("Base64Playground branches (file mode)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: clipboardWriteTextMock },
+    });
+    clipboardWriteTextMock.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("file mode hides the mode selector and the swap button, and shows the drop zone", () => {
+    render(<Base64Playground />);
+
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+
+    expect(screen.queryByRole("button", { name: /^codificar$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^decodificar$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^intercambiar$/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/arrastr[aá] un archivo/i)).toBeInTheDocument();
+  });
+
+  it("selecting a file in file mode encodes its bytes and shows the base64 output", async () => {
+    render(<Base64Playground />);
+
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+
+    const file = new File(["hello"], "test.txt", { type: "text/plain" });
+    const fileInput = document.querySelector('input[type="file"]');
+    if (!fileInput) throw new Error("file input not found");
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } });
+    });
+
+    expect(screen.getByText("test.txt")).toBeInTheDocument();
+    const output = screen.getByLabelText<HTMLTextAreaElement>("Salida");
+    expect(output.value).toBe("aGVsbG8=");
+  });
+
+  it("change file button clears the selected file and shows the drop zone again", async () => {
+    render(<Base64Playground />);
+
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+
+    const file = new File(["hello"], "test.txt", { type: "text/plain" });
+    const fileInput = document.querySelector('input[type="file"]');
+    if (!fileInput) throw new Error("file input not found");
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } });
+    });
+    expect(screen.getByText("test.txt")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^cambiar archivo$/i }));
+
+    expect(screen.queryByText("test.txt")).not.toBeInTheDocument();
+    expect(screen.getByText(/arrastr[aá] un archivo/i)).toBeInTheDocument();
   });
 });
