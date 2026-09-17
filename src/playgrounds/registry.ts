@@ -11,6 +11,7 @@ import { passwordConfig } from "./password/password.config";
 import { timestampConfig } from "./timestamp/timestamp.config";
 import { phpPlaygroundConfig } from "./php/php.config";
 import { sqlPlaygroundConfig } from "./sql/sql.config";
+import { base64Config } from "./base64/base64.config";
 
 export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
@@ -75,6 +76,11 @@ const entries: RegistryEntry[] = [
       import("./timestamp/TimestampPlayground").then((m) => ({
         default: m.TimestampPlayground,
       })),
+  },
+  {
+    config: base64Config,
+    load: () =>
+      import("./base64/Base64Playground").then((m) => ({ default: m.Base64Playground })),
   },
 ];
 
