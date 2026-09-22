@@ -17,6 +17,7 @@ vi.mock("./password/PasswordPlayground", () => ({ PasswordPlayground: vi.fn() })
 vi.mock("./timestamp/TimestampPlayground", () => ({ TimestampPlayground: vi.fn() }));
 vi.mock("./php/PhpPlayground", () => ({ PhpPlayground: vi.fn() }));
 vi.mock("./sql/SqlPlayground", () => ({ SqlPlayground: vi.fn() }));
+vi.mock("./base64/Base64Playground", () => ({ Base64Playground: vi.fn() }));
 
 // Mockear las funciones de preload para evitar cargar módulos reales
 vi.mock("./registry", async (importOriginal) => {
@@ -32,7 +33,7 @@ describe("playgroundRegistry", () => {
   it("exports playground registry with correct number of playgrounds", () => {
     expect(playgroundRegistry).toBeDefined();
     expect(Array.isArray(playgroundRegistry)).toBe(true);
-    expect(playgroundRegistry).toHaveLength(10);
+    expect(playgroundRegistry).toHaveLength(11);
   });
 
   it("contains sql playground", () => {
@@ -88,6 +89,11 @@ describe("playgroundRegistry", () => {
   it("contains timestamp playground", () => {
     const timestampPlayground = playgroundRegistry.find((p) => p.id === "timestamp");
     expect(timestampPlayground).toBeDefined();
+  });
+
+  it("contains base64 playground", () => {
+    const base64Playground = playgroundRegistry.find((p) => p.id === "base64");
+    expect(base64Playground).toBeDefined();
   });
 
   it("each playground has required properties", () => {
@@ -152,6 +158,7 @@ describe("preloadAllPlaygrounds", () => {
     await expect(preloadPlaygroundById("hash")).resolves.toBeUndefined();
     await expect(preloadPlaygroundById("password")).resolves.toBeUndefined();
     await expect(preloadPlaygroundById("timestamp")).resolves.toBeUndefined();
+    await expect(preloadPlaygroundById("base64")).resolves.toBeUndefined();
   });
 
   it("getPlaygroundById returns correct playground for each type", () => {
@@ -159,5 +166,6 @@ describe("preloadAllPlaygrounds", () => {
     expect(getPlaygroundById("hash")).toBeDefined();
     expect(getPlaygroundById("password")).toBeDefined();
     expect(getPlaygroundById("timestamp")).toBeDefined();
+    expect(getPlaygroundById("base64")).toBeDefined();
   });
 });
