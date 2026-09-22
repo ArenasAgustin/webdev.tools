@@ -264,5 +264,31 @@
     "title": "Instalar webdev.tools",
     "action": "Instalar",
     "dismiss": "Descartar"
+  },
+  "base64": {
+    "modeAuto": "Auto",
+    "modeAutoDetected": "Auto ({{mode}})",
+    "modeEncode": "Codificar",
+    "modeDecode": "Decodificar",
+    "inputTypeText": "Texto",
+    "inputTypeFile": "Archivo",
+    "inputLabel": "Entrada",
+    "inputPlaceholderEncode": "Ingresá el texto para codificar...",
+    "inputPlaceholderDecode": "Ingresá el Base64 para decodificar...",
+    "outputLabel": "Salida",
+    "outputPlaceholder": "El resultado aparecerá aquí",
+    "fileDropLabel": "Seleccionar archivo — clic o arrastrar aquí",
+    "dropFileHere": "Arrastrá un archivo o hacé clic aquí",
+    "changeFile": "Cambiar archivo",
+    "urlSafe": "URL-safe",
+    "padding": "Padding",
+    "copy": "Copiar",
+    "copyError": "No se pudo copiar al portapapeles",
+    "swap": "Intercambiar",
+    "clear": "Limpiar",
+    "errorInvalidCharacter": "La entrada contiene un carácter fuera del alfabeto Base64",
+    "errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
+    "errorInvalidPadding": "La entrada tiene un padding Base64 inválido",
+    "errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido"
   }
 }

@@ -51,6 +51,10 @@ export const STORAGE_KEYS = {
   HASH_OUTPUT_CASE: "hashOutputCase",
   HASH_INPUT_MODE: "hashInputMode",
   PASSWORD_OPTIONS: "passwordOptions",
+  BASE64_INPUT_MODE: "base64InputMode",
+  BASE64_INPUT: "base64Input",
+  BASE64_MODE: "base64Mode",
+  BASE64_OPTIONS: "base64Options",
 } as const;
 
 /**
