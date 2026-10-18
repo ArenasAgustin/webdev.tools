@@ -4,6 +4,9 @@ import { initReactI18next } from "react-i18next";
 
 import esTranslations from "../locales/es/translation.json";
 import enTranslations from "../locales/en/translation.json";
+import { bindDocumentLang } from "./bindDocumentLang";
+
+bindDocumentLang(i18n);
 
 void i18n
   .use(LanguageDetector)
