@@ -66,7 +66,9 @@
     "clearInput": "Limpiar entrada",
     "openConfig": "Abrir configuración",
     "viewShortcuts": "Ver atajos de teclado",
-    "viewDifferences": "Ver diferencias"
+    "viewDifferences": "Ver diferencias",
+    "editor": "Editor",
+    "toggleTabFocus": "Alternar Tab: indentar / mover el foco fuera del editor"
   },
   "tips": {
     "quickExamples": "Ejemplos Rápidos"
@@ -142,7 +144,9 @@
     "invalidLabel": "{{language}} inválido",
     "outputPlaceholder": "El resultado se mostrará aquí...",
     "closeDiff": "Cerrar",
-    "expandedTitle": "Resultado"
+    "expandedTitle": "Resultado",
+    "codeEditorLabel": "Editor de código",
+    "tabFocusHint": "Presioná Ctrl+M (Ctrl+Shift+M en macOS) para alternar si Tab indenta o mueve el foco."
   },
   "password": {
     "aria": {

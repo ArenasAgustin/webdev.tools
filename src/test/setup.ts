@@ -92,6 +92,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "shortcuts.viewShortcuts": "Ver atajos de teclado",
         "shortcuts.viewDifferences": "Ver diferencias",
         "shortcuts.clean": "Limpiar vacíos",
+        "shortcuts.editor": "Editor",
+        "shortcuts.toggleTabFocus": "Alternar Tab: indentar / mover el foco fuera del editor",
 
         // Tips
         "tips.quickExamples": "Ejemplos Rápidos",
@@ -150,6 +152,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "editor.outputPlaceholder": "El resultado se mostrará aquí...",
         "editor.closeDiff": "Cerrar",
         "editor.expandedTitle": "Resultado",
+        "editor.codeEditorLabel": "Editor de código",
+        "editor.tabFocusHint": "Presioná Ctrl+M (Ctrl+Shift+M en macOS) para alternar si Tab indenta o mueve el foco.",
 
         // Notifications / Toast
         "notifications": "Notificaciones",
@@ -334,6 +338,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "shortcuts.viewShortcuts": "View shortcuts",
         "shortcuts.viewDifferences": "View differences",
         "shortcuts.clean": "Clean empty",
+        "shortcuts.editor": "Editor",
+        "shortcuts.toggleTabFocus": "Toggle Tab: indent / move focus out of the editor",
 
         // Tips
         "tips.quickExamples": "Quick Examples",
@@ -392,6 +398,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "editor.outputPlaceholder": "The result will appear here...",
         "editor.closeDiff": "Close",
         "editor.expandedTitle": "Result",
+        "editor.codeEditorLabel": "Code editor",
+        "editor.tabFocusHint": "Press Ctrl+M (Ctrl+Shift+M on macOS) to toggle whether Tab indents or moves focus.",
 
         // Notifications / Toast
         "notifications": "Notifications",

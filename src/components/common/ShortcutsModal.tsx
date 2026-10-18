@@ -96,6 +96,16 @@ export function ShortcutsModal({
             />
           </div>
         </section>
+
+        {/* Editor — Monaco's native tab-focus toggle, documented for keyboard users (WCAG 2.1.2) */}
+        <section>
+          <h4 className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <i className="fas fa-code" aria-hidden="true"></i> {t("shortcuts.editor")}
+          </h4>
+          <div>
+            <ShortcutRow keys={["Ctrl", "M"]} description={t("shortcuts.toggleTabFocus")} />
+          </div>
+        </section>
       </div>
     </Modal>
   );
