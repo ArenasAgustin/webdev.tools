@@ -9,6 +9,7 @@ import {
   type HashOutputCase,
   type InputMode,
 } from "./hash.utils";
+import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { STORAGE_KEYS } from "@/services/storage";
 
@@ -101,30 +102,16 @@ export function HashPlayground() {
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-4">
       {/* Mode Tabs */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setInputMode("text")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            inputMode === "text"
-              ? "bg-cyan-500 text-white"
-              : "bg-white/10 text-gray-300 hover:bg-white/20"
-          }`}
-        >
-          {t("hash.inputTypeText")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setInputMode("file")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            inputMode === "file"
-              ? "bg-cyan-500 text-white"
-              : "bg-white/10 text-gray-300 hover:bg-white/20"
-          }`}
-        >
-          {t("hash.inputTypeFile")}
-        </button>
-      </div>
+      <ToggleButtonGroup
+        variant="segmented"
+        ariaLabel={t("hash.inputTypeGroupLabel")}
+        options={[
+          { value: "text", label: t("hash.inputTypeText") },
+          { value: "file", label: t("hash.inputTypeFile") },
+        ]}
+        value={inputMode}
+        onChange={setInputMode}
+      />
 
       {/* Input Section */}
       <div className="flex flex-col gap-4">

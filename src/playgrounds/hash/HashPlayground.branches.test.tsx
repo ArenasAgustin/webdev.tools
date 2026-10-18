@@ -64,6 +64,19 @@ describe("HashPlayground branches", () => {
     vi.restoreAllMocks();
   });
 
+  it("input type toggle exposes a named group and aria-pressed state", () => {
+    render(<HashPlayground />);
+
+    expect(screen.getByRole("group", { name: /tipo de entrada/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /texto/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /archivo/i, pressed: false })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+
+    expect(screen.getByRole("button", { name: /archivo/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /texto/i, pressed: false })).toBeInTheDocument();
+  });
+
   it("inputMode toggle switches between text and file UI", () => {
     render(<HashPlayground />);
 
