@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/cn";
 import { Button } from "@/components/common/Button";
@@ -90,6 +90,7 @@ export function Toolbar(props: ToolbarProps) {
   const { t } = useTranslation();
   const [openModal, setOpenModal] = useState<"config" | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const toolsPanelId = useId();
   const hasClean = !!props.config?.mode;
   const hasExecute = props.tools.actions.some((action) => action.id === "execute");
 
@@ -184,6 +185,8 @@ export function Toolbar(props: ToolbarProps) {
               }}
               className="inline-flex items-center justify-center w-6 h-6 text-gray-300 hover:text-white transition-colors"
               aria-label={isExpanded ? t("actions.hideTools") : t("actions.showTools")}
+              aria-expanded={isExpanded}
+              aria-controls={toolsPanelId}
             >
               <i
                 className={`fas fa-chevron-${isExpanded ? "down" : "up"}`}
@@ -193,8 +196,10 @@ export function Toolbar(props: ToolbarProps) {
           </div>
         </div>
 
-        {/* Buttons grid — hidden on mobile/tablet when collapsed, always visible on md+ */}
+        {/* Buttons grid — collapsed via max-h-0; inert keeps hidden buttons out of tab order and the a11y tree */}
         <div
+          id={toolsPanelId}
+          inert={!isExpanded}
           className={cn(
             "overflow-hidden transition-all duration-200",
             isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
