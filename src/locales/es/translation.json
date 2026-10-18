@@ -117,6 +117,7 @@
     "invalidInput": "Input inválido. Ingresá un timestamp o fecha válida.",
     "futureDate": "Esta fecha es en el futuro",
     "copied": "Copiado al portapapeles",
+    "copyError": "No se pudo copiar al portapapeles",
     "noResults": "Sin resultados",
     "formats": {
       "unixSeconds": "Unix (s)",

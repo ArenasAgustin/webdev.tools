@@ -190,7 +190,7 @@ describe("TimestampPlayground branches", () => {
       fireEvent.click(copyButtons[0]);
     });
 
-    expect(toastErrorMock).toHaveBeenCalledWith("common.copy");
+    expect(toastErrorMock).toHaveBeenCalledWith("timestamp.copyError");
   });
 
   it("Enter key on input fires handleConvert", () => {

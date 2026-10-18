@@ -72,7 +72,7 @@ export function TimestampPlayground() {
       if (await copy(value)) {
         toast.success(t("timestamp.copied"));
       } else {
-        toast.error(t("common.copy"));
+        toast.error(t("timestamp.copyError"));
       }
     },
     [copy, toast, t],

@@ -2,8 +2,10 @@ import { useTranslation } from "react-i18next";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
 /**
- * Floating install prompt for PWA installation.
+ * Install prompt for PWA installation.
  * Appears when the browser fires beforeinstallprompt.
+ * Rendered in normal flow at the bottom of the app shell (not as an overlay),
+ * so the page above shrinks to fit and no interactive content is covered.
  */
 export function InstallPromptBanner() {
   const { t } = useTranslation();
@@ -15,25 +17,27 @@ export function InstallPromptBanner() {
     <div
       role="complementary"
       aria-label={t("install.title")}
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/5 rounded-2xl shadow-2xl shadow-black/30 px-4 py-3 animate-fade-in"
+      className="shrink-0 flex justify-center bg-slate-950 px-2 py-2 sm:px-4"
     >
-      <i className="fas fa-download text-blue-400" aria-hidden="true" />
-      <span className="text-sm text-white/90">{t("install.title")}</span>
-      <button
-        type="button"
-        onClick={install}
-        className="px-3 py-1 text-xs rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 transition-colors"
-      >
-        {t("install.action")}
-      </button>
-      <button
-        type="button"
-        onClick={dismiss}
-        aria-label={t("install.dismiss")}
-        className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
-      >
-        <i className="fas fa-times text-xs" aria-hidden="true" />
-      </button>
+      <div className="flex max-w-full items-center gap-3 bg-white/10 border border-white/5 rounded-2xl px-4 py-2 animate-fade-in">
+        <i className="fas fa-download text-blue-400" aria-hidden="true" />
+        <span className="text-sm text-white/90">{t("install.title")}</span>
+        <button
+          type="button"
+          onClick={install}
+          className="px-3 py-1 text-xs rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 transition-colors"
+        >
+          {t("install.action")}
+        </button>
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label={t("install.dismiss")}
+          className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          <i className="fas fa-times text-xs" aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 }
