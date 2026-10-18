@@ -41,7 +41,9 @@
     "viewShortcuts": "View keyboard shortcuts",
     "configure": "Configure tools",
     "showTools": "Show tools",
-    "hideTools": "Hide tools"
+    "hideTools": "Hide tools",
+    "execute": "Execute",
+    "cleanEmpty": "Clean empty"
   },
   "toolbar": {
     "title": "Tools",

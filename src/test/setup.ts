@@ -67,6 +67,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "actions.configure": "Configurar herramientas",
         "actions.showTools": "Mostrar herramientas",
         "actions.hideTools": "Ocultar herramientas",
+        "actions.execute": "Ejecutar",
+        "actions.cleanEmpty": "Limpiar vacíos",
 
         // Toolbar
         "toolbar.title": "Herramientas",
@@ -313,6 +315,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "actions.configure": "Configure tools",
         "actions.showTools": "Show tools",
         "actions.hideTools": "Hide tools",
+        "actions.execute": "Execute",
+        "actions.cleanEmpty": "Clean empty",
 
         // Toolbar
         "toolbar.title": "Tools",
