@@ -66,7 +66,9 @@
     "clearInput": "Clear input",
     "openConfig": "Open settings",
     "viewShortcuts": "View shortcuts",
-    "viewDifferences": "View differences"
+    "viewDifferences": "View differences",
+    "editor": "Editor",
+    "toggleTabFocus": "Toggle Tab: indent / move focus out of the editor"
   },
   "tips": {
     "quickExamples": "Quick Examples"
@@ -142,7 +144,9 @@
     "invalidLabel": "{{language}} invalid",
     "outputPlaceholder": "The result will appear here...",
     "closeDiff": "Close",
-    "expandedTitle": "Result"
+    "expandedTitle": "Result",
+    "codeEditorLabel": "Code editor",
+    "tabFocusHint": "Press Ctrl+M (Ctrl+Shift+M on macOS) to toggle whether Tab indents or moves focus."
   },
   "password": {
     "aria": {

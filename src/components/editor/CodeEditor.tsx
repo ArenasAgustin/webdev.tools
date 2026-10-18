@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 import Editor from "@monaco-editor/react";
 
 interface CodeEditorProps {
@@ -16,6 +17,11 @@ export const CodeEditor = memo(function CodeEditor({
   onChange,
   placeholder,
 }: CodeEditorProps) {
+  const { t } = useTranslation();
+  // Accessible name + WCAG 2.1.2 hint: Monaco traps Tab for indentation; its native
+  // toggleTabFocusMode binding (Ctrl+M, Ctrl+Shift+M on macOS) lets keyboard users leave.
+  const ariaLabel = `${t("editor.codeEditorLabel")}. ${t("editor.tabFocusHint")}`;
+
   const handleChange = (newValue: string | undefined) => {
     if (onChange && newValue !== undefined) {
       onChange(newValue);
@@ -33,6 +39,7 @@ export const CodeEditor = memo(function CodeEditor({
         theme="vs-dark"
         options={{
           readOnly,
+          ariaLabel,
           minimap: { enabled: false },
           fontSize: 12,
           lineNumbers: "on",
