@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, useDeferredValue } from "react";
+import { useCallback, useMemo, useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 import { urlConfig } from "./url.config";
 import {
@@ -17,6 +17,7 @@ import {
 } from "./url.utils";
 import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
 
 type UrlResult = { ok: true; value: string } | { ok: false; code: UrlErrorCode };
@@ -49,14 +50,7 @@ export function UrlPlayground() {
   );
   const options = useMemo(() => normalizeUrlOptions(storedOptions), [storedOptions]);
 
-  const [clipboardError, setClipboardError] = useState(false);
-  const clipboardErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
-    };
-  }, []);
+  const { copy, error: clipboardError } = useClipboardCopy();
 
   const deferredInput = useDeferredValue(input);
   const effectiveMode = resolveMode(mode, deferredInput, variant);
@@ -80,15 +74,8 @@ export function UrlPlayground() {
 
   const handleCopy = useCallback(async () => {
     if (!result.ok || !result.value) return;
-    try {
-      await navigator.clipboard.writeText(result.value);
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-      setClipboardError(true);
-      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
-      clipboardErrorTimerRef.current = setTimeout(() => setClipboardError(false), 2000);
-    }
-  }, [result]);
+    await copy(result.value);
+  }, [result, copy]);
 
   const handleClear = useCallback(() => {
     setInput("");

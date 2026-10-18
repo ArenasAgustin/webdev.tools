@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   generatePasswordWithStrength,
@@ -7,6 +7,7 @@ import {
   type PasswordOptions,
 } from "./password.utils";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
 
 export function PasswordPlayground() {
@@ -22,39 +23,25 @@ export function PasswordPlayground() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [history, setHistory] = useState<{ id: string; value: string }[]>([]);
-  const [copied, setCopied] = useState(false);
-  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
-    };
-  }, []);
+  const { copy, copied, reset: resetCopied } = useClipboardCopy();
 
   const handleGenerate = useCallback(() => {
     const result = generatePasswordWithStrength(options);
     setPassword(result.password);
-    setCopied(false);
+    resetCopied();
 
     // Add to history (keep last 5)
     setHistory((prev) => {
       const newHistory = [{ id: crypto.randomUUID(), value: result.password }, ...prev];
       return newHistory.slice(0, 5);
     });
-  }, [options]);
+  }, [options, resetCopied]);
 
   const handleCopy = useCallback(async () => {
     if (password) {
-      try {
-        await navigator.clipboard.writeText(password);
-        setCopied(true);
-        if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
-        copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.warn("Clipboard write failed:", err);
-      }
+      await copy(password);
     }
-  }, [password]);
+  }, [password, copy]);
 
   const handleOptionChange = useCallback((key: keyof PasswordOptions, value: boolean | number) => {
     setOptions((prev) => ({ ...prev, [key]: value }));
@@ -62,8 +49,8 @@ export function PasswordPlayground() {
 
   const handleHistoryClick = useCallback((pwd: string) => {
     setPassword(pwd);
-    setCopied(false);
-  }, []);
+    resetCopied();
+  }, [resetCopied]);
 
   const getStrengthColor = (strength: number): string => {
     if (strength < 40) return "bg-red-500";

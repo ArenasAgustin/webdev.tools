@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, useDeferredValue } from "react";
+import { useState, useCallback, useRef, useMemo, useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 import { base64Config } from "./base64.config";
 import {
@@ -15,6 +15,7 @@ import {
 } from "./base64.utils";
 import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
 
 type FileState = { file: File; bytes: Uint8Array } | null;
@@ -47,14 +48,7 @@ export function Base64Playground() {
   const [fileState, setFileState] = useState<FileState>(null);
   const latestFileRef = useRef<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [clipboardError, setClipboardError] = useState(false);
-  const clipboardErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
-    };
-  }, []);
+  const { copy, error: clipboardError } = useClipboardCopy();
 
   const deferredInput = useDeferredValue(input);
   const effectiveMode = resolveMode(mode, deferredInput);
@@ -113,15 +107,8 @@ export function Base64Playground() {
 
   const handleCopy = useCallback(async () => {
     if (!result.ok || !result.value) return;
-    try {
-      await navigator.clipboard.writeText(result.value);
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-      setClipboardError(true);
-      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
-      clipboardErrorTimerRef.current = setTimeout(() => setClipboardError(false), 2000);
-    }
-  }, [result]);
+    await copy(result.value);
+  }, [result, copy]);
 
   const handleClear = useCallback(() => {
     setInput("");

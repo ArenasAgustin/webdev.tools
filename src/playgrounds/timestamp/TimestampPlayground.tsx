@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { timestampConfig } from "./timestamp.config";
 import { convertTimestamp, getCurrentTimestamp, type TimestampResult } from "./timestamp.utils";
 import { useToast } from "@/hooks/useToast";
+import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { STORAGE_KEYS } from "@/services/storage";
@@ -28,6 +29,7 @@ const ALL_TIMEZONES: string[] =
 export function TimestampPlayground() {
   const { t } = useTranslation();
   const toast = useToast();
+  const { copy } = useClipboardCopy();
   const [input, setInput] = usePersistedState(STORAGE_KEYS.TIMESTAMP_INPUT, timestampConfig.example);
   const [result, setResult] = useState<TimestampResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,14 +69,13 @@ export function TimestampPlayground() {
 
   const copyToClipboard = useCallback(
     async (value: string) => {
-      try {
-        await navigator.clipboard.writeText(value);
+      if (await copy(value)) {
         toast.success(t("timestamp.copied"));
-      } catch {
+      } else {
         toast.error(t("common.copy"));
       }
     },
-    [toast, t],
+    [copy, toast, t],
   );
 
   const formatLabels: { key: keyof TimestampResult; label: string }[] = useMemo(

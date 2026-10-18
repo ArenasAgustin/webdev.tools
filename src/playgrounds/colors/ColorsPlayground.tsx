@@ -4,6 +4,7 @@ import { HexColorPicker } from "react-colorful";
 import { colorsConfig } from "./colors.config";
 import { convertColor, getAllFormats, type ColorFormats } from "@/utils/colorConverter";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
 
 export function ColorsPlayground() {
@@ -48,13 +49,7 @@ export function ColorsPlayground() {
   const parsed = convertColor(input);
   const displayFormats = parsed ?? getAllFormatsFromHex(color);
 
-  const copyToClipboard = useCallback(async (value: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-    }
-  }, []);
+  const { copy: copyToClipboard } = useClipboardCopy();
 
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col lg:flex-row gap-4">
