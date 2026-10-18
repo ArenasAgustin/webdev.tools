@@ -173,6 +173,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "error.backToHome": "Inicio",
 
         // Hash
+        "hash.inputTypeGroupLabel": "Tipo de entrada",
         "hash.inputTypeText": "Texto",
         "hash.inputTypeFile": "Archivo",
         "hash.inputPlaceholder": "Ingresá el texto para generar hashes...",
@@ -414,6 +415,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "error.backToHome": "Home",
 
         // Hash
+        "hash.inputTypeGroupLabel": "Input type",
         "hash.inputTypeText": "Text",
         "hash.inputTypeFile": "File",
         "hash.inputPlaceholder": "Enter text to generate hashes...",

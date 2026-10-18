@@ -13,6 +13,7 @@ import {
   type Base64ErrorCode,
   type Base64InputMode,
 } from "./base64.utils";
+import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { STORAGE_KEYS } from "@/services/storage";
 
@@ -138,75 +139,36 @@ export function Base64Playground() {
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-4">
       {/* Input type toggle */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          aria-pressed={inputMode === "text"}
-          onClick={() => setInputMode("text")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            inputMode === "text"
-              ? "bg-cyan-500 text-white"
-              : "bg-white/10 text-gray-300 hover:bg-white/20"
-          }`}
-        >
-          {t("base64.inputTypeText")}
-        </button>
-        <button
-          type="button"
-          aria-pressed={inputMode === "file"}
-          onClick={() => setInputMode("file")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            inputMode === "file"
-              ? "bg-cyan-500 text-white"
-              : "bg-white/10 text-gray-300 hover:bg-white/20"
-          }`}
-        >
-          {t("base64.inputTypeFile")}
-        </button>
-      </div>
+      <ToggleButtonGroup
+        variant="segmented"
+        ariaLabel={t("base64.inputTypeGroupLabel")}
+        options={[
+          { value: "text", label: t("base64.inputTypeText") },
+          { value: "file", label: t("base64.inputTypeFile") },
+        ]}
+        value={inputMode}
+        onChange={setInputMode}
+      />
 
       {/* Mode selector (text mode only — file mode is encode-only) */}
       {inputMode === "text" && (
-        <div className="flex gap-2">
-          <button
-            type="button"
-            aria-pressed={mode === "auto"}
-            onClick={() => setMode("auto")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              mode === "auto"
-                ? "bg-cyan-500 text-white"
-                : "bg-white/10 text-gray-300 hover:bg-white/20"
-            }`}
-          >
-            {mode === "auto"
-              ? t("base64.modeAutoDetected", { mode: effectiveMode })
-              : t("base64.modeAuto")}
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === "encode"}
-            onClick={() => setMode("encode")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              mode === "encode"
-                ? "bg-cyan-500 text-white"
-                : "bg-white/10 text-gray-300 hover:bg-white/20"
-            }`}
-          >
-            {t("base64.modeEncode")}
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === "decode"}
-            onClick={() => setMode("decode")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              mode === "decode"
-                ? "bg-cyan-500 text-white"
-                : "bg-white/10 text-gray-300 hover:bg-white/20"
-            }`}
-          >
-            {t("base64.modeDecode")}
-          </button>
-        </div>
+        <ToggleButtonGroup
+          variant="segmented"
+          ariaLabel={t("base64.modeGroupLabel")}
+          options={[
+            {
+              value: "auto",
+              label:
+                mode === "auto"
+                  ? t("base64.modeAutoDetected", { mode: effectiveMode })
+                  : t("base64.modeAuto"),
+            },
+            { value: "encode", label: t("base64.modeEncode") },
+            { value: "decode", label: t("base64.modeDecode") },
+          ]}
+          value={mode}
+          onChange={setMode}
+        />
       )}
 
       {/* Options */}

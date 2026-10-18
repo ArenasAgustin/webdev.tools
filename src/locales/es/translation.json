@@ -189,6 +189,7 @@
     "backToHome": "Inicio"
   },
   "hash": {
+    "inputTypeGroupLabel": "Tipo de entrada",
     "inputTypeText": "Texto",
     "inputTypeFile": "Archivo",
     "inputPlaceholder": "Ingresá el texto para generar hashes...",
@@ -266,6 +267,8 @@
     "dismiss": "Descartar"
   },
   "base64": {
+    "inputTypeGroupLabel": "Tipo de entrada",
+    "modeGroupLabel": "Modo de conversión",
     "modeAuto": "Auto",
     "modeAutoDetected": "Auto ({{mode}})",
     "modeEncode": "Codificar",
