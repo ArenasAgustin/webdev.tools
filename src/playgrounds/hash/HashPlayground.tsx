@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { hashConfig } from "./hash.config";
 import {
@@ -11,6 +11,7 @@ import {
 } from "./hash.utils";
 import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
 
 export function HashPlayground() {
@@ -23,15 +24,8 @@ export function HashPlayground() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [compareResult, setCompareResult] = useState<boolean | null>(null);
-  const [clipboardError, setClipboardError] = useState(false);
-  const clipboardErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    return () => {
-      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
-    };
-  }, []);
 
   const processInput = useCallback(async () => {
     setIsProcessing(true);
@@ -78,17 +72,6 @@ export function HashPlayground() {
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-  }, []);
-
-  const copyToClipboard = useCallback(async (value: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-      setClipboardError(true);
-      if (clipboardErrorTimerRef.current !== null) clearTimeout(clipboardErrorTimerRef.current);
-      clipboardErrorTimerRef.current = setTimeout(() => setClipboardError(false), 2000);
-    }
   }, []);
 
   const handleCompare = useCallback(() => {

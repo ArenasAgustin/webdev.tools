@@ -10,6 +10,7 @@ import {
   type JsFormatConfig,
   type JsMinifyConfig,
 } from "@/types/js";
+import { DEFAULT_SQL_FORMAT_CONFIG } from "@/types/sql";
 
 // Mock storage functions
 vi.mock("@/services/storage", () => ({
@@ -89,6 +90,12 @@ describe("ConfigModal", () => {
         ...mockFormatConfig,
         indentSize: 4,
       });
+    });
+
+    it("should label the indent toggle group", () => {
+      render(<ConfigModal {...defaultProps} />);
+
+      expect(screen.getByRole("group", { name: "Espaciado" })).toBeInTheDocument();
     });
 
     it("should toggle sortKeys checkbox", () => {
@@ -391,6 +398,24 @@ describe("ConfigModal", () => {
         clean: DEFAULT_JS_CLEAN_CONFIG,
       });
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe("SQL mode", () => {
+    it("should label the indent toggle group", () => {
+      render(
+        <ConfigModal
+          mode="sql"
+          isOpen={true}
+          onClose={vi.fn()}
+          formatConfig={DEFAULT_SQL_FORMAT_CONFIG}
+          onFormatConfigChange={vi.fn()}
+          minifyConfig={{ autoCopy: false }}
+          onMinifyConfigChange={vi.fn()}
+        />,
+      );
+
+      expect(screen.getByRole("group", { name: "Espaciado" })).toBeInTheDocument();
     });
   });
 });
