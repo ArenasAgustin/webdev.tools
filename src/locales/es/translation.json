@@ -41,7 +41,9 @@
     "viewShortcuts": "Ver atajos de teclado",
     "configure": "Configurar herramientas",
     "showTools": "Mostrar herramientas",
-    "hideTools": "Ocultar herramientas"
+    "hideTools": "Ocultar herramientas",
+    "execute": "Ejecutar",
+    "cleanEmpty": "Limpiar vacíos"
   },
   "toolbar": {
     "title": "Herramientas",

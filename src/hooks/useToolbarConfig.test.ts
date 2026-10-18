@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { renderHook } from "@testing-library/react";
+import i18n from "i18next";
 import { useToolbarConfig } from "./useToolbarConfig";
 
 const baseParams = () => ({
@@ -14,6 +15,33 @@ const baseParams = () => ({
 });
 
 describe("useToolbarConfig", () => {
+  describe("i18n", () => {
+    afterEach(async () => {
+      await i18n.changeLanguage("es");
+    });
+
+    it("should translate action labels and config title to the active language", async () => {
+      await i18n.changeLanguage("en");
+      const params = {
+        ...baseParams(),
+        mode: "json" as const,
+        handleExecute: vi.fn(),
+        handleClean: vi.fn(),
+        cleanConfig: { removeEmpty: true },
+        setCleanConfig: vi.fn(),
+      };
+      const { result } = renderHook(() => useToolbarConfig(params));
+
+      expect(result.current.toolbarTools.actions.map((a) => a.label)).toEqual([
+        "Execute",
+        "Format",
+        "Minify",
+        "Clean empty",
+      ]);
+      expect(result.current.toolbarTools.configButtonTitle).toBe("Configure tools");
+    });
+  });
+
   describe("toolbarTools", () => {
     it("should return Format and Minify actions for base config", () => {
       const { result } = renderHook(() => useToolbarConfig(baseParams()));

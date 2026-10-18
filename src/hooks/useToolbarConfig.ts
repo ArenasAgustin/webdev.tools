@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { ToolbarAction, ToolbarConfig } from "@/types/toolbar";
 
 export interface UseToolbarConfigParams<M extends string, TFormat, TMinify> {
@@ -79,12 +80,13 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
   onOpenShortcuts,
   onOpenDiff,
 }: UseToolbarConfigParams<M, TFormat, TMinify> & Partial<CleanParams<TClean>>) {
+  const { t } = useTranslation();
   const toolbarTools = useMemo<ToolbarConfig>(() => {
     const actions: ToolbarAction[] = [];
     if (handleExecute) {
       actions.push({
         id: "execute",
-        label: "Ejecutar",
+        label: t("actions.execute"),
         icon: "play",
         variant: "orange",
         onClick: handleExecute,
@@ -93,7 +95,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
       });
     }
     actions.push({
-      label: "Formatear",
+      label: t("common.format"),
       icon: "indent",
       variant: "primary",
       onClick: handleFormat,
@@ -102,7 +104,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
     });
     if (handleMinify) {
       actions.push({
-        label: "Minificar",
+        label: t("common.minify"),
         icon: "compress",
         variant: "purple",
         onClick: handleMinify,
@@ -112,7 +114,7 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
     }
     if (handleClean) {
       actions.push({
-        label: "Limpiar vacíos",
+        label: t("actions.cleanEmpty"),
         icon: "broom",
         variant: "orange",
         onClick: handleClean,
@@ -122,12 +124,13 @@ export function useToolbarConfig<M extends string, TFormat, TMinify, TClean = un
     }
     return {
       actions,
-      configButtonTitle: "Configurar herramientas",
+      configButtonTitle: t("actions.configure"),
       gridClassName,
       onOpenShortcuts,
       onOpenDiff,
     };
   }, [
+    t,
     handleFormat,
     handleMinify,
     handleExecute,
