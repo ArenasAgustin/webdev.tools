@@ -312,6 +312,8 @@
     "copy": "Copy",
     "copyError": "Could not copy to clipboard",
     "clear": "Clear",
+    "swap": "Swap",
+    "strict": "Strict (RFC 3986)",
     "errorMalformedSequence": "Input contains a malformed percent-encoded sequence",
     "errorInvalidSurrogate": "Input contains an unpaired UTF-16 surrogate"
   }

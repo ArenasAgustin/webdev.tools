@@ -18,6 +18,7 @@ vi.mock("./timestamp/TimestampPlayground", () => ({ TimestampPlayground: vi.fn()
 vi.mock("./php/PhpPlayground", () => ({ PhpPlayground: vi.fn() }));
 vi.mock("./sql/SqlPlayground", () => ({ SqlPlayground: vi.fn() }));
 vi.mock("./base64/Base64Playground", () => ({ Base64Playground: vi.fn() }));
+vi.mock("./url/UrlPlayground", () => ({ UrlPlayground: vi.fn() }));
 
 // Mockear las funciones de preload para evitar cargar módulos reales
 vi.mock("./registry", async (importOriginal) => {
@@ -33,7 +34,7 @@ describe("playgroundRegistry", () => {
   it("exports playground registry with correct number of playgrounds", () => {
     expect(playgroundRegistry).toBeDefined();
     expect(Array.isArray(playgroundRegistry)).toBe(true);
-    expect(playgroundRegistry).toHaveLength(11);
+    expect(playgroundRegistry).toHaveLength(12);
   });
 
   it("contains sql playground", () => {
@@ -94,6 +95,11 @@ describe("playgroundRegistry", () => {
   it("contains base64 playground", () => {
     const base64Playground = playgroundRegistry.find((p) => p.id === "base64");
     expect(base64Playground).toBeDefined();
+  });
+
+  it("contains url playground", () => {
+    const urlPlayground = playgroundRegistry.find((p) => p.id === "url");
+    expect(urlPlayground).toBeDefined();
   });
 
   it("each playground has required properties", () => {
@@ -159,6 +165,7 @@ describe("preloadAllPlaygrounds", () => {
     await expect(preloadPlaygroundById("password")).resolves.toBeUndefined();
     await expect(preloadPlaygroundById("timestamp")).resolves.toBeUndefined();
     await expect(preloadPlaygroundById("base64")).resolves.toBeUndefined();
+    await expect(preloadPlaygroundById("url")).resolves.toBeUndefined();
   });
 
   it("getPlaygroundById returns correct playground for each type", () => {
@@ -167,5 +174,6 @@ describe("preloadAllPlaygrounds", () => {
     expect(getPlaygroundById("password")).toBeDefined();
     expect(getPlaygroundById("timestamp")).toBeDefined();
     expect(getPlaygroundById("base64")).toBeDefined();
+    expect(getPlaygroundById("url")).toBeDefined();
   });
 });

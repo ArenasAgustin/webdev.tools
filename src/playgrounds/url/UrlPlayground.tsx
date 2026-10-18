@@ -7,7 +7,10 @@ import {
   resolveMode,
   isUrlMode,
   isUrlVariant,
+  normalizeUrlOptions,
+  defaultUrlOptions,
   UrlError,
+  type UrlOptions,
   type UrlMode,
   type UrlVariant,
   type UrlErrorCode,
@@ -40,6 +43,12 @@ export function UrlPlayground() {
   const [rawInput, setInput] = usePersistedState<string>(STORAGE_KEYS.URL_INPUT, urlConfig.example);
   const input = typeof rawInput === "string" ? rawInput : urlConfig.example;
 
+  const [storedOptions, setOptions] = usePersistedState<UrlOptions>(
+    STORAGE_KEYS.URL_OPTIONS,
+    defaultUrlOptions,
+  );
+  const options = useMemo(() => normalizeUrlOptions(storedOptions), [storedOptions]);
+
   const [clipboardError, setClipboardError] = useState(false);
   const clipboardErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -56,7 +65,7 @@ export function UrlPlayground() {
     try {
       const value =
         effectiveMode === "encode"
-          ? encodeUrl(deferredInput, variant)
+          ? encodeUrl(deferredInput, variant, options)
           : decodeUrl(deferredInput, variant);
       return { ok: true, value };
     } catch (error) {
@@ -65,7 +74,7 @@ export function UrlPlayground() {
       }
       throw error;
     }
-  }, [effectiveMode, deferredInput, variant]);
+  }, [effectiveMode, deferredInput, variant, options]);
 
   const canUseOutput = result.ok && result.value !== "";
 
@@ -84,6 +93,17 @@ export function UrlPlayground() {
   const handleClear = useCallback(() => {
     setInput("");
   }, [setInput]);
+
+  const handleSwap = useCallback(() => {
+    if (!result.ok || !result.value) return;
+    setInput(result.value);
+    setMode(effectiveMode === "encode" ? "decode" : "encode");
+  }, [result, effectiveMode, setInput, setMode]);
+
+  const handleStrictChange = useCallback(
+    (strict: boolean) => setOptions({ ...options, strict }),
+    [options, setOptions],
+  );
 
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-4">
@@ -116,6 +136,17 @@ export function UrlPlayground() {
         value={variant}
         onChange={setVariant}
       />
+
+      <label className="flex items-center gap-2 text-gray-300">
+        <input
+          type="checkbox"
+          checked={options.strict}
+          disabled={variant === "uri"}
+          onChange={(e) => handleStrictChange(e.target.checked)}
+          className="w-4 h-4 rounded bg-white/10 border-white/20 disabled:opacity-50"
+        />
+        {t("url.strict")}
+      </label>
 
       <div className="flex flex-col gap-2">
         <label htmlFor="url-input" className="text-gray-300 font-medium">
@@ -155,6 +186,15 @@ export function UrlPlayground() {
             >
               <i className="fas fa-copy mr-1"></i>
               {t("url.copy")}
+            </button>
+            <button
+              type="button"
+              onClick={handleSwap}
+              disabled={!canUseOutput}
+              className={ACTION_BUTTON_CLASS}
+            >
+              <i className="fas fa-exchange-alt mr-1"></i>
+              {t("url.swap")}
             </button>
             <button type="button" onClick={handleClear} className={ACTION_BUTTON_CLASS}>
               <i className="fas fa-eraser mr-1"></i>
