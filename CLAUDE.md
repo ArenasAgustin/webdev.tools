@@ -50,7 +50,7 @@ Los tests flaky de IndexedDB en CI son conocidos — si fallan solo en CI pero l
 
 ## Roadmap
 
-Siempre mantené `docs/ROADMAP.md` actualizado cuando se completa o inicia una fase.
+Siempre mantené `ROADMAP.md` (en la raíz del repo) actualizado cuando se completa o inicia una fase.
 
 ---
 
