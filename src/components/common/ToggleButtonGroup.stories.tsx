@@ -15,6 +15,9 @@ const meta = {
     },
   },
   tags: ["autodocs"],
+  argTypes: {
+    variant: { control: "select", options: ["default", "segmented"] },
+  },
   args: {
     value: "format",
     onChange: fn(),
@@ -24,7 +27,7 @@ const meta = {
       { value: "clean", label: "Clean" },
     ],
   },
-} satisfies Meta<typeof ToggleButtonGroup>;
+} satisfies Meta<typeof ToggleButtonGroup<string | number>>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -38,6 +41,13 @@ export const TwoOptions: Story = {
       { value: "on", label: "On" },
       { value: "off", label: "Off" },
     ],
+  },
+};
+
+export const Segmented: Story = {
+  args: {
+    variant: "segmented",
+    ariaLabel: "Mode",
   },
 };
 
@@ -84,7 +94,7 @@ export const Documentation = {
                 <code>options</code>
               </td>
               <td className="border p-2">
-                <code>Array</code>
+                <code>{"{ value: string | number; label: ReactNode }[]"}</code>
               </td>
               <td className="border p-2">-</td>
               <td className="border p-2">Lista de opciones disponibles</td>
@@ -94,17 +104,17 @@ export const Documentation = {
                 <code>value</code>
               </td>
               <td className="border p-2">
-                <code>string | string[]</code>
+                <code>string | number</code>
               </td>
               <td className="border p-2">-</td>
-              <td className="border p-2">Valor/valores seleccionados</td>
+              <td className="border p-2">Valor seleccionado</td>
             </tr>
             <tr>
               <td className="border p-2">
                 <code>onChange</code>
               </td>
               <td className="border p-2">
-                <code>() =&gt; void</code>
+                <code>(value) =&gt; void</code>
               </td>
               <td className="border p-2">-</td>
               <td className="border p-2">Callback cuando cambia la selección</td>
@@ -114,22 +124,52 @@ export const Documentation = {
                 <code>variant</code>
               </td>
               <td className="border p-2">
+                <code>&quot;default&quot; | &quot;segmented&quot;</code>
+              </td>
+              <td className="border p-2">&quot;default&quot;</td>
+              <td className="border p-2">Estilo visual: azul (default) o cian segmentado</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>ariaLabel</code>
+              </td>
+              <td className="border p-2">
                 <code>string</code>
               </td>
-              <td className="border p-2">&quot;single&quot;</td>
-              <td className="border p-2">Modo de selección (single o multiple)</td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Nombre accesible del grupo (aria-label)</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>activeClassName</code>
+              </td>
+              <td className="border p-2">
+                <code>string</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Reemplaza las clases activas de la variante</td>
+            </tr>
+            <tr>
+              <td className="border p-2">
+                <code>inactiveClassName</code>
+              </td>
+              <td className="border p-2">
+                <code>string</code>
+              </td>
+              <td className="border p-2">-</td>
+              <td className="border p-2">Reemplaza las clases inactivas de la variante</td>
             </tr>
           </tbody>
         </table>
       </section>
       <section>
-        <h2 className="text-xl font-bold mb-4">Modos</h2>
+        <h2 className="text-xl font-bold mb-4">Variantes</h2>
         <ul className="list-disc pl-5 space-y-2">
           <li>
-            <strong>single</strong> - Solo una opción puede estar seleccionada
+            <strong>default</strong> - Botones azules que ocupan el ancho disponible
           </li>
           <li>
-            <strong>multiple</strong> - Varias opciones pueden estar seleccionadas simultanéamente
+            <strong>segmented</strong> - Botones cian compactos usados en los playgrounds
           </li>
         </ul>
       </section>
