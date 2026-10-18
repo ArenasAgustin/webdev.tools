@@ -55,6 +55,10 @@ export const STORAGE_KEYS = {
   BASE64_INPUT: "base64Input",
   BASE64_MODE: "base64Mode",
   BASE64_OPTIONS: "base64Options",
+  URL_MODE: "urlMode",
+  URL_VARIANT: "urlVariant",
+  URL_INPUT: "urlInput",
+  URL_OPTIONS: "urlOptions",
 } as const;
 
 /**
