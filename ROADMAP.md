@@ -52,7 +52,7 @@ _(vacío)_
 ## Próximo
 
 - [x] Base64 encoder/decoder
-- [ ] URL encoder/decoder
+- [x] URL encoder/decoder
 - [ ] JWT decoder
 - [ ] TypeScript playground
 - [ ] SASS/SCSS/LESS playground

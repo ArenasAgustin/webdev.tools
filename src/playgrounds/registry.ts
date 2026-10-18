@@ -12,6 +12,7 @@ import { timestampConfig } from "./timestamp/timestamp.config";
 import { phpPlaygroundConfig } from "./php/php.config";
 import { sqlPlaygroundConfig } from "./sql/sql.config";
 import { base64Config } from "./base64/base64.config";
+import { urlConfig } from "./url/url.config";
 
 export type PlaygroundRegistryItem = PlaygroundConfig & {
   component: LazyExoticComponent<ComponentType>;
@@ -81,6 +82,11 @@ const entries: RegistryEntry[] = [
     config: base64Config,
     load: () =>
       import("./base64/Base64Playground").then((m) => ({ default: m.Base64Playground })),
+  },
+  {
+    config: urlConfig,
+    load: () =>
+      import("./url/UrlPlayground").then((m) => ({ default: m.UrlPlayground })),
   },
 ];
 

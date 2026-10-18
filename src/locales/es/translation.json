@@ -312,6 +312,8 @@
     "copy": "Copiar",
     "copyError": "No se pudo copiar al portapapeles",
     "clear": "Limpiar",
+    "swap": "Intercambiar",
+    "strict": "Estricto (RFC 3986)",
     "errorMalformedSequence": "La entrada contiene una secuencia porcentual malformada",
     "errorInvalidSurrogate": "La entrada contiene un sustituto UTF-16 sin par"
   }

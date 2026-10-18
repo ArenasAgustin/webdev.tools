@@ -33,6 +33,8 @@ const esTranslations: Record<string, string> = {
   "url.copy": "Copiar",
   "url.copyError": "No se pudo copiar al portapapeles",
   "url.clear": "Limpiar",
+  "url.swap": "Intercambiar",
+  "url.strict": "Estricto (RFC 3986)",
   "url.errorMalformedSequence": "Secuencia porcentual malformada",
   "url.errorInvalidSurrogate": "Sustituto UTF-16 sin par",
 };
@@ -215,6 +217,71 @@ describe("UrlPlayground branches (core)", () => {
       "aria-pressed",
       "true",
     );
+  });
+
+  it("swap exchanges input/output, makes the flipped mode explicit and keeps the variant", () => {
+    render(<UrlPlayground />);
+    click("URI completa");
+    typeInput("a b");
+    expect(screen.getByRole("button", { name: "Auto (encode)" })).toBeInTheDocument();
+
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("a%20b");
+    expect(getOutput().value).toBe("a b");
+    expect(screen.getByRole("button", { name: "Decodificar" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "URI completa" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("a b");
+    expect(screen.getByRole("button", { name: "Codificar" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("swap is disabled on empty output or error", () => {
+    render(<UrlPlayground />);
+    const swap = screen.getByRole("button", { name: /Intercambiar/ });
+    typeInput("");
+    expect(swap).toBeDisabled();
+    click("Decodificar");
+    typeInput("%zz");
+    expect(swap).toBeDisabled();
+    typeInput("a%20b");
+    expect(swap).toBeEnabled();
+  });
+
+  it("strict escapes !'()* when encoding", () => {
+    render(<UrlPlayground />);
+    click("Codificar");
+    typeInput("a!b");
+    expect(getOutput().value).toBe("a!b");
+
+    const strict = screen.getByRole("checkbox", { name: "Estricto (RFC 3986)" });
+    expect(strict).not.toBeChecked();
+    fireEvent.click(strict);
+    expect(strict).toBeChecked();
+    expect(getOutput().value).toBe("a%21b");
+  });
+
+  it("strict has no effect on decode and is disabled (but rendered) for uri", () => {
+    render(<UrlPlayground />);
+    const strict = screen.getByRole("checkbox", { name: "Estricto (RFC 3986)" });
+    fireEvent.click(strict);
+    click("Decodificar");
+    typeInput("a%21b");
+    expect(getOutput().value).toBe("a!b");
+
+    click("URI completa");
+    expect(strict).toBeDisabled();
+    click("Formulario");
+    expect(strict).toBeEnabled();
   });
 
   it("coerces invalid stored values to defaults", () => {
