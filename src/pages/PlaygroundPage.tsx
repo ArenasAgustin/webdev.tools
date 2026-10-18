@@ -60,7 +60,7 @@ export function PlaygroundPage() {
   const PlaygroundComponent = playground.component;
 
   return (
-    <div className="h-dvh flex flex-col bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white overflow-hidden">
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white overflow-hidden">
       <PlaygroundSidebar
         currentPlaygroundId={playground.id}
         isOpen={sidebarOpen}

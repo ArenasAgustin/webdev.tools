@@ -12,15 +12,21 @@ function App() {
     <ErrorBoundary>
       <ToastProvider>
         <OfflineBanner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/playground/:playgroundId" element={<PlaygroundPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+        {/* Viewport-height shell: routes scroll inside the flexible area, so the
+            in-flow install banner below never overlaps page controls. */}
+        <div className="flex h-dvh flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/playground/:playgroundId" element={<PlaygroundPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </BrowserRouter>
+          </div>
+          <InstallPromptBanner />
+        </div>
         <ToastContainer />
-        <InstallPromptBanner />
       </ToastProvider>
     </ErrorBoundary>
   );

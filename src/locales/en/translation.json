@@ -117,6 +117,7 @@
     "invalidInput": "Invalid input. Enter a valid timestamp or date.",
     "futureDate": "This date is in the future",
     "copied": "Copied to clipboard",
+    "copyError": "Could not copy to clipboard",
     "noResults": "No results",
     "formats": {
       "unixSeconds": "Unix (s)",

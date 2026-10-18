@@ -65,18 +65,18 @@ export function PasswordPlayground() {
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-6">
       {/* Password Output */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             type={showPassword ? "text" : "password"}
             value={password}
             readOnly
             placeholder={t("password.placeholder")}
-            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-3 text-white font-mono text-lg focus:outline-none focus:ring-1 focus:ring-cyan-400"
+            className="min-w-0 grow basis-full sm:basis-0 bg-white/10 border border-white/20 rounded-lg px-3 py-3 text-white font-mono text-lg focus:outline-none focus:ring-1 focus:ring-cyan-400"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="p-3 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-colors"
+            className="shrink-0 p-3 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg transition-colors"
             aria-label={showPassword ? t("password.hidePassword") : t("password.showPassword")}
           >
             <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
@@ -84,7 +84,7 @@ export function PasswordPlayground() {
           <button
             type="button"
             onClick={handleGenerate}
-            className="px-4 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
+            className="grow sm:grow-0 px-4 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
           >
             <i className="fas fa-sync-alt mr-2"></i>
             {t("password.generate")}
@@ -93,7 +93,7 @@ export function PasswordPlayground() {
             type="button"
             onClick={handleCopy}
             disabled={!password}
-            className={`p-3 rounded-lg transition-colors ${
+            className={`shrink-0 p-3 rounded-lg transition-colors ${
               copied ? "bg-green-500 text-white" : "bg-white/10 hover:bg-white/20 text-gray-300"
             }`}
             aria-label={copied ? t("password.copied") : t("password.copyPassword")}
