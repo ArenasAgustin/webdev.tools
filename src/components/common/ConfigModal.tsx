@@ -244,6 +244,7 @@ export function ConfigModal(props: ConfigModalProps) {
                 <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
                 <ToggleButtonGroup
                   options={INDENT_OPTIONS}
+                  ariaLabel={t("config.indent")}
                   value={(props.formatConfig as { indentSize?: number }).indentSize ?? 2}
                   onChange={(indentSize) => updateFormat({ indentSize })}
                 />
@@ -255,6 +256,7 @@ export function ConfigModal(props: ConfigModalProps) {
                 <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
                 <ToggleButtonGroup
                   options={INDENT_OPTIONS}
+                  ariaLabel={t("config.indent")}
                   value={sqlProps.formatConfig.tabWidth ?? 2}
                   onChange={(tabWidth) => updateFormat({ tabWidth })}
                 />
