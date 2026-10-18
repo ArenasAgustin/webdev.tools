@@ -293,5 +293,26 @@
     "errorInvalidLength": "Input length is not a valid Base64 length",
     "errorInvalidPadding": "Input has invalid Base64 padding",
     "errorInvalidUtf8": "Decoded bytes are not valid UTF-8 text"
+  },
+  "url": {
+    "modeGroupLabel": "Conversion mode",
+    "modeAuto": "Auto",
+    "modeAutoDetected": "Auto ({{mode}})",
+    "modeEncode": "Encode",
+    "modeDecode": "Decode",
+    "variantGroupLabel": "Encoding variant",
+    "variantComponent": "Component",
+    "variantUri": "Full URI",
+    "variantForm": "Form",
+    "inputLabel": "Input",
+    "inputPlaceholderEncode": "Enter text or URL to encode...",
+    "inputPlaceholderDecode": "Enter percent-encoded text to decode...",
+    "outputLabel": "Output",
+    "outputPlaceholder": "Result will appear here",
+    "copy": "Copy",
+    "copyError": "Could not copy to clipboard",
+    "clear": "Clear",
+    "errorMalformedSequence": "Input contains a malformed percent-encoded sequence",
+    "errorInvalidSurrogate": "Input contains an unpaired UTF-16 surrogate"
   }
 }

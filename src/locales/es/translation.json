@@ -293,5 +293,26 @@
     "errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
     "errorInvalidPadding": "La entrada tiene un padding Base64 inválido",
     "errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido"
+  },
+  "url": {
+    "modeGroupLabel": "Modo de conversión",
+    "modeAuto": "Auto",
+    "modeAutoDetected": "Auto ({{mode}})",
+    "modeEncode": "Codificar",
+    "modeDecode": "Decodificar",
+    "variantGroupLabel": "Variante de codificación",
+    "variantComponent": "Componente",
+    "variantUri": "URI completa",
+    "variantForm": "Formulario",
+    "inputLabel": "Entrada",
+    "inputPlaceholderEncode": "Ingresá el texto o la URL para codificar...",
+    "inputPlaceholderDecode": "Ingresá el texto codificado para decodificar...",
+    "outputLabel": "Salida",
+    "outputPlaceholder": "El resultado aparecerá aquí",
+    "copy": "Copiar",
+    "copyError": "No se pudo copiar al portapapeles",
+    "clear": "Limpiar",
+    "errorMalformedSequence": "La entrada contiene una secuencia porcentual malformada",
+    "errorInvalidSurrogate": "La entrada contiene un sustituto UTF-16 sin par"
   }
 }
