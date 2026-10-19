@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
-import { DiffEditor } from "@monaco-editor/react";
+import { DiffEditor, type DiffOnMount } from "@monaco-editor/react";
 import { CodeEditorLoader } from "./CodeEditorLoader";
 
 interface DiffCodeEditorProps {
@@ -15,6 +15,17 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
   language,
 }: DiffCodeEditorProps) {
   const { t } = useTranslation();
+  const ariaLabels = {
+    originalAriaLabel: t("editor.diffOriginalLabel"),
+    modifiedAriaLabel: t("editor.diffModifiedLabel"),
+  };
+
+  // Monaco recomputes each pane's ariaLabel from the changed options only, so its
+  // internal post-create option update wipes the construction labels; re-apply them.
+  const handleMount: DiffOnMount = (editor) => {
+    editor.getOriginalEditor().updateOptions({ ariaLabel: ariaLabels.originalAriaLabel });
+    editor.getModifiedEditor().updateOptions({ ariaLabel: ariaLabels.modifiedAriaLabel });
+  };
 
   return (
     <div className="w-full h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
@@ -26,8 +37,7 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
         theme="vs-dark"
         options={{
           readOnly: true,
-          originalAriaLabel: t("editor.diffOriginalLabel"),
-          modifiedAriaLabel: t("editor.diffModifiedLabel"),
+          ...ariaLabels,
           minimap: { enabled: false },
           fontSize: 12,
           lineNumbers: "on",
@@ -37,6 +47,7 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
           padding: { top: 12, bottom: 12 },
           renderSideBySide: false,
         }}
+        onMount={handleMount}
         loading={<CodeEditorLoader />}
       />
     </div>
