@@ -2,13 +2,15 @@
  * SQL Playground types
  */
 
+import type { IndentStyle } from "@/types/format";
+
 // v1: only default dialect.
 // v2 will widen to: "postgresql" | "mysql" | "sqlite" | "mariadb" | "transactsql" | ...
 export type SqlDialect = "sql";
 
 export interface SqlFormatConfig {
   dialect: SqlDialect;
-  tabWidth?: number; // default: 2
+  tabWidth?: IndentStyle; // default: 2; "\t" indents with tabs
   autoCopy?: boolean;
 }
 
