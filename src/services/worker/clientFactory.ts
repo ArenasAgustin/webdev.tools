@@ -1,6 +1,15 @@
+/**
+ * Default time a request may wait for a worker response before it is rejected.
+ * Generous on purpose: the same client carries SQL execute, whose first call
+ * lazily downloads and compiles sql.js, and long-running queries. It only has to
+ * bound requests the worker never answers so callers can fall back or recover.
+ */
+export const DEFAULT_WORKER_TIMEOUT_MS = 60_000;
+
 interface PendingRequest<TResponse> {
   resolve: (value: TResponse) => void;
   reject: (error: Error) => void;
+  timer: ReturnType<typeof setTimeout> | null;
 }
 
 interface WorkerRequestBase {
@@ -16,6 +25,8 @@ interface CreateWorkerClientOptions<TPayload, TRequest extends WorkerRequestBase
   idPrefix: string;
   buildRequest: (id: string, payload: TPayload) => TRequest;
   unavailableMessage?: string;
+  /** Per-request timeout in ms. `0` disables it. Defaults to `DEFAULT_WORKER_TIMEOUT_MS`. */
+  timeoutMs?: number;
 }
 
 export interface WorkerClient<TPayload, TResponse extends WorkerResponseBase> {
@@ -31,6 +42,13 @@ export function createWorkerClient<
 >(options: CreateWorkerClientOptions<TPayload, TRequest>): WorkerClient<TPayload, TResponse> {
   const pending = new Map<string, PendingRequest<TResponse>>();
   let worker: Worker | null = null;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_WORKER_TIMEOUT_MS;
+
+  const clearTimer = (entry: PendingRequest<TResponse>) => {
+    if (entry.timer !== null) {
+      clearTimeout(entry.timer);
+    }
+  };
 
   const canUseWorker = () => typeof window !== "undefined" && typeof Worker !== "undefined";
 
@@ -46,6 +64,7 @@ export function createWorkerClient<
         const response = event.data;
         const entry = pending.get(response.id);
         if (entry) {
+          clearTimer(entry);
           entry.resolve(response);
           pending.delete(response.id);
         }
@@ -59,7 +78,10 @@ export function createWorkerClient<
         pending.clear();
         worker?.terminate();
         worker = null;
-        snapshot.forEach((entry) => entry.reject(error));
+        snapshot.forEach((entry) => {
+          clearTimer(entry);
+          entry.reject(error);
+        });
 
         // Reiniciar el worker en el próximo run
         console.warn("Worker reiniciado después de un error");
@@ -82,7 +104,17 @@ export function createWorkerClient<
     const message = options.buildRequest(id, payload);
 
     return new Promise((resolve, reject) => {
-      pending.set(id, { resolve, reject });
+      // Without a timeout, a request the worker never answers (e.g. an
+      // unhandled action) would leave the caller waiting forever.
+      const timer =
+        timeoutMs > 0
+          ? setTimeout(() => {
+              pending.delete(id);
+              reject(new Error(`Worker request timed out after ${timeoutMs}ms`));
+            }, timeoutMs)
+          : null;
+
+      pending.set(id, { resolve, reject, timer });
       instance.postMessage(message);
     });
   };
@@ -98,6 +130,7 @@ export function createWorkerClient<
 
     worker.terminate();
     worker = null;
+    pending.forEach(clearTimer);
     pending.clear();
   };
 

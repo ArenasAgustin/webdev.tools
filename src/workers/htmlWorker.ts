@@ -1,4 +1,4 @@
-import { formatHtml, minifyHtml } from "@/services/html/transform";
+import { formatHtml, minifyHtml, cleanHtml } from "@/services/html/transform";
 import type { Result } from "@/types/common";
 import type { HtmlWorkerRequest, HtmlWorkerResponse } from "@/services/html/worker.types";
 
@@ -46,6 +46,14 @@ ctx.onmessage = (event: MessageEvent<HtmlWorkerRequest>) => {
             ),
           );
           return;
+        case "clean":
+          ctx.postMessage(toResponse(id, cleanHtml(input, request.options)));
+          return;
+        default: {
+          const action = (request as { action?: unknown }).action;
+          ctx.postMessage({ id, ok: false, error: { message: `Unsupported worker action: ${String(action)}` } });
+          return;
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
