@@ -241,7 +241,7 @@ echo "done";`;
     if (result.ok) {
       // The heredoc content should NOT affect brace counting
       expect(result.value).toContain("SELECT * FROM users");
-      expect(result.value).toContain("echo \"done\";");
+      expect(result.value).toContain('echo "done";');
     }
   });
 
@@ -259,8 +259,56 @@ echo "end";`;
     if (result.ok) {
       // Nowdoc content preserved, outer braces handled correctly
       expect(result.value).toContain("function test()");
-      expect(result.value).toContain("echo \"end\";");
+      expect(result.value).toContain('echo "end";');
     }
+  });
+
+  it("keeps heredoc bodies verbatim inside an indented block", () => {
+    const input = `<?php
+function render() {
+$html = <<<EOT
+  <div>
+      {$name}
+  </div>
+EOT;
+return $html;
+}`;
+    const result = formatPhp(input);
+
+    expect(result).toEqual({
+      ok: true,
+      value: `<?php
+function render() {
+  $html = <<<EOT
+  <div>
+      {$name}
+  </div>
+EOT;
+  return $html;
+}`,
+    });
+  });
+
+  it("keeps nowdoc bodies verbatim when passed as an argument", () => {
+    const input = `<?php
+if ($x) {
+echo strtoupper(<<<'TXT'
+   a { b
+TXT);
+echo "after";
+}`;
+    const result = formatPhp(input);
+
+    expect(result).toEqual({
+      ok: true,
+      value: `<?php
+if ($x) {
+  echo strtoupper(<<<'TXT'
+   a { b
+TXT);
+  echo "after";
+}`,
+    });
   });
 
   it("handles interpolated strings with {$var}", () => {
@@ -272,7 +320,7 @@ echo "Hello {$name}!";`;
     expect(result.ok).toBe(true);
     if (result.ok) {
       // The {$name} should not be counted as a brace
-      expect(result.value).toContain("echo \"Hello {$name}!\";");
+      expect(result.value).toContain('echo "Hello {$name}!";');
     }
   });
 
@@ -313,7 +361,7 @@ echo "done";`;
     expect(result.ok).toBe(true);
     if (result.ok) {
       // The } inside heredoc should not close the function
-      expect(result.value).toContain("echo \"done\";");
+      expect(result.value).toContain('echo "done";');
     }
   });
 });
