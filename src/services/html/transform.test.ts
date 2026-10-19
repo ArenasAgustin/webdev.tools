@@ -173,6 +173,40 @@ describe("minifyHtml", () => {
     }
   });
 
+  it("keeps a single space between inline elements and around inline text", async () => {
+    const input =
+      "<p>\n  Hello\n  <b>bold</b>   <i>italic</i>\n  world <a href='#'>link</a>.\n</p>";
+
+    const result = await minifyHtml(input, {
+      removeComments: false,
+      collapseWhitespace: true,
+      minifyCss: false,
+      minifyJs: false,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      value: "<p>Hello <b>bold</b> <i>italic</i> world <a href='#'>link</a>.</p>",
+    });
+  });
+
+  it("keeps whitespace inside pre and textarea verbatim", async () => {
+    const input =
+      "<div>\n  <pre>  line 1\n    line 2</pre>\n  <textarea>a\n\n  b</textarea>\n</div>";
+
+    const result = await minifyHtml(input, {
+      removeComments: false,
+      collapseWhitespace: true,
+      minifyCss: false,
+      minifyJs: false,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      value: "<div><pre>  line 1\n    line 2</pre><textarea>a\n\n  b</textarea></div>",
+    });
+  });
+
   it("returns error for invalid HTML that throws during minification", async () => {
     // Trigger the catch path by passing a non-string
     const result = await minifyHtml(null as unknown as string, {

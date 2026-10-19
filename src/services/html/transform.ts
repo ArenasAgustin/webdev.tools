@@ -156,16 +156,97 @@ function minifyEmbeddedJs(
   });
 }
 
+// Elements whose surrounding whitespace never renders, so it can be dropped.
+// Anything else is treated as inline and keeps a single collapsed space.
+const BLOCK_LEVEL_TAGS = new Set([
+  "address",
+  "article",
+  "aside",
+  "base",
+  "blockquote",
+  "body",
+  "br",
+  "caption",
+  "col",
+  "colgroup",
+  "dd",
+  "details",
+  "dialog",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "head",
+  "header",
+  "hgroup",
+  "hr",
+  "html",
+  "legend",
+  "li",
+  "link",
+  "main",
+  "meta",
+  "nav",
+  "noscript",
+  "ol",
+  "optgroup",
+  "option",
+  "p",
+  "pre",
+  "script",
+  "section",
+  "style",
+  "summary",
+  "table",
+  "tbody",
+  "td",
+  "template",
+  "tfoot",
+  "th",
+  "thead",
+  "title",
+  "tr",
+  "ul",
+]);
+
+const HTML_TAG_PATTERN = /<!--[\s\S]*?-->|<[^>]+>/g;
+
+function isWhitespaceBoundary(tag: string | undefined): boolean {
+  if (tag === undefined) return true;
+  const name = /^<\/?([a-zA-Z][\w-]*)/.exec(tag)?.[1];
+  // Comments, doctypes and processing instructions also swallow whitespace.
+  return name === undefined || BLOCK_LEVEL_TAGS.has(name.toLowerCase());
+}
+
 function collapseHtmlWhitespace(source: string): string {
   const preservedBlocks = new Map<string, string>();
   let output = preserveEmbeddedTagContent(source, "style", preservedBlocks);
   output = preserveEmbeddedTagContent(output, "script", preservedBlocks);
+  output = preserveEmbeddedTagContent(output, "pre", preservedBlocks);
+  output = preserveEmbeddedTagContent(output, "textarea", preservedBlocks);
 
-  output = output.replace(/>\s+</g, "><");
-  output = output.replace(/>([^<]*)</g, (_match, text: string) => {
-    const normalizedText = text.replace(/\s+/g, " ").trim();
-    return normalizedText.length > 0 ? `>${normalizedText}<` : "><";
-  });
+  const tags = output.match(HTML_TAG_PATTERN) ?? [];
+  const texts = output.split(HTML_TAG_PATTERN);
+  // texts[i] sits between tags[i - 1] and tags[i]; edges are trimmed when the
+  // neighbouring tag is block-level, otherwise whitespace collapses to one space.
+  output = texts
+    .map((text, index) => {
+      let collapsed = text.replace(/\s+/g, " ");
+      if (isWhitespaceBoundary(tags[index - 1])) collapsed = collapsed.trimStart();
+      if (isWhitespaceBoundary(tags[index])) collapsed = collapsed.trimEnd();
+      return collapsed + (tags[index] ?? "");
+    })
+    .join("");
 
   output = restorePreservedContent(output, preservedBlocks);
   output = trimEmbeddedTagContent(output, "style");
@@ -183,7 +264,7 @@ function trimEmbeddedTagContent(source: string, tagName: "style" | "script"): st
 
 function preserveEmbeddedTagContent(
   source: string,
-  tagName: "style" | "script",
+  tagName: "style" | "script" | "pre" | "textarea",
   preservedBlocks: Map<string, string>,
 ): string {
   let index = 0;
