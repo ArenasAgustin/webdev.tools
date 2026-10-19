@@ -65,10 +65,18 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
 
     const decreaseKeywordsRegex = /^(break|continue|return|throw|goto)\s*;?$/;
 
-    let inHeredoc = false;
-    let heredocLabel = "";
+    let heredocLabel: string | null = null;
 
     for (const line of lines) {
+      // Heredoc/nowdoc bodies and their closing label are emitted verbatim: their
+      // whitespace is part of the string value (and the closing label's indent
+      // sets how much PHP strips from the body).
+      if (heredocLabel !== null) {
+        formatted.push(line);
+        if (new RegExp(`^\\s*${heredocLabel}\\b`).test(line)) heredocLabel = null;
+        continue;
+      }
+
       const trimmed = line.trim();
 
       // Skip empty lines but preserve them
@@ -77,28 +85,12 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
         continue;
       }
 
-      // Detect heredoc/nowdoc start and end
-      const heredocMatch = /^(<<<)\s*(['"]?)(\w+)\2/.exec(trimmed);
-      if (heredocMatch) {
-        if (!inHeredoc) {
-          inHeredoc = true;
-          heredocLabel = heredocMatch[3];
-          formatted.push(indent.repeat(indentLevel) + trimmed);
-          continue;
-        }
-      }
+      // A heredoc/nowdoc opener ends its line, e.g. `$x = <<<EOT` or `f(<<<'TXT'`.
+      const heredocMatch = /<<<\s*(['"]?)(\w+)\1$/.exec(trimmed);
+      if (heredocMatch) heredocLabel = heredocMatch[2];
+      const code = heredocMatch ? trimmed.slice(0, heredocMatch.index) : trimmed;
 
-      // Check if we're ending a heredoc
-      if (inHeredoc) {
-        if (trimmed === heredocLabel + ";") {
-          inHeredoc = false;
-          heredocLabel = "";
-        }
-        formatted.push(indent.repeat(indentLevel) + trimmed);
-        continue;
-      }
-
-      const braces = countOuterBraces(trimmed, false);
+      const braces = countOuterBraces(code);
 
       // Decrease indent BEFORE for a leading closing brace
       if (trimmed.startsWith("}")) {
@@ -141,37 +133,20 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
 }
 
 /**
- * Count { and } characters that appear outside string literals, comments, and heredocs.
- * Enhanced version that handles:
- * - Heredocs and nowdocs (<<<)
+ * Count { and } characters that appear outside string literals and comments.
+ * Heredoc/nowdoc bodies never reach this function (formatPhp emits them verbatim).
+ * Handles:
  * - Interpolated strings with {$var}
  * - Escaped characters
  * - Single and double quoted strings
  * - Line and block comments
  */
-function countOuterBraces(line: string, skipHeredocCheck: boolean): { open: number; close: number } {
+function countOuterBraces(line: string): { open: number; close: number } {
   let open = 0;
   let close = 0;
   type StringState = "outside" | "single" | "double";
   let state: StringState = "outside";
   let i = 0;
-
-  // Skip heredoc detection if already in heredoc (caller handles it)
-  if (!skipHeredocCheck) {
-    // Check for heredoc/nowdoc start
-    const heredocMatch = /^(<<<)\s*(['"]?)(\w+)\2/.exec(line);
-    if (heredocMatch) {
-      // Entire line is in heredoc context
-      // Count braces normally but don't interpret strings
-      while (i < line.length) {
-        const ch = line[i];
-        if (ch === "{") open++;
-        else if (ch === "}") close++;
-        i++;
-      }
-      return { open, close };
-    }
-  }
 
   while (i < line.length) {
     const ch = line[i];
