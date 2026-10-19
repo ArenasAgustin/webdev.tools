@@ -85,43 +85,96 @@ export function minifyCss(
   }
 }
 
+interface CssSegment {
+  kind: "literal" | "comment" | "code";
+  text: string;
+}
+
+// Splits CSS into string literals, unquoted url() bodies, comments and plain code,
+// so transforms never treat comment-like text inside a literal as a comment.
+function tokenizeCss(source: string): CssSegment[] {
+  const segments: CssSegment[] = [];
+  let code = "";
+  let i = 0;
+
+  const push = (kind: CssSegment["kind"], end: number) => {
+    if (code) {
+      segments.push({ kind: "code", text: code });
+      code = "";
+    }
+    segments.push({ kind, text: source.slice(i, end) });
+    i = end;
+  };
+
+  while (i < source.length) {
+    const char = source[i];
+
+    if (char === '"' || char === "'") {
+      let j = i + 1;
+      while (j < source.length && source[j] !== char) {
+        j += source[j] === "\\" ? 2 : 1;
+      }
+      push("literal", Math.min(j + 1, source.length));
+      continue;
+    }
+
+    if (char === "/" && source[i + 1] === "*") {
+      const close = source.indexOf("*/", i + 2);
+      push("comment", close === -1 ? source.length : close + 2);
+      continue;
+    }
+
+    if (/^url\(/i.test(source.slice(i, i + 4)) && !/[\w-]/.test(source[i - 1] ?? "")) {
+      const firstArgChar = source.slice(i + 4).trimStart()[0];
+      if (firstArgChar !== '"' && firstArgChar !== "'") {
+        const close = source.indexOf(")", i + 4);
+        push("literal", close === -1 ? source.length : close + 1);
+        continue;
+      }
+    }
+
+    code += char;
+    i += 1;
+  }
+
+  if (code) segments.push({ kind: "code", text: code });
+  return segments;
+}
+
 function stripComments(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return tokenizeCss(source)
+    .filter((segment) => segment.kind !== "comment")
+    .map((segment) => segment.text)
+    .join("");
 }
 
 function minifyCssString(source: string): string {
-  const preserved = new Map<string, string>();
-  let index = 0;
+  const preserved: string[] = [];
 
-  const withPreservedLiterals = source.replace(
-    /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g,
-    (match) => {
-      const token = `__CSS_LITERAL_${index}__`;
-      index += 1;
-      preserved.set(token, match);
-      return token;
-    },
-  );
+  // Mask literals and kept comments with private-use placeholders so whitespace
+  // rules can't touch them.
+  const masked = tokenizeCss(source)
+    .map((segment) => {
+      if (segment.kind === "code") return segment.text;
+      preserved.push(segment.text);
+      return `\uE000${preserved.length - 1}\uE001`;
+    })
+    .join("");
 
-  const compact = withPreservedLiterals
+  const compact = masked
     .replace(/\s+/g, " ")
     // Strip spaces around structural punctuation. `:` is handled separately below
-    // to avoid collapsing pseudo-selectors (e.g. `a :hover` → `a:hover`) or
-    // CSS custom property values / calc() expressions that contain colons.
+    // to avoid collapsing descendant pseudo-selectors (e.g. `a :hover` → `a:hover`).
     .replace(/\s*([{};,>])\s*/g, "$1")
-    // Strip spaces around `:` only in declaration context: after a word character
-    // (property name) and before a non-`/` character (value). This avoids collapsing
-    // descendant pseudo-selectors like `a :hover` while still minifying `color : red`.
-    .replace(/([a-zA-Z0-9_-])\s*:\s*(?=[^/])/g, "$1:")
+    // Collapse `:` only in declarations (next delimiter is `;` or `}`, not `{`)
+    // or inside parentheses such as media features.
+    .replace(/\s*:\s*(?=[^{};]*[;}])/g, ":")
+    .replace(/\s*:\s*(?=[^()]*\))/g, ":")
     .replace(/;}/g, "}")
     .trim();
 
-  let restored = compact;
-  for (const [token, literal] of preserved.entries()) {
-    restored = restored.replace(new RegExp(token, "g"), literal);
-  }
-
-  return restored;
+  // Restore with a replacer function so `$&`-style patterns in literals stay verbatim.
+  return compact.replace(/\uE000(\d+)\uE001/g, (_, index: string) => preserved[Number(index)]);
 }
 
 const CSS_ERROR_MESSAGES = {
@@ -151,7 +204,8 @@ export function cleanCss(input: string, options: CssCleanOptions = {}): Result<s
     // First, handle rules with only comments
     if (opts.removeRulesWithOnlyComments) {
       // Match selectors with only comments inside: selector { /* comment */ }
-      result = result.replace(/([^{}]*?)\{\s*(\/\*[\s\S]*?\*\/\s*)+\}/g, "");
+      // The comment pattern can't run past a `*/`, so it never swallows declarations.
+      result = result.replace(/([^{}]*?)\{\s*(\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/\s*)+\}/g, "");
     }
 
     // Remove empty rules: selector { }

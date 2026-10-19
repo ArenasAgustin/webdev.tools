@@ -151,6 +151,40 @@ describe("minifyCss", () => {
       expect(result.value).toContain("'hello world'");
     }
   });
+
+  it("keeps comment-like text inside strings and url()", async () => {
+    const result = await minifyCss(
+      '.a::before { content: "/* x */"; } .b { background: url(data:x;a/*b*/c); } /* drop */',
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      value: '.a::before{content:"/* x */"}.b{background:url(data:x;a/*b*/c)}',
+    });
+  });
+
+  it("keeps comment-like text inside strings when spaces are not removed", async () => {
+    const result = await minifyCss('.a { content: "/* x */"; } /* drop */', {
+      removeSpaces: false,
+    });
+
+    expect(result).toEqual({ ok: true, value: '.a { content: "/* x */"; }' });
+  });
+
+  it("restores string literals containing replacement patterns verbatim", async () => {
+    const result = await minifyCss(".a { content: \"$& $1 $$\"; }");
+
+    expect(result).toEqual({ ok: true, value: '.a{content:"$& $1 $$"}' });
+  });
+
+  it("keeps the descendant combinator before a pseudo-class", async () => {
+    const result = await minifyCss(".nav :hover { color : red; } div :not(.x) { margin : 0; }");
+
+    expect(result).toEqual({
+      ok: true,
+      value: ".nav :hover{color:red}div :not(.x){margin:0}",
+    });
+  });
 });
 
 describe("cleanCss", () => {
@@ -184,6 +218,11 @@ describe("cleanCss", () => {
       expect(result.value).not.toContain(".commented");
       expect(result.value).toContain(".real");
     }
+  });
+
+  it("keeps rules that have declarations next to a comment", () => {
+    const result = cleanCss("a { /* x */ color: red; } b { /* y */ }");
+    expect(result).toEqual({ ok: true, value: "a { /* x */ color: red; }" });
   });
 
   it("keeps comment-only rules when removeRulesWithOnlyComments is false", () => {
