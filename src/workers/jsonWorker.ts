@@ -43,6 +43,11 @@ ctx.onmessage = (event: MessageEvent<JsonWorkerRequest>) => {
         case "jsonPath":
           ctx.postMessage(toDomainResponse(id, applyJsonPath(input, request.path)));
           return;
+        default: {
+          const action = (request as { action?: unknown }).action;
+          ctx.postMessage({ id, ok: false, error: { message: `Unsupported worker action: ${String(action)}` } });
+          return;
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

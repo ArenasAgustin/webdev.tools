@@ -96,6 +96,12 @@ ctx.onmessage = (event: MessageEvent<SqlWorkerRequest>) => {
           ctx.postMessage({ id: req.id, ok: true, value: "reset" });
           return;
         }
+
+        default: {
+          const { id, action } = req as { id: string; action?: unknown };
+          ctx.postMessage({ id, ok: false, error: { message: `Unsupported worker action: ${String(action)}` } });
+          return;
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

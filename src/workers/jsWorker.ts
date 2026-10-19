@@ -1,4 +1,4 @@
-import { formatJs, minifyJs } from "@/services/js/transform";
+import { formatJs, minifyJs, cleanJs } from "@/services/js/transform";
 import type { Result } from "@/types/common";
 import type { JsWorkerRequest, JsWorkerResponse } from "@/services/js/worker.types";
 
@@ -28,6 +28,14 @@ ctx.onmessage = (event: MessageEvent<JsWorkerRequest>) => {
         case "minify":
           ctx.postMessage(toResponse(id, minifyJs(input, request.options)));
           return;
+        case "clean":
+          ctx.postMessage(toResponse(id, cleanJs(input, request.options)));
+          return;
+        default: {
+          const action = (request as { action?: unknown }).action;
+          ctx.postMessage({ id, ok: false, error: { message: `Unsupported worker action: ${String(action)}` } });
+          return;
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
