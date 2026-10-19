@@ -156,6 +156,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "editor.expandedTitle": "Resultado",
         "editor.codeEditorLabel": "Editor de código",
         "editor.tabFocusHint": "Presioná Ctrl+M (Ctrl+Shift+M en macOS) para alternar si Tab indenta o mueve el foco.",
+        "editor.diffOriginalLabel": "Código original (solo lectura)",
+        "editor.diffModifiedLabel": "Código resultante (solo lectura)",
 
         // Notifications / Toast
         "notifications": "Notificaciones",
@@ -404,6 +406,8 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "editor.expandedTitle": "Result",
         "editor.codeEditorLabel": "Code editor",
         "editor.tabFocusHint": "Press Ctrl+M (Ctrl+Shift+M on macOS) to toggle whether Tab indents or moves focus.",
+        "editor.diffOriginalLabel": "Original code (read-only)",
+        "editor.diffModifiedLabel": "Result code (read-only)",
 
         // Notifications / Toast
         "notifications": "Notifications",

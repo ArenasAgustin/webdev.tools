@@ -148,7 +148,9 @@
     "closeDiff": "Close",
     "expandedTitle": "Result",
     "codeEditorLabel": "Code editor",
-    "tabFocusHint": "Press Ctrl+M (Ctrl+Shift+M on macOS) to toggle whether Tab indents or moves focus."
+    "tabFocusHint": "Press Ctrl+M (Ctrl+Shift+M on macOS) to toggle whether Tab indents or moves focus.",
+    "diffOriginalLabel": "Original code (read-only)",
+    "diffModifiedLabel": "Result code (read-only)"
   },
   "password": {
     "aria": {
