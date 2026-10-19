@@ -148,7 +148,9 @@
     "closeDiff": "Cerrar",
     "expandedTitle": "Resultado",
     "codeEditorLabel": "Editor de código",
-    "tabFocusHint": "Presioná Ctrl+M (Ctrl+Shift+M en macOS) para alternar si Tab indenta o mueve el foco."
+    "tabFocusHint": "Presioná Ctrl+M (Ctrl+Shift+M en macOS) para alternar si Tab indenta o mueve el foco.",
+    "diffOriginalLabel": "Código original (solo lectura)",
+    "diffModifiedLabel": "Código resultante (solo lectura)"
   },
   "password": {
     "aria": {

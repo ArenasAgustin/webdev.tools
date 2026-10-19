@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 import { DiffEditor } from "@monaco-editor/react";
 import { CodeEditorLoader } from "./CodeEditorLoader";
 
@@ -13,6 +14,8 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
   modified,
   language,
 }: DiffCodeEditorProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="w-full h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
       <DiffEditor
@@ -23,6 +26,8 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
         theme="vs-dark"
         options={{
           readOnly: true,
+          originalAriaLabel: t("editor.diffOriginalLabel"),
+          modifiedAriaLabel: t("editor.diffModifiedLabel"),
           minimap: { enabled: false },
           fontSize: 12,
           lineNumbers: "on",
