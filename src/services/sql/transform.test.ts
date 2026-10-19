@@ -59,6 +59,16 @@ describe("formatSql", () => {
 
     expect(result.ok).toBe(true);
   });
+
+  it("indents with tabs when the indent option is a tab", () => {
+    const tab = "\t";
+    const result = formatSql("select a, b from t where x = 1", { dialect: "sql", tabWidth: tab });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.split("\n")).toContain(`${tab}a,`);
+      expect(result.value.split("\n")).toContain(`${tab}t`);
+    }
+  });
 });
 
 describe("validateSql", () => {
@@ -180,5 +190,25 @@ SELECT id, name FROM users WHERE id = 1`;
         }
       }
     }
+  });
+
+  it("keeps comment markers and spacing inside string literals", () => {
+    const result = minifySql(
+      "SELECT '--x' AS a,\n  'a   b' AS b, 'x;y' AS c, \"col  name\" FROM t; -- trailing",
+    );
+    expect(result).toEqual({
+      ok: true,
+      value: "SELECT '--x' AS a, 'a   b' AS b, 'x;y' AS c, \"col  name\" FROM t;",
+    });
+  });
+
+  it("keeps block-comment text inside strings and escaped quotes", () => {
+    const result = minifySql("SELECT '/* not */' AS x, 'it''s  ok' /* drop */ AS y;");
+    expect(result).toEqual({ ok: true, value: "SELECT '/* not */' AS x, 'it''s  ok' AS y;" });
+  });
+
+  it("keeps backtick-quoted identifiers verbatim", () => {
+    const result = minifySql("SELECT `a  --b`\n FROM t;");
+    expect(result).toEqual({ ok: true, value: "SELECT `a  --b` FROM t;" });
   });
 });
