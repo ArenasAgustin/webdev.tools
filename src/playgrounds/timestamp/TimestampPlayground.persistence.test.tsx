@@ -27,6 +27,7 @@ vi.mock("@/hooks/useDebouncedValue", () => ({
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
+    i18n: { language: "es" },
   }),
 }));
 
@@ -36,11 +37,7 @@ vi.mock("@/hooks/useToast", () => ({
 
 vi.mock("@/components/common/SearchableSelect", () => ({
   SearchableSelect: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-    <select
-      data-testid="timezone-select"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    >
+    <select data-testid="timezone-select" value={value} onChange={(e) => onChange(e.target.value)}>
       <option value={value}>{value}</option>
       <option value="Europe/London">Europe/London</option>
     </select>

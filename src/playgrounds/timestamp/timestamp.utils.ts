@@ -19,7 +19,13 @@ export function parseInput(input: string): { type: InputType; value: number | Da
 
   if (!trimmed) return null;
 
-  // First, try to parse as date string (more specific check first)
+  // A plain (possibly negative) number is always a Unix timestamp; without this
+  // check "-1" would be read as a date string by the "-" heuristic below.
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    return { type: "unix", value: Number(trimmed) };
+  }
+
+  // Then, try to parse as date string (more specific check first)
   // Check for date-like patterns: contains - or : or T
   if (trimmed.includes("-") || trimmed.includes("T") || trimmed.includes(":")) {
     const date = new Date(trimmed);
@@ -105,8 +111,9 @@ function getRelativeTime(date: Date, lang = "es"): string {
   }
 
   const prefix = isFuture ? (lang === "es" ? "dentro de " : "in ") : lang === "es" ? "hace " : "";
+  const suffix = !isFuture && lang !== "es" ? " ago" : "";
 
-  return `${prefix}${value} ${unit}`;
+  return `${prefix}${value} ${unit}${suffix}`;
 }
 
 /**
