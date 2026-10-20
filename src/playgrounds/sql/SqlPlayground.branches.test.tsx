@@ -36,9 +36,12 @@ const {
     loadCssToolsConfig: vi.fn(() => null),
     loadPhpToolsConfig: vi.fn(() => null),
   },
-  formatSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
-  minifySqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
-  executeSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: SqlExecuteResult; error?: string }>>(),
+  formatSqlAsyncMock:
+    vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
+  minifySqlAsyncMock:
+    vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
+  executeSqlAsyncMock:
+    vi.fn<(input: string) => Promise<{ ok: boolean; value?: SqlExecuteResult; error?: string }>>(),
   resetSqlAsyncMock: vi.fn<() => Promise<{ ok: boolean; value?: string; error?: string }>>(),
   validateSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; error?: string }>>(),
   downloadFileMock: vi.fn(),
@@ -162,13 +165,16 @@ vi.mock("@/components/layout/Panel", () => ({
   Panel: ({
     children,
     title,
+    actions,
   }: {
     children: React.ReactNode;
     title: string;
+    actions?: React.ReactNode;
     [key: string]: unknown;
   }) => (
     <div data-testid={`panel-${title.toLowerCase().replace(/\s/g, "-")}`}>
       <span>{title}</span>
+      {actions}
       {children}
     </div>
   ),
@@ -290,6 +296,48 @@ describe("SqlPlayground branches", () => {
     expect(jsonEditor.textContent).toBe(JSON.stringify(expectedResult, null, 2));
   });
 
+  it("execute error after a success → previous result replaced by the error banner", async () => {
+    vi.useFakeTimers();
+    render(<SqlPlayground />);
+
+    fireEvent.click(screen.getByRole("button", { name: "set-input" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+    expect(screen.getByTestId("code-editor-json")).toBeInTheDocument();
+
+    executeSqlAsyncMock.mockResolvedValueOnce({ ok: false, error: "table users already exists" });
+    fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(screen.queryByTestId("code-editor-json")).not.toBeInTheDocument();
+    expect(screen.getByTestId("sql-error-banner").textContent).toContain(
+      "table users already exists",
+    );
+  });
+
+  it("reset database button → resets the engine and clears the result", async () => {
+    vi.useFakeTimers();
+    render(<SqlPlayground />);
+
+    fireEvent.click(screen.getByRole("button", { name: "set-input" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ejecutar" }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Resetear base de datos" }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(resetSqlAsyncMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("code-editor-json")).not.toBeInTheDocument();
+  });
+
   it("execute error → error banner shown", async () => {
     executeSqlAsyncMock.mockResolvedValueOnce({
       ok: false,
@@ -307,7 +355,9 @@ describe("SqlPlayground branches", () => {
 
     expect(toastMocks.error).toHaveBeenCalledWith("near 'SELEKT': syntax error");
     expect(screen.getByTestId("sql-error-banner")).toBeInTheDocument();
-    expect(screen.getByTestId("sql-error-banner").textContent).toContain("near 'SELEKT': syntax error");
+    expect(screen.getByTestId("sql-error-banner").textContent).toContain(
+      "near 'SELEKT': syntax error",
+    );
   });
 
   it("loading state on first run → shows Loading SQLite engine…", async () => {
@@ -326,7 +376,9 @@ describe("SqlPlayground branches", () => {
 
     // While loading
     expect(screen.getByTestId("sql-loading")).toBeInTheDocument();
-    expect(screen.getByTestId("sql-loading").textContent).toMatch(/[Ll]oading SQLite engine|[Cc]argando motor SQLite/);
+    expect(screen.getByTestId("sql-loading").textContent).toMatch(
+      /[Ll]oading SQLite engine|[Cc]argando motor SQLite/,
+    );
 
     // Resolve the promise
     await act(async () => {
