@@ -1,6 +1,11 @@
 import { useState, useCallback } from "react";
 import { sqlPlaygroundConfig } from "@/playgrounds/sql/sql.config";
-import { executeSqlAsync, resetSqlAsync, formatSqlAsync, minifySqlAsync } from "@/services/sql/worker";
+import {
+  executeSqlAsync,
+  resetSqlAsync,
+  formatSqlAsync,
+  minifySqlAsync,
+} from "@/services/sql/worker";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
@@ -94,6 +99,8 @@ export function useSqlPlaygroundActions({
           setOutput(JSON.stringify(result.value, null, 2));
           toast?.success("Consulta ejecutada correctamente");
         } else {
+          // Drop the previous result so the error is not shown next to stale rows.
+          setOutput("");
           setError(result.error);
           toast?.error(result.error);
         }
@@ -102,6 +109,7 @@ export function useSqlPlaygroundActions({
         setIsExecuting(false);
         setIsFirstRun(false);
         const message = err instanceof Error ? err.message : String(err);
+        setOutput("");
         setError(message);
         toast?.error(message);
       });

@@ -4,11 +4,13 @@ import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { OutputActions } from "@/components/editor/OutputActions";
 import { EditorFooter } from "@/components/common/EditorFooter";
 import type { OutputPanelProps } from "../engines/types";
+import { SqlResetButton } from "./SqlResetButton";
 
 export interface SqlOutputPanelProps extends OutputPanelProps {
   actions?: {
     isExecuting?: boolean;
     isFirstRun?: boolean;
+    handleReset?: () => void;
     [key: string]: unknown;
   };
 }
@@ -36,6 +38,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
 
   const isExecuting = actions?.isExecuting ?? false;
   const isFirstRun = actions?.isFirstRun ?? true;
+  const resetButton = <SqlResetButton onReset={actions?.handleReset} />;
 
   // Loading state: first run and currently executing
   if (isFirstRun && isExecuting) {
@@ -62,12 +65,15 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
         icon="exclamation-triangle"
         iconColor="red-400"
         actions={
-          <OutputActions
-            onCopyOutput={onCopyOutput}
-            onDownloadOutput={onDownloadOutput}
-            onExpand={expandOutput}
-            onUseOutputAsInput={onUseOutputAsInput}
-          />
+          <>
+            {resetButton}
+            <OutputActions
+              onCopyOutput={onCopyOutput}
+              onDownloadOutput={onDownloadOutput}
+              onExpand={expandOutput}
+              onUseOutputAsInput={onUseOutputAsInput}
+            />
+          </>
         }
         footer={
           <EditorFooter
@@ -97,7 +103,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
   // Idle state (no output, no error)
   if (!output) {
     return (
-      <Panel title={t("sql.result")} icon="terminal" iconColor="green-400">
+      <Panel title={t("sql.result")} icon="terminal" iconColor="green-400" actions={resetButton}>
         <div className="flex h-full min-h-[220px] items-center justify-center">
           <div className="flex flex-col items-center gap-2 text-white/40">
             <i className="fas fa-database text-2xl" aria-hidden="true"></i>
@@ -124,12 +130,15 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
       icon="terminal"
       iconColor="green-400"
       actions={
-        <OutputActions
-          onCopyOutput={onCopyOutput}
-          onDownloadOutput={onDownloadOutput}
-          onExpand={expandOutput}
-          onUseOutputAsInput={onUseOutputAsInput}
-        />
+        <>
+          {resetButton}
+          <OutputActions
+            onCopyOutput={onCopyOutput}
+            onDownloadOutput={onDownloadOutput}
+            onExpand={expandOutput}
+            onUseOutputAsInput={onUseOutputAsInput}
+          />
+        </>
       }
       footer={
         <EditorFooter

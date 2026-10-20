@@ -233,7 +233,8 @@
     "loading": "Loading SQLite engine...",
     "executionError": "Execution Error",
     "sqlError": "SQL Error",
-    "truncated": "Result truncated to {{count}} rows"
+    "truncated": "Result truncated to {{count}} rows",
+    "resetDatabase": "Reset database"
   },
   "json": {
     "filterTitle": "JSONPath Filter",

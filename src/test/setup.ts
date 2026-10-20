@@ -237,6 +237,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "sql.executionError": "Error de ejecución",
         "sql.sqlError": "Error SQL",
         "sql.truncated": "Resultado truncado a {{count}} filas",
+        "sql.resetDatabase": "Resetear base de datos",
 
         // JSON
         "json.filterTitle": "Filtro JSONPath",
@@ -487,6 +488,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "sql.executionError": "Execution Error",
         "sql.sqlError": "SQL Error",
         "sql.truncated": "Result truncated to {{count}} rows",
+        "sql.resetDatabase": "Reset database",
 
         // JSON
         "json.filterTitle": "JSONPath Filter",

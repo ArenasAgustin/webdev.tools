@@ -233,7 +233,8 @@
     "loading": "Cargando motor SQLite...",
     "executionError": "Error de ejecución",
     "sqlError": "Error SQL",
-    "truncated": "Resultado truncado a {{count}} filas"
+    "truncated": "Resultado truncado a {{count}} filas",
+    "resetDatabase": "Resetear base de datos"
   },
   "json": {
     "filterTitle": "Filtro JSONPath",
