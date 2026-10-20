@@ -62,6 +62,9 @@ export function JsonPlayground() {
               type="text"
               value={jsonPathExpression}
               onChange={(e) => setJsonPathExpression(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") actions.handleApplyJsonPath?.();
+              }}
               aria-label={t("json.filterExpression")}
               className="flex-1 px-3 py-2 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-400 text-xs border border-white/10"
               placeholder={t("json.filterPlaceholder")}
@@ -119,7 +122,6 @@ export function JsonPlayground() {
       extraActionsParams={extraActionsParams}
       renderToolbarExtra={renderToolbarExtra}
       renderModals={renderModals}
-
     />
   );
 }

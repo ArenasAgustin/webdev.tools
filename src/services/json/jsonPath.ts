@@ -37,6 +37,9 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
       wrap: false,
     });
 
+    // wrap:false yields undefined when nothing matches; report it as an empty result
+    if (result === undefined) return { ok: true, value: "[]" };
+
     // Format result as JSON string
     const formatted = JSON.stringify(result, null, 2);
     return { ok: true, value: formatted };
