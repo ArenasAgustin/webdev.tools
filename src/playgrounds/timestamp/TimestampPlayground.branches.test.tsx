@@ -7,7 +7,9 @@ const {
   toastSuccessMock,
   toastErrorMock,
   clipboardWriteTextMock,
+  i18nState,
 } = vi.hoisted(() => ({
+  i18nState: { language: "es" },
   getItemMock: vi.fn(() => null),
   setItemMock: vi.fn(),
   toastSuccessMock: vi.fn(),
@@ -31,6 +33,7 @@ vi.mock("@/hooks/useDebouncedValue", () => ({
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (k: string) => k,
+    i18n: i18nState,
   }),
 }));
 
@@ -54,11 +57,7 @@ vi.mock("@/components/common/SearchableSelect", () => ({
     placeholder?: string;
     noResultsLabel?: string;
   }) => (
-    <select
-      data-testid="timezone-select"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    >
+    <select data-testid="timezone-select" value={value} onChange={(e) => onChange(e.target.value)}>
       <option value="UTC">UTC</option>
       <option value="America/Argentina/Buenos_Aires">America/Argentina/Buenos_Aires</option>
       <option value="Europe/London">Europe/London</option>
@@ -106,6 +105,18 @@ describe("TimestampPlayground branches", () => {
     // Result rows labelled by format keys (identity t() mock)
     expect(screen.getByText("timestamp.formats.iso8601")).toBeInTheDocument();
     expect(screen.getByText("timestamp.formats.unixSeconds")).toBeInTheDocument();
+  });
+
+  it("handleConvert: formats the relative time in the active UI language", () => {
+    i18nState.language = "en";
+    render(<TimestampPlayground />);
+
+    const input = screen.getByPlaceholderText("timestamp.placeholder");
+    fireEvent.change(input, { target: { value: "0" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
+
+    expect(screen.getByText(/years ago$/)).toBeInTheDocument();
+    i18nState.language = "es";
   });
 
   it("handleConvert: invalid input shows error message", () => {

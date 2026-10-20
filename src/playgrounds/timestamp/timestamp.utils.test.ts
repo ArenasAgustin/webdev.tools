@@ -40,6 +40,17 @@ describe("timestamp.utils", () => {
       const result = parseInput("");
       expect(result).toBeNull();
     });
+
+    it("formats past relative times with 'ago' in English and 'hace' in Spanish", () => {
+      const past = String(Math.floor(Date.now() / 1000) - 2 * 3600);
+      expect(convertTimestamp(past, "UTC", "en")?.relative).toBe("2 hours ago");
+      expect(convertTimestamp(past, "UTC", "es")?.relative).toBe("hace 2 horas");
+    });
+
+    it("parses negative Unix timestamps as numbers, not dates", () => {
+      expect(parseInput("-1")).toEqual({ type: "unix", value: -1 });
+      expect(parseInput("-86400")).toEqual({ type: "unix", value: -86400 });
+    });
   });
 
   describe("unixToDate", () => {
