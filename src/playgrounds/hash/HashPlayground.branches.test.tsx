@@ -192,6 +192,77 @@ describe("HashPlayground branches", () => {
     expect(screen.queryByText(/no se pudo copiar/i)).not.toBeInTheDocument();
   });
 
+  it("hides results once the text changes after generating", async () => {
+    render(<HashPlayground />);
+
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "hello" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+    expect(screen.getByText("aabbcc")).toBeInTheDocument();
+
+    fireEvent.change(textarea, { target: { value: "hello!" } });
+    expect(screen.queryByText("aabbcc")).not.toBeInTheDocument();
+  });
+
+  it("ignores a slow result that lands after the text changed", async () => {
+    let resolveHashes: (value: typeof FAKE_HASHES) => void = () => undefined;
+    generateAllHashesMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveHashes = resolve;
+      }),
+    );
+    render(<HashPlayground />);
+
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "slow" } });
+    fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    fireEvent.change(textarea, { target: { value: "other" } });
+    await act(async () => {
+      resolveHashes(FAKE_HASHES);
+      await Promise.resolve();
+    });
+
+    expect(screen.queryByText("aabbcc")).not.toBeInTheDocument();
+  });
+
+  it("uppercase toggle updates the shown results without regenerating", async () => {
+    render(<HashPlayground />);
+
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "hello" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /mayúsculas/i }));
+    expect(screen.getByText("AABBCC")).toBeInTheDocument();
+  });
+
+  it("clears the compare verdict when the compared value or the input changes", async () => {
+    render(<HashPlayground />);
+
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "hello" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    const compareInput = screen.getByPlaceholderText(/ingres[aá] un hash para comparar/i);
+    fireEvent.change(compareInput, { target: { value: "aabbcc" } });
+    fireEvent.click(screen.getByRole("button", { name: /comparar/i }));
+    expect(screen.getByText(/coincide/i)).toBeInTheDocument();
+
+    fireEvent.change(compareInput, { target: { value: "aabbc" } });
+    expect(screen.queryByText(/coincide/i)).not.toBeInTheDocument();
+
+    fireEvent.change(compareInput, { target: { value: "aabbcc" } });
+    fireEvent.click(screen.getByRole("button", { name: /comparar/i }));
+    fireEvent.change(textarea, { target: { value: "changed" } });
+    expect(screen.queryByText(/coincide/i)).not.toBeInTheDocument();
+  });
+
   it("compare logic: shows match/no-match result", async () => {
     render(<HashPlayground />);
 
