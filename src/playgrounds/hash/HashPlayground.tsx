@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { hashConfig } from "./hash.config";
 import {
@@ -14,32 +14,84 @@ import { usePersistedState } from "@/hooks/usePersistedState";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
 
+interface GeneratedHashes {
+  mode: InputMode;
+  text: string;
+  file: File | null;
+  results: HashResult[];
+}
+
+interface Comparison {
+  value: string;
+  source: GeneratedHashes;
+  match: boolean;
+}
+
+const NO_RESULTS: HashResult[] = [];
+
+function applyCase(hash: string, outputCase: HashOutputCase): string {
+  return outputCase === "uppercase" ? hash.toUpperCase() : hash.toLowerCase();
+}
+
 export function HashPlayground() {
   const { t } = useTranslation();
-  const [inputMode, setInputMode] = usePersistedState<InputMode>(STORAGE_KEYS.HASH_INPUT_MODE, "text");
-  const [textInput, setTextInput] = usePersistedState(STORAGE_KEYS.HASH_TEXT_INPUT, hashConfig.example);
+  const [inputMode, setInputMode] = usePersistedState<InputMode>(
+    STORAGE_KEYS.HASH_INPUT_MODE,
+    "text",
+  );
+  const [textInput, setTextInput] = usePersistedState(
+    STORAGE_KEYS.HASH_TEXT_INPUT,
+    hashConfig.example,
+  );
   const [fileInput, setFileInput] = useState<File | null>(null);
-  const [outputCase, setOutputCase] = usePersistedState<HashOutputCase>(STORAGE_KEYS.HASH_OUTPUT_CASE, "lowercase");
-  const [results, setResults] = useState<HashResult[]>([]);
+  const [outputCase, setOutputCase] = usePersistedState<HashOutputCase>(
+    STORAGE_KEYS.HASH_OUTPUT_CASE,
+    "lowercase",
+  );
+  const [generated, setGenerated] = useState<GeneratedHashes | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [compareValue, setCompareValue] = useState("");
-  const [compareResult, setCompareResult] = useState<boolean | null>(null);
+  const [comparison, setComparison] = useState<Comparison | null>(null);
   const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Results only belong to the input they were generated from: once the text,
+  // file or mode changes they are hidden, which also drops slow results that land
+  // after the input moved on. The case toggle is applied at display time.
+  const isCurrent =
+    generated !== null &&
+    generated.mode === inputMode &&
+    (inputMode === "text" ? generated.text === textInput : generated.file === fileInput);
+  const results = useMemo(
+    () =>
+      isCurrent
+        ? generated.results.map((result) => ({
+            ...result,
+            hash: applyCase(result.hash, outputCase),
+          }))
+        : NO_RESULTS,
+    [isCurrent, generated, outputCase],
+  );
+  const compareResult =
+    comparison !== null &&
+    isCurrent &&
+    comparison.source === generated &&
+    comparison.value === compareValue
+      ? comparison.match
+      : null;
+
   const processInput = useCallback(async () => {
     setIsProcessing(true);
-    setCompareResult(null);
+    const source = { mode: inputMode, text: textInput, file: fileInput };
 
     try {
       if (inputMode === "text") {
         if (!textInput) {
-          setResults([]);
-          setIsProcessing(false);
+          setGenerated(null);
           return;
         }
         const hashes = await generateAllHashes(textInput, outputCase);
-        setResults(hashes);
+        setGenerated({ ...source, results: hashes });
       } else if (fileInput) {
         const algorithms: HashAlgorithm[] = ["sha1", "sha256", "sha512"];
         const hashes = await Promise.all(
@@ -48,15 +100,13 @@ export function HashPlayground() {
             hash: await generateHashFromFile(fileInput, algorithm, outputCase),
           })),
         );
-        setResults(hashes);
+        setGenerated({ ...source, results: hashes });
       } else {
-        setResults([]);
-        setIsProcessing(false);
-        return;
+        setGenerated(null);
       }
     } catch (error) {
       console.error("Hash generation error:", error);
-      setResults([]);
+      setGenerated(null);
     } finally {
       setIsProcessing(false);
     }
@@ -75,12 +125,12 @@ export function HashPlayground() {
   }, []);
 
   const handleCompare = useCallback(() => {
-    if (!compareValue || results.length === 0) return;
+    if (!compareValue || !generated || results.length === 0) return;
 
     // Find matching hash
     const match = results.find((r) => r.hash.toLowerCase() === compareValue.toLowerCase());
-    setCompareResult(match !== undefined);
-  }, [compareValue, results]);
+    setComparison({ value: compareValue, source: generated, match: match !== undefined });
+  }, [compareValue, generated, results]);
 
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-4">
