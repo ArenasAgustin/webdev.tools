@@ -313,6 +313,20 @@ describe("JsonPlayground branches", () => {
     expect((input as HTMLInputElement).value).toBe("$.name");
   });
 
+  it("applies the jsonPath filter when Enter is pressed in the expression input", async () => {
+    storageMocks.loadLastJson.mockReturnValue('{"name":"John"}');
+    render(<JsonPlayground />);
+
+    const input = screen.getByLabelText("Expresion JSONPath");
+    fireEvent.change(input, { target: { value: "$.name" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+
+    expect(applyJsonPathMock).toHaveBeenCalledWith('{"name":"John"}', "$.name");
+  });
+
   it("tries a quick example from TipsModal and closes modal", async () => {
     render(<JsonPlayground />);
 

@@ -116,18 +116,11 @@ describe("applyJsonPath", () => {
     }
   });
 
-  it("should return result for non-matching path", () => {
+  it("returns an empty array string for a non-matching path", () => {
     const input = '{"name": "John"}';
-    const result = applyJsonPath(input, "$[invalid");
 
-    // JSONPath library handles non-matching selectors gracefully
-    // The wrap:false option means it returns undefined when no match
-    // JSON.stringify(undefined) returns undefined (not a string)
-    if (result.ok) {
-      expect(result.value).toBeUndefined();
-    } else {
-      throw new Error("Expected successful result");
-    }
+    expect(applyJsonPath(input, "$[invalid")).toEqual({ ok: true, value: "[]" });
+    expect(applyJsonPath(input, "$.missing")).toEqual({ ok: true, value: "[]" });
   });
 
   it("should handle complex nested arrays", () => {
