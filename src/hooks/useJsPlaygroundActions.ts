@@ -9,6 +9,8 @@ import {
 import type { ToastApi } from "./usePlaygroundActions";
 import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
 import { cleanJsAsync } from "@/services/js/worker";
+import { runJavaScript } from "@/services/js/execute";
+import type { JsExecRequest, JsExecResponse, JsRunResult } from "@/services/js/execute";
 
 const JS_EXEC_TIMEOUT_MS = 5000;
 
@@ -88,8 +90,13 @@ export function useJsPlaygroundActions({
         setError(null);
         setOutput("");
 
-        const outputText = await executeJavaScript(inputJs, JS_EXEC_TIMEOUT_MS);
-        setOutput(outputText);
+        try {
+          setOutput(await executeJavaScript(inputJs, JS_EXEC_TIMEOUT_MS));
+        } catch (error) {
+          // Keep whatever the code printed before failing or timing out.
+          if (error instanceof JsExecutionError) setOutput(error.output);
+          throw error;
+        }
       },
       toast,
       successMessage: "Código ejecutado correctamente",
@@ -133,144 +140,65 @@ export function useJsPlaygroundActions({
   };
 }
 
+/** Execution failure that carries the output printed before it failed. */
+class JsExecutionError extends Error {
+  readonly output: string;
+
+  constructor(message: string, output: string) {
+    super(message);
+    this.output = output;
+  }
+}
+
+function toExecutionError(result: JsRunResult): JsExecutionError {
+  return new JsExecutionError(
+    result.error ?? "Error desconocido al ejecutar código",
+    result.output,
+  );
+}
+
 async function executeJavaScript(code: string, timeoutMs: number): Promise<string> {
   if (typeof Worker === "undefined") {
-    return executeJavaScriptSync(code);
+    const result = await runJavaScript(code);
+    if (!result.ok) throw toExecutionError(result);
+    return result.output;
   }
-  const workerSource = `
-    const formatValue = (value) => {
-      if (value === null) return "null";
-      if (value === undefined) return "undefined";
-      if (typeof value === "string") return value;
-      if (typeof value === "object") {
-        try {
-          return JSON.stringify(value, null, 2);
-        } catch {
-          return Object.prototype.toString.call(value);
-        }
-      }
-      if (typeof value === "number") return String(value);
-      if (typeof value === "boolean") return String(value);
-      return Object.prototype.toString.call(value);
-    };
-    // Restrict network access: block the most common browser network APIs.
-    // Note: this is a best-effort sandbox — other exotic channels (e.g. SharedArrayBuffer
-    // messaging) are not blocked. Do NOT rely on this for security-critical isolation.
-    try { Object.defineProperty(self, 'fetch', { value: undefined, writable: false, configurable: false }); } catch (_) {}
-    try { Object.defineProperty(self, 'WebSocket', { value: undefined, writable: false, configurable: false }); } catch (_) {}
-    try { Object.defineProperty(self, 'XMLHttpRequest', { value: undefined, writable: false, configurable: false }); } catch (_) {}
-    try { Object.defineProperty(self, 'EventSource', { value: undefined, writable: false, configurable: false }); } catch (_) {}
-    try { if (typeof navigator !== 'undefined') { Object.defineProperty(navigator, 'sendBeacon', { value: undefined, writable: false, configurable: false }); } } catch (_) {}
-    try { Object.defineProperty(self, 'importScripts', { value: undefined, writable: false, configurable: false }); } catch (_) {}
-    self.onmessage = (event) => {
-      const { code } = event.data;
-      const logs = [];
-      self.console.log = (...args) => {
-        logs.push(args.map((arg) => formatValue(arg)).join(" "));
-      };
-      self.console.error = (...args) => {
-        logs.push("ERROR: " + args.map((arg) => formatValue(arg)).join(" "));
-      };
-      self.console.warn = (...args) => {
-        logs.push("WARN: " + args.map((arg) => formatValue(arg)).join(" "));
-      };
-      try {
-        const executeUserCode = new Function(code);
-        const result = executeUserCode();
-        const outputText = logs.length > 0 ? logs.join("\\n") : "";
-        if (result !== undefined && result !== null && logs.length === 0) {
-          self.postMessage({ ok: true, output: formatValue(result) });
-          return;
-        }
-        self.postMessage({ ok: true, output: outputText });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        self.postMessage({ ok: false, error: message });
-      }
-    };
-  `;
   return new Promise((resolve, reject) => {
     let settled = false;
-    const blob = new Blob([workerSource], { type: "application/javascript" });
-    const workerUrl = URL.createObjectURL(blob);
-    const worker = new Worker(workerUrl);
-    const cleanup = () => {
+    const logs: string[] = [];
+    const worker = new Worker(new URL("../workers/jsExecWorker.ts", import.meta.url), {
+      type: "module",
+    });
+    const settle = (finish: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
       worker.terminate();
-      URL.revokeObjectURL(workerUrl);
+      finish();
     };
     const timeout = window.setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      reject(new Error("La ejecución superó 5 segundos y fue cancelada"));
+      settle(() =>
+        reject(
+          new JsExecutionError("La ejecución superó 5 segundos y fue cancelada", logs.join("\n")),
+        ),
+      );
     }, timeoutMs);
-    worker.onmessage = (event: MessageEvent<{ ok: boolean; output?: string; error?: string }>) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeout);
-      const data = event.data;
-      cleanup();
-      if (!data.ok) {
-        reject(new Error(data.error ?? "Error desconocido al ejecutar código"));
+    worker.onmessage = (event: MessageEvent<JsExecResponse>) => {
+      const message = event.data;
+      if (message.type === "log") {
+        logs.push(message.line);
         return;
       }
-      resolve(data.output ?? "");
+      const { result } = message;
+      settle(() => (result.ok ? resolve(result.output) : reject(toExecutionError(result))));
     };
     worker.onerror = (event: ErrorEvent) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeout);
-      cleanup();
-      reject(new Error(event.message || "Error en el worker de ejecución"));
+      settle(() =>
+        reject(
+          new JsExecutionError(event.message || "Error en el worker de ejecución", logs.join("\n")),
+        ),
+      );
     };
-    worker.postMessage({ code });
+    worker.postMessage({ code } satisfies JsExecRequest);
   });
-}
-
-function executeJavaScriptSync(code: string): string {
-  const logs: string[] = [];
-  const originalLog = console.log;
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  try {
-    console.log = (...args: unknown[]) => {
-      logs.push(args.map((arg) => formatValue(arg)).join(" "));
-      originalLog(...args);
-    };
-    console.error = (...args: unknown[]) => {
-      logs.push(`ERROR: ${args.map((arg) => formatValue(arg)).join(" ")}`);
-      originalError(...args);
-    };
-    console.warn = (...args: unknown[]) => {
-      logs.push(`WARN: ${args.map((arg) => formatValue(arg)).join(" ")}`);
-      originalWarn(...args);
-    };
-    const executeUserCode = new Function(code) as () => unknown;
-    const result = executeUserCode();
-    const outputText = logs.length > 0 ? logs.join("\n") : "";
-    if (result !== undefined && result !== null && logs.length === 0) {
-      return formatValue(result);
-    }
-    return outputText;
-  } finally {
-    console.log = originalLog;
-    console.error = originalError;
-    console.warn = originalWarn;
-  }
-}
-
-function formatValue(value: unknown): string {
-  if (value === null) return "null";
-  if (value === undefined) return "undefined";
-  if (typeof value === "string") return value;
-  if (typeof value === "object") {
-    try {
-      return JSON.stringify(value, null, 2);
-    } catch {
-      return Object.prototype.toString.call(value);
-    }
-  }
-  if (typeof value === "number") return String(value);
-  if (typeof value === "boolean") return String(value);
-  return Object.prototype.toString.call(value);
 }
