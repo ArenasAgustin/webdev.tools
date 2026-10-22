@@ -1,11 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 
-const {
-  getItemMock,
-  setItemMock,
-  clipboardWriteTextMock,
-} = vi.hoisted(() => ({
+const { getItemMock, setItemMock, clipboardWriteTextMock } = vi.hoisted(() => ({
   getItemMock: vi.fn(() => null),
   setItemMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
@@ -37,6 +33,8 @@ const esTranslations: Record<string, string> = {
   "password.charsetNumbers": "Números (0-9)",
   "password.charsetSymbols": "Símbolos (!@#$%)",
   "password.strength": "Fortaleza:",
+  "password.strengthLevels.weak": "Débil",
+  "password.strengthLevels.strong": "Fuerte",
   "password.history": "Historial:",
   // password.aria.* intentionally omitted — tests query checkboxes by key literal
   // (mock falls back to key, so t("password.aria.uppercase") === "password.aria.uppercase")
@@ -191,6 +189,21 @@ describe("PasswordPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: /generar/i }));
 
     expect(screen.getByText(/fortaleza/i)).toBeInTheDocument();
+  });
+
+  it("strength label is translated and follows the password, not the options", () => {
+    render(<PasswordPlayground />);
+
+    // 8 lowercase-only characters: ~38 bits -> weak.
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: "password.aria.uppercase" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "password.aria.numbers" }));
+    fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    expect(screen.getByText(/^Débil \(\d+%\)$/)).toBeInTheDocument();
+
+    // Toggling generator options must not re-rate the current password.
+    fireEvent.click(screen.getByRole("checkbox", { name: "password.aria.symbols" }));
+    expect(screen.getByText(/^Débil \(\d+%\)$/)).toBeInTheDocument();
   });
 
   it("checkboxes are queryable by aria-label (i18n keys via mock)", () => {

@@ -81,7 +81,7 @@ describe("password.utils", () => {
       const result = generatePasswordWithStrength(defaultPasswordOptions);
       expect(result.password).toHaveLength(16);
       expect(result.strength).toBeGreaterThan(0);
-      expect(result.strengthLabel).toBeDefined();
+      expect(result.strengthLevel).toBeDefined();
     });
 
     it("returns stronger password with more character types", () => {
@@ -106,52 +106,31 @@ describe("password.utils", () => {
   });
 
   describe("calculateStrength", () => {
-    it("returns weak for short passwords", () => {
-      const result = calculateStrength("abc", {
-        length: 3,
-        includeUppercase: false,
-        includeLowercase: true,
-        includeNumbers: false,
-        includeSymbols: false,
-      });
+    it("rates the password content, not the generator options", () => {
+      expect(calculateStrength("abc")).toEqual(calculateStrength("abc"));
+      expect(calculateStrength("abc").level).toBe("weak");
+    });
+
+    it("rates very short passwords as weak even with every character type", () => {
+      const result = calculateStrength("a1");
+      expect(result.level).toBe("weak");
       expect(result.strength).toBeLessThan(40);
-      expect(result.label).toBe("Débil");
     });
 
-    it("returns regular for medium passwords", () => {
-      const result = calculateStrength("abcd1234", {
-        length: 8,
-        includeUppercase: false,
-        includeLowercase: true,
-        includeNumbers: true,
-        includeSymbols: false,
-      });
-      expect(result.strength).toBeGreaterThanOrEqual(40);
-      expect(result.strength).toBeLessThan(60);
-      expect(result.label).toBe("Regular");
+    it("rates 8 mixed characters as fair and 16 as strong", () => {
+      expect(calculateStrength("Ab1!cD2@").level).toBe("fair");
+      expect(calculateStrength("Ab1!cD2@eF3#gH4$").level).toBe("strong");
     });
 
-    it("returns strong for longer passwords with mixed types", () => {
-      const result = calculateStrength("Abcd1234!@#$", {
-        length: 12,
-        includeUppercase: true,
-        includeLowercase: true,
-        includeNumbers: true,
-        includeSymbols: true,
-      });
-      expect(result.strength).toBeGreaterThanOrEqual(60);
-      expect(result.label).toMatch(/Buena|Fuerte/);
+    it("rates 12 mixed characters as good", () => {
+      expect(calculateStrength("Ab1!cD2@eF3#").level).toBe("good");
     });
 
-    it("caps strength at 100", () => {
-      const result = calculateStrength("VeryLongPasswordWithManyTypes123!@#", {
-        length: 50,
-        includeUppercase: true,
-        includeLowercase: true,
-        includeNumbers: true,
-        includeSymbols: true,
-      });
-      expect(result.strength).toBeLessThanOrEqual(100);
+    it("grows with length and character variety and caps at 100", () => {
+      expect(calculateStrength("abcdefgh").strength).toBeLessThan(
+        calculateStrength("Ab1!cD2@").strength,
+      );
+      expect(calculateStrength("Ab1!".repeat(20)).strength).toBe(100);
     });
   });
 });

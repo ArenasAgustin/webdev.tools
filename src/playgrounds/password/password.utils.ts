@@ -9,7 +9,7 @@ export interface PasswordOptions {
 export interface PasswordResult {
   password: string;
   strength: number;
-  strengthLabel: string;
+  strengthLevel: StrengthLevel;
 }
 
 const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -17,45 +17,30 @@ const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
 const NUMBERS = "0123456789";
 const SYMBOLS = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
+export type StrengthLevel = "weak" | "fair" | "good" | "strong";
+
 /**
- * Calculate password strength (0-100)
+ * Rate a password (0-100) from its own content: estimated entropy bits =
+ * length * log2(size of the character pool it actually uses), capped at 100.
+ * Levels: < 40 weak, < 60 fair, < 80 good, otherwise strong.
  */
-export function calculateStrength(
-  password: string,
-  options: PasswordOptions,
-): { strength: number; label: string } {
-  let score = 0;
+export function calculateStrength(password: string): { strength: number; level: StrengthLevel } {
+  let pool = 0;
+  if (/[a-z]/.test(password)) pool += LOWERCASE.length;
+  if (/[A-Z]/.test(password)) pool += UPPERCASE.length;
+  if (/[0-9]/.test(password)) pool += NUMBERS.length;
+  if (/[^a-zA-Z0-9]/.test(password)) pool += SYMBOLS.length;
 
-  // Length contribution (2% per character, max 40%)
-  score += Math.min(password.length * 2, 40);
+  const bits = pool > 0 ? password.length * Math.log2(pool) : 0;
+  const strength = Math.min(Math.round(bits), 100);
 
-  // Character type contributions
-  if (options.includeUppercase) score += 10;
-  if (options.includeLowercase) score += 10;
-  if (options.includeNumbers) score += 15;
-  if (options.includeSymbols) score += 25;
+  let level: StrengthLevel;
+  if (strength < 40) level = "weak";
+  else if (strength < 60) level = "fair";
+  else if (strength < 80) level = "good";
+  else level = "strong";
 
-  // Bonus for using multiple character types
-  const typesUsed = [
-    options.includeUppercase,
-    options.includeLowercase,
-    options.includeNumbers,
-    options.includeSymbols,
-  ].filter(Boolean).length;
-
-  if (typesUsed >= 3) score += 10;
-  if (typesUsed === 4) score += 10;
-
-  // Cap at 100
-  score = Math.min(score, 100);
-
-  let label: string;
-  if (score < 40) label = "Débil";
-  else if (score < 60) label = "Regular";
-  else if (score < 80) label = "Buena";
-  else label = "Fuerte";
-
-  return { strength: score, label };
+  return { strength, level };
 }
 
 /**
@@ -138,9 +123,9 @@ export function generatePassword(options: PasswordOptions): string {
  */
 export function generatePasswordWithStrength(options: PasswordOptions): PasswordResult {
   const password = generatePassword(options);
-  const { strength, label } = calculateStrength(password, options);
+  const { strength, level } = calculateStrength(password);
 
-  return { password, strength, strengthLabel: label };
+  return { password, strength, strengthLevel: level };
 }
 
 /**
