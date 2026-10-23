@@ -309,4 +309,31 @@ describe("Base64Playground branches (file mode)", () => {
     expect(screen.queryByText("test.txt")).not.toBeInTheDocument();
     expect(screen.getByText(/arrastr[aá] un archivo/i)).toBeInTheDocument();
   });
+
+  it("clear discards a file read that is still pending", async () => {
+    render(<Base64Playground />);
+
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+
+    let resolveRead: (buffer: ArrayBuffer) => void = () => undefined;
+    const file = new File(["hello"], "slow.txt", { type: "text/plain" });
+    Object.defineProperty(file, "arrayBuffer", {
+      value: () =>
+        new Promise<ArrayBuffer>((resolve) => {
+          resolveRead = resolve;
+        }),
+    });
+    const fileInput = document.querySelector('input[type="file"]');
+    if (!fileInput) throw new Error("file input not found");
+
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    fireEvent.click(screen.getByRole("button", { name: /^limpiar$/i }));
+    await act(async () => {
+      resolveRead(new TextEncoder().encode("hello").buffer);
+      await Promise.resolve();
+    });
+
+    expect(screen.queryByText("slow.txt")).not.toBeInTheDocument();
+    expect(screen.getByLabelText<HTMLTextAreaElement>("Salida").value).toBe("");
+  });
 });
