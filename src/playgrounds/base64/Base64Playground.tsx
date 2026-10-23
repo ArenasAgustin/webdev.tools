@@ -112,6 +112,7 @@ export function Base64Playground() {
 
   const handleClear = useCallback(() => {
     setInput("");
+    latestFileRef.current = null; // drop any file read still in flight
     setFileState(null);
   }, [setInput]);
 
