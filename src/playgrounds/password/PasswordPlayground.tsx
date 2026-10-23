@@ -4,6 +4,9 @@ import {
   generatePasswordWithStrength,
   defaultPasswordOptions,
   calculateStrength,
+  clampPasswordLength,
+  PASSWORD_LENGTH_MIN,
+  PASSWORD_LENGTH_MAX,
   type PasswordOptions,
 } from "./password.utils";
 import { usePersistedState } from "@/hooks/usePersistedState";
@@ -16,7 +19,10 @@ export function PasswordPlayground() {
     STORAGE_KEYS.PASSWORD_OPTIONS,
     defaultPasswordOptions,
   );
-  const options = useMemo(() => ({ ...defaultPasswordOptions, ...storedOptions }), [storedOptions]);
+  const options = useMemo(() => {
+    const merged = { ...defaultPasswordOptions, ...storedOptions };
+    return { ...merged, length: clampPasswordLength(merged.length) };
+  }, [storedOptions]);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [history, setHistory] = useState<{ id: string; value: string }[]>([]);
@@ -115,8 +121,8 @@ export function PasswordPlayground() {
           <label className="text-gray-300 w-24">{t("password.length")}</label>
           <input
             type="range"
-            min="8"
-            max="128"
+            min={PASSWORD_LENGTH_MIN}
+            max={PASSWORD_LENGTH_MAX}
             value={options.length}
             onChange={(e) => handleOptionChange("length", parseInt(e.target.value))}
             className="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"

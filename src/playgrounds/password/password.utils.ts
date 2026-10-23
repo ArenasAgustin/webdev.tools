@@ -19,6 +19,22 @@ const SYMBOLS = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
 export type StrengthLevel = "weak" | "fair" | "good" | "strong";
 
+export const PASSWORD_LENGTH_MIN = 8;
+export const PASSWORD_LENGTH_MAX = 128;
+const PASSWORD_LENGTH_DEFAULT = 16;
+
+/**
+ * Keep a (possibly persisted or tampered) length inside the slider range:
+ * rounds fractions, clamps to [min, max] and falls back to the default for
+ * anything that is not a finite number.
+ */
+export function clampPasswordLength(length: number): number {
+  if (typeof length !== "number" || !Number.isFinite(length)) {
+    return PASSWORD_LENGTH_DEFAULT;
+  }
+  return Math.min(PASSWORD_LENGTH_MAX, Math.max(PASSWORD_LENGTH_MIN, Math.round(length)));
+}
+
 /**
  * Rate a password (0-100) from its own content: estimated entropy bits =
  * length * log2(size of the character pool it actually uses), capped at 100.
@@ -46,7 +62,8 @@ export function calculateStrength(password: string): { strength: number; level: 
 /**
  * Generate a secure random password
  */
-export function generatePassword(options: PasswordOptions): string {
+export function generatePassword(rawOptions: PasswordOptions): string {
+  const options = { ...rawOptions, length: clampPasswordLength(rawOptions.length) };
   let charset = "";
 
   if (options.includeUppercase) charset += UPPERCASE;
@@ -132,7 +149,7 @@ export function generatePasswordWithStrength(options: PasswordOptions): Password
  * Default options
  */
 export const defaultPasswordOptions: PasswordOptions = {
-  length: 16,
+  length: PASSWORD_LENGTH_DEFAULT,
   includeUppercase: true,
   includeLowercase: true,
   includeNumbers: true,
