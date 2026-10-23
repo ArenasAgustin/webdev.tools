@@ -5,6 +5,9 @@ import {
   generatePasswordWithStrength,
   calculateStrength,
   defaultPasswordOptions,
+  clampPasswordLength,
+  PASSWORD_LENGTH_MIN,
+  PASSWORD_LENGTH_MAX,
 } from "./password.utils";
 
 describe("password.utils", () => {
@@ -131,6 +134,33 @@ describe("password.utils", () => {
         calculateStrength("Ab1!cD2@").strength,
       );
       expect(calculateStrength("Ab1!".repeat(20)).strength).toBe(100);
+    });
+  });
+
+  describe("clampPasswordLength", () => {
+    it("keeps lengths inside the allowed range", () => {
+      expect(clampPasswordLength(20)).toBe(20);
+    });
+
+    it("clamps lengths outside the allowed range", () => {
+      expect(clampPasswordLength(2)).toBe(PASSWORD_LENGTH_MIN);
+      expect(clampPasswordLength(1_000_000_000)).toBe(PASSWORD_LENGTH_MAX);
+      expect(clampPasswordLength(-5)).toBe(PASSWORD_LENGTH_MIN);
+    });
+
+    it("rounds fractional lengths and falls back to the default for non-numbers", () => {
+      expect(clampPasswordLength(12.7)).toBe(13);
+      expect(clampPasswordLength(Number.NaN)).toBe(defaultPasswordOptions.length);
+      expect(clampPasswordLength("abc" as unknown as number)).toBe(defaultPasswordOptions.length);
+    });
+
+    it("is applied by generatePassword", () => {
+      expect(generatePassword({ ...defaultPasswordOptions, length: 1_000_000_000 })).toHaveLength(
+        PASSWORD_LENGTH_MAX,
+      );
+      expect(generatePassword({ ...defaultPasswordOptions, length: Number.NaN })).toHaveLength(
+        defaultPasswordOptions.length,
+      );
     });
   });
 });
