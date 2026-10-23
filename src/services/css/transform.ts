@@ -199,20 +199,41 @@ export function cleanCss(input: string, options: CssCleanOptions = {}): Result<s
   };
 
   try {
-    let result = input;
+    const preserved: string[] = [];
 
-    // First, handle rules with only comments
-    if (opts.removeRulesWithOnlyComments) {
-      // Match selectors with only comments inside: selector { /* comment */ }
-      // The comment pattern can't run past a `*/`, so it never swallows declarations.
-      result = result.replace(/([^{}]*?)\{\s*(\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/\s*)+\}/g, "");
-    }
+    // Mask literals (n) and comments (n) so braces or
+    // comment-like text inside a string never look like a rule.
+    let result = tokenizeCss(input)
+      .map((segment) => {
+        if (segment.kind === "code") return segment.text;
+        preserved.push(segment.text);
+        const index = preserved.length - 1;
+        return segment.kind === "comment" ? `${index}` : `${index}`;
+      })
+      .join("");
 
-    // Remove empty rules: selector { }
-    if (opts.removeEmptyRules) {
-      // Match rules with only whitespace: selector { }
-      result = result.replace(/[^{}]*?\{\s*\}/g, "");
-    }
+    // The selector part never crosses `;`, so declarations that precede a
+    // nested rule are kept.
+    const commentOnlyRule = /[^{};]*\{\s*(?:\d+\s*)+\}/g;
+    const emptyRule = /[^{};]*\{\s*\}/g;
+
+    // Repeat until stable: removing inner rules can leave an at-rule block empty.
+    let previous: string;
+    do {
+      previous = result;
+      if (opts.removeRulesWithOnlyComments) {
+        result = result.replace(commentOnlyRule, "");
+      }
+      if (opts.removeEmptyRules) {
+        result = result.replace(emptyRule, "");
+      }
+    } while (result !== previous);
+
+    // Restore with a replacer function so `$&`-style patterns in literals stay verbatim.
+    result = result.replace(
+      /[](\d+)[]/g,
+      (_, index: string) => preserved[Number(index)],
+    );
 
     // Clean up: remove multiple newlines and trim
     result = result.replace(/\n{3,}/g, "\n\n");
