@@ -155,5 +155,15 @@ describe("base64.utils", () => {
       expect(resolveMode("auto", "SGVsbG8gV29ybGQ=")).toBe("decode");
       expect(resolveMode("auto", "Hello World")).toBe("encode");
     });
+
+    it("encodes in auto mode when the input only looks like base64 but does not decode to text", () => {
+      expect(resolveMode("auto", "Test1234")).toBe("encode");
+      expect(resolveMode("auto", "abc123-_")).toBe("encode");
+    });
+
+    it("decodes in auto mode when the input decodes to readable text", () => {
+      expect(resolveMode("auto", "VGVzdDEyMzQ=")).toBe("decode");
+      expect(resolveMode("auto", "8J+YgA==")).toBe("decode");
+    });
   });
 });

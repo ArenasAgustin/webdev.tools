@@ -177,10 +177,24 @@ export function isLikelyBase64(str: string): boolean {
   return hasPadding || hasSpecialChars || (hasDigit && hasBothCases);
 }
 
+/**
+ * True when the input decodes to valid UTF-8 without control characters
+ * (tabs and line breaks allowed). Words like "Test1234" pass the alphabet
+ * heuristic but decode to garbage bytes, so auto mode must encode them.
+ */
+function decodesToReadableText(input: string): boolean {
+  try {
+    // eslint-disable-next-line no-control-regex
+    return !/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(decodeText(input));
+  } catch {
+    return false;
+  }
+}
+
 /** Resolve the effective encode/decode direction from persisted mode + current input. */
 export function resolveMode(mode: Base64Mode, input: string): "encode" | "decode" {
   if (mode === "auto") {
-    return isLikelyBase64(input) ? "decode" : "encode";
+    return isLikelyBase64(input) && decodesToReadableText(input) ? "decode" : "encode";
   }
   return mode;
 }
