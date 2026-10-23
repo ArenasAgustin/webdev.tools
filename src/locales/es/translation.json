@@ -172,6 +172,12 @@
     "charsetNumbers": "Números (0-9)",
     "charsetSymbols": "Símbolos (!@#$%)",
     "strength": "Fortaleza:",
+    "strengthLevels": {
+      "weak": "Débil",
+      "fair": "Regular",
+      "good": "Buena",
+      "strong": "Fuerte"
+    },
     "history": "Historial:"
   },
   "notifications": "Notificaciones",

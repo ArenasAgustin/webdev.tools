@@ -16,10 +16,7 @@ export function PasswordPlayground() {
     STORAGE_KEYS.PASSWORD_OPTIONS,
     defaultPasswordOptions,
   );
-  const options = useMemo(
-    () => ({ ...defaultPasswordOptions, ...storedOptions }),
-    [storedOptions],
-  );
+  const options = useMemo(() => ({ ...defaultPasswordOptions, ...storedOptions }), [storedOptions]);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [history, setHistory] = useState<{ id: string; value: string }[]>([]);
@@ -43,14 +40,20 @@ export function PasswordPlayground() {
     }
   }, [password, copy]);
 
-  const handleOptionChange = useCallback((key: keyof PasswordOptions, value: boolean | number) => {
-    setOptions((prev) => ({ ...prev, [key]: value }));
-  }, [setOptions]);
+  const handleOptionChange = useCallback(
+    (key: keyof PasswordOptions, value: boolean | number) => {
+      setOptions((prev) => ({ ...prev, [key]: value }));
+    },
+    [setOptions],
+  );
 
-  const handleHistoryClick = useCallback((pwd: string) => {
-    setPassword(pwd);
-    resetCopied();
-  }, [resetCopied]);
+  const handleHistoryClick = useCallback(
+    (pwd: string) => {
+      setPassword(pwd);
+      resetCopied();
+    },
+    [resetCopied],
+  );
 
   const getStrengthColor = (strength: number): string => {
     if (strength < 40) return "bg-red-500";
@@ -59,7 +62,7 @@ export function PasswordPlayground() {
     return "bg-emerald-400";
   };
 
-  const strengthResult = password ? calculateStrength(password, options) : null;
+  const strengthResult = password ? calculateStrength(password) : null;
 
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col gap-6">
@@ -178,7 +181,7 @@ export function PasswordPlayground() {
               />
             </div>
             <span className="text-white font-medium">
-              {strengthResult.label} ({strengthResult.strength}%)
+              {t(`password.strengthLevels.${strengthResult.level}`)} ({strengthResult.strength}%)
             </span>
           </div>
         </div>
