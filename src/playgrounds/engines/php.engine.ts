@@ -59,8 +59,8 @@ export const phpEngine = {
       throw new Error("Minify no está disponible para PHP");
     },
     executeRunner: async (input: string) => {
-      const { executePhp } = await import("@/services/php/phpExecutor");
-      const result = await executePhp(input);
+      const { executePhpWithTimeout } = await import("@/services/php/phpExecutor");
+      const result = await executePhpWithTimeout(input);
       return result.ok ? result.value : Promise.reject(new Error(result.error.message));
     },
   },
