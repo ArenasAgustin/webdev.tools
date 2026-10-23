@@ -150,3 +150,44 @@ const func2 = function() {};`;
     }
   });
 });
+
+describe("cleanJs - output stays valid and keeps non-empty code", () => {
+  const clean = (input: string) => {
+    const result = cleanJs(input);
+    if (!result.ok) throw new Error(result.error);
+    return result.value;
+  };
+
+  it("removes only the empty declarators of a multi-declarator declaration", () => {
+    expect(clean('let a = "", b = [], c = 1;')).toBe("let c = 1;");
+  });
+
+  it("removes a declaration whose declarators are all empty", () => {
+    expect(clean('let a = "", b = [];\nconst d = 1;')).toBe("const d = 1;");
+  });
+
+  it("removes empty array elements without leaving holes", () => {
+    expect(clean('const arr = [1, "", [], {}, 2];')).toBe("const arr = [1, 2];");
+    expect(clean('const arr = [1, ""];')).toBe("const arr = [1];");
+    expect(clean('const arr = ["", [], 3];')).toBe("const arr = [3];");
+  });
+
+  it("keeps call arguments untouched", () => {
+    expect(clean('foo("", [], {});')).toBe('foo("", [], {});');
+    expect(clean("items.forEach(() => {});")).toBe("items.forEach(() => {});");
+  });
+
+  it("removes a whole assignment statement with an empty value", () => {
+    expect(clean('x = "";\ny = 1;')).toBe("y = 1;");
+  });
+
+  it("keeps empty values inside expressions", () => {
+    expect(clean('if (a === "") run();')).toBe('if (a === "") run();');
+    expect(clean('const s = cond ? "" : "x";')).toBe('const s = cond ? "" : "x";');
+  });
+
+  it("does not rewrite separators inside unrelated code", () => {
+    expect(clean("for (;;) break;")).toBe("for (;;) break;");
+    expect(clean('const s = "a,,b;;c";')).toBe('const s = "a,,b;;c";');
+  });
+});

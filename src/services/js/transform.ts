@@ -100,62 +100,133 @@ interface RangeToRemove {
 }
 
 /**
- * Check if an object/array/string is a "removable" empty construct.
- * We should only remove empty values that are:
- * - Standalone statements
- * - Variable initializers (entire declaration will be removed)
- * - Return values
- * - Not nested as property values inside other objects (would leave invalid syntax)
+ * Check whether a node is an empty construct enabled by the clean options:
+ * "", [], {}, or a function with an empty block body.
  */
-function isRemovableValue(parent: BabelNode | null | undefined, key: string): boolean {
-  if (!parent) return true; // No parent = top level, removable
+function isEmptyConstruct(node: BabelNode | null | undefined, options: JsCleanOptions): boolean {
+  if (!node) return false;
 
-  const parentType = parent.type as string;
+  switch (node.type) {
+    case "ObjectExpression":
+      return !!options.removeEmptyObject && node.properties.length === 0;
+    case "ArrayExpression":
+      return !!options.removeEmptyArray && node.elements.length === 0;
+    case "StringLiteral":
+      return !!options.removeEmptyString && node.value === "";
+    case "FunctionExpression":
+    case "ArrowFunctionExpression":
+    case "FunctionDeclaration":
+      return (
+        !!options.removeEmptyFunction &&
+        node.body.type === "BlockStatement" &&
+        node.body.body.length === 0
+      );
+    default:
+      return false;
+  }
+}
 
-  // If parent is VariableDeclarator, we're in the init - removable
-  // BUT we need to remove the ENTIRE declaration, not just the value
-  if (parentType === "VariableDeclarator") {
-    return true;
+/**
+ * Check if an empty construct can be removed from where it sits.
+ * Only contexts whose removal leaves valid code are allowed:
+ * - Variable initializers (the declarator or whole declaration is removed)
+ * - Standalone statements and assignment statements
+ * - Return values
+ * - Array elements (removed together with their comma)
+ * - Function declarations in a statement list
+ * Object property values, call arguments and operands are kept: removing
+ * them would leave invalid syntax or change the meaning of the code.
+ */
+function isRemovableValue(
+  node: BabelNode,
+  parent: BabelNode | null,
+  key: string,
+  grandparent: BabelNode | null,
+): boolean {
+  if (!parent) return true;
+
+  switch (parent.type) {
+    case "VariableDeclarator":
+      return key === "init" && grandparent?.type === "VariableDeclaration";
+    case "ExpressionStatement":
+    case "ReturnStatement":
+    case "ArrayExpression":
+      return true;
+    case "AssignmentExpression":
+      return key === "right" && grandparent?.type === "ExpressionStatement";
+    case "Program":
+    case "BlockStatement":
+      return node.type === "FunctionDeclaration";
+    default:
+      return false;
+  }
+}
+
+/**
+ * Range of one item in a comma-separated list, including the comma that
+ * separates it from its neighbour so no hole is left behind.
+ */
+function listItemRange(list: (BabelNode | null)[], item: BabelNode): RangeToRemove {
+  const index = list.indexOf(item);
+  const next = list[index + 1];
+  const previous = list[index - 1];
+
+  if (next) {
+    return { start: item.start ?? 0, end: next.start ?? item.end ?? 0 };
+  }
+  if (previous) {
+    return { start: previous.end ?? item.start ?? 0, end: item.end ?? 0 };
+  }
+  return { start: item.start ?? 0, end: item.end ?? 0 };
+}
+
+/**
+ * Range of source to remove for an empty construct in a removable context.
+ */
+function removalRange(
+  node: BabelNode,
+  parent: BabelNode | null,
+  grandparent: BabelNode | null,
+  options: JsCleanOptions,
+): RangeToRemove {
+  if (parent?.type === "VariableDeclarator" && grandparent?.type === "VariableDeclaration") {
+    const allEmpty = grandparent.declarations.every((declarator) =>
+      isEmptyConstruct(declarator.init, options),
+    );
+    return allEmpty
+      ? { start: grandparent.start ?? 0, end: grandparent.end ?? 0 }
+      : listItemRange(grandparent.declarations, parent);
   }
 
-  // If parent is an expression statement, we're top-level - removable
-  if (parentType === "ExpressionStatement") {
-    return true;
+  if (parent?.type === "ArrayExpression") {
+    return listItemRange(parent.elements, node);
   }
 
-  // If parent is ReturnStatement, we're in return value - removable
-  if (parentType === "ReturnStatement") {
-    return true;
+  if (parent?.type === "AssignmentExpression" && grandparent) {
+    return { start: grandparent.start ?? 0, end: grandparent.end ?? 0 };
   }
 
-  // If parent is AssignmentExpression and we're in the right side - removable
-  if (parentType === "AssignmentExpression" && key === "right") {
-    return true;
+  return { start: node.start ?? 0, end: node.end ?? 0 };
+}
+
+/**
+ * Merge overlapping or touching ranges and sort them from end to start, so
+ * they can be removed without shifting the indices of the remaining ones.
+ */
+function mergeRanges(ranges: RangeToRemove[]): RangeToRemove[] {
+  const sorted = [...ranges].sort((a, b) => a.start - b.start);
+  const merged: RangeToRemove[] = [];
+
+  for (const range of sorted) {
+    const last = merged[merged.length - 1];
+    if (last && range.start <= last.end) {
+      last.end = Math.max(last.end, range.end);
+    } else {
+      merged.push({ ...range });
+    }
   }
 
-  // If parent is ObjectExpression, this is a property VALUE - NOT removable
-  // because removing it would leave invalid syntax like {a: }
-  if (parentType === "ObjectExpression") {
-    return false;
-  }
-
-  // If parent is ArrayExpression, this is an element - removable
-  if (parentType === "ArrayExpression") {
-    return true;
-  }
-
-  // If parent is Property or ObjectProperty (object property), we're the value - NOT removable
-  if (parentType === "Property" || parentType === "ObjectProperty") {
-    return false;
-  }
-
-  // For function arguments, call expressions, etc. - removable
-  if (parentType === "CallExpression" || parentType === "OptionalCallExpression") {
-    return true;
-  }
-
-  // Default: allow removal
-  return true;
+  return merged.reverse();
 }
 
 /**
@@ -163,7 +234,6 @@ function isRemovableValue(parent: BabelNode | null | undefined, key: string): bo
  */
 function findEmptyConstructs(input: string, options: JsCleanOptions): RangeToRemove[] {
   const ranges: RangeToRemove[] = [];
-  const { removeEmptyObject, removeEmptyArray, removeEmptyFunction, removeEmptyString } = options;
 
   let ast: babelParser.ParseResult | null;
   try {
@@ -194,74 +264,8 @@ function findEmptyConstructs(input: string, options: JsCleanOptions): RangeToRem
       return;
     }
 
-    const nodeType = node.type;
-
-    // Check for empty ObjectExpression: {}
-    if (removeEmptyObject && nodeType === "ObjectExpression") {
-      const obj = node;
-      if (obj.properties.length === 0 && isRemovableValue(parent, parentKey)) {
-        // Check if grandparent is VariableDeclaration - if so, remove entire declaration
-        const rangeNode = grandparent?.type === "VariableDeclaration" ? grandparent : obj;
-        ranges.push({
-          start: rangeNode.start ?? 0,
-          end: rangeNode.end ?? input.length,
-        });
-      }
-    }
-
-    // Check for empty ArrayExpression: []
-    if (removeEmptyArray && nodeType === "ArrayExpression") {
-      const arr = node;
-      if (arr.elements.length === 0 && isRemovableValue(parent, parentKey)) {
-        // Check if grandparent is VariableDeclaration - if so, remove entire declaration
-        const rangeNode = grandparent?.type === "VariableDeclaration" ? grandparent : arr;
-        ranges.push({
-          start: rangeNode.start ?? 0,
-          end: rangeNode.end ?? input.length,
-        });
-      }
-    }
-
-    // Check for empty function body: function() {} or () => {}
-    // Also handles: function name() {} and async functions
-    if (
-      removeEmptyFunction &&
-      (nodeType === "FunctionExpression" ||
-        nodeType === "ArrowFunctionExpression" ||
-        nodeType === "FunctionDeclaration")
-    ) {
-      const fn = node;
-      const body = fn.body;
-
-      // Arrow functions with expression body (no braces) don't have empty body
-      if (body?.type === "BlockStatement") {
-        const block = body;
-        // Empty block statement
-        const isEmpty = block.body.length === 0;
-        // Only remove if safe (not a property value in an object)
-        if (isEmpty && isRemovableValue(parent, parentKey)) {
-          // Check if grandparent is VariableDeclaration - if so, remove entire declaration
-          const rangeNode = grandparent?.type === "VariableDeclaration" ? grandparent : fn;
-          ranges.push({
-            start: rangeNode.start ?? 0,
-            end: rangeNode.end ?? input.length,
-          });
-        }
-      }
-    }
-
-    // Check for empty string: "" or ''
-    // Only remove if it's safe to do so (not a property value in an object)
-    if (removeEmptyString && nodeType === "StringLiteral") {
-      const str = node;
-      if (str.value === "" && isRemovableValue(parent, parentKey)) {
-        // Check if grandparent is VariableDeclaration - if so, remove entire declaration
-        const rangeNode = grandparent?.type === "VariableDeclaration" ? grandparent : str;
-        ranges.push({
-          start: rangeNode.start ?? 0,
-          end: rangeNode.end ?? input.length,
-        });
-      }
+    if (isEmptyConstruct(node, options) && isRemovableValue(node, parent, parentKey, grandparent)) {
+      ranges.push(removalRange(node, parent, grandparent, options));
     }
 
     // Recursively walk child nodes
@@ -288,22 +292,7 @@ function findEmptyConstructs(input: string, options: JsCleanOptions): RangeToRem
     walk(ast.program, null, "", null);
   }
 
-  // Sort ranges by start position (descending) to remove from end to start
-  // This prevents index shifting issues when removing
-  ranges.sort((a, b) => b.start - a.start);
-
-  // Filter overlapping ranges - keep only the outermost ones
-  const filteredRanges: RangeToRemove[] = [];
-  for (const range of ranges) {
-    const overlaps = filteredRanges.some(
-      (existing) => range.start >= existing.start && range.end <= existing.end,
-    );
-    if (!overlaps) {
-      filteredRanges.push(range);
-    }
-  }
-
-  return filteredRanges;
+  return mergeRanges(ranges);
 }
 
 /**
@@ -346,9 +335,7 @@ export function cleanJs(input: string, options: JsCleanOptions = {}): Result<str
     const emptyConstructRanges = findEmptyConstructs(result, opts);
     result = removeRanges(result, emptyConstructRanges);
 
-    // Final cleanup: remove multiple semicolons and clean up whitespace
-    result = result.replace(/;{2,}/g, ";");
-    result = result.replace(/,\s*,/g, ",");
+    // Final cleanup: collapse blank lines left by removed statements
     result = result.replace(/\n{3,}/g, "\n\n");
     result = result.trim();
 
