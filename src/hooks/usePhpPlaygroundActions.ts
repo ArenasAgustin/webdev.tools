@@ -96,7 +96,7 @@ export function usePhpPlaygroundActions({
         setError(null);
         setOutput("");
 
-        const { executePhp, isSharedArrayBufferSupported } = await import(
+        const { executePhpWithTimeout, isSharedArrayBufferSupported } = await import(
           "@/services/php/phpExecutor"
         );
 
@@ -107,7 +107,7 @@ export function usePhpPlaygroundActions({
           );
         }
 
-        const result = await executePhp(inputPhp);
+        const result = await executePhpWithTimeout(inputPhp);
         generic.setIsProcessing(false);
 
         if (!result.ok) {
