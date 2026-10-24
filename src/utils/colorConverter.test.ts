@@ -367,3 +367,51 @@ describe("colorConverter - convertColor", () => {
     expect(result!.hsl).toBe("hsl(240, 100%, 50%)");
   });
 });
+
+describe("colorConverter - alpha, named colors and 4/8-digit hex", () => {
+  it("parses 4-digit and 8-digit hex with alpha", () => {
+    expect(parseColor("#f00")).toEqual({ r: 255, g: 0, b: 0 });
+    expect(parseColor("#f008")).toEqual({ r: 255, g: 0, b: 0, a: 136 / 255 });
+    expect(parseColor("#3498db80")).toEqual({ r: 52, g: 152, b: 219, a: 128 / 255 });
+    expect(parseColor("#3498dbff")).toEqual({ r: 52, g: 152, b: 219 });
+  });
+
+  it("keeps the alpha of rgba and hsla", () => {
+    expect(parseColor("rgba(52, 152, 219, 0.5)")).toEqual({ r: 52, g: 152, b: 219, a: 0.5 });
+    expect(parseColor("rgba(52, 152, 219, 50%)")).toEqual({ r: 52, g: 152, b: 219, a: 0.5 });
+    expect(parseColor("hsla(0, 100%, 50%, .25)")).toEqual({ r: 255, g: 0, b: 0, a: 0.25 });
+  });
+
+  it("accepts the space-separated syntax with a slash alpha", () => {
+    expect(parseColor("rgb(52 152 219 / 0.5)")).toEqual({ r: 52, g: 152, b: 219, a: 0.5 });
+    expect(parseColor("hsl(0 100% 50%)")).toEqual({ r: 255, g: 0, b: 0 });
+  });
+
+  it("rejects an alpha outside 0..1", () => {
+    expect(parseColor("rgba(0, 0, 0, 2)")).toBeNull();
+    expect(parseColor("rgba(0, 0, 0, 150%)")).toBeNull();
+  });
+
+  it("parses CSS named colors and transparent", () => {
+    expect(parseColor("red")).toEqual({ r: 255, g: 0, b: 0 });
+    expect(parseColor("RebeccaPurple")).toEqual({ r: 102, g: 51, b: 153 });
+    expect(parseColor("transparent")).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+    expect(parseColor("notacolor")).toBeNull();
+  });
+
+  it("outputs alpha-aware formats when the color is translucent", () => {
+    const result = convertColor("rgba(255, 0, 0, 0.5)");
+    expect(result).toEqual({
+      hex: "#FF000080",
+      rgb: "rgba(255, 0, 0, 0.5)",
+      hsl: "hsla(0, 100%, 50%, 0.5)",
+      hsv: "hsv(0, 100%, 100%)",
+      cmyk: "cmyk(0%, 100%, 100%, 0%)",
+    });
+  });
+
+  it("keeps opaque output unchanged", () => {
+    expect(convertColor("#ff0000ff")?.rgb).toBe("rgb(255, 0, 0)");
+    expect(convertColor("red")?.hex).toBe("#FF0000");
+  });
+});
