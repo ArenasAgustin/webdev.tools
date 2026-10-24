@@ -25,6 +25,18 @@ describe("encodeUrl", () => {
     expect(encodeUrl("https://x.io/p?q=1#h", "uri")).toBe("https://x.io/p?q=1#h");
   });
 
+  it("keeps existing percent escapes in uri instead of double-encoding them", () => {
+    expect(encodeUrl("https://x.com/a%20b c?q=%C3%A9", "uri")).toBe(
+      "https://x.com/a%20b%20c?q=%C3%A9",
+    );
+    expect(encodeUrl("100% done", "uri")).toBe("100%25%20done");
+  });
+
+  it("still encodes percent signs in component and form", () => {
+    expect(encodeUrl("a%20b", "component")).toBe("a%2520b");
+    expect(encodeUrl("a%20b", "form")).toBe("a%2520b");
+  });
+
   it("encodes form variant with plus for spaces", () => {
     expect(encodeUrl("a b&c=d/é", "form")).toBe("a+b%26c%3Dd%2F%C3%A9");
   });

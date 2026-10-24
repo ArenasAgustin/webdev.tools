@@ -58,13 +58,21 @@ function toPercentHex(char: string): string {
  * so it leaves `!'()~` unescaped unless `strict` is set. This differs slightly from the
  * WHATWG application/x-www-form-urlencoded serializer.
  * `strict` escapes `!'()*` for `component` and `form`; it is ignored for `uri`.
+ * The `uri` variant keeps existing valid `%XX` escapes (like the WHATWG URL parser),
+ * so encoding a partially encoded URL does not double-encode them.
  */
 export function encodeUrl(text: string, variant: UrlVariant, opts?: Partial<UrlOptions>): string {
   const { strict } = { ...defaultUrlOptions, ...opts };
 
   let result: string;
   try {
-    result = variant === "uri" ? encodeURI(text) : encodeURIComponent(text);
+    result =
+      variant === "uri"
+        ? text
+            .split(/(%[0-9A-Fa-f]{2})/)
+            .map((part, index) => (index % 2 === 1 ? part : encodeURI(part)))
+            .join("")
+        : encodeURIComponent(text);
   } catch (error) {
     if (error instanceof URIError) {
       throw new UrlError("invalidSurrogate");
