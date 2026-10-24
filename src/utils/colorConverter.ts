@@ -2,10 +2,14 @@
  * Color conversion utilities
  */
 
+import { CSS_NAMED_COLORS } from "./cssNamedColors";
+
 export interface RGB {
   r: number;
   g: number;
   b: number;
+  /** Alpha in [0, 1); omitted when the color is opaque. */
+  a?: number;
 }
 
 export interface HSL {
@@ -35,64 +39,83 @@ export interface ColorFormats {
   cmyk: string;
 }
 
+// Channels are separated by commas (legacy syntax) or whitespace (modern syntax);
+// the optional alpha follows a comma or a slash, as a number or a percentage.
+const CHANNEL_SEP = String.raw`(?:\s*,\s*|\s+)`;
+const ALPHA = String.raw`(?:\s*[,/]\s*(\d*\.?\d+)(%?))?`;
+const RGB_PATTERN = new RegExp(
+  String.raw`^rgba?\s*\(\s*(\d+)${CHANNEL_SEP}(\d+)${CHANNEL_SEP}(\d+)${ALPHA}\s*\)$`,
+);
+const HSL_PATTERN = new RegExp(
+  String.raw`^hsla?\s*\(\s*(\d+)${CHANNEL_SEP}(\d+)%?${CHANNEL_SEP}(\d+)%?${ALPHA}\s*\)$`,
+);
+
+/** Parse a captured alpha; undefined when absent, null when out of range. */
+function parseAlpha(value: string | undefined, percent: string | undefined): number | null | undefined {
+  if (value === undefined) return undefined;
+  const alpha = Number(value) / (percent ? 100 : 1);
+  return alpha <= 1 ? alpha : null;
+}
+
+/** Attach alpha only when the color is translucent, so opaque colors stay `{ r, g, b }`. */
+function withAlpha(rgb: RGB, alpha: number | undefined): RGB {
+  return alpha === undefined || alpha >= 1 ? rgb : { ...rgb, a: alpha };
+}
+
 /**
- * Parse a color string to RGB
+ * Parse a color string to RGB. Supports hex (3, 4, 6 or 8 digits), CSS named colors,
+ * rgb()/rgba() and hsl()/hsla() (comma or space syntax, optional alpha), hsv() and cmyk().
  */
 export function parseColor(input: string): RGB | null {
   const cleanInput = input.trim().toLowerCase();
 
-  // HEX format
-  const hexMatch = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(cleanInput);
+  if (cleanInput === "transparent") {
+    return { r: 0, g: 0, b: 0, a: 0 };
+  }
+
+  // HEX format (named colors resolve to their hex value)
+  const hexSource = Object.hasOwn(CSS_NAMED_COLORS, cleanInput)
+    ? CSS_NAMED_COLORS[cleanInput]
+    : cleanInput;
+  const hexMatch = /^#?([a-f\d]{3,4}|[a-f\d]{6}|[a-f\d]{8})$/.exec(hexSource);
   if (hexMatch) {
-    return {
-      r: parseInt(hexMatch[1], 16),
-      g: parseInt(hexMatch[2], 16),
-      b: parseInt(hexMatch[3], 16),
-    };
+    const digits = hexMatch[1];
+    const hex =
+      digits.length <= 4
+        ? [...digits].map((digit) => digit + digit).join("")
+        : digits;
+    const alpha = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : undefined;
+    return withAlpha(
+      {
+        r: parseInt(hex.slice(0, 2), 16),
+        g: parseInt(hex.slice(2, 4), 16),
+        b: parseInt(hex.slice(4, 6), 16),
+      },
+      alpha,
+    );
   }
 
-  // Short HEX format
-  const shortHexMatch = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(cleanInput);
-  if (shortHexMatch) {
-    return {
-      r: parseInt(shortHexMatch[1] + shortHexMatch[1], 16),
-      g: parseInt(shortHexMatch[2] + shortHexMatch[2], 16),
-      b: parseInt(shortHexMatch[3] + shortHexMatch[3], 16),
-    };
-  }
-
-  // RGB format
-  const rgbMatch = /^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/.exec(cleanInput);
+  // RGB / RGBA format
+  const rgbMatch = RGB_PATTERN.exec(cleanInput);
   if (rgbMatch) {
     const r = parseInt(rgbMatch[1], 10);
     const g = parseInt(rgbMatch[2], 10);
     const b = parseInt(rgbMatch[3], 10);
-    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-      return { r, g, b };
+    const alpha = parseAlpha(rgbMatch[4], rgbMatch[5]);
+    if (alpha !== null && r <= 255 && g <= 255 && b <= 255) {
+      return withAlpha({ r, g, b }, alpha);
     }
   }
 
-  // RGBA format
-  const rgbaMatch = /^rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*[\d.]+\s*\)$/.exec(
-    cleanInput,
-  );
-  if (rgbaMatch) {
-    const r = parseInt(rgbaMatch[1], 10);
-    const g = parseInt(rgbaMatch[2], 10);
-    const b = parseInt(rgbaMatch[3], 10);
-    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-      return { r, g, b };
-    }
-  }
-
-  // HSL format
-  const hslMatch = /^hsl\s*\(\s*(\d+)\s*,\s*(\d+)%?\s*,\s*(\d+)%?\s*\)$/.exec(cleanInput);
+  // HSL / HSLA format
+  const hslMatch = HSL_PATTERN.exec(cleanInput);
   if (hslMatch) {
     const h = parseInt(hslMatch[1], 10);
     const s = parseInt(hslMatch[2], 10);
     const l = parseInt(hslMatch[3], 10);
-    if (h >= 0 && h <= 360 && s >= 0 && s <= 100 && l >= 0 && l <= 100) {
-      return hslToRgb(h, s, l);
+    const alpha = parseAlpha(hslMatch[4], hslMatch[5]);
+    if (alpha !== null && h <= 360 && s <= 100 && l <= 100) {
+      return withAlpha(hslToRgb(h, s, l), alpha);
     }
   }
 
@@ -343,16 +366,28 @@ export function cmykToRgb(c: number, m: number, y: number, k: number): RGB {
 }
 
 /**
- * Get all color formats from RGB
+ * Get all color formats from RGB. A translucent color keeps its alpha in hex (8 digits),
+ * rgba() and hsla(); hsv and cmyk have no alpha channel.
  */
 export function getAllFormats(rgb: RGB): ColorFormats {
-  const hex = rgbToHex(rgb);
   const hsl = rgbToHsl(rgb);
   const hsv = rgbToHsv(rgb);
   const cmyk = rgbToCmyk(rgb);
 
+  if (rgb.a !== undefined && rgb.a < 1) {
+    const alpha = Math.round(rgb.a * 100) / 100;
+    const alphaHex = Math.round(rgb.a * 255).toString(16).padStart(2, "0").toUpperCase();
+    return {
+      hex: rgbToHex(rgb) + alphaHex,
+      rgb: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`,
+      hsl: `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, ${alpha})`,
+      hsv: `hsv(${hsv.h}, ${hsv.s}%, ${hsv.v}%)`,
+      cmyk: `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`,
+    };
+  }
+
   return {
-    hex,
+    hex: rgbToHex(rgb),
     rgb: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
     hsl: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`,
     hsv: `hsv(${hsv.h}, ${hsv.s}%, ${hsv.v}%)`,

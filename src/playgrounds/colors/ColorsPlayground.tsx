@@ -32,22 +32,9 @@ export function ColorsPlayground() {
     setInput(newColor);
   }, [setInput]);
 
-  function getAllFormatsFromHex(hex: string): ColorFormats {
-    const cleanHex = hex.startsWith("#") ? hex.slice(1) : hex;
-    if (!/^[0-9a-fA-F]{6}$/.test(cleanHex)) {
-      return getAllFormats({ r: 0, g: 0, b: 0 });
-    }
-    const r = parseInt(cleanHex.slice(0, 2), 16);
-    const g = parseInt(cleanHex.slice(2, 4), 16);
-    const b = parseInt(cleanHex.slice(4, 6), 16);
-    if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) {
-      return getAllFormats({ r: 0, g: 0, b: 0 });
-    }
-    return getAllFormats({ r, g, b });
-  }
-
-  const parsed = convertColor(input);
-  const displayFormats = parsed ?? getAllFormatsFromHex(color);
+  // While the text input is invalid, keep showing the last valid color (hex, possibly with alpha).
+  const displayFormats: ColorFormats =
+    convertColor(input) ?? convertColor(color) ?? getAllFormats({ r: 0, g: 0, b: 0 });
 
   const { copy: copyToClipboard } = useClipboardCopy();
 
