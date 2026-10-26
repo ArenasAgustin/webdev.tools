@@ -35,42 +35,46 @@ export function TimestampPlayground() {
     STORAGE_KEYS.TIMESTAMP_INPUT,
     timestampConfig.example,
   );
-  const [result, setResult] = useState<TimestampResult | null>(null);
+  // The input that was last converted; the result is derived from it so a timezone or
+  // language change refreshes the shown formats without converting again.
+  const [convertedInput, setConvertedInput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [timezone, setTimezone] = usePersistedState(
     STORAGE_KEYS.TIMESTAMP_TIMEZONE,
     "America/Argentina/Buenos_Aires",
   );
 
+  const result = useMemo<TimestampResult | null>(
+    () => (convertedInput === null ? null : convertTimestamp(convertedInput, timezone, lang)),
+    [convertedInput, timezone, lang],
+  );
+
   const handleConvert = useCallback(() => {
     setError(null);
 
     if (!input.trim()) {
-      setResult(null);
+      setConvertedInput(null);
       return;
     }
 
-    const converted = convertTimestamp(input, timezone, lang);
-    if (converted) {
-      setResult(converted);
+    if (convertTimestamp(input, timezone, lang)) {
+      setConvertedInput(input);
     } else {
       setError(t("timestamp.invalidInput"));
-      setResult(null);
+      setConvertedInput(null);
     }
   }, [input, timezone, lang, t]);
 
   const handleNow = useCallback(() => {
-    const now = getCurrentTimestamp();
-    setInput(String(now));
+    const now = String(getCurrentTimestamp());
+    setInput(now);
     setError(null);
-
-    const converted = convertTimestamp(String(now), timezone, lang);
-    setResult(converted);
-  }, [timezone, lang, setInput]);
+    setConvertedInput(now);
+  }, [setInput]);
 
   const handleClear = useCallback(() => {
     setInput("");
-    setResult(null);
+    setConvertedInput(null);
     setError(null);
   }, [setInput]);
 
