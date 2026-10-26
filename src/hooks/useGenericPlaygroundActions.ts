@@ -60,13 +60,16 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       setOutput("");
       setError(null);
     }, [setOutput, setError]),
-    validateInput: useCallback(
-      () =>
-        inputTooLarge
-          ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
-          : null,
-      [inputTooLarge, inputTooLargeMessage],
-    ),
+    // Shared by every transform (format, minify, clean, execute): an empty input must
+    // fail instead of "succeeding" with an empty result.
+    validateInput: useCallback(() => {
+      if (!input.trim()) {
+        return `No hay ${language} para procesar`;
+      }
+      return inputTooLarge
+        ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
+        : null;
+    }, [input, language, inputTooLarge, inputTooLargeMessage]),
   });
 
   const { runTransformAction, isProcessing, setIsProcessing } = useTransformActions({
