@@ -107,6 +107,41 @@ describe("useGenericPlaygroundActions", () => {
     });
   });
 
+  it.each(["", "   \n\t"])(
+    "format and minify on empty input %j report an error instead of success",
+    async (input) => {
+      const formatRunner = vi.fn().mockResolvedValue("");
+      const minifyRunner = vi.fn().mockResolvedValue("");
+      const { result } = renderHook(() =>
+        useGenericPlaygroundActions({
+          input,
+          setInput,
+          output: "",
+          setOutput,
+          setError,
+          formatConfig: { autoCopy: false },
+          minifyConfig: { autoCopy: false },
+          toast,
+          exampleContent: "example",
+          fileConfig: FILE_CONFIG,
+          formatRunner,
+          minifyRunner,
+        }),
+      );
+      act(() => {
+        result.current.handleFormat();
+        result.current.handleMinify();
+      });
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledTimes(2);
+      });
+      expect(toast.error).toHaveBeenCalledWith("No hay TestLang para procesar");
+      expect(toast.success).not.toHaveBeenCalled();
+      expect(formatRunner).not.toHaveBeenCalled();
+      expect(minifyRunner).not.toHaveBeenCalled();
+    },
+  );
+
   describe("handleImportFile", () => {
     const makeHook = () =>
       renderHook(() =>
