@@ -51,6 +51,23 @@ describe("timestamp.utils", () => {
       expect(parseInput("-1")).toEqual({ type: "unix", value: -1 });
       expect(parseInput("-86400")).toEqual({ type: "unix", value: -86400 });
     });
+
+    it.each(["2024/01/15", "Jan 15 2024", "15 January 2024", "January 15, 2024"])(
+      "parses the date format %j",
+      (value) => {
+        const result = parseInput(value);
+        expect(result?.type).toBe("date");
+        const date = result?.value as Date;
+        expect([date.getFullYear(), date.getMonth(), date.getDate()]).toEqual([2024, 0, 15]);
+      },
+    );
+
+    it.each(["not-a-valid-timestamp 3", "hello 5", "version 2"])(
+      "rejects free text that the engine would read as a date: %j",
+      (value) => {
+        expect(parseInput(value)).toBeNull();
+      },
+    );
   });
 
   describe("unixToDate", () => {

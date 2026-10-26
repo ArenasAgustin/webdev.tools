@@ -231,4 +231,32 @@ describe("TimestampPlayground branches", () => {
     // Component still renders correctly with the new timezone
     expect(screen.getByText("timestamp.formats.humanReadable")).toBeInTheDocument();
   });
+
+  it("timezone change refreshes the shown result without converting again", () => {
+    render(<TimestampPlayground />);
+
+    const input = screen.getByPlaceholderText("timestamp.placeholder");
+    fireEvent.change(input, { target: { value: "1704067200" } });
+    fireEvent.change(screen.getByTestId("timezone-select"), { target: { value: "Europe/London" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
+    expect(screen.getByText("01/01/2024, 00:00:00")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId("timezone-select"), {
+      target: { value: "America/Argentina/Buenos_Aires" },
+    });
+
+    expect(screen.getByText("31/12/2023, 21:00:00")).toBeInTheDocument();
+  });
+
+  it("typing after converting does not change the shown result until converting again", () => {
+    render(<TimestampPlayground />);
+
+    const input = screen.getByPlaceholderText("timestamp.placeholder");
+    fireEvent.change(screen.getByTestId("timezone-select"), { target: { value: "Europe/London" } });
+    fireEvent.change(input, { target: { value: "1704067200" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
+    fireEvent.change(input, { target: { value: "0" } });
+
+    expect(screen.getByText("01/01/2024, 00:00:00")).toBeInTheDocument();
+  });
 });

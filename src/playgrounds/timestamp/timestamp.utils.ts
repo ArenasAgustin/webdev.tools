@@ -11,6 +11,21 @@ export interface TimestampResult {
 
 export type InputType = "unix" | "date";
 
+const MONTH_NAME = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/i;
+
+/**
+ * Date shapes accepted for parsing: ISO-like (2024-01-15, 2024-01-15T10:00),
+ * numeric with slashes or dots (2024/01/15, 01/15/2024, 2024.01.15) and
+ * an English month name with a 4-digit year (Jan 15 2024, Mon, 15 Jan 2024 10:00:00 GMT).
+ */
+function looksLikeDate(value: string): boolean {
+  return (
+    /^\d{4}-\d{1,2}(-\d{1,2})?([T\s]|$)/.test(value) ||
+    /^\d{1,4}[/.]\d{1,2}[/.]\d{1,4}(\s|$)/.test(value) ||
+    (MONTH_NAME.test(value) && /\b\d{4}\b/.test(value))
+  );
+}
+
 /**
  * Parse input and determine if it's a Unix timestamp or a date string
  */
@@ -25,9 +40,9 @@ export function parseInput(input: string): { type: InputType; value: number | Da
     return { type: "unix", value: Number(trimmed) };
   }
 
-  // Then, try to parse as date string (more specific check first)
-  // Check for date-like patterns: contains - or : or T
-  if (trimmed.includes("-") || trimmed.includes("T") || trimmed.includes(":")) {
+  // Then, try to parse as date string. The engine's parser is lenient ("hello 5" becomes
+  // a date in 2001), so only hand it strings with a recognizable date shape.
+  if (looksLikeDate(trimmed)) {
     const date = new Date(trimmed);
     if (!isNaN(date.getTime())) {
       return { type: "date", value: date };
