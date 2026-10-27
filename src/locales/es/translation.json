@@ -223,7 +223,8 @@
     "comparePlaceholder": "Ingresá un hash para comparar...",
     "compareAction": "Comparar",
     "matchSuccess": "El hash coincide",
-    "matchFail": "El hash NO coincide"
+    "matchFail": "El hash NO coincide",
+    "generateError": "No se pudieron generar los hashes. El archivo puede ser ilegible o demasiado grande."
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",

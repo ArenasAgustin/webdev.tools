@@ -9,6 +9,12 @@ export interface HashResult {
 
 export type HashOutputCase = "lowercase" | "uppercase";
 
+const ALGORITHM_NAMES: Record<HashAlgorithm, "SHA-1" | "SHA-256" | "SHA-512"> = {
+  sha1: "SHA-1",
+  sha256: "SHA-256",
+  sha512: "SHA-512",
+};
+
 /**
  * Convert ArrayBuffer to hex string
  */
@@ -63,13 +69,7 @@ export async function generateHash(
   outputCase: HashOutputCase = "lowercase",
 ): Promise<string> {
   const uppercase = outputCase === "uppercase";
-  const algorithmMap: Record<HashAlgorithm, "SHA-1" | "SHA-256" | "SHA-512"> = {
-    sha1: "SHA-1",
-    sha256: "SHA-256",
-    sha512: "SHA-512",
-  };
-
-  const hash = await generateShaHash(text, algorithmMap[algorithm]);
+  const hash = await generateShaHash(text, ALGORITHM_NAMES[algorithm]);
   return uppercase ? hash.toUpperCase() : hash;
 }
 
@@ -82,16 +82,28 @@ export async function generateHashFromFile(
   outputCase: HashOutputCase = "lowercase",
 ): Promise<string> {
   const buffer = await file.arrayBuffer();
-
-  const algorithmMap: Record<HashAlgorithm, "SHA-1" | "SHA-256" | "SHA-512"> = {
-    sha1: "SHA-1",
-    sha256: "SHA-256",
-    sha512: "SHA-512",
-  };
-
-  const hashBuffer = await crypto.subtle.digest(algorithmMap[algorithm], buffer);
+  const hashBuffer = await crypto.subtle.digest(ALGORITHM_NAMES[algorithm], buffer);
   const hash = arrayBufferToHex(hashBuffer);
   return outputCase === "uppercase" ? hash.toUpperCase() : hash;
+}
+
+/**
+ * Generate every hash for a File, reading its contents only once
+ */
+export async function generateAllHashesFromFile(
+  file: File,
+  outputCase: HashOutputCase = "lowercase",
+): Promise<HashResult[]> {
+  const buffer = await file.arrayBuffer();
+  const algorithms: HashAlgorithm[] = ["sha1", "sha256", "sha512"];
+
+  return Promise.all(
+    algorithms.map(async (algorithm) => {
+      const hashBuffer = await crypto.subtle.digest(ALGORITHM_NAMES[algorithm], buffer);
+      const hash = arrayBufferToHex(hashBuffer, outputCase === "uppercase");
+      return { algorithm, hash };
+    }),
+  );
 }
 
 /**

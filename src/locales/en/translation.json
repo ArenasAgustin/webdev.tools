@@ -223,7 +223,8 @@
     "comparePlaceholder": "Enter a hash to compare...",
     "compareAction": "Compare",
     "matchSuccess": "Hash matches",
-    "matchFail": "Hash does NOT match"
+    "matchFail": "Hash does NOT match",
+    "generateError": "Could not generate the hashes. The file may be unreadable or too large."
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
