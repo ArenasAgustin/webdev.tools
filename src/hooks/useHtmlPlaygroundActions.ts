@@ -6,6 +6,7 @@ import {
 import { htmlPlaygroundConfig } from "@/playgrounds/html/html.config";
 import { htmlService } from "@/services/html/service";
 import { createTransformHandler } from "@/utils/createTransformHandler";
+import { translate } from "@/i18n/translate";
 import type { ToastApi } from "./usePlaygroundActions";
 import type { HtmlFormatConfig, HtmlMinifyConfig, HtmlCleanConfig } from "@/types/html";
 import { cleanHtmlAsync } from "@/services/html/worker";
@@ -24,7 +25,7 @@ async function formatRunner(input: string, config: HtmlFormatConfig) {
     formatCss: config.formatCss,
     formatJs: config.formatJs,
   });
-  if (!result.ok) throw new Error(result.error || "Error al formatear HTML");
+  if (!result.ok) throw new Error(result.error || translate("messages.formatError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
@@ -35,7 +36,7 @@ async function minifyRunner(input: string, config: HtmlMinifyConfig) {
     minifyCss: config.minifyCss,
     minifyJs: config.minifyJs,
   });
-  if (!result.ok) throw new Error(result.error || "Error al minificar HTML");
+  if (!result.ok) throw new Error(result.error || translate("messages.minifyError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
@@ -92,14 +93,14 @@ export function useHtmlPlaygroundActions({
           removeEmptyTags: cleanConfig.removeEmptyTags,
         });
         if (!result.ok) throw new Error(result.error.message);
-        if (!result.value.trim()) throw new Error("El HTML estaba completamente vacío");
+        if (!result.value.trim()) throw new Error(translate("messages.cleanEmpty", { language: FILE_CONFIG.language }));
         return result.value;
       },
       setOutput,
       setError,
       autoCopy: cleanConfig.autoCopy,
-      successMessage: "HTML limpiado correctamente",
-      errorMessage: "Error al limpiar HTML",
+      successMessage: translate("messages.cleaned", { language: FILE_CONFIG.language }),
+      errorMessage: translate("messages.cleanError", { language: FILE_CONFIG.language }),
     });
   }, [generic.runTransformAction, inputHtml, cleanConfig, setError, setOutput]);
 

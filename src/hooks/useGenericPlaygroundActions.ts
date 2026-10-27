@@ -50,7 +50,9 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
   formatRunner,
   minifyRunner,
 }: UseGenericPlaygroundActionsProps<TFormat, TMinify>) {
-  const { language, inputFileName, outputFileName, mimeType, acceptExtensions } = fileConfig;
+  // `language` is read from fileConfig inside each callback (not destructured) so a
+  // translated getter resolves at call time and follows language switches.
+  const { inputFileName, outputFileName, mimeType, acceptExtensions } = fileConfig;
 
   const baseActions = usePlaygroundActions({
     input,
@@ -65,10 +67,10 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     // fail instead of "succeeding" with an empty result.
     validateInput: useCallback(() => {
       if (!input.trim()) {
-        return translate("messages.noInputToProcess", { language });
+        return translate("messages.noInputToProcess", { language: fileConfig.language });
       }
       return inputTooLarge ? (inputTooLargeMessage ?? translate("messages.inputTooLarge")) : null;
-    }, [input, language, inputTooLarge, inputTooLargeMessage]),
+    }, [input, fileConfig, inputTooLarge, inputTooLargeMessage]),
   });
 
   const { runTransformAction, isProcessing, setIsProcessing } = useTransformActions({
@@ -132,9 +134,9 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       fileName: inputFileName,
       mimeType,
       successMessage: translate("messages.downloadedAs", { fileName: inputFileName }),
-      validate: () => (!input ? translate("messages.noInputToDownload", { language }) : null),
+      validate: () => (!input ? translate("messages.noInputToDownload", { language: fileConfig.language }) : null),
     });
-  }, [baseActions, input, inputFileName, mimeType, language]);
+  }, [baseActions, input, inputFileName, mimeType, fileConfig]);
 
   const handleDownloadOutput = useCallback(() => {
     baseActions.handleDownload({
@@ -153,10 +155,10 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       setOutput,
       setError,
       autoCopy: formatConfig.autoCopy,
-      successMessage: translate("messages.formatted", { language }),
-      errorMessage: translate("messages.formatError", { language }),
+      successMessage: translate("messages.formatted", { language: fileConfig.language }),
+      errorMessage: translate("messages.formatError", { language: fileConfig.language }),
     });
-  }, [runTransformAction, input, formatConfig, setError, setOutput, formatRunner, language]);
+  }, [runTransformAction, input, formatConfig, setError, setOutput, formatRunner, fileConfig]);
 
   const handleMinify = useCallback(() => {
     createTransformHandler({
@@ -165,10 +167,10 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       setOutput,
       setError,
       autoCopy: minifyConfig.autoCopy,
-      successMessage: translate("messages.minified", { language }),
-      errorMessage: translate("messages.minifyError", { language }),
+      successMessage: translate("messages.minified", { language: fileConfig.language }),
+      errorMessage: translate("messages.minifyError", { language: fileConfig.language }),
     });
-  }, [runTransformAction, input, minifyConfig, setError, setOutput, minifyRunner, language]);
+  }, [runTransformAction, input, minifyConfig, setError, setOutput, minifyRunner, fileConfig]);
 
   return {
     handleClearInput: baseActions.handleClearInput,

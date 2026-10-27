@@ -5,6 +5,7 @@ import { DEFAULT_PHP_FORMAT_CONFIG } from "@/types/php";
 import { loadPhpToolsConfig, loadLastPhp, saveLastPhp } from "@/services/storage";
 import { phpPlaygroundConfig } from "../php/php.config";
 import { formatPhp } from "@/services/php/transform";
+import { translate } from "@/i18n/translate";
 
 /**
  * Map generic params to PHP-specific params
@@ -56,7 +57,7 @@ export const phpEngine = {
     exampleContent: phpPlaygroundConfig.example,
     formatRunner: formatPhp,
     minifyRunner: async () => {
-      throw new Error("Minify no está disponible para PHP");
+      throw new Error(translate("messages.php.minifyUnavailable"));
     },
     executeRunner: async (input: string) => {
       const { executePhpWithTimeout } = await import("@/services/php/phpExecutor");
