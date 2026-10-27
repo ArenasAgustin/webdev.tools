@@ -1,6 +1,7 @@
 import { createPlaygroundService } from "@/services/transform";
 import type { PhpFormatOptions } from "@/services/php/transform";
 import { formatPhp, validatePhp } from "@/services/php/transform";
+import { serviceMessage } from "@/services/serviceMessage";
 
 export const phpService = createPlaygroundService<PhpFormatOptions, never>({
   format: async (input, options) => {
@@ -9,8 +10,8 @@ export const phpService = createPlaygroundService<PhpFormatOptions, never>({
   },
   minify: async () => ({
     ok: false,
-    error: { message: "Minify no está disponible para PHP" },
+    error: { message: serviceMessage("services.php.minifyUnavailable") },
   }),
-  emptyMessage: "No hay código para procesar",
+  emptyMessage: "services.common.noCode",
   validate: async (input) => validatePhp(input),
 });

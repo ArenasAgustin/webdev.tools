@@ -256,7 +256,8 @@ describe("cleanHtml", () => {
   it("returns error for empty input", () => {
     const result = cleanHtml("   ");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error).toContain("vacío");
+    // Worker-safe transforms return a message key; services localize it.
+    if (!result.ok) expect(result.error).toBe("services.html.empty");
   });
 
   it("removes empty tags by default", () => {

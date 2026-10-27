@@ -399,5 +399,55 @@
   "validation": {
     "syntaxError": "Syntax error: {{message}}",
     "invalidCode": "Invalid code"
+  },
+  "services": {
+    "common": {
+      "noCode": "No code to process"
+    },
+    "worker": {
+      "error": "Worker error",
+      "unavailable": "Worker not available"
+    },
+    "json": {
+      "noInput": "No JSON to process",
+      "empty": "The JSON is empty",
+      "formatError": "Error formatting JSON",
+      "minifyError": "Error minifying JSON",
+      "cleanError": "Error cleaning JSON: {{message}}",
+      "jsonPathEmpty": "The JSONPath expression is empty",
+      "jsonPathError": "JSONPath error: {{message}}"
+    },
+    "css": {
+      "noInput": "No CSS to process",
+      "empty": "The CSS is empty",
+      "minifyError": "Error minifying CSS",
+      "cleanError": "Error cleaning CSS: {{message}}"
+    },
+    "html": {
+      "noInput": "No HTML to process",
+      "empty": "The HTML is empty",
+      "cleanError": "Error cleaning HTML: {{message}}"
+    },
+    "js": {
+      "empty": "The JavaScript code is empty",
+      "parseError": "Could not parse the JavaScript code",
+      "formatError": "Error formatting code",
+      "minifyUnavailable": "Terser minify is not available",
+      "cleanError": "Error cleaning code: {{message}}"
+    },
+    "php": {
+      "empty": "The PHP code is empty",
+      "syntaxError": "Syntax error: {{message}}",
+      "syntaxErrorAtLine": "Syntax error on line {{line}}: {{message}}",
+      "parseError": "Error parsing PHP code",
+      "formatError": "Error formatting PHP code",
+      "minifyUnavailable": "Minify is not available for PHP",
+      "noOutput": "(no output)",
+      "timeout": "Execution exceeded {{seconds}} seconds and was cancelled"
+    },
+    "sql": {
+      "noInput": "No SQL to process",
+      "empty": "The SQL is empty"
+    }
   }
 }

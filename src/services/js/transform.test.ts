@@ -106,7 +106,8 @@ describe("cleanJs", () => {
   it("returns error for empty input", () => {
     const result = cleanJs("   ");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error).toContain("vacío");
+    // Worker-safe transforms return a message key; services localize it.
+    if (!result.ok) expect(result.error).toBe("services.js.empty");
   });
 
   it("handles code that evaluates cleanly even with odd syntax fragments", () => {

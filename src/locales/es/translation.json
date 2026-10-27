@@ -399,5 +399,55 @@
   "validation": {
     "syntaxError": "Error de sintaxis: {{message}}",
     "invalidCode": "Código inválido"
+  },
+  "services": {
+    "common": {
+      "noCode": "No hay código para procesar"
+    },
+    "worker": {
+      "error": "Error en worker",
+      "unavailable": "Worker no disponible"
+    },
+    "json": {
+      "noInput": "No hay JSON para procesar",
+      "empty": "El JSON está vacío",
+      "formatError": "Error al formatear JSON",
+      "minifyError": "Error al minificar JSON",
+      "cleanError": "Error al limpiar JSON: {{message}}",
+      "jsonPathEmpty": "La expresión JSONPath está vacía",
+      "jsonPathError": "Error en JSONPath: {{message}}"
+    },
+    "css": {
+      "noInput": "No hay CSS para procesar",
+      "empty": "El CSS está vacío",
+      "minifyError": "Error al minificar CSS",
+      "cleanError": "Error al limpiar CSS: {{message}}"
+    },
+    "html": {
+      "noInput": "No hay HTML para procesar",
+      "empty": "El HTML está vacío",
+      "cleanError": "Error al limpiar HTML: {{message}}"
+    },
+    "js": {
+      "empty": "El código JavaScript está vacío",
+      "parseError": "No se pudo parsear el código JavaScript",
+      "formatError": "Error al formatear código",
+      "minifyUnavailable": "Terser minify no está disponible",
+      "cleanError": "Error al limpiar código: {{message}}"
+    },
+    "php": {
+      "empty": "El código PHP está vacío",
+      "syntaxError": "Error de sintaxis: {{message}}",
+      "syntaxErrorAtLine": "Error de sintaxis en línea {{line}}: {{message}}",
+      "parseError": "Error al parsear código PHP",
+      "formatError": "Error al formatear código PHP",
+      "minifyUnavailable": "Minify no está disponible para PHP",
+      "noOutput": "(sin salida)",
+      "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada"
+    },
+    "sql": {
+      "noInput": "No hay SQL para procesar",
+      "empty": "El SQL está vacío"
+    }
   }
 }

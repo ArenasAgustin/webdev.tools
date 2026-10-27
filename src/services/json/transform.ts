@@ -3,12 +3,13 @@ import type { IndentStyle } from "@/types/format";
 import type { JsonCleanConfig } from "@/types/json";
 import type { TransformService } from "@/services/transform";
 import { formatWithPrettier } from "@/services/formatter/prettier";
+import { serviceMessage } from "@/services/serviceMessage";
 
 /**
- * Common error messages for JSON operations
+ * Common error messages for JSON operations (`services.*` keys, see `serviceMessage`)
  */
 export const JSON_ERROR_MESSAGES = {
-  EMPTY_INPUT: "El JSON está vacío",
+  EMPTY_INPUT: serviceMessage("services.json.empty"),
 } as const;
 
 /**
@@ -92,7 +93,7 @@ export async function formatJson(
     return { ok: true, value: formatted };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || "Error al formatear JSON" };
+    return { ok: false, error: message || serviceMessage("services.json.formatError") };
   }
 }
 
@@ -111,7 +112,7 @@ export function minifyJson(input: string, options: JsonMinifyOptions = {}): Resu
     return { ok: true, value: minified };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || "Error al minificar JSON" };
+    return { ok: false, error: message || serviceMessage("services.json.minifyError") };
   }
 }
 
@@ -213,7 +214,7 @@ export function cleanJson(input: string, options: CleanOptions = {}): Result<str
     return {
       ok: false,
       error: {
-        message: `Error al limpiar JSON: ${errorMessage}`,
+        message: serviceMessage("services.json.cleanError", { message: errorMessage }),
       },
     };
   }

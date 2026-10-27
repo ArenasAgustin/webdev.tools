@@ -1,11 +1,13 @@
 /**
  * SQL Worker facade — async functions for the main thread.
- * All operations delegate to sqlWorkerAdapter (singleton worker).
+ * All operations delegate to sqlWorkerAdapter (singleton worker); error keys
+ * coming back from the worker are localized here.
  */
 
 import type { Result } from "@/types/common";
 import type { SqlExecuteResult, SqlFormatConfig } from "@/types/sql";
 import { sqlWorkerAdapter } from "@/services/sql/workerClient";
+import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
 export const formatSqlAsync = async (
   input: string,
@@ -17,9 +19,9 @@ export const formatSqlAsync = async (
       return { ok: true, value: (response as { value: string }).value ?? "" };
     }
     const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: err?.message ?? "Format error" };
+    return { ok: false, error: localizeServiceMessage(err?.message ?? "Format error") };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
 };
 
@@ -33,9 +35,9 @@ export const validateSqlAsync = async (
       return { ok: true, value: true };
     }
     const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: err?.message ?? "Validate error" };
+    return { ok: false, error: localizeServiceMessage(err?.message ?? "Validate error") };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
 };
 
@@ -46,9 +48,9 @@ export const minifySqlAsync = async (input: string): Promise<Result<string, stri
       return { ok: true, value: (response as { value: string }).value ?? "" };
     }
     const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: err?.message ?? "Minify error" };
+    return { ok: false, error: localizeServiceMessage(err?.message ?? "Minify error") };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
 };
 
@@ -65,11 +67,11 @@ export const executeSqlAsync = async (
     }
     if (!response.ok) {
       const err = (response as { error?: { message?: string } }).error;
-      return { ok: false, error: err?.message ?? "Execute error" };
+      return { ok: false, error: localizeServiceMessage(err?.message ?? "Execute error") };
     }
     return { ok: false, error: "Unexpected execute response" };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
 };
 
@@ -80,8 +82,8 @@ export const resetSqlAsync = async (): Promise<Result<string, string>> => {
       return { ok: true, value: "reset" };
     }
     const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: err?.message ?? "Reset error" };
+    return { ok: false, error: localizeServiceMessage(err?.message ?? "Reset error") };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
 };

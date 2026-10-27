@@ -2,14 +2,15 @@ import { createPlaygroundService } from "@/services/transform";
 import type { JsonFormatOptions, JsonMinifyOptions } from "@/services/json/transform";
 import { formatJsonAsync, minifyJsonAsync } from "@/services/json/worker";
 import { parseJson } from "@/services/json/transform";
+import { serviceMessage } from "@/services/serviceMessage";
 
 export const jsonService = createPlaygroundService<JsonFormatOptions, JsonMinifyOptions>({
   format: (input, options) => formatJsonAsync(input, options ?? {}),
   minify: (input, options) => minifyJsonAsync(input, options ?? {}),
-  emptyMessage: "No hay JSON para procesar",
+  emptyMessage: "services.json.noInput",
   validate: (input) => {
     if (!input.trim()) {
-      return { ok: false, error: "No hay JSON para procesar" };
+      return { ok: false, error: serviceMessage("services.json.noInput") };
     }
 
     const parsed = parseJson(input);

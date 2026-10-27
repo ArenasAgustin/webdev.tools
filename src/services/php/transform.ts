@@ -5,6 +5,7 @@
 
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
+import { serviceMessage } from "@/services/serviceMessage";
 import PhpParser from "php-parser";
 
 export interface PhpFormatOptions {
@@ -16,7 +17,7 @@ type PhpAst = unknown;
 export function parsePhp(input: string): Result<PhpAst, string> {
   try {
     if (!input.trim()) {
-      return { ok: false, error: "El código PHP está vacío" };
+      return { ok: false, error: serviceMessage("services.php.empty") };
     }
 
     const PhpParserFactory = PhpParser as unknown as {
@@ -35,14 +36,16 @@ export function parsePhp(input: string): Result<PhpAst, string> {
   } catch (error) {
     if (error instanceof SyntaxError) {
       const line = (error as unknown as { lineNumber?: number }).lineNumber;
-      const location = line != null ? ` en línea ${line}` : "";
       return {
         ok: false,
-        error: `Error de sintaxis${location}: ${error.message}`,
+        error:
+          line != null
+            ? serviceMessage("services.php.syntaxErrorAtLine", { line, message: error.message })
+            : serviceMessage("services.php.syntaxError", { message: error.message }),
       };
     }
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || "Error al parsear código PHP" };
+    return { ok: false, error: message || serviceMessage("services.php.parseError") };
   }
 }
 
@@ -128,7 +131,7 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
     return { ok: true, value: formatted.join("\n") };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || "Error al formatear código PHP" };
+    return { ok: false, error: message || serviceMessage("services.php.formatError") };
   }
 }
 

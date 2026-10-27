@@ -1,5 +1,7 @@
 import type { Result } from "@/types/common";
 import { WORKER_THRESHOLD_BYTES } from "@/utils/constants/limits";
+import { localizeServiceResult } from "@/services/localizeServiceMessage";
+import { serviceMessage } from "@/services/serviceMessage";
 
 interface WorkerResponseLike {
   ok: boolean;
@@ -22,6 +24,11 @@ const getInputBytes = (input: string) => new TextEncoder().encode(input).length;
 export const shouldUseWorkerForInput = (input: string, thresholdBytes = WORKER_THRESHOLD_BYTES) =>
   getInputBytes(input) >= thresholdBytes;
 
+/**
+ * Runs an operation in its worker (or synchronously for small inputs) on the
+ * main thread. Errors carrying `services.*` message keys are localized here, so
+ * callers always receive user-facing text.
+ */
 export const executeWorkerOperation = async <
   TPayload,
   TError,
@@ -35,12 +42,12 @@ export const executeWorkerOperation = async <
     runWorker,
     runSync,
     toError,
-    workerErrorMessage = "Error en worker",
+    workerErrorMessage = serviceMessage("services.worker.error"),
     thresholdBytes = WORKER_THRESHOLD_BYTES,
   } = options;
 
   if (!shouldUseWorkerForInput(input, thresholdBytes)) {
-    return runSync();
+    return localizeServiceResult(await runSync());
   }
 
   try {
@@ -50,8 +57,11 @@ export const executeWorkerOperation = async <
       return { ok: true, value: response.value ?? "" };
     }
 
-    return { ok: false, error: toError(response.error?.message ?? workerErrorMessage) };
+    return localizeServiceResult<string, TError>({
+      ok: false,
+      error: toError(response.error?.message ?? workerErrorMessage),
+    });
   } catch {
-    return runSync();
+    return localizeServiceResult(await runSync());
   }
 };

@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
 import { applyJsonPath } from "./jsonPath";
+import { parseServiceMessage } from "@/services/serviceMessage";
 
 describe("applyJsonPath", () => {
   it("should extract single property", () => {
@@ -93,7 +94,7 @@ describe("applyJsonPath", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.message).toBe("El JSON está vacío");
+      expect(result.error.message).toBe("services.json.empty");
     }
   });
 
@@ -103,7 +104,7 @@ describe("applyJsonPath", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.message).toBe("La expresión JSONPath está vacía");
+      expect(result.error.message).toBe("services.json.jsonPathEmpty");
     }
   });
 
@@ -112,7 +113,7 @@ describe("applyJsonPath", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.message).toContain("Error en JSONPath");
+      expect(parseServiceMessage(result.error.message)?.key).toBe("services.json.jsonPathError");
     }
   });
 
