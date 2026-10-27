@@ -65,6 +65,12 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       return { ok: true, value: "" };
     }
 
+    // The formatter is heuristic and would happily re-indent broken code; refuse it instead.
+    const parsed = parsePhp(input);
+    if (!parsed.ok) {
+      return { ok: false, error: parsed.error };
+    }
+
     const indent = indentSize === "\t" ? "\t" : " ".repeat(indentSize);
 
     const lines = input.split("\n");

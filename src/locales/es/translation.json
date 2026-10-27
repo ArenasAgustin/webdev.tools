@@ -452,12 +452,17 @@
       "noInput": "No hay CSS para procesar",
       "empty": "El CSS está vacío",
       "minifyError": "Error al minificar CSS",
+      "syntaxError": "CSS inválido: {{message}}",
       "cleanError": "Error al limpiar CSS: {{message}}"
     },
     "html": {
       "noInput": "No hay HTML para procesar",
       "empty": "El HTML está vacío",
-      "cleanError": "Error al limpiar HTML: {{message}}"
+      "cleanError": "Error al limpiar HTML: {{message}}",
+      "unexpectedClosingTag": "HTML inválido: la etiqueta de cierre </{{tag}}> de la línea {{line}} no tiene etiqueta de apertura",
+      "misnestedClosingTag": "HTML inválido: la etiqueta de cierre </{{tag}}> de la línea {{line}} aparece mientras <{{open}}> sigue abierta",
+      "unclosedComment": "HTML inválido: el comentario abierto en la línea {{line}} nunca se cierra",
+      "unclosedTag": "HTML inválido: la etiqueta de la línea {{line}} nunca se cierra con \">\""
     },
     "js": {
       "empty": "El código JavaScript está vacío",

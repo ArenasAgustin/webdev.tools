@@ -95,6 +95,27 @@ describe("formatCss", () => {
 });
 
 describe("minifyCss", () => {
+  it.each([
+    ["an unclosed block", "a { color: red;", /Unclosed block/],
+    ["a stray closing brace", "a { color: red; } }", /Unexpected }/],
+    ["an unclosed string", 'a { content: "x; }', /Unclosed string/],
+    ["an unclosed bracket", "a { width: calc(1px + (2px); }", /Unclosed bracket/],
+  ])("rejects CSS with %s instead of minifying it", async (_name, input, pattern) => {
+    const result = await minifyCss(input);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.startsWith("services.css.syntaxError")).toBe(true);
+      expect(result.error).toMatch(pattern);
+    }
+  });
+
+  it("still minifies valid modern CSS such as nesting and container queries", async () => {
+    const result = await minifyCss(".a { &:hover { b: c } } @container (width > 1px) { a { b: c } }");
+
+    expect(result).toEqual({ ok: true, value: ".a{&:hover{b:c}}@container (width>1px){a{b:c}}" });
+  });
+
   it("returns empty output for blank input", async () => {
     const result = await minifyCss("   \n ");
 

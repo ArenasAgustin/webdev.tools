@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { formatHtml, minifyHtml, cleanHtml } from "./transform";
+import { serviceMessage } from "@/services/serviceMessage";
 
 describe("formatHtml", () => {
   it("returns empty output for blank input", async () => {
@@ -86,6 +87,49 @@ describe("formatHtml", () => {
 });
 
 describe("minifyHtml", () => {
+  const minifyOptions = {
+    removeComments: true,
+    collapseWhitespace: true,
+    minifyCss: true,
+    minifyJs: true,
+  };
+
+  it.each([
+    ["a closing tag with no open element", "<div>a</div></span>", /unexpectedClosingTag/],
+    ["misnested tags", "<div><span>a</div></span>", /misnestedClosingTag/],
+    ["an unclosed comment", "<div>a</div><!-- open", /unclosedComment/],
+    ["an unterminated tag", '<div class="a">x</div><img src="b', /unclosedTag/],
+  ])("rejects HTML with %s instead of minifying it", async (_name, input, pattern) => {
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toMatch(pattern);
+  });
+
+  it("reports the tag and line of a stray closing tag", async () => {
+    const result = await minifyHtml("<div>\n</section>\n</div>", minifyOptions);
+
+    expect(result).toEqual({
+      ok: false,
+      error: serviceMessage("services.html.unexpectedClosingTag", { tag: "section", line: 2 }),
+    });
+  });
+
+  it("accepts valid HTML with optional end tags, void elements and raw text", async () => {
+    const input = [
+      "<!DOCTYPE html><html><head><title>a</div></title>",
+      '<script>if (a < b) document.write("</p></span>")</script></head>',
+      "<body><p>one<p>two<ul><li>a<li>b</ul>",
+      '<table><tr><td>1<td>2</table><br><img src="x"><svg><path d="M0 0" /></svg>',
+      '<input value="a>b"></br></p><textarea></div></textarea>',
+      "<a title=it's href=/x>link</a><?php echo 1; ?>",
+      "<!-- ok --></body></html>",
+    ].join("\n");
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result.ok).toBe(true);
+  });
+
   it("returns empty output for blank input", async () => {
     const result = await minifyHtml("\n\t  ", {
       removeComments: true,

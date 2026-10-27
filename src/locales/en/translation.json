@@ -452,12 +452,17 @@
       "noInput": "No CSS to process",
       "empty": "The CSS is empty",
       "minifyError": "Error minifying CSS",
+      "syntaxError": "Invalid CSS: {{message}}",
       "cleanError": "Error cleaning CSS: {{message}}"
     },
     "html": {
       "noInput": "No HTML to process",
       "empty": "The HTML is empty",
-      "cleanError": "Error cleaning HTML: {{message}}"
+      "cleanError": "Error cleaning HTML: {{message}}",
+      "unexpectedClosingTag": "Invalid HTML: closing tag </{{tag}}> on line {{line}} has no matching opening tag",
+      "misnestedClosingTag": "Invalid HTML: closing tag </{{tag}}> on line {{line}} found while <{{open}}> is still open",
+      "unclosedComment": "Invalid HTML: comment opened on line {{line}} is never closed",
+      "unclosedTag": "Invalid HTML: tag on line {{line}} is never closed with \">\""
     },
     "js": {
       "empty": "The JavaScript code is empty",
