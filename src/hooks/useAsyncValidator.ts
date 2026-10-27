@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { compactTransformError } from "@/utils/transformError";
+import { translate } from "@/i18n/translate";
 
 export interface ValidationState {
   isValid: boolean;
@@ -41,7 +42,9 @@ export function useAsyncValidator(
           setValidation({
             isValid: false,
             error: {
-              message: `Error de sintaxis: ${compactTransformError(result.error ?? fallbackError)}`,
+              message: translate("validation.syntaxError", {
+                message: compactTransformError(result.error ?? fallbackError),
+              }),
             },
           });
         }
@@ -53,7 +56,9 @@ export function useAsyncValidator(
         setValidation({
           isValid: false,
           error: {
-            message: `Error de sintaxis: ${compactTransformError(message ?? fallbackError)}`,
+            message: translate("validation.syntaxError", {
+              message: compactTransformError(message ?? fallbackError),
+            }),
           },
         });
       });

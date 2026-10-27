@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTextStats } from "@/hooks/useTextStats";
 import { MAX_INPUT_BYTES, MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { translate } from "@/i18n/translate";
 
 interface UsePlaygroundInputLifecycleProps {
   input: string;
@@ -29,7 +30,7 @@ export function usePlaygroundInputLifecycle({
   debounceMs = 300,
   maxInputBytes = MAX_INPUT_BYTES,
   maxInputLabel = MAX_INPUT_LABEL,
-  inputWarningMessage = "Entrada grande: algunas operaciones pueden ser lentas",
+  inputWarningMessage = translate("messages.inputLarge"),
   inputTooLargeToastMessage,
 }: UsePlaygroundInputLifecycleProps): PlaygroundInputLifecycleState {
   const debouncedInput = useDebouncedValue(input, debounceMs);
@@ -46,7 +47,7 @@ export function usePlaygroundInputLifecycle({
     if (inputTooLarge && !sizeWarningShownRef.current) {
       toast?.info(
         inputTooLargeToastMessage ??
-          `El contenido supera ${maxInputLabel}. Algunas operaciones pueden ser lentas.`,
+          translate("messages.inputExceedsLimit", { limit: maxInputLabel }),
       );
       sizeWarningShownRef.current = true;
     }

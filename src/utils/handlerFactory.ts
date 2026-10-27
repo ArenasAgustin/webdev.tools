@@ -1,4 +1,5 @@
 import { compactTransformError } from "./transformError";
+import { translate } from "@/i18n/translate";
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -39,7 +40,7 @@ function isResultLike(value: unknown): value is ResultLike {
   return "ok" in value && typeof (value).ok === "boolean";
 }
 
-function toErrorMessage(error: unknown, fallback = "Ha ocurrido un error"): string {
+function toErrorMessage(error: unknown, fallback = translate("messages.genericError")): string {
   if (error instanceof Error && error.message) {
     return error.message;
   }
@@ -86,7 +87,7 @@ export function createValidatedHandler<TResult>(
 
     const process = (result: TResult) => {
       if (isResultLike(result) && !result.ok) {
-        fail(result.error ?? errorMessage ?? "Ha ocurrido un error");
+        fail(result.error ?? errorMessage ?? translate("messages.genericError"));
         return;
       }
 

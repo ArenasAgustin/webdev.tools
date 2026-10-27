@@ -150,7 +150,10 @@
     "codeEditorLabel": "Editor de código",
     "tabFocusHint": "Presioná Ctrl+M (Ctrl+Shift+M en macOS) para alternar si Tab indenta o mueve el foco.",
     "diffOriginalLabel": "Código original (solo lectura)",
-    "diffModifiedLabel": "Código resultante (solo lectura)"
+    "diffModifiedLabel": "Código resultante (solo lectura)",
+    "loading": "Cargando editor...",
+    "diffTitle": "Diferencias",
+    "expandedPlaceholder": "Contenido de {{title}}..."
   },
   "password": {
     "aria": {
@@ -271,7 +274,8 @@
       "description": "{{description}}. Herramienta online para desarrolladores, sin instalación. Parte de webdev.tools.",
       "descriptionFallback": "Herramientas de desarrollo web online",
       "keywords": "{{name}}, {{description}}, herramientas desarrollo web online",
-      "keywordsFallback": "herramientas desarrollo web"
+      "keywordsFallback": "herramientas desarrollo web",
+      "defaultDescription": "Suite de herramientas online para desarrolladores: formatear JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador."
     }
   },
   "offline": {
@@ -332,5 +336,38 @@
     "strict": "Estricto (RFC 3986)",
     "errorMalformedSequence": "La entrada contiene una secuencia porcentual malformada",
     "errorInvalidSurrogate": "La entrada contiene un sustituto UTF-16 sin par"
+  },
+  "messages": {
+    "noInputToProcess": "No hay {{language}} para procesar",
+    "inputTooLarge": "El contenido es demasiado grande para procesarlo.",
+    "inputLarge": "Entrada grande: algunas operaciones pueden ser lentas",
+    "inputExceedsLimit": "El contenido supera {{limit}}. Algunas operaciones pueden ser lentas.",
+    "noOutputToUseAsInput": "No hay resultado para usar como entrada",
+    "outputLoadedAsInput": "Resultado cargado como entrada",
+    "noInputToUseAsOutput": "No hay entrada para usar como resultado",
+    "inputLoadedAsOutput": "Entrada cargada como resultado",
+    "invalidFile": "Archivo no válido. Extensiones aceptadas: {{extensions}}",
+    "fileLoaded": "Archivo \"{{name}}\" cargado",
+    "fileReadError": "Error al leer el archivo",
+    "inputCleared": "Entrada limpiada",
+    "exampleLoaded": "Ejemplo cargado",
+    "copied": "Copiado al portapapeles",
+    "outputCopied": "Resultado copiado al portapapeles",
+    "noContentToCopy": "No hay contenido para copiar",
+    "noOutputToCopy": "No hay resultado para copiar",
+    "copyError": "Error al copiar al portapapeles",
+    "downloadedAs": "Descargado como {{fileName}}",
+    "noContentToDownload": "No hay contenido para descargar",
+    "noInputToDownload": "No hay {{language}} para descargar",
+    "noOutputToDownload": "No hay resultado para descargar",
+    "formatted": "{{language}} formateado correctamente",
+    "formatError": "Error al formatear {{language}}",
+    "minified": "{{language}} minificado correctamente",
+    "minifyError": "Error al minificar {{language}}",
+    "genericError": "Ha ocurrido un error"
+  },
+  "validation": {
+    "syntaxError": "Error de sintaxis: {{message}}",
+    "invalidCode": "Código inválido"
   }
 }
