@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import type { ToastApi } from "./usePlaygroundActions";
 
@@ -17,6 +17,22 @@ interface UseTransformActionsProps {
 
 export function useTransformActions({ createInputValidator, toast }: UseTransformActionsProps) {
   const [isProcessing, setIsProcessing] = useState(false);
+  // Synchronous mirror of `isProcessing`: state only updates on the next render, so a
+  // double click or a keyboard shortcut fired before it would otherwise start a second run.
+  const busyRef = useRef(false);
+
+  /** Marks a run as started. Returns false (and changes nothing) if one is already running. */
+  const beginProcessing = useCallback(() => {
+    if (busyRef.current) return false;
+    busyRef.current = true;
+    setIsProcessing(true);
+    return true;
+  }, []);
+
+  const endProcessing = useCallback(() => {
+    busyRef.current = false;
+    setIsProcessing(false);
+  }, []);
 
   const runTransformAction = useCallback(
     <TResult>({
@@ -26,18 +42,17 @@ export function useTransformActions({ createInputValidator, toast }: UseTransfor
       successMessage,
       errorMessage,
     }: TransformActionOptions<TResult>) => {
+      // Ignore re-entrant calls: overlapping runs could finish out of order.
+      if (!beginProcessing()) return;
       createValidatedHandler({
         validate: createInputValidator,
-        run: async () => {
-          setIsProcessing(true);
-          return run();
-        },
+        run,
         onSuccess: (result) => {
-          setIsProcessing(false);
+          endProcessing();
           void onSuccess?.(result);
         },
         onError: (message) => {
-          setIsProcessing(false);
+          endProcessing();
           void onError?.(message);
         },
         toast,
@@ -45,12 +60,13 @@ export function useTransformActions({ createInputValidator, toast }: UseTransfor
         errorMessage,
       })();
     },
-    [createInputValidator, toast],
+    [createInputValidator, toast, beginProcessing, endProcessing],
   );
 
   return {
     runTransformAction,
     isProcessing,
-    setIsProcessing,
+    beginProcessing,
+    endProcessing,
   };
 }

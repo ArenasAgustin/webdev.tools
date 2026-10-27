@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { createTransformHandler } from "@/utils/createTransformHandler";
@@ -49,6 +49,18 @@ async function minifyRunner(input: string, config: JsonMinifyConfig) {
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.value;
+}
+
+/** Drops the toasts of a JSONPath request that a newer one has superseded. */
+function latestOnlyToast(toast: ToastApi | undefined, isLatest: () => boolean): ToastApi {
+  return {
+    success: (message) => {
+      if (isLatest()) toast?.success(message);
+    },
+    error: (message) => {
+      if (isLatest()) toast?.error(message);
+    },
+  };
 }
 
 interface UseJsonPlaygroundActionsProps {
@@ -104,6 +116,10 @@ export function useJsonPlaygroundActions({
     minifyRunner,
   });
 
+  // Id of the latest JSONPath request. Queries are not exclusive (the user may refine the
+  // expression and press Enter again), so a slower earlier query must not overwrite the result.
+  const jsonPathRequestRef = useRef(0);
+
   // Extensión: limpiar JSON
   const handleClean = useCallback(() => {
     createTransformHandler({
@@ -131,6 +147,8 @@ export function useJsonPlaygroundActions({
 
   // Extensión: aplicar JSONPath
   const handleApplyJsonPath = useCallback(() => {
+    const requestId = ++jsonPathRequestRef.current;
+    const isLatest = () => requestId === jsonPathRequestRef.current;
     void createValidatedHandler({
       validate: generic.baseActions.createInputValidator,
       run: async () => {
@@ -142,6 +160,7 @@ export function useJsonPlaygroundActions({
         return result.value;
       },
       onSuccess: (value) => {
+        if (!isLatest()) return;
         if (!value.trim() || value === "[]" || value === "{}") {
           setOutput(value);
           setError(translate("messages.json.noResults"));
@@ -152,10 +171,11 @@ export function useJsonPlaygroundActions({
         void addToHistory(jsonPathExpression);
       },
       onError: (message) => {
+        if (!isLatest()) return;
         setOutput("");
         setError(compactTransformError(message));
       },
-      toast,
+      toast: latestOnlyToast(toast, isLatest),
       errorMessage: translate("messages.json.jsonPathError"),
     })();
   }, [
@@ -171,6 +191,8 @@ export function useJsonPlaygroundActions({
   // Extensión: reutilizar expresión de historial
   const handleReuseFromHistory = useCallback(
     (expression: string) => {
+      const requestId = ++jsonPathRequestRef.current;
+      const isLatest = () => requestId === jsonPathRequestRef.current;
       void createValidatedHandler({
         validate: generic.baseActions.createInputValidator,
         run: async () => {
@@ -180,6 +202,7 @@ export function useJsonPlaygroundActions({
           return result.value;
         },
         onSuccess: (value) => {
+          if (!isLatest()) return;
           if (!value.trim() || value === "[]" || value === "{}") {
             setOutput(value);
             setError(translate("messages.json.noResults"));
@@ -190,10 +213,11 @@ export function useJsonPlaygroundActions({
           void addToHistory(expression);
         },
         onError: (message) => {
+          if (!isLatest()) return;
           setOutput("");
           setError(compactTransformError(message));
         },
-        toast,
+        toast: latestOnlyToast(toast, isLatest),
         errorMessage: translate("messages.json.jsonPathError"),
       })();
     },
