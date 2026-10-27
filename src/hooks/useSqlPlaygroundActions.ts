@@ -80,12 +80,19 @@ export function useSqlPlaygroundActions({
     minifyRunner,
   });
 
+  const { beginProcessing, endProcessing } = generic;
+
   const handleExecute = useCallback(() => {
+    // Ignore a second trigger (button or Ctrl+Shift+Enter) while a query is running:
+    // a statement such as INSERT must not run twice.
+    if (!beginProcessing()) return;
     if (!inputSql.trim()) {
+      endProcessing();
       toast?.error(translate("messages.noInputToExecute", { language: FILE_CONFIG.language }));
       return;
     }
     if (inputTooLarge) {
+      endProcessing();
       toast?.error(inputTooLargeMessage ?? translate("messages.inputTooLarge"));
       return;
     }
@@ -95,6 +102,7 @@ export function useSqlPlaygroundActions({
 
     void executeSqlAsync(inputSql)
       .then((result: { ok: true; value: SqlExecuteResult } | { ok: false; error: string }) => {
+        endProcessing();
         setIsExecuting(false);
         setIsFirstRun(false);
         if (result.ok) {
@@ -109,6 +117,7 @@ export function useSqlPlaygroundActions({
         }
       })
       .catch((err: unknown) => {
+        endProcessing();
         setIsExecuting(false);
         setIsFirstRun(false);
         const message = err instanceof Error ? err.message : String(err);
@@ -116,7 +125,16 @@ export function useSqlPlaygroundActions({
         setError(message);
         toast?.error(compactTransformError(message));
       });
-  }, [inputSql, inputTooLarge, inputTooLargeMessage, setError, setOutput, toast]);
+  }, [
+    beginProcessing,
+    endProcessing,
+    inputSql,
+    inputTooLarge,
+    inputTooLargeMessage,
+    setError,
+    setOutput,
+    toast,
+  ]);
 
   const handleReset = useCallback(() => {
     void resetSqlAsync()
@@ -138,6 +156,6 @@ export function useSqlPlaygroundActions({
     handleReset,
     isExecuting,
     isFirstRun,
-    isProcessing: generic.isProcessing || isExecuting,
+    isProcessing: generic.isProcessing,
   };
 }

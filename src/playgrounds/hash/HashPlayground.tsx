@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 import { hashConfig } from "./hash.config";
 import {
   generateAllHashes,
-  generateHashFromFile,
-  type HashAlgorithm,
+  generateAllHashesFromFile,
   type HashResult,
   type HashOutputCase,
   type InputMode,
@@ -50,6 +49,7 @@ export function HashPlayground() {
   );
   const [generated, setGenerated] = useState<GeneratedHashes | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hashError, setHashError] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
@@ -82,6 +82,7 @@ export function HashPlayground() {
 
   const processInput = useCallback(async () => {
     setIsProcessing(true);
+    setHashError(false);
     const source = { mode: inputMode, text: textInput, file: fileInput };
 
     try {
@@ -93,13 +94,7 @@ export function HashPlayground() {
         const hashes = await generateAllHashes(textInput, outputCase);
         setGenerated({ ...source, results: hashes });
       } else if (fileInput) {
-        const algorithms: HashAlgorithm[] = ["sha1", "sha256", "sha512"];
-        const hashes = await Promise.all(
-          algorithms.map(async (algorithm) => ({
-            algorithm,
-            hash: await generateHashFromFile(fileInput, algorithm, outputCase),
-          })),
-        );
+        const hashes = await generateAllHashesFromFile(fileInput, outputCase);
         setGenerated({ ...source, results: hashes });
       } else {
         setGenerated(null);
@@ -107,6 +102,7 @@ export function HashPlayground() {
     } catch (error) {
       console.error("Hash generation error:", error);
       setGenerated(null);
+      setHashError(true);
     } finally {
       setIsProcessing(false);
     }
@@ -239,6 +235,12 @@ export function HashPlayground() {
         </div>
       </div>
 
+      {hashError && (
+        <p role="alert" className="text-red-400 text-sm">
+          {t("hash.generateError")}
+        </p>
+      )}
+
       {/* Results */}
       {results.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -246,18 +248,18 @@ export function HashPlayground() {
           {results.map((result) => (
             <div
               key={result.algorithm}
-              className="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3"
+              className="flex items-center justify-between gap-3 bg-white/5 rounded-lg px-4 py-3"
             >
-              <span className="text-xs font-mono text-gray-400 uppercase w-16">
+              <span className="text-xs font-mono text-gray-400 uppercase w-16 shrink-0">
                 {result.algorithm}
               </span>
-              <code className="text-sm text-white font-mono flex-1 text-right select-all">
+              <code className="text-sm text-white font-mono flex-1 min-w-0 break-all text-right select-all">
                 {result.hash}
               </code>
               <button
                 type="button"
                 onClick={() => copyToClipboard(result.hash)}
-                className="ml-3 text-gray-400 hover:text-white transition-colors"
+                className="shrink-0 text-gray-400 hover:text-white transition-colors"
                 title={t("hash.copyHash", { algorithm: result.algorithm })}
                 aria-label={t("hash.copyHash", { algorithm: result.algorithm })}
               >

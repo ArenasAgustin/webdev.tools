@@ -5,6 +5,7 @@ import { minifyJs } from "@/services/js/transform";
 import type { HtmlMinifyConfig } from "@/types/html";
 import type { IndentStyle } from "@/types/format";
 import { serviceMessage } from "@/services/serviceMessage";
+import { findHtmlStructureError } from "@/services/html/structure";
 
 interface HtmlFormatOptions {
   formatCss?: boolean;
@@ -59,6 +60,12 @@ export async function minifyHtml(
   try {
     if (!input.trim()) {
       return { ok: true, value: "" };
+    }
+
+    // Minifying broken markup would report success on output that is just as broken.
+    const structureError = findHtmlStructureError(input);
+    if (structureError) {
+      return { ok: false, error: structureError };
     }
 
     let source = input;

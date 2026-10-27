@@ -7,7 +7,11 @@
  * parameters, so nothing global is patched. Execution is considered finished once
  * the body settled and no timer created by the code is still pending; an endless
  * `setInterval` therefore never finishes and must be bounded by the caller.
+ *
+ * This module runs inside the execution worker: it must stay free of i18next imports.
  */
+
+import { serviceMessage } from "@/services/serviceMessage";
 
 export interface JsRunResult {
   ok: boolean;
@@ -55,6 +59,13 @@ export async function runJavaScript(
   const sandboxConsole = {
     log: (...args: unknown[]) => log("", args),
     info: (...args: unknown[]) => log("", args),
+    debug: (...args: unknown[]) => log("", args),
+    table: (data: unknown) => {
+      for (const line of formatTable(data)) {
+        logs.push(line);
+        options.onLog?.(line);
+      }
+    },
     error: (...args: unknown[]) => log("ERROR: ", args),
     warn: (...args: unknown[]) => log("WARN: ", args),
   };
@@ -133,17 +144,41 @@ function failure(logs: string[], error: unknown): JsRunResult {
   return {
     ok: false,
     output: logs.join("\n"),
-    error: error instanceof Error ? error.message : String(error),
+    error: describeError(error),
   };
 }
+
+// The Function constructor puts two header lines ("async function anonymous(...", ") {")
+// before the user code, so stack line numbers are offset by this much.
+const FUNCTION_HEADER_LINES = 2;
+// Frames of code built by the Function constructor: V8 "<anonymous>:L:C",
+// Firefox "> AsyncFunction:L:C".
+const USER_FRAME_PATTERN = /(?:<anonymous>|> (?:Async)?Function):(\d+):\d+/;
+
+/**
+ * Describe a thrown value as "Name: message", followed by the user code line when the
+ * stack has one (as a `services.js.runtimeErrorAtLine` service message).
+ */
+export function describeError(error: unknown): string {
+  if (!(error instanceof Error)) return formatValue(error);
+
+  const message = error.message ? `${error.name}: ${error.message}` : error.name;
+  const match = USER_FRAME_PATTERN.exec(error.stack ?? "");
+  const line = match ? Number(match[1]) - FUNCTION_HEADER_LINES : 0;
+  return line > 0 ? serviceMessage("services.js.runtimeErrorAtLine", { message, line }) : message;
+}
+
+const bigintReplacer = (_key: string, value: unknown) =>
+  typeof value === "bigint" ? `${value}n` : value;
 
 export function formatValue(value: unknown): string {
   if (value === null) return "null";
   if (value === undefined) return "undefined";
   if (typeof value === "string") return value;
+  if (typeof value === "bigint") return `${value}n`;
   if (typeof value === "object") {
     try {
-      return JSON.stringify(value, null, 2);
+      return JSON.stringify(value, bigintReplacer, 2);
     } catch {
       return Object.prototype.toString.call(value);
     }
@@ -151,4 +186,52 @@ export function formatValue(value: unknown): string {
   if (typeof value === "number") return String(value);
   if (typeof value === "boolean") return String(value);
   return Object.prototype.toString.call(value);
+}
+
+/** Single-line rendering of a `console.table` cell. */
+function formatCell(value: unknown): string {
+  if (typeof value === "object" && value !== null) {
+    try {
+      return JSON.stringify(value, bigintReplacer);
+    } catch {
+      return Object.prototype.toString.call(value);
+    }
+  }
+  return formatValue(value);
+}
+
+/**
+ * Render `console.table` data as aligned text rows: an "(index)" column, one column per
+ * property of the row objects and a "Values" column for primitive rows. Anything that is
+ * not an object is logged as a plain value, like the browser console does.
+ */
+function formatTable(data: unknown): string[] {
+  if (typeof data !== "object" || data === null) return [formatValue(data)];
+
+  const rows = Object.entries(data as Record<string, unknown>);
+  const columns: string[] = [];
+  let hasValues = false;
+  for (const [, row] of rows) {
+    if (typeof row === "object" && row !== null) {
+      for (const key of Object.keys(row)) if (!columns.includes(key)) columns.push(key);
+    } else {
+      hasValues = true;
+    }
+  }
+  if (hasValues) columns.push("Values");
+
+  const table = [
+    ["(index)", ...columns],
+    ...rows.map(([index, row]) => [
+      index,
+      ...columns.map((column) => {
+        if (typeof row === "object" && row !== null) {
+          return column in row ? formatCell((row as Record<string, unknown>)[column]) : "";
+        }
+        return column === "Values" ? formatCell(row) : "";
+      }),
+    ]),
+  ];
+  const widths = table[0].map((_, i) => Math.max(...table.map((cells) => cells[i].length)));
+  return table.map((cells) => cells.map((cell, i) => cell.padEnd(widths[i])).join(" | "));
 }

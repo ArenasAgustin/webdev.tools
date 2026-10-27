@@ -36,12 +36,17 @@ export function parsePhp(input: string): Result<PhpAst, string> {
   } catch (error) {
     if (error instanceof SyntaxError) {
       const line = (error as unknown as { lineNumber?: number }).lineNumber;
+      // php-parser reports "Parse Error : syntax error, ... on line N"; our keys
+      // already carry the "syntax error" label and the line.
+      const message = error.message
+        .replace(/^Parse Error\s*:\s*/i, "")
+        .replace(/\s+on line \d+\s*$/, "");
       return {
         ok: false,
         error:
           line != null
-            ? serviceMessage("services.php.syntaxErrorAtLine", { line, message: error.message })
-            : serviceMessage("services.php.syntaxError", { message: error.message }),
+            ? serviceMessage("services.php.syntaxErrorAtLine", { line, message })
+            : serviceMessage("services.php.syntaxError", { message }),
       };
     }
     const message = error instanceof Error ? error.message : String(error);
@@ -60,13 +65,17 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       return { ok: true, value: "" };
     }
 
+    // The formatter is heuristic and would happily re-indent broken code; refuse it instead.
+    const parsed = parsePhp(input);
+    if (!parsed.ok) {
+      return { ok: false, error: parsed.error };
+    }
+
     const indent = indentSize === "\t" ? "\t" : " ".repeat(indentSize);
 
     const lines = input.split("\n");
     let indentLevel = 0;
     const formatted: string[] = [];
-
-    const decreaseKeywordsRegex = /^(break|continue|return|throw|goto)\s*;?$/;
 
     let heredocLabel: string | null = null;
 
@@ -113,13 +122,6 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       const trailingClose = trimmed.startsWith("}") ? braces.close - 1 : braces.close;
       if (trailingClose > 0) {
         indentLevel = Math.max(0, indentLevel - trailingClose);
-      }
-
-      // Decrease indent AFTER certain keywords
-      if (decreaseKeywordsRegex.exec(trimmed)) {
-        if (indentLevel > 0) {
-          indentLevel--;
-        }
       }
     }
 
@@ -217,10 +219,8 @@ function countOuterBraces(line: string): { open: number; close: number } {
         i += 2; // Skip escaped character
         continue;
       }
-      // Check for {$ or {$ - start of interpolation
+      // `${expr}` interpolation: its braces are part of the string, skip them
       if (ch === "$" && line[i + 1] === "{") {
-        // This { is an interpolation, count it
-        open++;
         i += 2;
         // Find matching }
         let braceCount = 1;

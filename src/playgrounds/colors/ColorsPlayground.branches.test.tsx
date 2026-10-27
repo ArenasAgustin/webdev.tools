@@ -73,6 +73,22 @@ describe("ColorsPlayground branches", () => {
     }).not.toThrow();
   });
 
+  it("flags invalid text with aria-invalid and a translated inline error", () => {
+    render(<ColorsPlayground />);
+
+    const input = screen.getByPlaceholderText(/HEX, RGB, HSL/i);
+    fireEvent.change(input, { target: { value: "not-a-color" } });
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent(/color no válido/i);
+    expect(input).toHaveAttribute("aria-describedby", screen.getByRole("alert").id);
+
+    fireEvent.change(input, { target: { value: "#00ff00" } });
+
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("handleColorChange from picker updates color and input", () => {
     render(<ColorsPlayground />);
 

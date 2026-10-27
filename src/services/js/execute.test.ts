@@ -1,6 +1,10 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
-import { runJavaScript } from "@/services/js/execute";
+import { formatValue, runJavaScript } from "@/services/js/execute";
+import { serviceMessage } from "@/services/serviceMessage";
+
+const atLine = (message: string, line: number) =>
+  serviceMessage("services.js.runtimeErrorAtLine", { message, line });
 
 describe("runJavaScript", () => {
   it("returns console output joined by newlines", async () => {
@@ -46,7 +50,7 @@ describe("runJavaScript", () => {
 
   it("keeps logs written before a synchronous throw", async () => {
     const result = await runJavaScript('console.log("before"); throw new Error("boom");');
-    expect(result).toEqual({ ok: false, output: "before", error: "boom" });
+    expect(result).toEqual({ ok: false, output: "before", error: atLine("Error: boom", 1) });
   });
 
   it("reports errors thrown inside timer callbacks", async () => {
@@ -54,12 +58,12 @@ describe("runJavaScript", () => {
       console.log("start");
       setTimeout(() => { throw new Error("late"); }, 5);
     `);
-    expect(result).toEqual({ ok: false, output: "start", error: "late" });
+    expect(result).toEqual({ ok: false, output: "start", error: atLine("Error: late", 3) });
   });
 
   it("reports a rejected returned promise as an error", async () => {
     const result = await runJavaScript('return Promise.reject(new Error("nope"));');
-    expect(result).toEqual({ ok: false, output: "", error: "nope" });
+    expect(result).toEqual({ ok: false, output: "", error: atLine("Error: nope", 1) });
   });
 
   it("streams each log line to the onLog callback", async () => {
@@ -68,5 +72,50 @@ describe("runJavaScript", () => {
       onLog: (line) => lines.push(line),
     });
     expect(lines).toEqual(["x", "y"]);
+  });
+
+  it("captures console.info, console.debug and console.table", async () => {
+    const result = await runJavaScript(
+      'console.info("i"); console.debug("d"); console.table([{ a: 1, b: "x" }, { a: 2 }]);',
+    );
+    expect(result.ok).toBe(true);
+    expect(result.output.split("\n")).toEqual([
+      "i",
+      "d",
+      "(index) | a | b",
+      "0       | 1 | x",
+      "1       | 2 |  ",
+    ]);
+  });
+
+  it("prints BigInt values with the n suffix, also inside objects", async () => {
+    const result = await runJavaScript("console.log(10n, { big: 2n ** 64n });");
+    expect(result.output).toBe('10n {\n  "big": "18446744073709551616n"\n}');
+  });
+
+  it("names the error type and the user code line of a runtime error", async () => {
+    const result = await runJavaScript("const a = 1;\nconst b = null;\nb.foo;");
+    expect(result).toEqual({
+      ok: false,
+      output: "",
+      error: atLine("TypeError: Cannot read properties of null (reading 'foo')", 3),
+    });
+  });
+
+  it("names the error type of a syntax error even without line info", async () => {
+    const result = await runJavaScript("const = 1;");
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(/^SyntaxError: /);
+  });
+
+  it("reports thrown non-Error values as they are", async () => {
+    const result = await runJavaScript('throw "plain";');
+    expect(result).toEqual({ ok: false, output: "", error: "plain" });
+  });
+});
+
+describe("formatValue", () => {
+  it("formats a bare BigInt", () => {
+    expect(formatValue(5n)).toBe("5n");
   });
 });

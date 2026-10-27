@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createWorkerClient, DEFAULT_WORKER_TIMEOUT_MS } from "@/services/worker/clientFactory";
+import {
+  createWorkerClient,
+  DEFAULT_WORKER_TIMEOUT_MS,
+  WorkerTimeoutError,
+} from "@/services/worker/clientFactory";
 
 interface TestPayload {
   input: string;
@@ -115,6 +119,36 @@ describe("createWorkerClient timeout", () => {
 
     run.terminate();
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("replaces a worker that misses its deadline and replays the requests queued behind it", async () => {
+    const run = createClient(1_000);
+
+    const hung = run({ input: "hang" });
+    const assertion = expect(hung).rejects.toBeInstanceOf(WorkerTimeoutError);
+    await vi.advanceTimersByTimeAsync(500);
+    const queued = run({ input: "queued" });
+
+    await vi.advanceTimersByTimeAsync(500);
+    await assertion;
+
+    const [stuck, fresh] = MockWorker.instances;
+    expect(stuck.terminate).toHaveBeenCalledOnce();
+    const replayed = fresh.postMessage.mock.calls[0]?.[0] as TestRequest;
+    expect(replayed.input).toBe("queued");
+
+    fresh.emitMessage({ id: replayed.id, ok: true, value: "done" });
+    await expect(queued).resolves.toEqual(expect.objectContaining({ value: "done" }));
+  });
+
+  it("honours a per-request timeout override", async () => {
+    const run = createClient(10_000);
+    const onReject = vi.fn();
+
+    run({ input: "x" }, { timeoutMs: 100 }).catch(onReject);
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(onReject).toHaveBeenCalledOnce();
   });
 
   it("disables the timeout when timeoutMs is 0", async () => {

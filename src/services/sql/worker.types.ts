@@ -10,6 +10,7 @@ export type SqlWorkerPayload =
   | ({ action: "validate"; options: SqlFormatConfig } & WorkerPayloadBase)
   | ({ action: "minify" } & WorkerPayloadBase)
   | ({ action: "execute" } & WorkerPayloadBase)
+  | ({ action: "load"; input: "" } & WorkerPayloadBase)
   | ({ action: "reset"; input: "" } & WorkerPayloadBase);
 
 export type SqlWorkerRequest = WorkerRequest<SqlWorkerPayload>;

@@ -182,6 +182,14 @@ describe("isLikelyUrlEncoded", () => {
     ["a+b", "component", false],
     ["a+b", "form", true],
     ["a+b\n", "form", false],
+    ["hello+world", "form", true],
+    ["a+b%2Bc", "form", true],
+    // "+" alone only signals form data when every other character could come out of
+    // the form encoder; "=", "&", "/" etc. would have been escaped
+    ["1+1=2", "form", false],
+    ["c++/notes", "form", false],
+    ["a+b&c", "form", false],
+    ["1+1=2%21", "form", true],
   ] as [string, UrlVariant, boolean][])("%j (%s) -> %s", (input, variant, expected) => {
     expect(isLikelyUrlEncoded(input, variant)).toBe(expected);
   });
@@ -197,6 +205,10 @@ describe("resolveMode", () => {
     expect(resolveMode("auto", "a%20b", "component")).toBe("decode");
     expect(resolveMode("auto", "a b", "component")).toBe("encode");
     expect(resolveMode("auto", "", "component")).toBe("encode");
+  });
+
+  it("auto encodes plain form text that merely contains + and =", () => {
+    expect(resolveMode("auto", "1+1=2", "form")).toBe("encode");
   });
 });
 

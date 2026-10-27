@@ -223,11 +223,13 @@
     "comparePlaceholder": "Ingresá un hash para comparar...",
     "compareAction": "Comparar",
     "matchSuccess": "El hash coincide",
-    "matchFail": "El hash NO coincide"
+    "matchFail": "El hash NO coincide",
+    "generateError": "No se pudieron generar los hashes. El archivo puede ser ilegible o demasiado grande."
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
-    "copy": "Copiar {{format}}"
+    "copy": "Copiar {{format}}",
+    "invalidColor": "Color no válido. Usá HEX, RGB, HSL, HSV o CMYK."
   },
   "html": {
     "previewLabel": "Vista previa",
@@ -342,7 +344,9 @@
     "errorInvalidCharacter": "La entrada contiene un carácter fuera del alfabeto Base64",
     "errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
     "errorInvalidPadding": "La entrada tiene un padding Base64 inválido",
-    "errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido"
+    "errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido",
+    "errorFileTooLarge": "El archivo supera el máximo de {{max}} MB",
+    "errorFileUnreadable": "No se pudo leer el archivo"
   },
   "url": {
     "modeGroupLabel": "Modo de conversión",
@@ -443,6 +447,7 @@
       "empty": "El JSON está vacío",
       "formatError": "Error al formatear JSON",
       "minifyError": "Error al minificar JSON",
+      "tooDeep": "El JSON tiene demasiados niveles de anidación para procesarlo",
       "cleanError": "Error al limpiar JSON: {{message}}",
       "jsonPathEmpty": "La expresión JSONPath está vacía",
       "jsonPathError": "Error en JSONPath: {{message}}"
@@ -451,19 +456,25 @@
       "noInput": "No hay CSS para procesar",
       "empty": "El CSS está vacío",
       "minifyError": "Error al minificar CSS",
+      "syntaxError": "CSS inválido: {{message}}",
       "cleanError": "Error al limpiar CSS: {{message}}"
     },
     "html": {
       "noInput": "No hay HTML para procesar",
       "empty": "El HTML está vacío",
-      "cleanError": "Error al limpiar HTML: {{message}}"
+      "cleanError": "Error al limpiar HTML: {{message}}",
+      "unexpectedClosingTag": "HTML inválido: la etiqueta de cierre </{{tag}}> de la línea {{line}} no tiene etiqueta de apertura",
+      "misnestedClosingTag": "HTML inválido: la etiqueta de cierre </{{tag}}> de la línea {{line}} aparece mientras <{{open}}> sigue abierta",
+      "unclosedComment": "HTML inválido: el comentario abierto en la línea {{line}} nunca se cierra",
+      "unclosedTag": "HTML inválido: la etiqueta de la línea {{line}} nunca se cierra con \">\""
     },
     "js": {
       "empty": "El código JavaScript está vacío",
       "parseError": "No se pudo parsear el código JavaScript",
       "formatError": "Error al formatear código",
       "minifyUnavailable": "Terser minify no está disponible",
-      "cleanError": "Error al limpiar código: {{message}}"
+      "cleanError": "Error al limpiar código: {{message}}",
+      "runtimeErrorAtLine": "{{message}} (línea {{line}})"
     },
     "php": {
       "empty": "El código PHP está vacío",
@@ -477,7 +488,8 @@
     },
     "sql": {
       "noInput": "No hay SQL para procesar",
-      "empty": "El SQL está vacío"
+      "empty": "El SQL está vacío",
+      "timeout": "La consulta superó los {{seconds}} segundos y se canceló. La base de datos se reinició."
     }
   }
 }

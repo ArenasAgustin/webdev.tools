@@ -295,6 +295,10 @@ describe("JsonPlayground branches", () => {
     minifyJsonMock.mockResolvedValueOnce({ ok: false, error: { message: "minify fail" } });
 
     fireEvent.click(screen.getByRole("button", { name: "Formatear" }));
+    // Actions are exclusive: let the format run finish before starting minify.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
     await act(async () => {

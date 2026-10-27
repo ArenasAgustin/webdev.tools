@@ -1,31 +1,110 @@
+import { StrictMode, Suspense, use } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { createFakeLoader, createFakeMonaco, type FakeMonaco } from "@/test/fakeMonaco";
 import { CodeEditor } from "./CodeEditor";
 
-interface EditorMockProps {
-  options?: { ariaLabel?: string; readOnly?: boolean };
-}
-
-const editorProps: EditorMockProps[] = [];
+let fake: FakeMonaco;
+let fakeLoader: ReturnType<typeof createFakeLoader>;
 
 vi.mock("@monaco-editor/react", () => ({
-  default: (props: EditorMockProps) => {
-    editorProps.push(props);
-    return <div data-testid="monaco-editor" />;
-  },
+  loader: { init: () => fakeLoader.init() },
 }));
+
+// Suspends its Suspense boundary on demand, hiding (and later revealing) the editor
+// that is already mounted next to it.
+const never = new Promise<never>(() => {});
+function Suspender({ suspended }: { suspended: boolean }) {
+  if (suspended) use(never);
+  return null;
+}
+
+function SuspendableEditor({ suspended }: { suspended: boolean }) {
+  return (
+    <StrictMode>
+      <Suspense fallback={null}>
+        <Suspender suspended={suspended} />
+        <CodeEditor value="a" language="json" />
+      </Suspense>
+    </StrictMode>
+  );
+}
 
 describe("CodeEditor", () => {
   beforeEach(() => {
-    editorProps.length = 0;
+    fake = createFakeMonaco();
+    fakeLoader = createFakeLoader(fake.monaco);
   });
 
-  it("passes an accessible name with the Tab focus hint to Monaco", () => {
-    render(<CodeEditor value="" language="json" />);
+  const loadMonaco = async () => {
+    await act(async () => fakeLoader.resolve());
+  };
 
-    const ariaLabel = editorProps.at(-1)?.options?.ariaLabel;
-    expect(ariaLabel).toBe(
+  it("passes an accessible name with the Tab focus hint to Monaco", async () => {
+    render(<CodeEditor value="" language="json" />);
+    await loadMonaco();
+
+    expect(fake.editors.at(-1)?.options.ariaLabel).toBe(
       "Editor de código. Presioná Ctrl+M (Ctrl+Shift+M en macOS) para alternar si Tab indenta o mueve el foco.",
     );
+  });
+
+  it("shows the placeholder until Monaco has loaded", async () => {
+    render(<CodeEditor value="" language="json" placeholder="Cargando JSON" />);
+    expect(screen.getByText("Cargando JSON")).toBeInTheDocument();
+
+    await loadMonaco();
+
+    expect(screen.queryByText("Cargando JSON")).not.toBeInTheDocument();
+  });
+
+  it("never creates an editor when unmounted before Monaco finishes loading", async () => {
+    const { unmount } = render(<CodeEditor value="a" language="json" />);
+    unmount();
+    await loadMonaco();
+
+    expect(fake.editors).toHaveLength(0);
+    expect(fake.violations).toEqual([]);
+  });
+
+  it("survives a StrictMode Suspense hide/reveal without touching a disposed editor", async () => {
+    const { rerender } = render(<SuspendableEditor suspended={false} />);
+    await loadMonaco();
+    await waitFor(() => expect(fake.editors.length).toBeGreaterThan(0));
+
+    act(() => rerender(<SuspendableEditor suspended />));
+    await act(async () => rerender(<SuspendableEditor suspended={false} />));
+
+    expect(fake.violations).toEqual([]);
+    // The reveal reconnected the effects: the first editor was disposed and replaced.
+    expect(fake.editors.length).toBeGreaterThan(1);
+    const live = fake.editors.filter((editor) => !editor.disposed);
+    expect(live).toHaveLength(1);
+    expect(live[0].getValue()).toBe("a");
+  });
+
+  it("disposes the editor and then its model on unmount", async () => {
+    const { unmount } = render(<CodeEditor value="a" language="json" />);
+    await loadMonaco();
+    const [editor] = fake.editors;
+    const model = editor.getModel();
+
+    unmount();
+
+    expect(editor.disposed).toBe(true);
+    expect(model?.disposed).toBe(true);
+  });
+
+  it("applies external value changes without reporting them as user edits", async () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<CodeEditor value="a" language="json" onChange={onChange} />);
+    await loadMonaco();
+
+    rerender(<CodeEditor value="b" language="json" onChange={onChange} />);
+    expect(fake.editors[0].getValue()).toBe("b");
+    expect(onChange).not.toHaveBeenCalled();
+
+    fake.editors[0].setValue("typed");
+    expect(onChange).toHaveBeenCalledWith("typed");
   });
 });

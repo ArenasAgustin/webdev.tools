@@ -1,6 +1,12 @@
 // @vitest-environment node
-import { describe, it, expect } from "vitest";
-import { generateAllHashes, generateHash, compareHash, generateHashFromFile } from "./hash.utils";
+import { describe, it, expect, vi } from "vitest";
+import {
+  generateAllHashes,
+  generateAllHashesFromFile,
+  generateHash,
+  compareHash,
+  generateHashFromFile,
+} from "./hash.utils";
 
 describe("hash.utils", () => {
   describe("generateHash", () => {
@@ -64,6 +70,18 @@ describe("hash.utils", () => {
       const upper = await generateHashFromFile(file, "sha256", "uppercase");
       expect(lower).toBe(lower.toLowerCase());
       expect(upper).toBe(upper.toUpperCase());
+    });
+  });
+
+  describe("generateAllHashesFromFile", () => {
+    it("reads the file once and returns every algorithm matching the text hashes", async () => {
+      const file = new File(["hello"], "test.txt", { type: "text/plain" });
+      const readSpy = vi.spyOn(file, "arrayBuffer");
+
+      const results = await generateAllHashesFromFile(file, "uppercase");
+
+      expect(readSpy).toHaveBeenCalledTimes(1);
+      expect(results).toEqual(await generateAllHashes("hello", "uppercase"));
     });
   });
 });

@@ -204,7 +204,8 @@ export function PasswordPlayground() {
                 type="button"
                 onClick={() => handleHistoryClick(entry.value)}
                 className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 text-sm font-mono rounded-lg transition-colors truncate max-w-32"
-                title={entry.value}
+                // The full value only goes in the tooltip while the password is shown
+                title={showPassword ? entry.value : undefined}
               >
                 {entry.value.slice(0, 8)}...
               </button>

@@ -44,6 +44,13 @@ echo $g->greet("World");
 });
 
 describe("formatPhp", () => {
+  it("reports a syntax error instead of formatting invalid PHP", () => {
+    const result = formatPhp("<?php\nif ($a {\n  echo 1;\n}");
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toMatch(/^services\.php\.syntaxErrorAtLine/);
+  });
+
   it("should format unindented PHP code with default indentation", () => {
     const input = `<?php
 function hello($name){return "Hello, ".$name;}`;
@@ -69,12 +76,7 @@ function hello($name){return "Hello, ".$name;}`;
     const input = "<?php echo ";
     const result = formatPhp(input);
 
-    // Formatter returns ok: true - it can't detect syntax errors, just formats
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      // It returns the formatted input (may be empty or with content)
-      expect(typeof result.value).toBe("string");
-    }
+    expect(result.ok).toBe(false);
   });
 
   it("formats with custom indentation (4 spaces)", () => {
@@ -172,6 +174,62 @@ return 1;
     const result = formatPhp(input);
 
     expect(result.ok).toBe(true);
+  });
+
+  it("keeps code after an early return/break at the block's indent", () => {
+    const input = `<?php
+function test($a) {
+if ($a) {
+return;
+}
+foreach ($a as $x) {
+if ($x) {
+break;
+}
+echo $x;
+}
+return 1;
+}
+echo "end";`;
+    const result = formatPhp(input);
+
+    expect(result).toEqual({
+      ok: true,
+      value: `<?php
+function test($a) {
+  if ($a) {
+    return;
+  }
+  foreach ($a as $x) {
+    if ($x) {
+      break;
+    }
+    echo $x;
+  }
+  return 1;
+}
+echo "end";`,
+    });
+  });
+
+  it("does not drift indentation on ${var} interpolation", () => {
+    const input = `<?php
+if ($a) {
+echo "Hi \${name}!";
+echo "x";
+}
+echo "end";`;
+    const result = formatPhp(input);
+
+    expect(result).toEqual({
+      ok: true,
+      value: `<?php
+if ($a) {
+  echo "Hi \${name}!";
+  echo "x";
+}
+echo "end";`,
+    });
   });
 
   it("handles throw statement", () => {

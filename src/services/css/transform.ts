@@ -54,13 +54,35 @@ export async function formatCss(
   }
 }
 
-export function minifyCss(
+/**
+ * Return the first line of the syntax error PostCSS (via Prettier, already used to
+ * format) reports for `input`, or `null` when it parses. PostCSS only rejects
+ * structural damage (unclosed blocks, strings, brackets or comments, stray `}`),
+ * so modern syntax such as nesting is accepted.
+ */
+async function findCssSyntaxError(input: string): Promise<string | null> {
+  try {
+    await formatWithPrettier(input, "css");
+    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return message.split("\n")[0].trim() || serviceMessage("services.css.minifyError");
+  }
+}
+
+export async function minifyCss(
   input: string,
   options: CssMinifyOptions = {},
 ): Promise<Result<string, string>> {
   try {
     if (!input.trim()) {
-      return Promise.resolve({ ok: true, value: "" });
+      return { ok: true, value: "" };
+    }
+
+    // Minifying broken CSS would report success on output browsers drop.
+    const syntaxError = await findCssSyntaxError(input);
+    if (syntaxError) {
+      return { ok: false, error: serviceMessage("services.css.syntaxError", { message: syntaxError }) };
     }
 
     const removeComments = options.removeComments ?? true;
@@ -68,21 +90,13 @@ export function minifyCss(
     const source = removeComments ? stripComments(input) : input;
 
     if (!removeSpaces) {
-      return Promise.resolve({
-        ok: true,
-        value: source.trim(),
-      });
+      return { ok: true, value: source.trim() };
     }
 
-    const output = minifyCssString(source);
-
-    return Promise.resolve({
-      ok: true,
-      value: output.trim(),
-    });
+    return { ok: true, value: minifyCssString(source).trim() };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return Promise.resolve({ ok: false, error: message || serviceMessage("services.css.minifyError") });
+    return { ok: false, error: message || serviceMessage("services.css.minifyError") };
   }
 }
 
@@ -168,9 +182,12 @@ function minifyCssString(source: string): string {
     // to avoid collapsing descendant pseudo-selectors (e.g. `a :hover` → `a:hover`).
     .replace(/\s*([{};,>])\s*/g, "$1")
     // Collapse `:` only in declarations (next delimiter is `;` or `}`, not `{`)
-    // or inside parentheses such as media features.
+    // or inside the parentheses of a feature-query at-rule prelude (`@media (a : b)`).
+    // Selector functions such as `:is(.nav :hover)` keep their descendant space.
     .replace(/\s*:\s*(?=[^{};]*[;}])/g, ":")
-    .replace(/\s*:\s*(?=[^()]*\))/g, ":")
+    .replace(/@(?:media|supports|container|import|custom-media)\b[^{};]*/gi, (prelude) =>
+      prelude.replace(/\([^()]*\)/g, (group) => group.replace(/\s*:\s*/g, ":")),
+    )
     .replace(/;}/g, "}")
     .trim();
 

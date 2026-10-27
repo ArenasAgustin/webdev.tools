@@ -5,13 +5,13 @@ const {
   getItemMock,
   setItemMock,
   generateAllHashesMock,
-  generateHashFromFileMock,
+  generateAllHashesFromFileMock,
   clipboardWriteTextMock,
 } = vi.hoisted(() => ({
   getItemMock: vi.fn(() => null),
   setItemMock: vi.fn(),
   generateAllHashesMock: vi.fn(),
-  generateHashFromFileMock: vi.fn(),
+  generateAllHashesFromFileMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
 }));
 
@@ -34,7 +34,7 @@ vi.mock("./hash.utils", async (importOriginal) => {
   return {
     ...original,
     generateAllHashes: generateAllHashesMock,
-    generateHashFromFile: generateHashFromFileMock,
+    generateAllHashesFromFile: generateAllHashesFromFileMock,
   };
 });
 
@@ -51,7 +51,7 @@ describe("HashPlayground branches", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     generateAllHashesMock.mockResolvedValue(FAKE_HASHES);
-    generateHashFromFileMock.mockResolvedValue("filehash123");
+    generateAllHashesFromFileMock.mockResolvedValue(FAKE_HASHES);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
       value: { writeText: clipboardWriteTextMock },
@@ -90,6 +90,37 @@ describe("HashPlayground branches", () => {
     // Switch back to text mode
     fireEvent.click(screen.getByRole("button", { name: /texto/i }));
     expect(screen.getByPlaceholderText(/ingres[aá] el texto/i)).toBeInTheDocument();
+  });
+
+  it("file mode: hashes the file in one pass and shows the results", async () => {
+    const { container } = render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+    const file = new File(["hello"], "a.txt", { type: "text/plain" });
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    expect(generateAllHashesFromFileMock).toHaveBeenCalledTimes(1);
+    expect(generateAllHashesFromFileMock).toHaveBeenCalledWith(file, "lowercase");
+    expect(screen.getByText("ddeeff")).toBeInTheDocument();
+  });
+
+  it("file mode: shows a translated error when the file cannot be hashed", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    generateAllHashesFromFileMock.mockRejectedValue(new DOMException("NotReadableError"));
+    const { container } = render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    fireEvent.change(input, { target: { files: [new File(["x"], "a.txt")] } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(/no se pudieron generar los hashes/i);
   });
 
   it("empty text guard returns early without calling generateAllHashes", async () => {

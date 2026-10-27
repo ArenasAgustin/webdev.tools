@@ -8,7 +8,19 @@ import { translate } from "@/i18n/translate";
  */
 export const DEFAULT_WORKER_TIMEOUT_MS = 60_000;
 
-interface PendingRequest<TResponse> {
+/** Rejection reason for a request the worker did not answer in time. */
+export class WorkerTimeoutError extends Error {
+  readonly timeoutMs: number;
+
+  constructor(timeoutMs: number) {
+    super(`Worker request timed out after ${timeoutMs}ms`);
+    this.name = "WorkerTimeoutError";
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+interface PendingRequest<TRequest, TResponse> {
+  message: TRequest;
   resolve: (value: TResponse) => void;
   reject: (error: Error) => void;
   timer: ReturnType<typeof setTimeout> | null;
@@ -31,8 +43,13 @@ interface CreateWorkerClientOptions<TPayload, TRequest extends WorkerRequestBase
   timeoutMs?: number;
 }
 
+export interface WorkerRunOptions {
+  /** Overrides the client's timeout for this request. `0` disables it. */
+  timeoutMs?: number;
+}
+
 export interface WorkerClient<TPayload, TResponse extends WorkerResponseBase> {
-  (payload: TPayload): Promise<TResponse>;
+  (payload: TPayload, runOptions?: WorkerRunOptions): Promise<TResponse>;
   preload: () => void;
   terminate: () => void;
 }
@@ -42,11 +59,11 @@ export function createWorkerClient<
   TRequest extends WorkerRequestBase,
   TResponse extends WorkerResponseBase,
 >(options: CreateWorkerClientOptions<TPayload, TRequest>): WorkerClient<TPayload, TResponse> {
-  const pending = new Map<string, PendingRequest<TResponse>>();
+  const pending = new Map<string, PendingRequest<TRequest, TResponse>>();
   let worker: Worker | null = null;
   const timeoutMs = options.timeoutMs ?? DEFAULT_WORKER_TIMEOUT_MS;
 
-  const clearTimer = (entry: PendingRequest<TResponse>) => {
+  const clearTimer = (entry: PendingRequest<TRequest, TResponse>) => {
     if (entry.timer !== null) {
       clearTimeout(entry.timer);
     }
@@ -96,7 +113,27 @@ export function createWorkerClient<
   const createId = () =>
     `${options.idPrefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
-  const run = (payload: TPayload): Promise<TResponse> => {
+  /**
+   * A worker that misses a deadline is presumed stuck (e.g. a runaway query) and
+   * would never read the requests queued behind the expired one, so it is
+   * replaced and those requests are handed to the fresh instance.
+   */
+  const expire = (id: string, ms: number) => {
+    const entry = pending.get(id);
+    if (!entry) {
+      return;
+    }
+    pending.delete(id);
+    worker?.terminate();
+    worker = null;
+    if (pending.size > 0) {
+      const replacement = ensureWorker();
+      pending.forEach((other) => replacement?.postMessage(other.message));
+    }
+    entry.reject(new WorkerTimeoutError(ms));
+  };
+
+  const run = (payload: TPayload, runOptions?: WorkerRunOptions): Promise<TResponse> => {
     const instance = ensureWorker();
     if (!instance) {
       return Promise.reject(
@@ -107,18 +144,15 @@ export function createWorkerClient<
     const id = createId();
     const message = options.buildRequest(id, payload);
 
+    const requestTimeoutMs = runOptions?.timeoutMs ?? timeoutMs;
+
     return new Promise((resolve, reject) => {
       // Without a timeout, a request the worker never answers (e.g. an
-      // unhandled action) would leave the caller waiting forever.
+      // unhandled action or a runaway query) would leave the caller waiting forever.
       const timer =
-        timeoutMs > 0
-          ? setTimeout(() => {
-              pending.delete(id);
-              reject(new Error(`Worker request timed out after ${timeoutMs}ms`));
-            }, timeoutMs)
-          : null;
+        requestTimeoutMs > 0 ? setTimeout(() => expire(id, requestTimeoutMs), requestTimeoutMs) : null;
 
-      pending.set(id, { resolve, reject, timer });
+      pending.set(id, { message, resolve, reject, timer });
       instance.postMessage(message);
     });
   };

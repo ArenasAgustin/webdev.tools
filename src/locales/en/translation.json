@@ -223,11 +223,13 @@
     "comparePlaceholder": "Enter a hash to compare...",
     "compareAction": "Compare",
     "matchSuccess": "Hash matches",
-    "matchFail": "Hash does NOT match"
+    "matchFail": "Hash does NOT match",
+    "generateError": "Could not generate the hashes. The file may be unreadable or too large."
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
-    "copy": "Copy {{format}}"
+    "copy": "Copy {{format}}",
+    "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK."
   },
   "html": {
     "previewLabel": "Preview",
@@ -342,7 +344,9 @@
     "errorInvalidCharacter": "Input contains a character outside the Base64 alphabet",
     "errorInvalidLength": "Input length is not a valid Base64 length",
     "errorInvalidPadding": "Input has invalid Base64 padding",
-    "errorInvalidUtf8": "Decoded bytes are not valid UTF-8 text"
+    "errorInvalidUtf8": "Decoded bytes are not valid UTF-8 text",
+    "errorFileTooLarge": "The file exceeds the {{max}} MB limit",
+    "errorFileUnreadable": "Could not read the file"
   },
   "url": {
     "modeGroupLabel": "Conversion mode",
@@ -443,6 +447,7 @@
       "empty": "The JSON is empty",
       "formatError": "Error formatting JSON",
       "minifyError": "Error minifying JSON",
+      "tooDeep": "The JSON is nested too deeply to process",
       "cleanError": "Error cleaning JSON: {{message}}",
       "jsonPathEmpty": "The JSONPath expression is empty",
       "jsonPathError": "JSONPath error: {{message}}"
@@ -451,19 +456,25 @@
       "noInput": "No CSS to process",
       "empty": "The CSS is empty",
       "minifyError": "Error minifying CSS",
+      "syntaxError": "Invalid CSS: {{message}}",
       "cleanError": "Error cleaning CSS: {{message}}"
     },
     "html": {
       "noInput": "No HTML to process",
       "empty": "The HTML is empty",
-      "cleanError": "Error cleaning HTML: {{message}}"
+      "cleanError": "Error cleaning HTML: {{message}}",
+      "unexpectedClosingTag": "Invalid HTML: closing tag </{{tag}}> on line {{line}} has no matching opening tag",
+      "misnestedClosingTag": "Invalid HTML: closing tag </{{tag}}> on line {{line}} found while <{{open}}> is still open",
+      "unclosedComment": "Invalid HTML: comment opened on line {{line}} is never closed",
+      "unclosedTag": "Invalid HTML: tag on line {{line}} is never closed with \">\""
     },
     "js": {
       "empty": "The JavaScript code is empty",
       "parseError": "Could not parse the JavaScript code",
       "formatError": "Error formatting code",
       "minifyUnavailable": "Terser minify is not available",
-      "cleanError": "Error cleaning code: {{message}}"
+      "cleanError": "Error cleaning code: {{message}}",
+      "runtimeErrorAtLine": "{{message}} (line {{line}})"
     },
     "php": {
       "empty": "The PHP code is empty",
@@ -477,7 +488,8 @@
     },
     "sql": {
       "noInput": "No SQL to process",
-      "empty": "The SQL is empty"
+      "empty": "The SQL is empty",
+      "timeout": "The query exceeded {{seconds}} seconds and was cancelled. The database was reset."
     }
   }
 }
