@@ -4,7 +4,10 @@ export const jsPlaygroundConfig: PlaygroundConfig = {
   id: "js",
   name: "JavaScript tools",
   icon: "fab fa-js",
-  description: "Ejecutar y probar código JavaScript",
+  description: {
+    es: "Ejecutar y probar código JavaScript",
+    en: "Run and test JavaScript code",
+  },
   language: "javascript",
   keywords: ["JavaScript formatter", "JS beautifier", "JavaScript minifier", "online JS tool"],
   example: `// Ejemplo: Función para calcular factorial

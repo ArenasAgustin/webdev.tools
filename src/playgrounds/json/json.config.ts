@@ -4,7 +4,10 @@ export const jsonPlaygroundConfig: PlaygroundConfig = {
   id: "json",
   name: "JSON Tools",
   icon: "fas fa-database",
-  description: "Formatear, minificar y filtrar JSON",
+  description: {
+    es: "Formatear, minificar y filtrar JSON",
+    en: "Format, minify and filter JSON",
+  },
   language: "json",
   keywords: ["JSON formatter", "JSON minifier", "JSONPath", "JSON validator", "online JSON tool"],
   example:

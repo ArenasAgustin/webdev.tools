@@ -4,7 +4,10 @@ export const htmlPlaygroundConfig: PlaygroundConfig = {
   id: "html",
   name: "HTML tools",
   icon: "fab fa-html5",
-  description: "Formatear y minificar HTML",
+  description: {
+    es: "Formatear y minificar HTML",
+    en: "Format and minify HTML",
+  },
   language: "html",
   keywords: ["HTML formatter", "HTML minifier", "HTML beautifier", "online HTML tool"],
   example: `<!doctype html>

@@ -4,7 +4,10 @@ export const phpPlaygroundConfig: PlaygroundConfig = {
   id: "php",
   name: "PHP 7.4 tools",
   icon: "fab fa-php",
-  description: "Ejecutar y probar código PHP 7.4",
+  description: {
+    es: "Ejecutar y probar código PHP 7.4",
+    en: "Run and test PHP 7.4 code",
+  },
   language: "php",
   keywords: ["PHP formatter", "PHP beautifier", "PHP syntax validator", "online PHP tool"],
   example: `<?php

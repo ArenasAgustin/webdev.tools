@@ -257,7 +257,37 @@
     "reuseFilter": "Reuse filter",
     "deleteFilter": "Delete filter",
     "historyTitle": "Filter History",
-    "clearHistory": "Clear History"
+    "clearHistory": "Clear History",
+    "tips": {
+      "categories": {
+        "basicAccess": "Basic Access",
+        "arrays": "Arrays",
+        "wildcard": "Wildcard (*)",
+        "conditionals": "Conditional Filters"
+      },
+      "items": {
+        "fromRoot": "Access from the root",
+        "usersArray": "Get the users array",
+        "nestedProperty": "Nested property",
+        "firstElement": "First element",
+        "lastElement": "Last element",
+        "multipleIndexes": "Multiple indexes",
+        "allUsers": "All users",
+        "allNames": "All names",
+        "namesAnyLevel": "Names at any level",
+        "ageOver25": "Age over 25",
+        "activeUsers": "Active users",
+        "cheapProducts": "Cheap products"
+      },
+      "examples": {
+        "fullArray": "Full array",
+        "firstUser": "First user",
+        "allNames": "All names",
+        "activeOnly": "Active only",
+        "metadata": "Metadata",
+        "prices": "Prices"
+      }
+    }
   },
   "loader": {
     "loading": "Loading {{name}} Tools",
