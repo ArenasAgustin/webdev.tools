@@ -65,6 +65,20 @@ export function sortJsonKeys(value: JsonValue): JsonValue {
   return value;
 }
 
+/** True when `error` is the engine's stack overflow (e.g. very deeply nested JSON). */
+function isStackOverflow(error: unknown): boolean {
+  return error instanceof RangeError && /call stack/i.test(error.message);
+}
+
+/** Turn a caught format/minify error into a transportable message. */
+function toJsonErrorMessage(error: unknown, fallbackKey: `services.json.${string}`): string {
+  if (isStackOverflow(error)) {
+    return serviceMessage("services.json.tooDeep");
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return message || serviceMessage(fallbackKey);
+}
+
 export interface JsonFormatOptions {
   indentSize?: IndentStyle;
   sortKeys?: boolean;
@@ -92,8 +106,7 @@ export async function formatJson(
     const formatted = await formatWithPrettier(JSON.stringify(processed), "json-stringify", indent);
     return { ok: true, value: formatted };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || serviceMessage("services.json.formatError") };
+    return { ok: false, error: toJsonErrorMessage(error, "services.json.formatError") };
   }
 }
 
@@ -111,8 +124,7 @@ export function minifyJson(input: string, options: JsonMinifyOptions = {}): Resu
         : JSON.stringify(processed);
     return { ok: true, value: minified };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || serviceMessage("services.json.minifyError") };
+    return { ok: false, error: toJsonErrorMessage(error, "services.json.minifyError") };
   }
 }
 

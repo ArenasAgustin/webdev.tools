@@ -443,6 +443,7 @@
       "empty": "The JSON is empty",
       "formatError": "Error formatting JSON",
       "minifyError": "Error minifying JSON",
+      "tooDeep": "The JSON is nested too deeply to process",
       "cleanError": "Error cleaning JSON: {{message}}",
       "jsonPathEmpty": "The JSONPath expression is empty",
       "jsonPathError": "JSONPath error: {{message}}"

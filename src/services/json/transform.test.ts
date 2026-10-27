@@ -115,6 +115,13 @@ describe("formatJson", () => {
       expect(result.value).toContain('  "a": 1');
     }
   });
+
+  it("reports a translated error instead of a stack overflow on very deep nesting", async () => {
+    const input = "[".repeat(5000) + "]".repeat(5000);
+    const result = await formatJson(input);
+
+    expect(result).toEqual({ ok: false, error: "services.json.tooDeep" });
+  });
 });
 
 describe("minifyJson", () => {

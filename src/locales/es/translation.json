@@ -443,6 +443,7 @@
       "empty": "El JSON está vacío",
       "formatError": "Error al formatear JSON",
       "minifyError": "Error al minificar JSON",
+      "tooDeep": "El JSON tiene demasiados niveles de anidación para procesarlo",
       "cleanError": "Error al limpiar JSON: {{message}}",
       "jsonPathEmpty": "La expresión JSONPath está vacía",
       "jsonPathError": "Error en JSONPath: {{message}}"
