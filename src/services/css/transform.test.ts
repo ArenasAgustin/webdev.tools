@@ -185,6 +185,29 @@ describe("minifyCss", () => {
       value: ".nav :hover{color:red}div :not(.x){margin:0}",
     });
   });
+
+  it("keeps the descendant combinator before a pseudo-class inside a selector function", async () => {
+    const result = await minifyCss(
+      ":is(.nav :hover) { color: red; } a:not(.b :focus) { margin: 0; } @page :first { margin: 0; }",
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      value: ":is(.nav :hover){color:red}a:not(.b :focus){margin:0}@page :first{margin:0}",
+    });
+  });
+
+  it("still collapses colons in at-rule feature queries", async () => {
+    const result = await minifyCss(
+      "@media (min-width : 1px) and (hover : hover) { a { b: c } } @supports (display : grid) { a { b: c } }",
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      value:
+        "@media (min-width:1px) and (hover:hover){a{b:c}}@supports (display:grid){a{b:c}}",
+    });
+  });
 });
 
 describe("cleanCss", () => {

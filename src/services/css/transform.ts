@@ -168,9 +168,12 @@ function minifyCssString(source: string): string {
     // to avoid collapsing descendant pseudo-selectors (e.g. `a :hover` → `a:hover`).
     .replace(/\s*([{};,>])\s*/g, "$1")
     // Collapse `:` only in declarations (next delimiter is `;` or `}`, not `{`)
-    // or inside parentheses such as media features.
+    // or inside the parentheses of a feature-query at-rule prelude (`@media (a : b)`).
+    // Selector functions such as `:is(.nav :hover)` keep their descendant space.
     .replace(/\s*:\s*(?=[^{};]*[;}])/g, ":")
-    .replace(/\s*:\s*(?=[^()]*\))/g, ":")
+    .replace(/@(?:media|supports|container|import|custom-media)\b[^{};]*/gi, (prelude) =>
+      prelude.replace(/\([^()]*\)/g, (group) => group.replace(/\s*:\s*/g, ":")),
+    )
     .replace(/;}/g, "}")
     .trim();
 
