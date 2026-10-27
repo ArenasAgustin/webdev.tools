@@ -364,7 +364,37 @@
     "formatError": "Error formatting {{language}}",
     "minified": "{{language}} minified successfully",
     "minifyError": "Error minifying {{language}}",
-    "genericError": "An error occurred"
+    "genericError": "An error occurred",
+    "noInputToExecute": "No {{language}} to run",
+    "cleaned": "{{language}} cleaned successfully",
+    "cleanError": "Error cleaning {{language}}",
+    "cleanEmpty": "The {{language}} was completely empty",
+    "formatCodeError": "Error formatting code",
+    "minifyCodeError": "Error minifying code",
+    "js": {
+      "languageName": "JavaScript",
+      "executed": "Code executed successfully",
+      "cleanEmpty": "The code was completely empty",
+      "cleanError": "Error cleaning code",
+      "timeout": "Execution exceeded {{seconds}} seconds and was cancelled",
+      "workerError": "Execution worker error",
+      "unknownError": "Unknown error while running code"
+    },
+    "json": {
+      "jsonPathRequired": "Enter a JSONPath expression",
+      "noResults": "The filter returned no results",
+      "jsonPathError": "Error applying JSONPath"
+    },
+    "php": {
+      "minifyUnavailable": "Minify is not available for PHP",
+      "formatCodeError": "Error formatting PHP code",
+      "sharedArrayBufferUnsupported": "Your browser does not support SharedArrayBuffer, which is required to run PHP. Try an up-to-date Chrome or Firefox.",
+      "executed": "PHP code executed successfully"
+    },
+    "sql": {
+      "executed": "Query executed successfully",
+      "reset": "Database reset"
+    }
   },
   "validation": {
     "syntaxError": "Syntax error: {{message}}",

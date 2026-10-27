@@ -11,6 +11,7 @@ import {
   type PlaygroundFileConfig,
 } from "./useGenericPlaygroundActions";
 import { compactTransformError } from "@/utils/transformError";
+import { translate } from "@/i18n/translate";
 import type { ToastApi } from "./usePlaygroundActions";
 import type { SqlFormatConfig, SqlMinifyConfig, SqlExecuteResult } from "@/types/sql";
 
@@ -24,13 +25,13 @@ const FILE_CONFIG: PlaygroundFileConfig = {
 
 async function formatRunner(input: string, config: SqlFormatConfig): Promise<string> {
   const result = await formatSqlAsync(input, config);
-  if (!result.ok) throw new Error(result.error ?? "Error al formatear SQL");
+  if (!result.ok) throw new Error(result.error ?? translate("messages.formatError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
 async function minifyRunner(input: string): Promise<string> {
   const result = await minifySqlAsync(input);
-  if (!result.ok) throw new Error(result.error ?? "Error al minificar SQL");
+  if (!result.ok) throw new Error(result.error ?? translate("messages.minifyError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
@@ -81,11 +82,11 @@ export function useSqlPlaygroundActions({
 
   const handleExecute = useCallback(() => {
     if (!inputSql.trim()) {
-      toast?.error("No hay SQL para ejecutar");
+      toast?.error(translate("messages.noInputToExecute", { language: FILE_CONFIG.language }));
       return;
     }
     if (inputTooLarge) {
-      toast?.error(inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.");
+      toast?.error(inputTooLargeMessage ?? translate("messages.inputTooLarge"));
       return;
     }
 
@@ -98,7 +99,7 @@ export function useSqlPlaygroundActions({
         setIsFirstRun(false);
         if (result.ok) {
           setOutput(JSON.stringify(result.value, null, 2));
-          toast?.success("Consulta ejecutada correctamente");
+          toast?.success(translate("messages.sql.executed"));
         } else {
           // Drop the previous result so the error is not shown next to stale rows.
           setOutput("");
@@ -123,7 +124,7 @@ export function useSqlPlaygroundActions({
         setOutput("");
         setError(null);
         setIsFirstRun(true);
-        toast?.success("Base de datos reseteada");
+        toast?.success(translate("messages.sql.reset"));
       })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);

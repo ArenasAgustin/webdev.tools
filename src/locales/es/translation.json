@@ -364,7 +364,37 @@
     "formatError": "Error al formatear {{language}}",
     "minified": "{{language}} minificado correctamente",
     "minifyError": "Error al minificar {{language}}",
-    "genericError": "Ha ocurrido un error"
+    "genericError": "Ha ocurrido un error",
+    "noInputToExecute": "No hay {{language}} para ejecutar",
+    "cleaned": "{{language}} limpiado correctamente",
+    "cleanError": "Error al limpiar {{language}}",
+    "cleanEmpty": "El {{language}} estaba completamente vacío",
+    "formatCodeError": "Error al formatear código",
+    "minifyCodeError": "Error al minificar código",
+    "js": {
+      "languageName": "Código",
+      "executed": "Código ejecutado correctamente",
+      "cleanEmpty": "El código estaba completamente vacío",
+      "cleanError": "Error al limpiar código",
+      "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
+      "workerError": "Error en el worker de ejecución",
+      "unknownError": "Error desconocido al ejecutar código"
+    },
+    "json": {
+      "jsonPathRequired": "Ingresa una expresión JSONPath",
+      "noResults": "El filtro no devolvió resultados",
+      "jsonPathError": "Error al aplicar JSONPath"
+    },
+    "php": {
+      "minifyUnavailable": "Minify no está disponible para PHP",
+      "formatCodeError": "Error al formatear código PHP",
+      "sharedArrayBufferUnsupported": "Tu navegador no soporta SharedArrayBuffer, necesario para ejecutar PHP. Probá con Chrome o Firefox actualizado.",
+      "executed": "Código PHP ejecutado correctamente"
+    },
+    "sql": {
+      "executed": "Consulta ejecutada correctamente",
+      "reset": "Base de datos reseteada"
+    }
   },
   "validation": {
     "syntaxError": "Error de sintaxis: {{message}}",

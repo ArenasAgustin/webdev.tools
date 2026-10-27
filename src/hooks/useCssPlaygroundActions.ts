@@ -6,6 +6,7 @@ import {
 import { cssPlaygroundConfig } from "@/playgrounds/css/css.config";
 import { cssService } from "@/services/css/service";
 import { createTransformHandler } from "@/utils/createTransformHandler";
+import { translate } from "@/i18n/translate";
 import type { ToastApi } from "./usePlaygroundActions";
 import type { CssFormatConfig, CssMinifyConfig, CssCleanConfig } from "@/types/css";
 import { cleanCssAsync } from "@/services/css/worker";
@@ -20,7 +21,7 @@ const FILE_CONFIG: PlaygroundFileConfig = {
 
 async function formatRunner(input: string, config: CssFormatConfig) {
   const result = await cssService.format(input, config.indentSize);
-  if (!result.ok) throw new Error(result.error || "Error al formatear CSS");
+  if (!result.ok) throw new Error(result.error || translate("messages.formatError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
@@ -29,7 +30,7 @@ async function minifyRunner(input: string, config: CssMinifyConfig) {
     removeComments: config.removeComments,
     removeSpaces: config.removeSpaces,
   });
-  if (!result.ok) throw new Error(result.error || "Error al minificar CSS");
+  if (!result.ok) throw new Error(result.error || translate("messages.minifyError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
@@ -87,14 +88,14 @@ export function useCssPlaygroundActions({
           removeRulesWithOnlyComments: cleanConfig.removeRulesWithOnlyComments,
         });
         if (!result.ok) throw new Error(result.error.message);
-        if (!result.value.trim()) throw new Error("El CSS estaba completamente vacío");
+        if (!result.value.trim()) throw new Error(translate("messages.cleanEmpty", { language: FILE_CONFIG.language }));
         return result.value;
       },
       setOutput,
       setError,
       autoCopy: cleanConfig.autoCopy,
-      successMessage: "CSS limpiado correctamente",
-      errorMessage: "Error al limpiar CSS",
+      successMessage: translate("messages.cleaned", { language: FILE_CONFIG.language }),
+      errorMessage: translate("messages.cleanError", { language: FILE_CONFIG.language }),
     });
   }, [generic.runTransformAction, inputCss, cleanConfig, setError, setOutput]);
 

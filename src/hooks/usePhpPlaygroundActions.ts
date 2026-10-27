@@ -3,6 +3,7 @@ import { phpPlaygroundConfig } from "@/playgrounds/php/php.config";
 import { phpService } from "@/services/php/service";
 import { createTransformHandler } from "@/utils/createTransformHandler";
 import { createValidatedHandler } from "@/utils/handlerFactory";
+import { translate } from "@/i18n/translate";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
@@ -20,7 +21,7 @@ const FILE_CONFIG: PlaygroundFileConfig = {
 
 async function formatRunner(input: string, config: PhpFormatConfig) {
   const result = await phpService.format(input, { indentSize: config.indentSize });
-  if (!result.ok) throw new Error(result.error ?? "Error al formatear código");
+  if (!result.ok) throw new Error(result.error ?? translate("messages.formatCodeError"));
   return result.value;
 }
 
@@ -64,7 +65,7 @@ export function usePhpPlaygroundActions({
     fileConfig: FILE_CONFIG,
     formatRunner,
     minifyRunner: async () => {
-      throw new Error("Minify no está disponible para PHP");
+      throw new Error(translate("messages.php.minifyUnavailable"));
     },
   });
 
@@ -76,14 +77,14 @@ export function usePhpPlaygroundActions({
         const result = await phpService.format(inputPhp, {
           indentSize: formatConfig.indentSize,
         });
-        if (!result.ok) throw new Error(result.error ?? "Error al formatear código PHP");
+        if (!result.ok) throw new Error(result.error ?? translate("messages.php.formatCodeError"));
         return result.value;
       },
       setOutput,
       setError,
       autoCopy: formatConfig.autoCopy,
-      successMessage: "PHP formateado correctamente",
-      errorMessage: "Error al formatear PHP",
+      successMessage: translate("messages.formatted", { language: FILE_CONFIG.language }),
+      errorMessage: translate("messages.formatError", { language: FILE_CONFIG.language }),
     });
   }, [generic.runTransformAction, inputPhp, formatConfig, setError, setOutput]);
 
@@ -101,10 +102,7 @@ export function usePhpPlaygroundActions({
         );
 
         if (!isSharedArrayBufferSupported()) {
-          throw new Error(
-            "Tu navegador no soporta SharedArrayBuffer, necesario para ejecutar PHP. " +
-              "Probá con Chrome o Firefox actualizado."
-          );
+          throw new Error(translate("messages.php.sharedArrayBufferUnsupported"));
         }
 
         const result = await executePhpWithTimeout(inputPhp);
@@ -117,7 +115,7 @@ export function usePhpPlaygroundActions({
         setOutput(result.value);
       },
       toast,
-      successMessage: "Código PHP ejecutado correctamente",
+      successMessage: translate("messages.php.executed"),
       onError: (message) => {
         generic.setIsProcessing(false);
         // Also reached when validation fails before `run`, so clear the previous result here.

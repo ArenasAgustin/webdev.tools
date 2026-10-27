@@ -11,6 +11,7 @@ import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
 import { cleanJsAsync } from "@/services/js/worker";
 import { runJavaScript } from "@/services/js/execute";
 import type { JsExecRequest, JsExecResponse, JsRunResult } from "@/services/js/execute";
+import { translate } from "@/i18n/translate";
 
 const JS_EXEC_TIMEOUT_MS = 5000;
 
@@ -18,13 +19,16 @@ const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "code.js",
   outputFileName: "output.txt",
   mimeType: "application/javascript",
-  language: "Código",
+  // Getter so the translated name is resolved each time a message is built.
+  get language() {
+    return translate("messages.js.languageName");
+  },
   acceptExtensions: ".js,.ts,.mjs,.mts",
 };
 
 async function formatRunner(input: string, config: JsFormatConfig) {
   const result = await jsService.format(input, { indentSize: config.indentSize });
-  if (!result.ok) throw new Error(result.error ?? "Error al formatear código");
+  if (!result.ok) throw new Error(result.error ?? translate("messages.formatCodeError"));
   return result.value;
 }
 
@@ -33,7 +37,7 @@ async function minifyRunner(input: string, config: JsMinifyConfig) {
     removeComments: config.removeComments,
     removeSpaces: config.removeSpaces,
   });
-  if (!result.ok) throw new Error(result.error ?? "Error al minificar código");
+  if (!result.ok) throw new Error(result.error ?? translate("messages.minifyCodeError"));
   return result.value;
 }
 
@@ -102,7 +106,7 @@ export function useJsPlaygroundActions({
         }
       },
       toast,
-      successMessage: "Código ejecutado correctamente",
+      successMessage: translate("messages.js.executed"),
       onSuccess: () => {
         generic.setIsProcessing(false);
       },
@@ -125,14 +129,14 @@ export function useJsPlaygroundActions({
           removeEmptyString: cleanConfig.removeEmptyString,
         });
         if (!result.ok) throw new Error(result.error.message);
-        if (!result.value.trim()) throw new Error("El código estaba completamente vacío");
+        if (!result.value.trim()) throw new Error(translate("messages.js.cleanEmpty"));
         return result.value;
       },
       setOutput,
       setError,
       autoCopy: cleanConfig.autoCopy,
-      successMessage: "Código limpiado correctamente",
-      errorMessage: "Error al limpiar código",
+      successMessage: translate("messages.cleaned", { language: FILE_CONFIG.language }),
+      errorMessage: translate("messages.js.cleanError"),
     });
   };
 
@@ -155,7 +159,7 @@ class JsExecutionError extends Error {
 
 function toExecutionError(result: JsRunResult): JsExecutionError {
   return new JsExecutionError(
-    result.error ?? "Error desconocido al ejecutar código",
+    result.error ?? translate("messages.js.unknownError"),
     result.output,
   );
 }
@@ -182,7 +186,10 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
     const timeout = window.setTimeout(() => {
       settle(() =>
         reject(
-          new JsExecutionError("La ejecución superó 5 segundos y fue cancelada", logs.join("\n")),
+          new JsExecutionError(
+            translate("messages.js.timeout", { seconds: timeoutMs / 1000 }),
+            logs.join("\n"),
+          ),
         ),
       );
     }, timeoutMs);
@@ -198,7 +205,7 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
     worker.onerror = (event: ErrorEvent) => {
       settle(() =>
         reject(
-          new JsExecutionError(event.message || "Error en el worker de ejecución", logs.join("\n")),
+          new JsExecutionError(event.message || translate("messages.js.workerError"), logs.join("\n")),
         ),
       );
     };

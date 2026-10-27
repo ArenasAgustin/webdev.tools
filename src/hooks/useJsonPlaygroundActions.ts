@@ -3,6 +3,7 @@ import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { createTransformHandler } from "@/utils/createTransformHandler";
 import { compactTransformError } from "@/utils/transformError";
+import { translate } from "@/i18n/translate";
 import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
@@ -117,14 +118,14 @@ export function useJsonPlaygroundActions({
           outputFormat: cleanConfig.outputFormat,
         });
         if (!result.ok) throw new Error(result.error.message);
-        if (!result.value.trim()) throw new Error("El JSON estaba completamente vacío");
+        if (!result.value.trim()) throw new Error(translate("messages.cleanEmpty", { language: "JSON" }));
         return result.value;
       },
       setOutput,
       setError,
       autoCopy: cleanConfig.autoCopy,
-      successMessage: "JSON limpiado correctamente",
-      errorMessage: "Error al limpiar JSON",
+      successMessage: translate("messages.cleaned", { language: "JSON" }),
+      errorMessage: translate("messages.cleanError", { language: "JSON" }),
     });
   }, [generic.runTransformAction, inputJson, cleanConfig, setError, setOutput]);
 
@@ -134,7 +135,7 @@ export function useJsonPlaygroundActions({
       validate: generic.baseActions.createInputValidator,
       run: async () => {
         if (!jsonPathExpression.trim()) {
-          throw new Error("Ingresa una expresión JSONPath");
+          throw new Error(translate("messages.json.jsonPathRequired"));
         }
         const result = await applyJsonPathAsync(inputJson, jsonPathExpression);
         if (!result.ok) throw new Error(result.error.message);
@@ -143,7 +144,7 @@ export function useJsonPlaygroundActions({
       onSuccess: (value) => {
         if (!value.trim() || value === "[]" || value === "{}") {
           setOutput(value);
-          setError("El filtro no devolvió resultados");
+          setError(translate("messages.json.noResults"));
         } else {
           setOutput(value);
           setError(null);
@@ -155,7 +156,7 @@ export function useJsonPlaygroundActions({
         setError(compactTransformError(message));
       },
       toast,
-      errorMessage: "Error al aplicar JSONPath",
+      errorMessage: translate("messages.json.jsonPathError"),
     })();
   }, [
     generic.baseActions,
@@ -181,7 +182,7 @@ export function useJsonPlaygroundActions({
         onSuccess: (value) => {
           if (!value.trim() || value === "[]" || value === "{}") {
             setOutput(value);
-            setError("El filtro no devolvió resultados");
+            setError(translate("messages.json.noResults"));
           } else {
             setOutput(value);
             setError(null);
@@ -193,7 +194,7 @@ export function useJsonPlaygroundActions({
           setError(compactTransformError(message));
         },
         toast,
-        errorMessage: "Error al aplicar JSONPath",
+        errorMessage: translate("messages.json.jsonPathError"),
       })();
     },
     [
