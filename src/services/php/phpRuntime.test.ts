@@ -1,0 +1,43 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+const { run, setPhpIniEntries } = vi.hoisted(() => ({
+  run: vi.fn(),
+  setPhpIniEntries: vi.fn(),
+}));
+
+vi.mock("@php-wasm/web", () => ({ loadWebRuntime: vi.fn(() => Promise.resolve(1)) }));
+vi.mock("@php-wasm/universal", () => ({
+  PHP: class {
+    run = run;
+  },
+  setPhpIniEntries,
+}));
+
+import { executePhp } from "./phpRuntime";
+
+/** Shape of what php-wasm returns. */
+const response = (text: string, exitCode = 0) => ({ text, errors: "", exitCode });
+
+describe("executePhp", () => {
+  beforeEach(() => {
+    run.mockReset();
+    setPhpIniEntries.mockReset();
+  });
+
+  it("reports warnings as plain text, in order with the output", async () => {
+    run.mockResolvedValue(
+      response("a\nNotice: Undefined variable: undef in /internal/eval.php on line 2\nb"),
+    );
+
+    const result = await executePhp('echo "a";\necho $undef;\necho "b";');
+
+    expect(setPhpIniEntries).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ html_errors: "0", log_errors: "0" }),
+    );
+    expect(result).toEqual({
+      ok: true,
+      value: "a\nNotice: Undefined variable: undef on line 2\nb",
+    });
+  });
+});

@@ -28,6 +28,19 @@ export const PHP_NO_OUTPUT = serviceMessage("services.php.noOutput");
 export const PHP_VERSION = "7.4";
 
 /**
+ * php-wasm's default php.ini prints errors as HTML and also logs them to stderr.
+ * Print them as plain text, once, in order with the script's output.
+ */
+const PHP_INI_ENTRIES = { html_errors: "0", log_errors: "0" };
+
+/** Drop php-wasm's internal script path from PHP error messages. */
+function stripInternalPaths(text: string): string {
+  return text
+    .replace(/ in \/internal\/\S+?\.php:(\d+)/g, " on line $1")
+    .replace(/ in \/internal\/\S+?\.php on line/g, " on line");
+}
+
+/**
  * Execute PHP code client-side via php-wasm.
  *
  * Vite bundles the wasm as a same-origin hashed asset and sets the loader's
@@ -42,20 +55,21 @@ export async function executePhp(
   try {
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const { loadWebRuntime } = (await import("@php-wasm/web")) as any;
-    const { PHP } = (await import("@php-wasm/universal")) as any;
+    const { PHP, setPhpIniEntries } = (await import("@php-wasm/universal")) as any;
     const runtimeId = await loadWebRuntime(PHP_VERSION, {
       emscriptenOptions: {
         locateFile: (filePath: string) => filePath,
       },
     });
     const php = new PHP(runtimeId);
+    await setPhpIniEntries(php, PHP_INI_ENTRIES);
     const trimmed = code.trim();
     const phpCode = trimmed.startsWith("<?") ? trimmed : `<?php\n${trimmed}`;
     options.onStarted?.();
     const response = await php.run({ code: phpCode });
     /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
-    const output: string = (response as { text?: string }).text ?? "";
+    const output = stripInternalPaths((response as { text?: string }).text ?? "");
     const stderr: string = (response as { errors?: string }).errors ?? "";
 
     if (!output && stderr) {
