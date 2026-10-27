@@ -64,7 +64,9 @@ export async function executePhp(
     const php = new PHP(runtimeId);
     await setPhpIniEntries(php, PHP_INI_ENTRIES);
     const trimmed = code.trim();
-    const phpCode = trimmed.startsWith("<?") ? trimmed : `<?php\n${trimmed}`;
+    // Code with an open tag anywhere (e.g. inline HTML first) runs as written.
+    // Tagless code gets one on its first line so error line numbers still match.
+    const phpCode = /<\?(php\b|=)/i.test(trimmed) ? trimmed : `<?php ${trimmed}`;
     options.onStarted?.();
     const response = await php.run({ code: phpCode });
     /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */

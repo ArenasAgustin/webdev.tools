@@ -24,6 +24,23 @@ describe("executePhp", () => {
     setPhpIniEntries.mockReset();
   });
 
+  it("runs code that starts with inline HTML as written", async () => {
+    run.mockResolvedValue(response("<h1>Hi</h1>\n2"));
+    const code = "<h1>Hi</h1>\n<?php echo 1 + 1; ?>";
+
+    await executePhp(code);
+
+    expect(run).toHaveBeenCalledWith({ code });
+  });
+
+  it("opens a PHP tag for tagless code without shifting line numbers", async () => {
+    run.mockResolvedValue(response("1"));
+
+    await executePhp("echo 1;\necho 2;");
+
+    expect(run).toHaveBeenCalledWith({ code: "<?php echo 1;\necho 2;" });
+  });
+
   it("reports warnings as plain text, in order with the output", async () => {
     run.mockResolvedValue(
       response("a\nNotice: Undefined variable: undef in /internal/eval.php on line 2\nb"),
