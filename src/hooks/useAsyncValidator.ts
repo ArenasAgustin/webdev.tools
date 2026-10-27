@@ -19,11 +19,14 @@ const EMPTY: ValidationState = { isValid: false, error: null };
  * @param input - Raw input string (will be trimmed)
  * @param validateFn - Async function that returns `{ ok, error? }`
  * @param fallbackError - Fallback message when error is empty (e.g. "CSS inválido")
+ * @param options.prefixed - The validator's messages already name the syntax error
+ *   (e.g. "Syntax error on line 2: ..."), so they are shown without another prefix.
  */
 export function useAsyncValidator(
   input: string,
   validateFn: ValidateFn,
   fallbackError: string,
+  { prefixed = false }: { prefixed?: boolean } = {},
 ): ValidationState {
   const source = input.trim();
   const [validation, setValidation] = useState<ValidationState>(EMPTY);
@@ -32,6 +35,11 @@ export function useAsyncValidator(
     if (!source) return;
 
     let cancelled = false;
+
+    const toErrorMessage = (message: string) => {
+      const compact = compactTransformError(message);
+      return prefixed ? compact : translate("validation.syntaxError", { message: compact });
+    };
 
     void validateFn(source)
       .then((result) => {
@@ -43,10 +51,8 @@ export function useAsyncValidator(
           setValidation({
             isValid: false,
             error: {
-              message: translate("validation.syntaxError", {
-                // Parsers call worker-safe transforms directly; localize their message keys.
-                message: compactTransformError(localizeServiceMessage(result.error ?? fallbackError)),
-              }),
+              // Parsers call worker-safe transforms directly; localize their message keys.
+              message: toErrorMessage(localizeServiceMessage(result.error ?? fallbackError)),
             },
           });
         }
@@ -57,18 +63,14 @@ export function useAsyncValidator(
         const message = error instanceof Error ? error.message : String(error);
         setValidation({
           isValid: false,
-          error: {
-            message: translate("validation.syntaxError", {
-              message: compactTransformError(message ?? fallbackError),
-            }),
-          },
+          error: { message: toErrorMessage(message || fallbackError) },
         });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [source, validateFn, fallbackError]);
+  }, [source, validateFn, fallbackError, prefixed]);
 
   return !source ? EMPTY : validation;
 }

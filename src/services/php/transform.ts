@@ -36,12 +36,17 @@ export function parsePhp(input: string): Result<PhpAst, string> {
   } catch (error) {
     if (error instanceof SyntaxError) {
       const line = (error as unknown as { lineNumber?: number }).lineNumber;
+      // php-parser reports "Parse Error : syntax error, ... on line N"; our keys
+      // already carry the "syntax error" label and the line.
+      const message = error.message
+        .replace(/^Parse Error\s*:\s*/i, "")
+        .replace(/\s+on line \d+\s*$/, "");
       return {
         ok: false,
         error:
           line != null
-            ? serviceMessage("services.php.syntaxErrorAtLine", { line, message: error.message })
-            : serviceMessage("services.php.syntaxError", { message: error.message }),
+            ? serviceMessage("services.php.syntaxErrorAtLine", { line, message })
+            : serviceMessage("services.php.syntaxError", { message }),
       };
     }
     const message = error instanceof Error ? error.message : String(error);

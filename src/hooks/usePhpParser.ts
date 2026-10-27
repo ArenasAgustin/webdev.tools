@@ -9,5 +9,7 @@ export function usePhpParser(input: string): ValidationState {
     input,
     validatePhpAsync,
     translate("editor.invalidLabel", { language: "PHP" }),
+    // validatePhp already reports "Syntax error on line N: ...".
+    { prefixed: true },
   );
 }
