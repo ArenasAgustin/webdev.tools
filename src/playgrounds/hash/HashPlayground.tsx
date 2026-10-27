@@ -248,18 +248,18 @@ export function HashPlayground() {
           {results.map((result) => (
             <div
               key={result.algorithm}
-              className="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3"
+              className="flex items-center justify-between gap-3 bg-white/5 rounded-lg px-4 py-3"
             >
-              <span className="text-xs font-mono text-gray-400 uppercase w-16">
+              <span className="text-xs font-mono text-gray-400 uppercase w-16 shrink-0">
                 {result.algorithm}
               </span>
-              <code className="text-sm text-white font-mono flex-1 text-right select-all">
+              <code className="text-sm text-white font-mono flex-1 min-w-0 break-all text-right select-all">
                 {result.hash}
               </code>
               <button
                 type="button"
                 onClick={() => copyToClipboard(result.hash)}
-                className="ml-3 text-gray-400 hover:text-white transition-colors"
+                className="shrink-0 text-gray-400 hover:text-white transition-colors"
                 title={t("hash.copyHash", { algorithm: result.algorithm })}
                 aria-label={t("hash.copyHash", { algorithm: result.algorithm })}
               >
