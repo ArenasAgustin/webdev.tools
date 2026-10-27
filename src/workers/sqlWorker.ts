@@ -1,7 +1,7 @@
 /**
  * SQL Worker — Vite worker entry.
- * Handles format / validate / minify / execute / reset messages.
- * sql.js is lazily imported on the first EXECUTE only.
+ * Handles format / validate / minify / load / execute / reset messages.
+ * sql.js is lazily imported on the first LOAD or EXECUTE only.
  */
 
 import type { SqlWorkerRequest, SqlWorkerResponse } from "@/services/sql/worker.types";
@@ -60,6 +60,12 @@ ctx.onmessage = (event: MessageEvent<SqlWorkerRequest>) => {
           } else {
             ctx.postMessage({ id: req.id, ok: false, error: { message: result.error } });
           }
+          return;
+        }
+
+        case "load": {
+          await getDb();
+          ctx.postMessage({ id: req.id, ok: true, value: "" });
           return;
         }
 

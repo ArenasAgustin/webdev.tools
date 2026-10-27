@@ -141,6 +141,39 @@ describe("sqlWorkerAdapter action round-trips", () => {
     expect((result as { error: { message: string } }).error.message).toBe("parse error");
   });
 
+  it("EXECUTE timeout — cancels a runaway query, reports the reset and keeps format working", async () => {
+    vi.useFakeTimers();
+    try {
+      const { executeSqlAsync, formatSqlAsync, SQL_EXECUTION_TIMEOUT_MS } = await import(
+        "@/services/sql/worker"
+      );
+      const pending = executeSqlAsync(
+        "WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM c) SELECT count(*) FROM c;",
+      );
+
+      const stuck = MockWorker.instances[0];
+      const load = stuck.postMessage.mock.calls[0]?.[0] as { id: string; action: string };
+      expect(load.action).toBe("load");
+      stuck.emit({ id: load.id, ok: true, value: "" });
+      await vi.advanceTimersByTimeAsync(0);
+      expect((stuck.postMessage.mock.calls[1]?.[0] as { action: string }).action).toBe("execute");
+
+      await vi.advanceTimersByTimeAsync(SQL_EXECUTION_TIMEOUT_MS);
+      const result = await pending;
+      expect(result.ok).toBe(false);
+      expect((result as { error: string }).error).toMatch(/segundos.*base de datos se reinició/);
+      expect(stuck.terminate).toHaveBeenCalledOnce();
+
+      const formatted = formatSqlAsync("select 1");
+      const fresh = MockWorker.instances[1];
+      const call = fresh.postMessage.mock.calls[0]?.[0] as { id: string };
+      fresh.emit({ id: call.id, ok: true, value: "SELECT\n  1" });
+      await expect(formatted).resolves.toEqual({ ok: true, value: "SELECT\n  1" });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("cleanup — terminate() can be called without errors", async () => {
     const adapter = await getAdapter();
 

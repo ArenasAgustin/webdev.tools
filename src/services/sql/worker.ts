@@ -8,6 +8,16 @@ import type { Result } from "@/types/common";
 import type { SqlExecuteResult, SqlFormatConfig } from "@/types/sql";
 import { sqlWorkerAdapter } from "@/services/sql/workerClient";
 import { localizeServiceMessage } from "@/services/localizeServiceMessage";
+import { WorkerTimeoutError } from "@/services/worker/clientFactory";
+import { translate } from "@/i18n/translate";
+
+/**
+ * Time a query may run before its worker is terminated and replaced. sql.js
+ * runs synchronously in the worker, so a runaway query (e.g. an unbounded
+ * recursive CTE) can only be stopped this way, and the in-memory database is
+ * lost with it.
+ */
+export const SQL_EXECUTION_TIMEOUT_MS = 10_000;
 
 export const formatSqlAsync = async (
   input: string,
@@ -58,7 +68,17 @@ export const executeSqlAsync = async (
   input: string,
 ): Promise<Result<SqlExecuteResult, string>> => {
   try {
-    const response = await sqlWorkerAdapter.run({ action: "execute", input });
+    // Load sql.js first, under the client's default timeout, so the wasm
+    // download and compile do not count against the query.
+    const loaded = await sqlWorkerAdapter.run({ action: "load", input: "" });
+    if (!loaded.ok) {
+      const err = (loaded as { error?: { message?: string } }).error;
+      return { ok: false, error: localizeServiceMessage(err?.message ?? "Execute error") };
+    }
+    const response = await sqlWorkerAdapter.run(
+      { action: "execute", input },
+      { timeoutMs: SQL_EXECUTION_TIMEOUT_MS },
+    );
     if (response.ok && "action" in response && response.action === "execute") {
       return {
         ok: true,
@@ -71,6 +91,12 @@ export const executeSqlAsync = async (
     }
     return { ok: false, error: "Unexpected execute response" };
   } catch (err) {
+    if (err instanceof WorkerTimeoutError) {
+      return {
+        ok: false,
+        error: translate("services.sql.timeout", { seconds: SQL_EXECUTION_TIMEOUT_MS / 1000 }),
+      };
+    }
     return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
 };
