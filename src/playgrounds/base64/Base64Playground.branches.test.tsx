@@ -376,4 +376,27 @@ describe("Base64Playground branches (file mode)", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("No se pudo leer el archivo");
   });
+
+  it("clear resets the file input so the same file can be picked again", async () => {
+    render(<Base64Playground />);
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!fileInput) throw new Error("file input not found");
+    let value = "C:\fakepath\test.txt";
+    Object.defineProperty(fileInput, "value", {
+      configurable: true,
+      get: () => value,
+      set: (next: string) => {
+        value = next;
+      },
+    });
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File(["hello"], "test.txt")] } });
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^limpiar$/i }));
+
+    expect(fileInput.value).toBe("");
+  });
 });

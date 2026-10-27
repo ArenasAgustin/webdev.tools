@@ -128,11 +128,18 @@ export function Base64Playground() {
     e.preventDefault();
   }, []);
 
+  // Without this the browser keeps the old selection and picking the same file
+  // again fires no change event.
+  const resetFileInput = useCallback(() => {
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, []);
+
   const handleChangeFile = useCallback(() => {
     latestFileRef.current = null;
     setFileState(null);
     setFileError(null);
-  }, []);
+    resetFileInput();
+  }, [resetFileInput]);
 
   const handleCopy = useCallback(async () => {
     if (!result.ok || !result.value) return;
@@ -144,7 +151,8 @@ export function Base64Playground() {
     latestFileRef.current = null; // drop any file read still in flight
     setFileState(null);
     setFileError(null);
-  }, [setInput]);
+    resetFileInput();
+  }, [setInput, resetFileInput]);
 
   const canSwap = inputMode === "text" && result.ok && result.value !== "";
 
