@@ -5,7 +5,7 @@ import { jsonEngine } from "../engines/json.engine";
 import { TipsModal } from "@/components/common/TipsModal";
 import { JsonPathHistoryModal } from "@/components/common/JsonPathHistoryModal";
 import { Button } from "@/components/common/Button";
-import { jsonPathTips, jsonPathQuickExamples } from "./jsonPathTips";
+import { getJsonPathTips, getJsonPathQuickExamples } from "./jsonPathTips";
 import { useJsonPathHistory } from "@/hooks/useJsonPathHistory";
 
 /**
@@ -93,8 +93,8 @@ export function JsonPlayground() {
         title={t("json.tipsTitle")}
         icon="lightbulb"
         iconColor="yellow-400"
-        tips={jsonPathTips}
-        quickExamples={jsonPathQuickExamples}
+        tips={getJsonPathTips()}
+        quickExamples={getJsonPathQuickExamples()}
         onClose={handleCloseJsonPathModal}
         onTryExample={(code) => {
           setJsonPathExpression(code);

@@ -38,6 +38,6 @@ export interface Playground {
  */
 export function getLocalizedString(value: LocalizedString): string {
   if (typeof value === "string") return value;
-  const lang = i18next.language || "es";
+  const lang = (i18next.resolvedLanguage ?? i18next.language) || "es";
   return value[lang] || value.es || Object.values(value)[0] || "";
 }

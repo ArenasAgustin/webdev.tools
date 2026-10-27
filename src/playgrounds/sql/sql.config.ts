@@ -4,7 +4,10 @@ export const sqlPlaygroundConfig: PlaygroundConfig = {
   id: "sql",
   name: "SQL tools",
   icon: "fas fa-database",
-  description: "Formatear, minificar y ejecutar consultas SQL en el navegador",
+  description: {
+    es: "Formatear, minificar y ejecutar consultas SQL en el navegador",
+    en: "Format, minify and run SQL queries in the browser",
+  },
   language: "sql",
   keywords: [
     "SQL formatter",

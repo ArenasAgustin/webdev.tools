@@ -4,7 +4,10 @@ export const cssPlaygroundConfig: PlaygroundConfig = {
   id: "css",
   name: "CSS tools",
   icon: "fab fa-css3-alt",
-  description: "Formatear y minificar CSS",
+  description: {
+    es: "Formatear y minificar CSS",
+    en: "Format and minify CSS",
+  },
   language: "css",
   keywords: ["CSS formatter", "CSS minifier", "CSS beautifier", "online CSS tool"],
   example: `:root {
