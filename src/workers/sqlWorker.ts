@@ -7,6 +7,7 @@
 import type { SqlWorkerRequest, SqlWorkerResponse } from "@/services/sql/worker.types";
 import { ROW_CAP } from "@/services/sql/worker.types";
 import { formatSql, validateSql, minifySql } from "@/services/sql/transform";
+import { runStatements } from "@/services/sql/execute";
 import type { Database } from "sql.js";
 import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
@@ -72,19 +73,12 @@ ctx.onmessage = (event: MessageEvent<SqlWorkerRequest>) => {
         case "execute": {
           const db = await getDb();
           const start = performance.now();
-          const stmts = db.exec(req.input);
-          const last = stmts[stmts.length - 1] ?? { columns: [], values: [] };
-          const truncated = last.values.length > ROW_CAP;
+          const { columns, rows, truncated } = runStatements(db, req.input, ROW_CAP);
           ctx.postMessage({
             id: req.id,
             ok: true,
             action: "execute",
-            value: {
-              columns: last.columns,
-              rows: last.values.slice(0, ROW_CAP),
-              elapsedMs: performance.now() - start,
-              truncated,
-            },
+            value: { columns, rows, elapsedMs: performance.now() - start, truncated },
           });
           return;
         }
