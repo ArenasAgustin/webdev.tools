@@ -90,6 +90,8 @@ export function usePhpPlaygroundActions({
 
   // Extensión: ejecutar código PHP
   const handleExecute = useCallback(() => {
+    // What the script printed before a fatal error, shown next to the error.
+    let partialOutput = "";
     createValidatedHandler({
       validate: generic.baseActions.createInputValidator,
       run: async () => {
@@ -109,6 +111,7 @@ export function usePhpPlaygroundActions({
         generic.setIsProcessing(false);
 
         if (!result.ok) {
+          partialOutput = result.error.output ?? "";
           throw new Error(result.error.message);
         }
 
@@ -119,7 +122,7 @@ export function usePhpPlaygroundActions({
       onError: (message) => {
         generic.setIsProcessing(false);
         // Also reached when validation fails before `run`, so clear the previous result here.
-        setOutput("");
+        setOutput(partialOutput);
         setError(message);
       },
     })();

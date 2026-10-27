@@ -15,8 +15,12 @@ vi.mock("@php-wasm/universal", () => ({
 
 import { executePhp } from "./phpRuntime";
 
-/** Shape of what php-wasm returns. */
+/** Shape of what php-wasm returns, or throws on a non-zero exit code. */
 const response = (text: string, exitCode = 0) => ({ text, errors: "", exitCode });
+const failure = (text: string) =>
+  Object.assign(new Error("PHP.run() failed with exit code 255.\n\n=== Stdout ===\n ..."), {
+    response: response(text, 255),
+  });
 
 describe("executePhp", () => {
   beforeEach(() => {
@@ -55,6 +59,37 @@ describe("executePhp", () => {
     expect(result).toEqual({
       ok: true,
       value: "a\nNotice: Undefined variable: undef on line 2\nb",
+    });
+  });
+
+  it("reports a fatal error as one plain line and keeps the output printed before it", async () => {
+    run.mockRejectedValue(
+      failure(
+        "before\n\nFatal error: Uncaught Error: Call to undefined function nope() in /internal/eval.php:2\nStack trace:\n#0 {main}\n  thrown in /internal/eval.php on line 2\n",
+      ),
+    );
+
+    const result = await executePhp('echo "before\n";\nnope();');
+
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        message: "Fatal error: Uncaught Error: Call to undefined function nope() on line 2",
+        output: "before\n",
+      },
+    });
+  });
+
+  it("reports a parse error without output", async () => {
+    run.mockRejectedValue(
+      failure("\nParse error: syntax error, unexpected ';' in /internal/eval.php on line 2\n"),
+    );
+
+    const result = await executePhp("echo 1;\n$a = ;");
+
+    expect(result).toEqual({
+      ok: false,
+      error: { message: "Parse error: syntax error, unexpected ';' on line 2" },
     });
   });
 });

@@ -8,7 +8,8 @@
 import type { Result } from "@/types/common";
 import { serviceMessage } from "@/services/serviceMessage";
 
-export type PhpExecResult = Result<string, { message: string }>;
+/** `output` holds what the script printed before a fatal error. */
+export type PhpExecResult = Result<string, { message: string; output?: string }>;
 
 export interface PhpExecRequest {
   code: string;
@@ -32,6 +33,19 @@ export const PHP_VERSION = "7.4";
  * Print them as plain text, once, in order with the script's output.
  */
 const PHP_INI_ENTRIES = { html_errors: "0", log_errors: "0" };
+
+/**
+ * A fatal or parse error ends the script: report its first line as the error
+ * and keep whatever the script printed before it.
+ */
+function toFailure(text: string): PhpExecResult {
+  const match = /(^|\n)((?:Fatal|Parse) error: [^\n]*)/.exec(text);
+  if (!match) {
+    return { ok: false, error: { message: text.trim() } };
+  }
+  const output = text.slice(0, match.index);
+  return { ok: false, error: output ? { message: match[2], output } : { message: match[2] } };
+}
 
 /** Drop php-wasm's internal script path from PHP error messages. */
 function stripInternalPaths(text: string): string {
@@ -80,6 +94,9 @@ export async function executePhp(
 
     return { ok: true, value: output || PHP_NO_OUTPUT };
   } catch (error) {
+    // php-wasm throws on a non-zero exit code; the error carries the response.
+    const failed = (error as { response?: { text?: string } } | null)?.response?.text;
+    if (failed) return toFailure(stripInternalPaths(failed));
     const message = error instanceof Error ? error.message : String(error);
     return { ok: false, error: { message } };
   }
