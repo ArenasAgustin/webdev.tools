@@ -47,6 +47,8 @@ const esTranslations: Record<string, string> = {
   "base64.errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
   "base64.errorInvalidPadding": "La entrada tiene un padding Base64 inválido",
   "base64.errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido",
+  "base64.errorFileTooLarge": "El archivo supera el máximo de {{max}} MB",
+  "base64.errorFileUnreadable": "No se pudo leer el archivo",
 };
 
 vi.mock("react-i18next", () => ({
@@ -60,6 +62,7 @@ vi.mock("react-i18next", () => ({
 }));
 
 import { Base64Playground } from "./Base64Playground";
+import { MAX_FILE_BYTES } from "./base64.utils";
 
 describe("Base64Playground branches (text mode)", () => {
   beforeEach(() => {
@@ -335,5 +338,42 @@ describe("Base64Playground branches (file mode)", () => {
 
     expect(screen.queryByText("slow.txt")).not.toBeInTheDocument();
     expect(screen.getByLabelText<HTMLTextAreaElement>("Salida").value).toBe("");
+  });
+
+  it("rejects a file over the size limit with a translated error instead of reading it", async () => {
+    render(<Base64Playground />);
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+
+    const file = new File(["x"], "huge.bin");
+    Object.defineProperty(file, "size", { value: MAX_FILE_BYTES + 1 });
+    const readSpy = vi.spyOn(file, "arrayBuffer");
+    const fileInput = document.querySelector('input[type="file"]');
+    if (!fileInput) throw new Error("file input not found");
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } });
+    });
+
+    expect(readSpy).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent("El archivo supera el máximo de 10 MB");
+    expect(screen.getByLabelText<HTMLTextAreaElement>("Salida").value).toBe("");
+  });
+
+  it("shows a translated error when the file cannot be read", async () => {
+    render(<Base64Playground />);
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+
+    const file = new File(["x"], "broken.bin");
+    Object.defineProperty(file, "arrayBuffer", {
+      value: () => Promise.reject(new DOMException("read failed", "NotReadableError")),
+    });
+    const fileInput = document.querySelector('input[type="file"]');
+    if (!fileInput) throw new Error("file input not found");
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } });
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo leer el archivo");
   });
 });

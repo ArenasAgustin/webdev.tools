@@ -35,6 +35,13 @@ export class Base64Error extends Error {
   }
 }
 
+/**
+ * Largest file accepted in file mode (10 MB). The whole Base64 output (~13.4 MB)
+ * lives in a textarea, and much larger inputs exceed the engine's max string
+ * length (RangeError) or freeze the page.
+ */
+export const MAX_FILE_BYTES = 10 * 1024 * 1024;
+
 /** Max chunk size passed to String.fromCharCode.apply to avoid call-stack overflow. */
 const CHUNK_SIZE = 0x8000;
 

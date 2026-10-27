@@ -343,7 +343,9 @@
     "errorInvalidCharacter": "La entrada contiene un carácter fuera del alfabeto Base64",
     "errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
     "errorInvalidPadding": "La entrada tiene un padding Base64 inválido",
-    "errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido"
+    "errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido",
+    "errorFileTooLarge": "El archivo supera el máximo de {{max}} MB",
+    "errorFileUnreadable": "No se pudo leer el archivo"
   },
   "url": {
     "modeGroupLabel": "Modo de conversión",
