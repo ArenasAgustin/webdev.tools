@@ -71,8 +71,6 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
     let indentLevel = 0;
     const formatted: string[] = [];
 
-    const decreaseKeywordsRegex = /^(break|continue|return|throw|goto)\s*;?$/;
-
     let heredocLabel: string | null = null;
 
     for (const line of lines) {
@@ -118,13 +116,6 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       const trailingClose = trimmed.startsWith("}") ? braces.close - 1 : braces.close;
       if (trailingClose > 0) {
         indentLevel = Math.max(0, indentLevel - trailingClose);
-      }
-
-      // Decrease indent AFTER certain keywords
-      if (decreaseKeywordsRegex.exec(trimmed)) {
-        if (indentLevel > 0) {
-          indentLevel--;
-        }
       }
     }
 
@@ -222,10 +213,8 @@ function countOuterBraces(line: string): { open: number; close: number } {
         i += 2; // Skip escaped character
         continue;
       }
-      // Check for {$ or {$ - start of interpolation
+      // `${expr}` interpolation: its braces are part of the string, skip them
       if (ch === "$" && line[i + 1] === "{") {
-        // This { is an interpolation, count it
-        open++;
         i += 2;
         // Find matching }
         let braceCount = 1;
