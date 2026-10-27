@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Container } from "@/components/common/Container";
 import { LazyDiffEditor } from "@/components/editor/LazyDiffEditor";
 
@@ -17,6 +18,8 @@ export function ExpandedDiffModal({
   language,
   onClose,
 }: ExpandedDiffModalProps) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!onClose) return;
     const handler = (e: KeyboardEvent) => {
@@ -31,7 +34,7 @@ export function ExpandedDiffModal({
 
   return (
     <Container
-      title="Diferencias"
+      title={t("editor.diffTitle")}
       icon="code-compare"
       iconColor="purple-400"
       actions={actions}

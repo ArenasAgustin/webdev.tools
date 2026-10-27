@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { usePlaygroundActions, type ToastApi } from "./usePlaygroundActions";
 import { useTransformActions } from "./useTransformActions";
 import { createTransformHandler } from "@/utils/createTransformHandler";
+import { translate } from "@/i18n/translate";
 
 export interface PlaygroundFileConfig {
   /** Input file name for download (e.g. "styles.css") */
@@ -64,11 +65,9 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
     // fail instead of "succeeding" with an empty result.
     validateInput: useCallback(() => {
       if (!input.trim()) {
-        return `No hay ${language} para procesar`;
+        return translate("messages.noInputToProcess", { language });
       }
-      return inputTooLarge
-        ? (inputTooLargeMessage ?? "El contenido es demasiado grande para procesarlo.")
-        : null;
+      return inputTooLarge ? (inputTooLargeMessage ?? translate("messages.inputTooLarge")) : null;
     }, [input, language, inputTooLarge, inputTooLargeMessage]),
   });
 
@@ -79,21 +78,21 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
 
   const handleUseOutputAsInput = useCallback(() => {
     if (!output) {
-      toast?.error("No hay resultado para usar como entrada");
+      toast?.error(translate("messages.noOutputToUseAsInput"));
       return;
     }
     setInput(output);
-    toast?.success("Resultado cargado como entrada");
+    toast?.success(translate("messages.outputLoadedAsInput"));
   }, [output, setInput, toast]);
 
   const handleUseInputAsOutput = useCallback(() => {
     if (!input) {
-      toast?.error("No hay entrada para usar como resultado");
+      toast?.error(translate("messages.noInputToUseAsOutput"));
       return;
     }
     setOutput(input);
     setError(null);
-    toast?.success("Entrada cargada como resultado");
+    toast?.success(translate("messages.inputLoadedAsOutput"));
   }, [input, setOutput, setError, toast]);
 
   const handleImportFile = useCallback(
@@ -102,17 +101,17 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       const allowed = acceptExtensions.split(",").map((e) => e.trim().toLowerCase());
 
       if (!allowed.includes(ext)) {
-        toast?.error(`Archivo no válido. Extensiones aceptadas: ${acceptExtensions}`);
+        toast?.error(translate("messages.invalidFile", { extensions: acceptExtensions }));
         return;
       }
 
       const reader = new FileReader();
       reader.onload = () => {
         setInput(reader.result as string);
-        toast?.success(`Archivo "${file.name}" cargado`);
+        toast?.success(translate("messages.fileLoaded", { name: file.name }));
       };
       reader.onerror = () => {
-        toast?.error("Error al leer el archivo");
+        toast?.error(translate("messages.fileReadError"));
       };
       reader.readAsText(file);
     },
@@ -122,8 +121,8 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
   const handleCopyOutput = useCallback(() => {
     baseActions.handleCopy({
       text: output,
-      successMessage: "Resultado copiado al portapapeles",
-      validate: () => (!output ? "No hay resultado para copiar" : null),
+      successMessage: translate("messages.outputCopied"),
+      validate: () => (!output ? translate("messages.noOutputToCopy") : null),
     });
   }, [baseActions, output]);
 
@@ -132,8 +131,8 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       content: input,
       fileName: inputFileName,
       mimeType,
-      successMessage: `Descargado como ${inputFileName}`,
-      validate: () => (!input ? `No hay ${language} para descargar` : null),
+      successMessage: translate("messages.downloadedAs", { fileName: inputFileName }),
+      validate: () => (!input ? translate("messages.noInputToDownload", { language }) : null),
     });
   }, [baseActions, input, inputFileName, mimeType, language]);
 
@@ -142,8 +141,8 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       content: output,
       fileName: outputFileName,
       mimeType,
-      successMessage: `Descargado como ${outputFileName}`,
-      validate: () => (!output ? "No hay resultado para descargar" : null),
+      successMessage: translate("messages.downloadedAs", { fileName: outputFileName }),
+      validate: () => (!output ? translate("messages.noOutputToDownload") : null),
     });
   }, [baseActions, output, outputFileName, mimeType]);
 
@@ -154,8 +153,8 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       setOutput,
       setError,
       autoCopy: formatConfig.autoCopy,
-      successMessage: `${language} formateado correctamente`,
-      errorMessage: `Error al formatear ${language}`,
+      successMessage: translate("messages.formatted", { language }),
+      errorMessage: translate("messages.formatError", { language }),
     });
   }, [runTransformAction, input, formatConfig, setError, setOutput, formatRunner, language]);
 
@@ -166,8 +165,8 @@ export function useGenericPlaygroundActions<TFormat, TMinify>({
       setOutput,
       setError,
       autoCopy: minifyConfig.autoCopy,
-      successMessage: `${language} minificado correctamente`,
-      errorMessage: `Error al minificar ${language}`,
+      successMessage: translate("messages.minified", { language }),
+      errorMessage: translate("messages.minifyError", { language }),
     });
   }, [runTransformAction, input, minifyConfig, setError, setOutput, minifyRunner, language]);
 

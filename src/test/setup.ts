@@ -2,6 +2,8 @@ import "@testing-library/jest-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { vi, afterEach } from "vitest";
+import esTranslations from "../locales/es/translation.json";
+import enTranslations from "../locales/en/translation.json";
 
 // Catch and ignore unhandled worker errors from tinypool that cause CI failures
 // This is a known issue with Vitest under memory pressure
@@ -539,3 +541,9 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
     escapeValue: false,
   },
 });
+
+// Fill keys missing from the inline map with the real locale files, so code that
+// translates outside components (src/i18n/translate.ts) resolves real copy.
+// No overwrite: inline entries above keep precedence.
+i18n.addResourceBundle("es", "translation", esTranslations, true, false);
+i18n.addResourceBundle("en", "translation", enTranslations, true, false);

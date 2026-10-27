@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { validateSqlAsync } from "@/services/sql/worker";
 import { compactTransformError } from "@/utils/transformError";
+import { translate } from "@/i18n/translate";
 
 export interface SqlParserState {
   valid: boolean;
@@ -37,7 +38,11 @@ export function useSqlParser(input: string): SqlParserState {
           setInternal({
             validatedSource: source,
             valid: false,
-            error: `Error de sintaxis: ${compactTransformError(result.error ?? "SQL inválido")}`,
+            error: translate("validation.syntaxError", {
+              message: compactTransformError(
+                result.error ?? translate("editor.invalidLabel", { language: "SQL" }),
+              ),
+            }),
           });
         }
       })
@@ -48,7 +53,7 @@ export function useSqlParser(input: string): SqlParserState {
         setInternal({
           validatedSource: source,
           valid: false,
-          error: `Error de sintaxis: ${compactTransformError(message)}`,
+          error: translate("validation.syntaxError", { message: compactTransformError(message) }),
         });
       });
 

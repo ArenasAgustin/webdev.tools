@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { downloadFile } from "@/utils/download";
 import { createValidatedHandler } from "@/utils/handlerFactory";
+import { translate } from "@/i18n/translate";
 
 /**
  * Toast API interface
@@ -74,7 +75,7 @@ export function usePlaygroundActions<TInput = string>({
   const handleClearInput = useCallback(() => {
     setInput("" as TInput);
     onClearOutputs?.();
-    toast?.success("Entrada limpiada");
+    toast?.success(translate("messages.inputCleared"));
   }, [setInput, onClearOutputs, toast]);
 
   /**
@@ -83,7 +84,7 @@ export function usePlaygroundActions<TInput = string>({
   const handleLoadExample = useCallback(() => {
     setInput(exampleContent);
     onClearOutputs?.();
-    toast?.success("Ejemplo cargado");
+    toast?.success(translate("messages.exampleLoaded"));
   }, [setInput, exampleContent, onClearOutputs, toast]);
 
   /**
@@ -91,16 +92,16 @@ export function usePlaygroundActions<TInput = string>({
    */
   const handleCopy = useCallback(
     (options: CopyOptions) => {
-      const { text, successMessage = "Copiado al portapapeles", validate } = options;
+      const { text, successMessage = translate("messages.copied"), validate } = options;
 
       createValidatedHandler({
-        validate: validate ?? (() => (!text ? "No hay contenido para copiar" : null)),
+        validate: validate ?? (() => (!text ? translate("messages.noContentToCopy") : null)),
         run: async () => {
           await navigator.clipboard.writeText(text);
         },
         toast,
         successMessage,
-        errorMessage: "Error al copiar al portapapeles",
+        errorMessage: translate("messages.copyError"),
       })();
     },
     [toast],
@@ -115,12 +116,12 @@ export function usePlaygroundActions<TInput = string>({
         content,
         fileName,
         mimeType,
-        successMessage = `Descargado como ${fileName}`,
+        successMessage = translate("messages.downloadedAs", { fileName }),
         validate,
       } = options;
 
       createValidatedHandler({
-        validate: validate ?? (() => (!content ? "No hay contenido para descargar" : null)),
+        validate: validate ?? (() => (!content ? translate("messages.noContentToDownload") : null)),
         run: () => {
           downloadFile(content, fileName, mimeType);
         },

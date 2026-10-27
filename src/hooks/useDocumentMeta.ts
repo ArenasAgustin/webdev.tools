@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { translate } from "@/i18n/translate";
 
 export interface DocumentMetaOptions {
   title: string;
@@ -14,8 +15,6 @@ export interface DocumentMetaOptions {
 }
 
 const BASE_TITLE = "webdev.tools";
-const BASE_DESCRIPTION =
-  "Suite de herramientas online para desarrolladores: formatear JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador.";
 const BASE_URL = "https://webdev.tools";
 
 /**
@@ -26,7 +25,7 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
   useEffect(() => {
     const {
       title,
-      description = BASE_DESCRIPTION,
+      description = translate("page.meta.defaultDescription"),
       keywords,
       ogTitle,
       ogDescription,

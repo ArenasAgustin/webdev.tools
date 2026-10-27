@@ -52,7 +52,7 @@ export const CodeEditor = memo(function CodeEditor({
         }}
         loading={
           <div className="w-full h-full flex items-center justify-center bg-black/40 text-white text-xs">
-            {placeholder ?? "Cargando editor..."}
+            {placeholder ?? t("editor.loading")}
           </div>
         }
       />

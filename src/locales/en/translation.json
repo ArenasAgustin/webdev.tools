@@ -150,7 +150,10 @@
     "codeEditorLabel": "Code editor",
     "tabFocusHint": "Press Ctrl+M (Ctrl+Shift+M on macOS) to toggle whether Tab indents or moves focus.",
     "diffOriginalLabel": "Original code (read-only)",
-    "diffModifiedLabel": "Result code (read-only)"
+    "diffModifiedLabel": "Result code (read-only)",
+    "loading": "Loading editor...",
+    "diffTitle": "Differences",
+    "expandedPlaceholder": "{{title}} content..."
   },
   "password": {
     "aria": {
@@ -271,7 +274,8 @@
       "description": "{{description}}. Online tool for developers, no installation required. Part of webdev.tools.",
       "descriptionFallback": "Online web development tools",
       "keywords": "{{name}}, {{description}}, web developer tools online",
-      "keywordsFallback": "web developer tools"
+      "keywordsFallback": "web developer tools",
+      "defaultDescription": "Online tool suite for developers: format JSON, run JavaScript, and more. No installation, 100% in the browser."
     }
   },
   "offline": {
@@ -332,5 +336,38 @@
     "strict": "Strict (RFC 3986)",
     "errorMalformedSequence": "Input contains a malformed percent-encoded sequence",
     "errorInvalidSurrogate": "Input contains an unpaired UTF-16 surrogate"
+  },
+  "messages": {
+    "noInputToProcess": "No {{language}} to process",
+    "inputTooLarge": "The content is too large to process.",
+    "inputLarge": "Large input: some operations may be slow",
+    "inputExceedsLimit": "The content exceeds {{limit}}. Some operations may be slow.",
+    "noOutputToUseAsInput": "No output to use as input",
+    "outputLoadedAsInput": "Output loaded as input",
+    "noInputToUseAsOutput": "No input to use as output",
+    "inputLoadedAsOutput": "Input loaded as output",
+    "invalidFile": "Invalid file. Accepted extensions: {{extensions}}",
+    "fileLoaded": "File \"{{name}}\" loaded",
+    "fileReadError": "Error reading the file",
+    "inputCleared": "Input cleared",
+    "exampleLoaded": "Example loaded",
+    "copied": "Copied to clipboard",
+    "outputCopied": "Output copied to clipboard",
+    "noContentToCopy": "No content to copy",
+    "noOutputToCopy": "No output to copy",
+    "copyError": "Error copying to clipboard",
+    "downloadedAs": "Downloaded as {{fileName}}",
+    "noContentToDownload": "No content to download",
+    "noInputToDownload": "No {{language}} to download",
+    "noOutputToDownload": "No output to download",
+    "formatted": "{{language}} formatted successfully",
+    "formatError": "Error formatting {{language}}",
+    "minified": "{{language}} minified successfully",
+    "minifyError": "Error minifying {{language}}",
+    "genericError": "An error occurred"
+  },
+  "validation": {
+    "syntaxError": "Syntax error: {{message}}",
+    "invalidCode": "Invalid code"
   }
 }
