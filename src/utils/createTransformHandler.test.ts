@@ -136,6 +136,21 @@ describe("createTransformHandler", () => {
     expect(setError).toHaveBeenCalledWith("Some long");
   });
 
+  it("onError clears the previous output so it is not shown as the current result", () => {
+    createTransformHandler({
+      runTransformAction,
+      run: () => Promise.resolve("result"),
+      setOutput,
+      setError,
+      successMessage: "ok",
+      errorMessage: "fail",
+    });
+
+    capturedConfig.onError("Unexpected token");
+
+    expect(setOutput).toHaveBeenCalledWith("");
+  });
+
   it("passes the run function through", () => {
     const run = vi.fn().mockResolvedValue("output");
 

@@ -39,6 +39,8 @@ export function createTransformHandler({
       }
     },
     onError: (message) => {
+      // Drop the previous result so it is not mistaken for the output of this run.
+      setOutput("");
       setError(compactTransformError(message));
     },
     successMessage,

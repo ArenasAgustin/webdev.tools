@@ -83,6 +83,9 @@ export function useJsPlaygroundActions({
 
   // Extensión: ejecutar código JS
   const handleExecute = () => {
+    // Clear before validating: a rejected input must not leave the previous result on screen.
+    // Output printed before a runtime failure is set again in `run` below.
+    setOutput("");
     createValidatedHandler({
       validate: generic.baseActions.createInputValidator,
       run: async () => {

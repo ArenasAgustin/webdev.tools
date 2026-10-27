@@ -151,6 +151,7 @@ export function useJsonPlaygroundActions({
         void addToHistory(jsonPathExpression);
       },
       onError: (message) => {
+        setOutput("");
         setError(compactTransformError(message));
       },
       toast,
@@ -188,6 +189,7 @@ export function useJsonPlaygroundActions({
           void addToHistory(expression);
         },
         onError: (message) => {
+          setOutput("");
           setError(compactTransformError(message));
         },
         toast,
