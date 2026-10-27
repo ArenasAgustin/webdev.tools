@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 const storedValues: Record<string, unknown> = {};
 
@@ -68,5 +68,18 @@ describe("ColorsPlayground persistence", () => {
 
     const picker = screen.getByTestId("color-picker");
     expect(picker.dataset.color).toBe("#3498db");
+  });
+
+  it("persists only valid input, never the invalid text being typed", () => {
+    render(<ColorsPlayground />);
+
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "#00ff00" } });
+    fireEvent.change(input, { target: { value: "#00ff0" } });
+
+    expect(input).toHaveValue("#00ff0");
+    expect(setItemMock).toHaveBeenCalledWith("colorsInput", "#00ff00");
+    expect(setItemMock).not.toHaveBeenCalledWith("colorsInput", "#00ff0");
+    expect(storedValues.colorsInput).toBe("#00ff00");
   });
 });

@@ -228,7 +228,8 @@
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
-    "copy": "Copiar {{format}}"
+    "copy": "Copiar {{format}}",
+    "invalidColor": "Color no válido. Usá HEX, RGB, HSL, HSV o CMYK."
   },
   "html": {
     "previewLabel": "Vista previa",

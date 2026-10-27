@@ -9,32 +9,47 @@ import { STORAGE_KEYS } from "@/services/storage";
 
 export function ColorsPlayground() {
   const { t } = useTranslation();
-  const [input, setInput] = usePersistedState(STORAGE_KEYS.COLORS_INPUT, colorsConfig.example);
-  // Derive initial color from `input` (already loaded by usePersistedState above).
-  // React guarantees sequential useState execution, so `input` is populated before
+  // Only valid colors are persisted; the text box itself may hold an invalid draft.
+  const [storedInput, setStoredInput] = usePersistedState(
+    STORAGE_KEYS.COLORS_INPUT,
+    colorsConfig.example,
+  );
+  const [input, setInput] = useState(storedInput);
+  // Derive initial color from the stored input (already loaded by usePersistedState above).
+  // React guarantees sequential useState execution, so it is populated before
   // this lazy initializer runs. Avoids a redundant getItem call.
-  const [color, setColor] = useState<string>(() => convertColor(input)?.hex ?? "#3498db");
+  const [color, setColor] = useState<string>(() => convertColor(storedInput)?.hex ?? "#3498db");
 
-  const handleInputChange = useCallback((value: string) => {
-    setInput(value);
-    try {
-      const formats = convertColor(value);
-      if (formats) {
-        setColor(formats.hex);
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInput(value);
+      try {
+        const formats = convertColor(value);
+        if (formats) {
+          setColor(formats.hex);
+          setStoredInput(value);
+        }
+      } catch (err) {
+        console.warn("Invalid color input:", err);
       }
-    } catch (err) {
-      console.warn("Invalid color input:", err);
-    }
-  }, [setInput]);
+    },
+    [setStoredInput],
+  );
 
-  const handleColorChange = useCallback((newColor: string) => {
-    setColor(newColor);
-    setInput(newColor);
-  }, [setInput]);
+  const handleColorChange = useCallback(
+    (newColor: string) => {
+      setColor(newColor);
+      setInput(newColor);
+      setStoredInput(newColor);
+    },
+    [setStoredInput],
+  );
 
   // While the text input is invalid, keep showing the last valid color (hex, possibly with alpha).
+  const inputFormats = convertColor(input);
+  const isInvalid = input.trim() !== "" && inputFormats === null;
   const displayFormats: ColorFormats =
-    convertColor(input) ?? convertColor(color) ?? getAllFormats({ r: 0, g: 0, b: 0 });
+    inputFormats ?? convertColor(color) ?? getAllFormats({ r: 0, g: 0, b: 0 });
 
   const { copy: copyToClipboard } = useClipboardCopy();
 
@@ -50,7 +65,14 @@ export function ColorsPlayground() {
           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono text-center focus:outline-none focus:ring-1 focus:ring-cyan-400"
           placeholder={t("colors.placeholder")}
           spellCheck={false}
+          aria-invalid={isInvalid}
+          aria-describedby={isInvalid ? "colors-input-error" : undefined}
         />
+        {isInvalid && (
+          <p id="colors-input-error" role="alert" className="text-red-400 text-sm">
+            {t("colors.invalidColor")}
+          </p>
+        )}
         {/* Preview swatch */}
         <div
           className="w-full h-16 rounded-xl border border-white/20 shadow-lg"
