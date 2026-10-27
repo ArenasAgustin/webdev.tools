@@ -115,6 +115,22 @@ describe("useSqlPlaygroundActions", () => {
     expect(result.current.isFirstRun).toBe(false);
   });
 
+  it("execute error toast shows a compact message, the panel keeps the details", async () => {
+    const error = `Parse error on line 1:\n${"SELEKT * FROM users\n^---\n".repeat(200)}`;
+    executeSqlAsyncMock.mockResolvedValue({ ok: false, error });
+    const props = makeProps({ inputSql: "SELEKT * FROM users" });
+    const { result } = renderHook(() => useSqlPlaygroundActions(props));
+
+    act(() => {
+      result.current.handleExecute();
+    });
+
+    await waitFor(() => {
+      expect(props.toast.error).toHaveBeenCalledWith("Parse error on line 1:");
+    });
+    expect(props.setError).toHaveBeenCalledWith(error);
+  });
+
   it("execute with empty input shows error toast and does not call executeSqlAsync", () => {
     const props = makeProps({ inputSql: "" });
     const { result } = renderHook(() => useSqlPlaygroundActions(props));

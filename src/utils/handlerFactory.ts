@@ -1,3 +1,5 @@
+import { compactTransformError } from "./transformError";
+
 type MaybePromise<T> = T | Promise<T>;
 
 interface ResultLike {
@@ -56,7 +58,8 @@ export function createValidatedHandler<TResult>(
 
   return () => {
     const fail = (message: string) => {
-      toast?.error(message);
+      // Parser errors can span thousands of lines; the toast only gets the first one.
+      toast?.error(compactTransformError(message));
       const effect = onError?.(message);
       if (isPromiseLike<void>(effect)) {
         void effect;

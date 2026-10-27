@@ -10,6 +10,7 @@ import {
   useGenericPlaygroundActions,
   type PlaygroundFileConfig,
 } from "./useGenericPlaygroundActions";
+import { compactTransformError } from "@/utils/transformError";
 import type { ToastApi } from "./usePlaygroundActions";
 import type { SqlFormatConfig, SqlMinifyConfig, SqlExecuteResult } from "@/types/sql";
 
@@ -101,8 +102,9 @@ export function useSqlPlaygroundActions({
         } else {
           // Drop the previous result so the error is not shown next to stale rows.
           setOutput("");
+          // The panel keeps the full parser message; the toast only gets its first line.
           setError(result.error);
-          toast?.error(result.error);
+          toast?.error(compactTransformError(result.error));
         }
       })
       .catch((err: unknown) => {
@@ -111,7 +113,7 @@ export function useSqlPlaygroundActions({
         const message = err instanceof Error ? err.message : String(err);
         setOutput("");
         setError(message);
-        toast?.error(message);
+        toast?.error(compactTransformError(message));
       });
   }, [inputSql, inputTooLarge, inputTooLargeMessage, setError, setOutput, toast]);
 

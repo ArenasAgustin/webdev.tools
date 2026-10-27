@@ -94,6 +94,25 @@ describe("createValidatedHandler", () => {
     expect(toast.error).toHaveBeenCalledWith("boom");
   });
 
+  it("shows only a compact first line of a huge error in the toast", () => {
+    const toast = { success: vi.fn(), error: vi.fn() };
+    const onError = vi.fn();
+    const message = `Parse error at token: «EOF» at line 1 column 16\n${"expected token\n".repeat(500)}`;
+
+    const handler = createValidatedHandler({
+      run: () => {
+        throw new Error(message);
+      },
+      toast,
+      onError,
+    });
+
+    handler();
+
+    expect(toast.error).toHaveBeenCalledWith("Parse error at token: «EOF» at line 1 column 16");
+    expect(onError).toHaveBeenCalledWith(message);
+  });
+
   it("handles thrown string errors", () => {
     const toast = { success: vi.fn(), error: vi.fn() };
 
