@@ -12,6 +12,7 @@ import { cleanJsAsync } from "@/services/js/worker";
 import { runJavaScript } from "@/services/js/execute";
 import type { JsExecRequest, JsExecResponse, JsRunResult } from "@/services/js/execute";
 import { translate } from "@/i18n/translate";
+import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
 const JS_EXEC_TIMEOUT_MS = 5000;
 
@@ -113,7 +114,7 @@ export function useJsPlaygroundActions({
       },
       onError: (message) => {
         generic.endProcessing();
-        setError(message.replace(/^Error:\s*/, ""));
+        setError(message);
       },
     })();
   };
@@ -160,7 +161,7 @@ class JsExecutionError extends Error {
 
 function toExecutionError(result: JsRunResult): JsExecutionError {
   return new JsExecutionError(
-    result.error ?? translate("messages.js.unknownError"),
+    result.error ? localizeServiceMessage(result.error) : translate("messages.js.unknownError"),
     result.output,
   );
 }

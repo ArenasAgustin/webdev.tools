@@ -1,4 +1,4 @@
-import { formatValue, runJavaScript } from "@/services/js/execute";
+import { describeError, runJavaScript } from "@/services/js/execute";
 import type { JsExecRequest, JsExecResponse } from "@/services/js/execute";
 
 const ctx = self as unknown as {
@@ -36,8 +36,7 @@ let unhandledRejection: string | null = null;
 // error in the host page; report it as the run's error instead.
 ctx.addEventListener("unhandledrejection", (event) => {
   event.preventDefault();
-  const reason: unknown = event.reason;
-  unhandledRejection ??= reason instanceof Error ? reason.message : formatValue(reason);
+  unhandledRejection ??= describeError(event.reason);
 });
 
 // `unhandledrejection` is dispatched as its own task, which can land after the

@@ -181,8 +181,8 @@ describe("JsPlayground branches", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(100);
     });
-    expect(screen.getByTestId("error-code").textContent).toBe("Boom");
-    expect(toastMocks.error).toHaveBeenCalledWith("Boom");
+    expect(screen.getByTestId("error-code").textContent).toBe("Error: Boom (línea 1)");
+    expect(toastMocks.error).toHaveBeenCalledWith("Error: Boom (línea 1)");
   });
 
   it("handles copy and download input and output branches", async () => {

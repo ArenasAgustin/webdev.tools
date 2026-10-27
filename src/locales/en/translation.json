@@ -464,7 +464,8 @@
       "parseError": "Could not parse the JavaScript code",
       "formatError": "Error formatting code",
       "minifyUnavailable": "Terser minify is not available",
-      "cleanError": "Error cleaning code: {{message}}"
+      "cleanError": "Error cleaning code: {{message}}",
+      "runtimeErrorAtLine": "{{message}} (line {{line}})"
     },
     "php": {
       "empty": "The PHP code is empty",
