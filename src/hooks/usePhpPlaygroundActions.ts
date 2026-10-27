@@ -120,6 +120,8 @@ export function usePhpPlaygroundActions({
       successMessage: "Código PHP ejecutado correctamente",
       onError: (message) => {
         generic.setIsProcessing(false);
+        // Also reached when validation fails before `run`, so clear the previous result here.
+        setOutput("");
         setError(message);
       },
     })();
