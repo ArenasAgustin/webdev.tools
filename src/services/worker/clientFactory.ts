@@ -1,3 +1,5 @@
+import { translate } from "@/i18n/translate";
+
 /**
  * Default time a request may wait for a worker response before it is rejected.
  * Generous on purpose: the same client carries SQL execute, whose first call
@@ -97,7 +99,9 @@ export function createWorkerClient<
   const run = (payload: TPayload): Promise<TResponse> => {
     const instance = ensureWorker();
     if (!instance) {
-      return Promise.reject(new Error(options.unavailableMessage ?? "Worker no disponible"));
+      return Promise.reject(
+        new Error(options.unavailableMessage ?? translate("services.worker.unavailable")),
+      );
     }
 
     const id = createId();

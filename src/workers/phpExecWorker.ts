@@ -1,5 +1,5 @@
-import { executePhp } from "@/services/php/phpExecutor";
-import type { PhpExecRequest, PhpExecResponse } from "@/services/php/phpExecutor";
+import { executePhp } from "@/services/php/phpRuntime";
+import type { PhpExecRequest, PhpExecResponse } from "@/services/php/phpRuntime";
 
 const ctx = self as unknown as {
   postMessage: (message: PhpExecResponse) => void;

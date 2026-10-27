@@ -1,5 +1,6 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
+import { serviceMessage } from "@/services/serviceMessage";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 import { minify_sync as terserMinifySync } from "terser";
 import * as babelParser from "@babel/parser";
@@ -50,7 +51,7 @@ export async function formatJs(
     return { ok: true, value: formatted };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || "Error al formatear código" };
+    return { ok: false, error: message || serviceMessage("services.js.formatError") };
   }
 }
 
@@ -64,7 +65,7 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
 
     const minifySyncUnknown: unknown = terserMinifySync;
     if (typeof minifySyncUnknown !== "function") {
-      return { ok: false, error: "Terser minify no está disponible" };
+      return { ok: false, error: serviceMessage("services.js.minifyUnavailable") };
     }
 
     const minifySync = minifySyncUnknown as TerserSyncMinifyFn;
@@ -87,8 +88,8 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
 }
 
 const JS_ERROR_MESSAGES = {
-  EMPTY_INPUT: "El código JavaScript está vacío",
-  PARSE_ERROR: "No se pudo parsear el código JavaScript",
+  EMPTY_INPUT: serviceMessage("services.js.empty"),
+  PARSE_ERROR: serviceMessage("services.js.parseError"),
 } as const;
 
 /**
@@ -342,6 +343,6 @@ export function cleanJs(input: string, options: JsCleanOptions = {}): Result<str
     return { ok: true, value: result };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: `Error al limpiar código: ${message}` };
+    return { ok: false, error: serviceMessage("services.js.cleanError", { message }) };
   }
 }

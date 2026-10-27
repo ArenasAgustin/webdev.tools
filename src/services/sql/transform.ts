@@ -7,6 +7,7 @@ import { format as sqlFormat } from "sql-formatter";
 import type { Result } from "@/types/common";
 import type { SqlFormatConfig } from "@/types/sql";
 import { DEFAULT_SQL_FORMAT_CONFIG } from "@/types/sql";
+import { serviceMessage } from "@/services/serviceMessage";
 
 /**
  * Format SQL using sql-formatter.
@@ -42,7 +43,7 @@ export function formatSql(input: string, config: SqlFormatConfig): Result<string
  */
 export function validateSql(input: string): Result<void, string> {
   if (!input.trim()) {
-    return { ok: false, error: "El SQL está vacío" };
+    return { ok: false, error: serviceMessage("services.sql.empty") };
   }
 
   const result = formatSql(input, DEFAULT_SQL_FORMAT_CONFIG);

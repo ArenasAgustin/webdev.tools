@@ -328,7 +328,7 @@ describe("cleanJson", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.message).toBe("El JSON está vacío");
+      expect(result.error.message).toBe("services.json.empty");
     }
   });
 
@@ -390,7 +390,7 @@ describe("sortJsonKeys", () => {
 
 describe("JSON_ERROR_MESSAGES", () => {
   it("should have EMPTY_INPUT message", () => {
-    expect(JSON_ERROR_MESSAGES.EMPTY_INPUT).toBe("El JSON está vacío");
+    expect(JSON_ERROR_MESSAGES.EMPTY_INPUT).toBe("services.json.empty");
   });
 });
 
@@ -475,7 +475,7 @@ describe("parseJson", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.message).toBe("El JSON está vacío");
+      expect(result.error.message).toBe("services.json.empty");
     }
   });
 
@@ -484,7 +484,7 @@ describe("parseJson", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.message).toBe("El JSON está vacío");
+      expect(result.error.message).toBe("services.json.empty");
     }
   });
 

@@ -191,7 +191,8 @@ describe("cleanCss", () => {
   it("returns error for empty input", () => {
     const result = cleanCss("   ");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error).toContain("vacío");
+    // Worker-safe transforms return a message key; services localize it.
+    if (!result.ok) expect(result.error).toBe("services.css.empty");
   });
 
   it("removes empty rules by default", () => {

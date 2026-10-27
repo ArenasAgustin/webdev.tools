@@ -10,5 +10,5 @@ export type CssMinifyOptions = Partial<Pick<CssMinifyConfig, "removeComments" | 
 export const cssService = createPlaygroundService<CssFormatOptions, CssMinifyOptions>({
   format: (input, indentSize) => formatCssAsync(input, indentSize ?? 2),
   minify: (input, options) => minifyCssAsync(input, options ?? {}),
-  emptyMessage: "No hay CSS para procesar",
+  emptyMessage: "services.css.noInput",
 });

@@ -1,5 +1,6 @@
 import { JSONPath } from "jsonpath-plus";
 import { JSON_ERROR_MESSAGES } from "./transform";
+import { serviceMessage } from "@/services/serviceMessage";
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
 
 /**
@@ -20,7 +21,7 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
     return {
       ok: false,
       error: {
-        message: "La expresión JSONPath está vacía",
+        message: serviceMessage("services.json.jsonPathEmpty"),
       },
     };
   }
@@ -48,7 +49,7 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
     return {
       ok: false,
       error: {
-        message: `Error en JSONPath: ${errorMessage}`,
+        message: serviceMessage("services.json.jsonPathError", { message: errorMessage }),
       },
     };
   }

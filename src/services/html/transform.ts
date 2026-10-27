@@ -4,6 +4,7 @@ import { minifyCss } from "@/services/css/transform";
 import { minifyJs } from "@/services/js/transform";
 import type { HtmlMinifyConfig } from "@/types/html";
 import type { IndentStyle } from "@/types/format";
+import { serviceMessage } from "@/services/serviceMessage";
 
 interface HtmlFormatOptions {
   formatCss?: boolean;
@@ -293,7 +294,7 @@ function escapeRegExp(value: string): string {
 }
 
 const HTML_ERROR_MESSAGES = {
-  EMPTY_INPUT: "El HTML está vacío",
+  EMPTY_INPUT: serviceMessage("services.html.empty"),
 } as const;
 
 /**
@@ -389,6 +390,6 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
     return { ok: true, value: result };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: `Error al limpiar HTML: ${message}` };
+    return { ok: false, error: serviceMessage("services.html.cleanError", { message }) };
   }
 }

@@ -1,5 +1,6 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
+import { serviceMessage } from "@/services/serviceMessage";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 import { parse } from "css-tree";
 
@@ -81,7 +82,7 @@ export function minifyCss(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return Promise.resolve({ ok: false, error: message || "Error al minificar CSS" });
+    return Promise.resolve({ ok: false, error: message || serviceMessage("services.css.minifyError") });
   }
 }
 
@@ -178,7 +179,7 @@ function minifyCssString(source: string): string {
 }
 
 const CSS_ERROR_MESSAGES = {
-  EMPTY_INPUT: "El CSS está vacío",
+  EMPTY_INPUT: serviceMessage("services.css.empty"),
 } as const;
 
 /**
@@ -242,6 +243,6 @@ export function cleanCss(input: string, options: CssCleanOptions = {}): Result<s
     return { ok: true, value: result };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: `Error al limpiar CSS: ${message}` };
+    return { ok: false, error: serviceMessage("services.css.cleanError", { message }) };
   }
 }

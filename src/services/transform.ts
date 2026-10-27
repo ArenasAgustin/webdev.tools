@@ -3,6 +3,7 @@
  */
 
 import type { Result } from "@/types/common";
+import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -42,20 +43,35 @@ export interface PlaygroundTransformService<
 export function createPlaygroundService<TFormat, TMinify>(config: {
   format: (input: string, options?: TFormat) => Promise<Result<string, { message: string }>>;
   minify: (input: string, options?: TMinify) => Promise<Result<string, { message: string }>>;
-  emptyMessage: string;
+  /** `services.*` key (see `serviceMessage`) reported when the input is blank. */
+  emptyMessage: `services.${string}`;
   validate?: ValidateFn<string>;
 }): PlaygroundTransformService<TFormat, TMinify, string> {
+  // Transforms may hand back locale-neutral message keys; this is the main-thread
+  // boundary where they become user-facing text.
+  const validate = config.validate;
   return {
     format: async (input, options) => {
       const result = await config.format(input, options);
-      return result.ok ? result : { ok: false, error: result.error.message };
+      return result.ok ? result : { ok: false, error: localizeServiceMessage(result.error.message) };
     },
     minify: async (input, options) => {
       const result = await config.minify(input, options);
-      return result.ok ? result : { ok: false, error: result.error.message };
+      return result.ok ? result : { ok: false, error: localizeServiceMessage(result.error.message) };
     },
-    validate: config.validate ?? createNonEmptyValidator(() => config.emptyMessage),
+    validate: validate
+      ? (input) => {
+          const result = validate(input);
+          return result instanceof Promise
+            ? result.then(localizeValidation)
+            : localizeValidation(result);
+        }
+      : createNonEmptyValidator(() => localizeServiceMessage(config.emptyMessage)),
   };
+}
+
+function localizeValidation(result: Result<void, string>): Result<void, string> {
+  return result.ok ? result : { ok: false, error: localizeServiceMessage(result.error) };
 }
 
 export function createNonEmptyValidator<TError>(errorFactory: () => TError): ValidateFn<TError> {

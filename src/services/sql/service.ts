@@ -13,7 +13,7 @@ export const sqlService = createPlaygroundService<SqlFormatConfig, SqlMinifyConf
     const result = minifySql(input);
     return Promise.resolve(result.ok ? result : { ok: false, error: { message: result.error } });
   },
-  emptyMessage: "No hay SQL para procesar",
+  emptyMessage: "services.sql.noInput",
   validate: (input) => {
     const result = validateSql(input);
     if (result.ok) {

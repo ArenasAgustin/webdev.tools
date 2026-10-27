@@ -25,7 +25,7 @@ describe("createPlaygroundService", () => {
   const service = createPlaygroundService({
     format: mockFormat,
     minify: mockMinify,
-    emptyMessage: "Vacío",
+    emptyMessage: "services.css.noInput",
   });
 
   it("format returns value when ok", async () => {
@@ -55,7 +55,7 @@ describe("createPlaygroundService", () => {
   it("uses default non-empty validator when validate is not provided", async () => {
     const result = await service.validate("   ");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error).toBe("Vacío");
+    if (!result.ok) expect(result.error).toBe("No hay CSS para procesar");
   });
 
   it("uses default validator — returns ok for non-empty input", async () => {
@@ -68,7 +68,7 @@ describe("createPlaygroundService", () => {
     const customService = createPlaygroundService({
       format: mockFormat,
       minify: mockMinify,
-      emptyMessage: "Vacío",
+      emptyMessage: "services.css.noInput",
       validate: customValidate,
     });
     const result = await customService.validate("anything");

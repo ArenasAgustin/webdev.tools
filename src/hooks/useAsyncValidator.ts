@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { compactTransformError } from "@/utils/transformError";
 import { translate } from "@/i18n/translate";
+import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
 export interface ValidationState {
   isValid: boolean;
@@ -43,7 +44,8 @@ export function useAsyncValidator(
             isValid: false,
             error: {
               message: translate("validation.syntaxError", {
-                message: compactTransformError(result.error ?? fallbackError),
+                // Parsers call worker-safe transforms directly; localize their message keys.
+                message: compactTransformError(localizeServiceMessage(result.error ?? fallbackError)),
               }),
             },
           });

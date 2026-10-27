@@ -24,5 +24,5 @@ const DEFAULT_HTML_MINIFY_OPTIONS: HtmlMinifyOptions = {
 export const htmlService = createPlaygroundService<HtmlFormatOptions, HtmlMinifyOptions>({
   format: (input, options) => formatHtmlAsync(input, options ?? {}),
   minify: (input, options) => minifyHtmlAsync(input, options ?? DEFAULT_HTML_MINIFY_OPTIONS),
-  emptyMessage: "No hay HTML para procesar",
+  emptyMessage: "services.html.noInput",
 });
