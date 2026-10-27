@@ -154,12 +154,27 @@ describe("PasswordPlayground branches", () => {
 
     // The second history entry (index 1) corresponds to firstPassword
     const secondHistoryBtn = historyBtns[1];
-    expect(secondHistoryBtn.getAttribute("title")).toBe(firstPassword);
+    expect(secondHistoryBtn).toHaveTextContent(`${firstPassword.slice(0, 8)}...`);
 
     fireEvent.click(secondHistoryBtn);
 
     // After click, password input should be restored to firstPassword
     expect((passwordInput as HTMLInputElement).value).toBe(firstPassword);
+  });
+
+  it("history tooltips only reveal the full password while it is shown", () => {
+    render(<PasswordPlayground />);
+
+    fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    const passwordInput = screen.getByPlaceholderText(/contraseña aparecerá aquí/i);
+    const password = (passwordInput as HTMLInputElement).value;
+    const historyBtn = screen.getByRole("button", { name: /\.\.\./i });
+
+    expect(historyBtn).not.toHaveAttribute("title");
+
+    fireEvent.click(screen.getByRole("button", { name: /mostrar contraseña/i }));
+
+    expect(historyBtn).toHaveAttribute("title", password);
   });
 
   it("strengthResult colors: weak(<40), medium(<60), good(<80), strong(>=80)", () => {
