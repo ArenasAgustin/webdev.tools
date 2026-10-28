@@ -4,6 +4,7 @@ import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { OutputActions } from "@/components/editor/OutputActions";
 import { EditorFooter } from "@/components/common/EditorFooter";
 import type { OutputPanelProps } from "../engines/types";
+import { ROW_CAP } from "@/services/sql/worker.types";
 import { SqlResetButton } from "./SqlResetButton";
 
 export interface SqlOutputPanelProps extends OutputPanelProps {
@@ -157,7 +158,7 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
           data-testid="sql-truncation-banner"
         >
           <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
-          <span>{t("sql.truncated", { count: 1000 })}</span>
+          <span>{t("sql.truncated", { count: ROW_CAP })}</span>
         </div>
       )}
       <LazyCodeEditor
