@@ -82,10 +82,24 @@ export function UrlPlayground() {
   }, [setInput]);
 
   const handleSwap = useCallback(() => {
-    if (!result.ok || !result.value) return;
-    setInput(result.value);
-    setMode(effectiveMode === "encode" ? "decode" : "encode");
-  }, [result, effectiveMode, setInput, setMode]);
+    // Recompute from the live input: the rendered result may lag behind (deferred value)
+    const direction = resolveMode(mode, input, variant);
+    let value: string;
+    try {
+      value =
+        direction === "encode" ? encodeUrl(input, variant, options) : decodeUrl(input, variant);
+    } catch (error) {
+      if (error instanceof UrlError) return;
+      throw error;
+    }
+    if (!value) return;
+    const flipped = direction === "encode" ? "decode" : "encode";
+    setInput(value);
+    // Auto stays auto when it already detects the flipped direction for the new input
+    if (mode !== "auto" || resolveMode("auto", value, variant) !== flipped) {
+      setMode(flipped);
+    }
+  }, [mode, input, variant, options, setInput, setMode]);
 
   const handleStrictChange = useCallback(
     (strict: boolean) => setOptions({ ...options, strict }),

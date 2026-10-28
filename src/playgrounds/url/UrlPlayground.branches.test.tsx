@@ -219,11 +219,43 @@ describe("UrlPlayground branches (core)", () => {
     );
   });
 
-  it("swap exchanges input/output, makes the flipped mode explicit and keeps the variant", () => {
+  it("swap from auto stays in auto when detection flips the direction", () => {
+    render(<UrlPlayground />);
+    typeInput("a b");
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("a%20b");
+    expect(getOutput().value).toBe("a b");
+    expect(screen.getByRole("button", { name: "Auto (decode)" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("a b");
+    expect(screen.getByRole("button", { name: "Auto (encode)" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("swap from auto pins the flipped mode when detection would not flip", () => {
+    render(<UrlPlayground />);
+    // decoding "%2541" yields "%41", which auto would decode again
+    typeInput("%2541");
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("%41");
+    expect(screen.getByRole("button", { name: "Codificar" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(getOutput().value).toBe("%2541");
+  });
+
+  it("swap exchanges input/output, flips an explicit mode and keeps the variant", () => {
     render(<UrlPlayground />);
     click("URI completa");
+    click("Codificar");
     typeInput("a b");
-    expect(screen.getByRole("button", { name: "Auto (encode)" })).toBeInTheDocument();
 
     click(/Intercambiar/);
     expect(getInput().value).toBe("a%20b");
