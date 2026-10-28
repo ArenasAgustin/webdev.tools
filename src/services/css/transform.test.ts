@@ -229,6 +229,39 @@ describe("minifyCss", () => {
         "@media (min-width:1px) and (hover:hover){a{b:c}}@supports (display:grid){a{b:c}}",
     });
   });
+
+  it("removes spaces inside function arguments but keeps them around calc operators", async () => {
+    const result = await minifyCss(
+      ".a { color: rgb( 0, 0, 0 ); width: calc( 100% - 2px + 1em ); transform: translate( 1px , 2px ); }",
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      value: ".a{color:rgb(0,0,0);width:calc(100% - 2px + 1em);transform:translate(1px,2px)}",
+    });
+  });
+
+  it("removes spaces around selector combinators", async () => {
+    const result = await minifyCss(
+      "a > b { x: y; } a + b { x: y; } a ~ b { x: y; } li:nth-child( 2n + 1 ) { x: y; }",
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      value: "a>b{x:y}a+b{x:y}a~b{x:y}li:nth-child(2n+1){x:y}",
+    });
+  });
+
+  it("keeps spaces inside strings and urls while compacting combinators", async () => {
+    const result = await minifyCss(
+      'a + b { content: "a + b ( c )"; background: url( "x y.png" ); }',
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      value: 'a+b{content:"a + b ( c )";background:url("x y.png")}',
+    });
+  });
 });
 
 describe("cleanCss", () => {

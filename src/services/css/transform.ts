@@ -181,6 +181,14 @@ function minifyCssString(source: string): string {
     // Strip spaces around structural punctuation. `:` is handled separately below
     // to avoid collapsing descendant pseudo-selectors (e.g. `a :hover` → `a:hover`).
     .replace(/\s*([{};,>])\s*/g, "$1")
+    // Padding just inside parentheses is never significant (`rgb( 0 )` → `rgb(0)`).
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    // `+` and `~` are combinators only in selectors (next delimiter is `{`); in
+    // declarations `calc(a + b)` needs its spaces. At-rule preludes are skipped.
+    .replace(/(^|[{};])([^{};@]*)(?=\{)/g, (_, start: string, selector: string) =>
+      start + selector.replace(/\s*([+~])\s*/g, "$1"),
+    )
     // Collapse `:` only in declarations (next delimiter is `;` or `}`, not `{`)
     // or inside the parentheses of a feature-query at-rule prelude (`@media (a : b)`).
     // Selector functions such as `:is(.nav :hover)` keep their descendant space.
