@@ -18,6 +18,7 @@ const {
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  removeItem: vi.fn(() => true),
   STORAGE_KEYS: {
     HASH_INPUT_MODE: "hashInputMode",
     HASH_TEXT_INPUT: "hashTextInput",

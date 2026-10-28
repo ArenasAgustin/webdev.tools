@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { hashConfig } from "./hash.config";
 import {
@@ -11,7 +11,7 @@ import {
 import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
-import { STORAGE_KEYS } from "@/services/storage";
+import { STORAGE_KEYS, removeItem } from "@/services/storage";
 
 interface GeneratedHashes {
   mode: InputMode;
@@ -38,10 +38,9 @@ export function HashPlayground() {
     STORAGE_KEYS.HASH_INPUT_MODE,
     "text",
   );
-  const [textInput, setTextInput] = usePersistedState(
-    STORAGE_KEYS.HASH_TEXT_INPUT,
-    hashConfig.example,
-  );
+  // The text is often a secret (password, token), so it is never persisted:
+  // only non-sensitive options survive a reload.
+  const [textInput, setTextInput] = useState(hashConfig.example);
   const [fileInput, setFileInput] = useState<File | null>(null);
   const [outputCase, setOutputCase] = usePersistedState<HashOutputCase>(
     STORAGE_KEYS.HASH_OUTPUT_CASE,
@@ -54,6 +53,11 @@ export function HashPlayground() {
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Purge the plain-text copy that earlier versions stored on disk
+  useEffect(() => {
+    removeItem(STORAGE_KEYS.HASH_TEXT_INPUT);
+  }, []);
 
   // Results only belong to the input they were generated from: once the text,
   // file or mode changes they are hidden, which also drops slow results that land
