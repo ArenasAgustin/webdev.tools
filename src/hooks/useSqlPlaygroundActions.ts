@@ -23,6 +23,20 @@ const FILE_CONFIG: PlaygroundFileConfig = {
   acceptExtensions: ".sql",
 };
 
+/**
+ * The output holds either an execution result (JSON) or formatted/minified SQL.
+ * Name and type the download after what is actually there, the same way the
+ * output panel picks its editor language.
+ */
+function outputDownloadFile(output: string): { fileName: string; mimeType: string } {
+  try {
+    JSON.parse(output);
+    return { fileName: "result.json", mimeType: "application/json" };
+  } catch {
+    return { fileName: "result.sql", mimeType: FILE_CONFIG.mimeType };
+  }
+}
+
 async function formatRunner(input: string, config: SqlFormatConfig): Promise<string> {
   const result = await formatSqlAsync(input, config);
   if (!result.ok) throw new Error(result.error ?? translate("messages.formatError", { language: FILE_CONFIG.language }));
@@ -80,7 +94,18 @@ export function useSqlPlaygroundActions({
     minifyRunner,
   });
 
-  const { beginProcessing, endProcessing } = generic;
+  const { beginProcessing, endProcessing, baseActions } = generic;
+
+  const handleDownloadOutput = useCallback(() => {
+    const { fileName, mimeType } = outputDownloadFile(output);
+    baseActions.handleDownload({
+      content: output,
+      fileName,
+      mimeType,
+      successMessage: translate("messages.downloadedAs", { fileName }),
+      validate: () => (!output ? translate("messages.noOutputToDownload") : null),
+    });
+  }, [baseActions, output]);
 
   const handleExecute = useCallback(() => {
     // Ignore a second trigger (button or Ctrl+Shift+Enter) while a query is running:
@@ -152,6 +177,7 @@ export function useSqlPlaygroundActions({
 
   return {
     ...generic,
+    handleDownloadOutput,
     handleExecute,
     handleReset,
     isExecuting,
