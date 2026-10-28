@@ -39,7 +39,7 @@ const usuario = {
   nombre: "Juan",
   edad: 28,
   saludar() {
-    return \`Hola, soy \${this.nombre} y tengo \${this.edad} anos\`;
+    return \`Hola, soy \${this.nombre} y tengo \${this.edad} años\`;
   }
 };
 
