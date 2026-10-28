@@ -121,10 +121,11 @@ export function HashPlayground() {
   }, []);
 
   const handleCompare = useCallback(() => {
-    if (!compareValue || !generated || results.length === 0) return;
+    // Pasted hashes often carry stray whitespace or the other letter case
+    const expected = compareValue.trim().toLowerCase();
+    if (!expected || !generated || results.length === 0) return;
 
-    // Find matching hash
-    const match = results.find((r) => r.hash.toLowerCase() === compareValue.toLowerCase());
+    const match = results.find((r) => r.hash.toLowerCase() === expected);
     setComparison({ value: compareValue, source: generated, match: match !== undefined });
   }, [compareValue, generated, results]);
 

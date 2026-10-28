@@ -317,6 +317,24 @@ describe("HashPlayground branches", () => {
     expect(screen.getByText(/no coincide/i)).toBeInTheDocument();
   });
 
+  it("compare ignores surrounding whitespace and letter case", async () => {
+    render(<HashPlayground />);
+
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "compare-test" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    const compareInput = screen.getByPlaceholderText(/ingres[aá] un hash para comparar/i);
+    fireEvent.change(compareInput, { target: { value: "  AABBCC\n" } });
+    fireEvent.click(screen.getByRole("button", { name: /comparar/i }));
+
+    expect(screen.getByText(/coincide/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no coincide/i)).not.toBeInTheDocument();
+  });
+
   it("compare guard: empty compareValue or no results — does nothing", () => {
     render(<HashPlayground />);
 
