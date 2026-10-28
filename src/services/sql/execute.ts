@@ -8,6 +8,8 @@ import type { SqlResultSet } from "@/types/sql";
 import { CELL_CAP } from "@/services/sql/worker.types";
 
 type Cell = SqlResultSet["rows"][number][number];
+/** A value as sql.js reads it, before toCell turns it into a Cell. */
+type RawValue = Cell | Uint8Array;
 
 export interface StatementsResult {
   /** One entry per statement that produced rows, in execution order. */
@@ -20,7 +22,7 @@ export interface StatementsResult {
 
 // sql.js reads integers as bigint with this option; @types/sql.js does not declare it.
 interface BigIntStatement {
-  get(params: null, config: { useBigInt: true }): (Cell | bigint)[];
+  get(params: null, config: { useBigInt: true }): (RawValue | bigint)[];
 }
 
 /**
@@ -29,7 +31,7 @@ interface BigIntStatement {
  * string, which JSON (and any reader of the downloaded JSON) keeps as written
  * instead of silently rounding it as a number.
  */
-function readRow(stmt: Statement): Cell[] {
+function readRow(stmt: Statement): RawValue[] {
   return (stmt as unknown as BigIntStatement).get(null, { useBigInt: true }).map((value) => {
     if (typeof value !== "bigint") return value;
     return value >= BigInt(Number.MIN_SAFE_INTEGER) && value <= BigInt(Number.MAX_SAFE_INTEGER)
@@ -38,20 +40,30 @@ function readRow(stmt: Statement): Cell[] {
   });
 }
 
+/** Render a BLOB as a SQLite hex literal (x'0102FF'), readable in the view and the JSON download. */
+function blobToHex(bytes: Uint8Array): string {
+  let hex = "";
+  for (const byte of bytes) hex += byte.toString(16).padStart(2, "0");
+  return `x'${hex.toUpperCase()}'`;
+}
+
 /**
- * Cut a text value to `cellCap` characters (marked with a trailing "…") and a
- * BLOB to half as many bytes, so one huge value (randomblob(1e6), a 50 MB
- * string) cannot make the output unusable. Returns null when nothing was cut.
+ * Prepare one value for the result: a BLOB becomes its hex literal, and a text
+ * value is cut to `cellCap` characters (a BLOB to half as many bytes, so its hex
+ * stays within the cap), marked with a trailing "…", so one huge value
+ * (randomblob(1e6), a 50 MB string) cannot make the output unusable.
  */
-function capCell(value: Cell, cellCap: number): Cell | null {
+function toCell(value: RawValue, cellCap: number): { cell: Cell; cut: boolean } {
   if (typeof value === "string" && value.length > cellCap) {
-    return `${value.slice(0, cellCap)}…`;
+    return { cell: `${value.slice(0, cellCap)}…`, cut: true };
   }
-  const maxBytes = Math.floor(cellCap / 2);
-  if (value instanceof Uint8Array && value.length > maxBytes) {
-    return value.slice(0, maxBytes);
+  if (value instanceof Uint8Array) {
+    const maxBytes = Math.floor(cellCap / 2);
+    const cut = value.length > maxBytes;
+    const hex = blobToHex(cut ? value.subarray(0, maxBytes) : value);
+    return { cell: cut ? `${hex}…` : hex, cut };
   }
-  return null;
+  return { cell: value, cut: false };
 }
 
 /** Round a performance.now() delta to one decimal, so the result shows 3.3 instead of 3.2999999999999545. */
@@ -67,7 +79,7 @@ export function roundElapsedMs(ms: number): number {
  * reached, later statements still run (for their side effects) but keep no rows.
  * Stopping early is safe: SELECTs have no side effects, and SQLite applies every
  * change of a `RETURNING` statement on its first step. Each value is also bounded
- * by `cellCap` (see capCell).
+ * by `cellCap` (see toCell).
  */
 export function runStatements(
   db: Database,
@@ -94,15 +106,13 @@ export function runStatements(
         truncated = true;
         break;
       }
-      const row = readRow(stmt);
-      for (let i = 0; i < row.length; i++) {
-        const capped = capCell(row[i], cellCap);
-        if (capped !== null) {
-          row[i] = capped;
-          valuesTruncated = true;
-        }
-      }
-      rows.push(row);
+      rows.push(
+        readRow(stmt).map((value) => {
+          const { cell, cut } = toCell(value, cellCap);
+          if (cut) valuesTruncated = true;
+          return cell;
+        }),
+      );
       remaining--;
     } while (stmt.step());
     resultSets.push(

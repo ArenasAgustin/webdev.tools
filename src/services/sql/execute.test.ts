@@ -75,11 +75,11 @@ describe("runStatements", () => {
   it("cuts long text and blob values so a huge cell cannot flood the output", () => {
     const result = runStatements(db, "SELECT 'abc' AS short, zeroblob(4) AS b, printf('%.50000c', 'x') AS long, zeroblob(50000) AS blob;", 10, 100);
 
-    const [short, b, long, blob] = result.resultSets[0].rows[0] as [string, Uint8Array, string, Uint8Array];
+    const [short, b, long, blob] = result.resultSets[0].rows[0] as string[];
     expect(short).toBe("abc");
-    expect(b).toHaveLength(4);
+    expect(b).toBe("x'00000000'");
     expect(long).toBe(`${"x".repeat(100)}…`);
-    expect(blob).toHaveLength(50);
+    expect(blob).toBe(`x'${"00".repeat(50)}'…`);
     expect(result.valuesTruncated).toBe(true);
     expect(result.resultSets[0].valuesTruncated).toBe(true);
   });
@@ -89,6 +89,12 @@ describe("runStatements", () => {
 
     expect(result.resultSets[0].rows[0][0]).toHaveLength(100);
     expect(result.valuesTruncated).toBeUndefined();
+  });
+
+  it("renders BLOBs as SQLite hex literals", () => {
+    const result = runStatements(db, "SELECT x'0102FF' AS b, zeroblob(0) AS empty;", 10);
+
+    expect(result.resultSets[0].rows[0]).toEqual(["x'0102FF'", "x''"]);
   });
 
   it("keeps integers beyond 2^53 exact, as decimal strings", () => {
