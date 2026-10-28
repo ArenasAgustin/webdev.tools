@@ -290,7 +290,8 @@ function restorePreservedContent(source: string, preservedBlocks: Map<string, st
   let output = source;
 
   for (const [token, content] of preservedBlocks.entries()) {
-    output = output.replace(new RegExp(escapeRegExp(token), "g"), content);
+    // A replacer function keeps `    output = output.replace(new RegExp(escapeRegExp(token), "g"), content);`, `$` and friends in the content literal.
+    output = output.replace(new RegExp(escapeRegExp(token), "g"), () => content);
   }
 
   return output;
@@ -386,7 +387,7 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
 
       // Restore preserved blocks
       for (const [token, content] of preservedBlocks.entries()) {
-        result = result.replace(token, content);
+        result = result.replace(token, () => content);
       }
     }
 

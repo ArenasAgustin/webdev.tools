@@ -366,3 +366,37 @@ describe("cleanHtml", () => {
     }
   });
 });
+
+describe("preserved content with replacement patterns", () => {
+  const dollarScript = '<script>var a = "$$"; var b = "$\'"; var c = s.replace(/x/, "$&!");</script>';
+
+  it("formatHtml keeps $ patterns in scripts when JS formatting is off", async () => {
+    const result = await formatHtml(`<div>${dollarScript}</div>`, 2, { formatJs: false });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain('var a = "$$"; var b = "$\'"; var c = s.replace(/x/, "$&!");');
+    }
+  });
+
+  it("minifyHtml keeps $ patterns in pre and unminified scripts", async () => {
+    const result = await minifyHtml(`<pre>cost: $$5 and $&</pre>\n${dollarScript}`, {
+      removeComments: true,
+      collapseWhitespace: true,
+      minifyCss: true,
+      minifyJs: false,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("<pre>cost: $$5 and $&</pre>");
+      expect(result.value).toContain(dollarScript);
+    }
+  });
+
+  it("cleanHtml keeps $ patterns in preserved blocks", () => {
+    const result = cleanHtml(`<p></p>${dollarScript}<span></span>`);
+
+    expect(result).toEqual({ ok: true, value: dollarScript });
+  });
+});
