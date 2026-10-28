@@ -188,7 +188,13 @@
   "stats": {
     "smaller": "más pequeño",
     "larger": "más grande",
-    "summary": "{{lines}} líneas · {{characters}} caracteres · {{bytes}}"
+    "summary": "{{lines}} · {{characters}} · {{bytes}}",
+    "lines_one": "{{count}} línea",
+    "lines_many": "{{count}} líneas",
+    "lines_other": "{{count}} líneas",
+    "characters_one": "{{value}} carácter",
+    "characters_many": "{{value}} caracteres",
+    "characters_other": "{{value}} caracteres"
   },
   "home": {
     "tagline": "Herramientas para desarrolladores web",
@@ -292,7 +298,7 @@
     }
   },
   "loader": {
-    "loading": "Cargando {{name}} Tools",
+    "loading": "Cargando {{name}}",
     "preparing": "Preparando el playground..."
   },
   "card": {

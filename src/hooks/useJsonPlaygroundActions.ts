@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { createTransformHandler } from "@/utils/createTransformHandler";
@@ -129,10 +129,14 @@ export function useJsonPlaygroundActions({
     [toast],
   );
 
+  // JSON line breaks are only whitespace, so hand copy/download a LF-only output
+  // (an input loaded from a Windows file and reused as result would keep CRLF).
+  const outputLf = useMemo(() => output.replace(/\r\n?/g, "\n"), [output]);
+
   const generic = useGenericPlaygroundActions({
     input: inputJson,
     setInput: setInputJson,
-    output,
+    output: outputLf,
     setOutput,
     setError,
     inputTooLarge,

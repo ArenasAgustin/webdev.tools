@@ -188,7 +188,13 @@
   "stats": {
     "smaller": "smaller",
     "larger": "larger",
-    "summary": "{{lines}} lines · {{characters}} characters · {{bytes}}"
+    "summary": "{{lines}} · {{characters}} · {{bytes}}",
+    "lines_one": "{{count}} line",
+    "lines_many": "{{count}} lines",
+    "lines_other": "{{count}} lines",
+    "characters_one": "{{value}} character",
+    "characters_many": "{{value}} characters",
+    "characters_other": "{{value}} characters"
   },
   "home": {
     "tagline": "Web developer tools",
@@ -292,7 +298,7 @@
     }
   },
   "loader": {
-    "loading": "Loading {{name}} Tools",
+    "loading": "Loading {{name}}",
     "preparing": "Preparing the playground..."
   },
   "card": {
