@@ -124,6 +124,17 @@ describe("applyJsonPath", () => {
     expect(applyJsonPath(input, "$.missing")).toEqual({ ok: true, value: "[]" });
   });
 
+  it.each(["constructor", "toString", "hasOwnProperty", "__proto__"])(
+    "treats the Object.prototype name %s as a normal path",
+    (name) => {
+      expect(applyJsonPath('{"name": "John"}', name)).toEqual({ ok: true, value: "[]" });
+      expect(applyJsonPath(`{"${name}": 5}`, `$.${name}`)).toEqual({
+        ok: true,
+        value: "[\n  5\n]",
+      });
+    },
+  );
+
   it("should handle complex nested arrays", () => {
     const input =
       '{"store": {"books": [{"title": "Book1", "price": 10}, {"title": "Book2", "price": 15}]}}';
