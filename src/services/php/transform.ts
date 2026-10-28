@@ -14,24 +14,29 @@ export interface PhpFormatOptions {
 
 type PhpAst = unknown;
 
+interface PhpParserInstance {
+  parseCode: (code: string) => PhpAst;
+  tokenGetAll: (code: string) => PhpToken[];
+}
+
+function createPhpParser(): PhpParserInstance {
+  const PhpParserFactory = PhpParser as unknown as {
+    create: (options: { ast: { withPositions: boolean } }) => PhpParserInstance;
+  };
+  return PhpParserFactory.create({
+    ast: {
+      withPositions: true,
+    },
+  });
+}
+
 export function parsePhp(input: string): Result<PhpAst, string> {
   try {
     if (!input.trim()) {
       return { ok: false, error: serviceMessage("services.php.empty") };
     }
 
-    const PhpParserFactory = PhpParser as unknown as {
-      create: (options: { ast: { withPositions: boolean } }) => {
-        parseCode: (code: string) => PhpAst;
-      };
-    };
-    const parser = PhpParserFactory.create({
-      ast: {
-        withPositions: true,
-      },
-    });
-
-    const ast = parser.parseCode(input);
+    const ast = createPhpParser().parseCode(input);
     return { ok: true, value: ast };
   } catch (error) {
     if (error instanceof SyntaxError) {
@@ -55,8 +60,10 @@ export function parsePhp(input: string): Result<PhpAst, string> {
 }
 
 /**
- * Improved PHP formatter using heuristic approach.
- * Handles heredocs, nowdocs, interpolated strings, and comments correctly.
+ * Heuristic PHP formatter: re-indents code lines by brace depth.
+ * It works on php-parser's tokens, so braces and line breaks inside strings,
+ * heredocs and comments never affect indentation, and lines that start inside
+ * a string are emitted verbatim (their whitespace is part of the value).
  */
 
 export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<string, string> {
@@ -74,20 +81,17 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
     const indent = indentSize === "\t" ? "\t" : " ".repeat(indentSize);
 
     const lines = input.split("\n");
+    const layout = analyzePhpLines(input, lines);
     let indentLevel = 0;
     const formatted: string[] = [];
 
-    let heredocLabel: string | null = null;
-    let inBlockComment = false;
+    lines.forEach((line, index) => {
+      const { verbatim, leadingClose, open, close } = layout[index];
 
-    for (const line of lines) {
-      // Heredoc/nowdoc bodies and their closing label are emitted verbatim: their
-      // whitespace is part of the string value (and the closing label's indent
-      // sets how much PHP strips from the body).
-      if (heredocLabel !== null) {
-        formatted.push(line);
-        if (new RegExp(`^\\s*${heredocLabel}\\b`).test(line)) heredocLabel = null;
-        continue;
+      if (verbatim) {
+        formatted.push(line.replace(/\r$/, ""));
+        indentLevel = Math.max(0, indentLevel + open - close);
+        return;
       }
 
       const trimmed = line.trim();
@@ -95,39 +99,18 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       // Skip empty lines but preserve them
       if (trimmed === "") {
         formatted.push("");
-        continue;
+        return;
       }
-
-      // A heredoc/nowdoc opener ends its line, e.g. `$x = <<<EOT` or `f(<<<'TXT'`.
-      const heredocMatch = /<<<\s*(['"]?)(\w+)\1$/.exec(trimmed);
-      if (heredocMatch) heredocLabel = heredocMatch[2];
-      const code = heredocMatch ? trimmed.slice(0, heredocMatch.index) : trimmed;
-
-      const startsInComment = inBlockComment;
-      const braces = countOuterBraces(code, inBlockComment);
-      inBlockComment = braces.inBlockComment;
-      const leadingClose = !startsInComment && trimmed.startsWith("}");
 
       // Decrease indent BEFORE for a leading closing brace
-      if (leadingClose) {
-        if (indentLevel > 0) indentLevel--;
-      }
+      if (leadingClose && indentLevel > 0) indentLevel--;
 
-      // Apply current indent level
-      const indentedLine = indent.repeat(indentLevel) + trimmed;
-      formatted.push(indentedLine);
+      formatted.push(indent.repeat(indentLevel) + trimmed);
 
-      // Increase indent for opening braces found outside strings
-      if (braces.open > 0) {
-        indentLevel += braces.open;
-      }
-
-      // Decrease for closing braces not already handled above
-      const trailingClose = leadingClose ? braces.close - 1 : braces.close;
-      if (trailingClose > 0) {
-        indentLevel = Math.max(0, indentLevel - trailingClose);
-      }
-    }
+      // Then apply the line's other braces
+      const trailingClose = leadingClose ? close - 1 : close;
+      indentLevel = Math.max(0, indentLevel + open - trailingClose);
+    });
 
     // Remove trailing empty lines
     while (formatted.length > 0 && formatted[formatted.length - 1] === "") {
@@ -141,101 +124,82 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
   }
 }
 
+interface PhpLineLayout {
+  /** The line starts inside a string, so it is emitted unchanged. */
+  verbatim: boolean;
+  /** The line's first character is a code `}`. */
+  leadingClose: boolean;
+  /** Code braces on the line (never ones inside strings or comments). */
+  open: number;
+  close: number;
+}
+
+type PhpToken = string | [name: string, text: string, line: number];
+
 /**
- * Count { and } characters that appear outside string literals and comments.
- * Heredoc/nowdoc bodies never reach this function (formatPhp emits them verbatim).
- * Handles:
- * - Interpolated strings with {$var}
- * - Escaped characters
- * - Single and double quoted strings
- * - Line and block comments (a block comment may span lines: `inBlockComment`
- *   says the line starts inside one, and the result says whether it ends inside one)
+ * Tagless code runs as PHP (the runtime adds an open tag), so it is tokenized
+ * the same way; `prefixLength` maps token offsets back to `input`.
  */
-function countOuterBraces(
-  line: string,
-  inBlockComment = false,
-): { open: number; close: number; inBlockComment: boolean } {
-  let open = 0;
-  let close = 0;
-  type StringState = "outside" | "single" | "double" | "comment";
-  let state: StringState = inBlockComment ? "comment" : "outside";
-  let i = 0;
+function toPhpSource(input: string): { source: string; prefixLength: number } {
+  if (/<\?(php\b|=)/i.test(input)) return { source: input, prefixLength: 0 };
+  const prefix = "<?php ";
+  return { source: prefix + input, prefixLength: prefix.length };
+}
 
-  while (i < line.length) {
-    const ch = line[i];
+function analyzePhpLines(input: string, lines: string[]): PhpLineLayout[] {
+  const { source, prefixLength } = toPhpSource(input);
+  const tokens = createPhpParser().tokenGetAll(source);
 
-    if (state === "outside") {
-      // Block comment start: its braces are not code
-      if (ch === "/" && line[i + 1] === "*") {
-        state = "comment";
-        i += 2;
-        continue;
-      }
-      // Line comment
-      if (ch === "/" && line[i + 1] === "/") break;
-      if (ch === "#") break;
+  const layout: PhpLineLayout[] = lines.map(() => ({
+    verbatim: false,
+    leadingClose: false,
+    open: 0,
+    close: 0,
+  }));
+  const lineStarts: number[] = [];
+  let lineStart = prefixLength;
+  for (const line of lines) {
+    lineStarts.push(lineStart);
+    lineStart += line.length + 1;
+  }
+  let offset = 0;
+  let nextLine = 0;
+  let inString = false;
+  for (const token of tokens) {
+    const [name, text] = typeof token === "string" ? [token, token] : token;
+    const start = offset;
+    const end = start + text.length;
+    offset = end;
 
-      if (ch === "'") {
-        state = "single";
-        i++;
-        continue;
-      }
-      if (ch === '"') {
-        state = "double";
-        i++;
-        continue;
-      }
-      if (ch === "{") {
-        open++;
-        i++;
-        continue;
-      }
-      if (ch === "}") {
-        close++;
-        i++;
-        continue;
-      }
-      i++;
-    } else if (state === "comment") {
-      const commentEnd = line.indexOf("*/", i);
-      if (commentEnd === -1) break;
-      state = "outside";
-      i = commentEnd + 2;
-    } else if (state === "single") {
-      if (ch === "\\" && i + 1 < line.length) {
-        i += 2; // Skip escaped character
-        continue;
-      }
-      if (ch === "'") {
-        state = "outside";
-      }
-      i++;
-    } else {
-      // double quoted string
-      if (ch === "\\" && i + 1 < line.length) {
-        i += 2; // Skip escaped character
-        continue;
-      }
-      // `${expr}` interpolation: its braces are part of the string, skip them
-      if (ch === "$" && line[i + 1] === "{") {
-        i += 2;
-        // Find matching }
-        let braceCount = 1;
-        while (i < line.length && braceCount > 0) {
-          if (line[i] === "{") braceCount++;
-          else if (line[i] === "}") braceCount--;
-          i++;
+    // Lines starting at or inside this token are verbatim when inside a string.
+    let tokenLine = nextLine - 1;
+    while (nextLine < lineStarts.length && lineStarts[nextLine] < end) {
+      const midToken = lineStarts[nextLine] > start;
+      if (midToken && name === "T_CONSTANT_ENCAPSED_STRING") layout[nextLine].verbatim = true;
+      if (inString) layout[nextLine].verbatim = true;
+      if (!midToken) tokenLine = nextLine;
+      nextLine++;
+    }
+
+    if (name === '"' || name === "`") inString = !inString;
+    else if (name === "T_START_HEREDOC") inString = true;
+    else if (name === "T_END_HEREDOC") inString = false;
+    // Interpolation braces (`{$a}`, `${a}`) are part of the string.
+    else if (!inString && tokenLine >= 0 && (name === "{" || name === "}")) {
+      const line = layout[tokenLine];
+      if (name === "{") {
+        line.open++;
+      } else {
+        line.close++;
+        const raw = lines[tokenLine];
+        if (start === lineStarts[tokenLine] + raw.length - raw.trimStart().length) {
+          line.leadingClose = true;
         }
-        continue;
       }
-      if (ch === '"') {
-        state = "outside";
-      }
-      i++;
     }
   }
 
-  return { open, close, inBlockComment: state === "comment" };
+  return layout;
 }
 
 export function validatePhp(input: string): Result<void, string> {
