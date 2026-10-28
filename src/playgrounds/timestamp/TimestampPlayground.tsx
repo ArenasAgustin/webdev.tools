@@ -43,7 +43,9 @@ const RELATIVE_TICK_MS = 1000;
 
 export function TimestampPlayground() {
   const { t, i18n } = useTranslation();
-  const lang = i18n.language.startsWith("en") ? "en" : "es";
+  // resolvedLanguage is the translation in use (en for en-US, and the English
+  // fallback for fr-FR); the raw detected language would read those as Spanish.
+  const lang = (i18n.resolvedLanguage ?? i18n.language) === "es" ? "es" : "en";
   const toast = useToast();
   const { copy } = useClipboardCopy();
   const [input, setInput] = usePersistedState(
