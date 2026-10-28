@@ -1,5 +1,6 @@
 import { describeError, runJavaScript } from "@/services/js/execute";
 import type { JsExecRequest, JsExecResponse } from "@/services/js/execute";
+import { lockDownWorkerGlobals } from "@/services/js/workerLockdown";
 
 const ctx = self as unknown as {
   postMessage: (message: JsExecResponse) => void;
@@ -10,25 +11,9 @@ const ctx = self as unknown as {
   ) => void;
 };
 
-// Restrict network access: block the most common browser network APIs.
-// Note: this is a best-effort sandbox — other exotic channels (e.g. SharedArrayBuffer
-// messaging) are not blocked. Do NOT rely on this for security-critical isolation.
-for (const name of ["fetch", "WebSocket", "XMLHttpRequest", "EventSource", "importScripts"]) {
-  try {
-    Object.defineProperty(self, name, { value: undefined, writable: false, configurable: false });
-  } catch {
-    // Non-configurable in this runtime; leave it as is.
-  }
-}
-try {
-  Object.defineProperty(navigator, "sendBeacon", {
-    value: undefined,
-    writable: false,
-    configurable: false,
-  });
-} catch {
-  // Non-configurable in this runtime; leave it as is.
-}
+// Best-effort: remove network APIs and the site's IndexedDB / Cache Storage before any
+// user code runs. Not a security boundary, see lockDownWorkerGlobals.
+lockDownWorkerGlobals(self);
 
 let unhandledRejection: string | null = null;
 
