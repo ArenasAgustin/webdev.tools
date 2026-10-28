@@ -10,7 +10,7 @@ describe("applyJsonPath", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(JSON.parse(result.value)).toBe("John");
+      expect(JSON.parse(result.value)).toEqual(["John"]);
     }
   });
 
@@ -20,7 +20,7 @@ describe("applyJsonPath", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(JSON.parse(result.value)).toBe("Jane");
+      expect(JSON.parse(result.value)).toEqual(["Jane"]);
     }
   });
 
@@ -53,7 +53,7 @@ describe("applyJsonPath", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       const parsed = JSON.parse(result.value);
-      expect(parsed).toEqual({ name: "John" });
+      expect(parsed).toEqual([{ name: "John" }]);
     }
   });
 
@@ -74,7 +74,7 @@ describe("applyJsonPath", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(JSON.parse(result.value)).toBe(20);
+      expect(JSON.parse(result.value)).toEqual([20]);
     }
   });
 

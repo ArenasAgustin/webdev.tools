@@ -30,16 +30,14 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
     // Parse input JSON
     const parsed: unknown = JSON.parse(input) as unknown;
 
-    // Apply JSONPath filter
+    // Apply JSONPath filter. wrap:true always yields an array of matches, so the
+    // output shape doesn't depend on the match count (no matches -> []).
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = JSONPath({
       path,
       json: parsed as JsonValue,
-      wrap: false,
+      wrap: true,
     });
-
-    // wrap:false yields undefined when nothing matches; report it as an empty result
-    if (result === undefined) return { ok: true, value: "[]" };
 
     // Format result as JSON string
     const formatted = JSON.stringify(result, null, 2);
