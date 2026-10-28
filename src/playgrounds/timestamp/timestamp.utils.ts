@@ -7,9 +7,30 @@ export interface TimestampResult {
   relative: string;
   isFuture: boolean;
   timezone: string;
+  /** How a numeric input was read; null for date strings. */
+  unit: UnixUnit | null;
 }
 
 export type InputType = "unix" | "date";
+
+export type UnixUnit = "seconds" | "milliseconds";
+
+/**
+ * Magnitudes above this are read as milliseconds, the rest as seconds. 1e11 seconds is
+ * year ~5138 and 1e11 ms is 1973-03-03, so real-world values of either unit fall on the
+ * expected side; the UI shows the detected unit so the jump at the boundary is visible.
+ */
+const UNIX_MS_THRESHOLD = 1e11;
+
+/** Unit a numeric Unix timestamp is interpreted in (see UNIX_MS_THRESHOLD). */
+export function detectUnixUnit(unix: number): UnixUnit {
+  return Math.abs(unix) > UNIX_MS_THRESHOLD ? "milliseconds" : "seconds";
+}
+
+/** Engines omit "UTC" from Intl.supportedValuesOf("timeZone"); make sure it can be picked. */
+export function withUtc(timezones: readonly string[]): string[] {
+  return timezones.includes("UTC") ? [...timezones] : ["UTC", ...timezones];
+}
 
 const MONTH_NAME = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/i;
 
@@ -51,7 +72,7 @@ export function parseInput(input: string): { type: InputType; value: number | Da
 
   // Then, try to parse as number (Unix timestamp).
   // The seconds-vs-milliseconds disambiguation is handled downstream in unixToDate()
-  // using the same 1e11 boundary check.
+  // via detectUnixUnit().
   const num = Number(trimmed);
   if (Number.isFinite(num)) {
     return { type: "unix", value: num };
@@ -64,25 +85,19 @@ export function parseInput(input: string): { type: InputType; value: number | Da
  * Convert Unix timestamp (seconds or milliseconds) to Date
  */
 export function unixToDate(unix: number): Date {
-  // If the absolute value is greater than 1e11, assume it's milliseconds
-  if (Math.abs(unix) > 1e11) {
-    return new Date(unix);
-  }
-  // Otherwise, assume it's seconds and convert to milliseconds
-  return new Date(unix * 1000);
+  return new Date(detectUnixUnit(unix) === "milliseconds" ? unix : unix * 1000);
 }
 
 /**
  * Generate relative time string
  */
-function getRelativeTime(date: Date, lang = "es"): string {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
+function getRelativeTime(date: Date, lang = "es", now = Date.now()): string {
+  const diff = now - date.getTime();
   const absDiff = Math.abs(diff);
   const isFuture = diff < 0;
 
-  // Handle diff = 0 (now)
-  if (absDiff === 0) {
+  // Under a second reads as "now" (avoids "0 seconds ago" for second-precision input)
+  if (absDiff < 1000) {
     return lang === "es" ? "ahora mismo" : "just now";
   }
 
@@ -138,6 +153,8 @@ export function convertTimestamp(
   input: string,
   timezone = Intl.DateTimeFormat().resolvedOptions().timeZone,
   lang = "es",
+  /** Reference time (epoch ms) for isFuture and the relative time. */
+  now = Date.now(),
 ): TimestampResult | null {
   const parsed = parseInput(input);
   if (!parsed) return null;
@@ -152,8 +169,7 @@ export function convertTimestamp(
 
   if (isNaN(date.getTime())) return null;
 
-  const now = new Date();
-  const isFuture = date.getTime() > now.getTime();
+  const isFuture = date.getTime() > now;
 
   // Format for user's timezone
   const userTimezone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -173,9 +189,10 @@ export function convertTimestamp(
       second: "2-digit",
       hour12: false,
     }),
-    relative: getRelativeTime(date, lang),
+    relative: getRelativeTime(date, lang, now),
     isFuture,
     timezone: userTimezone,
+    unit: parsed.type === "unix" ? detectUnixUnit(parsed.value as number) : null,
   };
 }
 

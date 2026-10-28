@@ -123,6 +123,9 @@
     "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
     "noResults": "No results",
+    "detectedUnit": "Read as Unix time in {{unit}}",
+    "unitSeconds": "seconds",
+    "unitMilliseconds": "milliseconds",
     "formats": {
       "unixSeconds": "Unix (s)",
       "unixMilliseconds": "Unix (ms)",

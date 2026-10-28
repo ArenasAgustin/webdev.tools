@@ -123,6 +123,9 @@
     "copied": "Copiado al portapapeles",
     "copyError": "No se pudo copiar al portapapeles",
     "noResults": "Sin resultados",
+    "detectedUnit": "Interpretado como tiempo Unix en {{unit}}",
+    "unitSeconds": "segundos",
+    "unitMilliseconds": "milisegundos",
     "formats": {
       "unixSeconds": "Unix (s)",
       "unixMilliseconds": "Unix (ms)",
