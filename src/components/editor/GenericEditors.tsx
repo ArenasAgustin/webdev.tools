@@ -58,6 +58,7 @@ interface GenericEditorsProps {
     input: string;
     output: string;
     error: string | null;
+    isProcessing: boolean;
     outputStats: { lines: number; characters: number; bytes: number };
     comparisonBytes: number;
     expandOutput: () => void;
@@ -320,6 +321,7 @@ export const GenericEditors = memo(function GenericEditors({
                 input,
                 output,
                 error,
+                isProcessing: isProcessing ?? false,
                 outputStats,
                 comparisonBytes,
                 expandOutput: () => editor.expand("output"),

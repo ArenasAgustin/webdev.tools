@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import type { OutputPanelProps } from "../engines/types";
 import { useTranslation } from "react-i18next";
 import { GenericPlayground } from "../GenericPlayground";
 import { htmlEngine } from "../engines/html.engine";
@@ -16,31 +17,29 @@ export function HtmlPlayground() {
   const { t } = useTranslation();
   const [showPreview, setShowPreview] = useState(false);
 
-  const renderOutputActions = useCallback(() => {
-    return (
-      <Button
-        variant="cyan"
-        onClick={() => setShowPreview(true)}
-        aria-label={t("html.viewPreview")}
-        title={t("html.viewPreview")}
-      >
-        <i className="fas fa-eye"></i>
-      </Button>
-    );
-  }, [t]);
+  // Rendered inside the expanded output modal: close it so the preview panel
+  // underneath becomes visible.
+  const renderOutputActions = useCallback(
+    ({ closeExpandedEditor }: { closeExpandedEditor: () => void }) => {
+      return (
+        <Button
+          variant="cyan"
+          onClick={() => {
+            closeExpandedEditor();
+            setShowPreview(true);
+          }}
+          aria-label={t("html.viewPreview")}
+          title={t("html.viewPreview")}
+        >
+          <i className="fas fa-eye"></i>
+        </Button>
+      );
+    },
+    [t],
+  );
 
   const renderOutputPanel = useCallback(
-    (props: {
-      input: string;
-      output: string;
-      error: string | null;
-      outputStats: { lines: number; characters: number; bytes: number };
-      comparisonBytes: number;
-      expandOutput: () => void;
-      onCopyOutput: () => void;
-      onDownloadOutput: () => void;
-      onUseOutputAsInput?: () => void;
-    }) => {
+    (props: OutputPanelProps) => {
       if (showPreview) {
         return (
           <Panel
@@ -70,12 +69,14 @@ export function HtmlPlayground() {
           iconColor="green-400"
           actions={
             <>
-              <OutputActions
-                onCopyOutput={props.onCopyOutput}
-                onDownloadOutput={props.onDownloadOutput}
-                onExpand={props.expandOutput}
-                onUseOutputAsInput={props.onUseOutputAsInput}
-              />
+              {props.output && (
+                <OutputActions
+                  onCopyOutput={props.onCopyOutput}
+                  onDownloadOutput={props.onDownloadOutput}
+                  onExpand={props.expandOutput}
+                  onUseOutputAsInput={props.onUseOutputAsInput}
+                />
+              )}
               <Button
                 variant="cyan"
                 onClick={() => setShowPreview(true)}
@@ -91,7 +92,7 @@ export function HtmlPlayground() {
               variant="output"
               value={props.output}
               error={props.error}
-              isProcessing={false}
+              isProcessing={props.isProcessing}
               stats={props.outputStats}
               comparisonBytes={props.comparisonBytes}
             />

@@ -20,8 +20,8 @@ interface GenericPlaygroundExtraProps {
   extraActionsParams?: object;
   /** Extra toolbar content - receives actions for direct access */
   renderToolbarExtra?: (params: { actions: PlaygroundActions }) => ReactNode;
-  /** Extra output actions */
-  renderOutputActions?: () => ReactNode;
+  /** Extra output actions, shown in the expanded output modal */
+  renderOutputActions?: (params: { closeExpandedEditor: () => void }) => ReactNode;
   /** Extra output panel */
   renderOutputPanel?: (props: OutputPanelProps) => ReactNode;
   /** Extra modals */
@@ -210,7 +210,7 @@ export function GenericPlayground({
   const extraParams = { input: ctx.input, output: ctx.output, actions, overlays };
   const toolbarExtraContent =
     renderToolbarExtra?.({ actions }) ?? engine.renderToolbarExtra?.(extraParams);
-  const outputActions = renderOutputActions?.() ?? engine.renderOutputActions?.(extraParams);
+  const outputActions = renderOutputActions?.({ closeExpandedEditor: overlays.editor.collapse }) ?? engine.renderOutputActions?.(extraParams);
   const outputPanelFn = renderOutputPanel ?? engine.renderOutputPanel;
   const modals = renderModals?.() ?? engine.renderModals?.(extraParams) ?? [];
 
