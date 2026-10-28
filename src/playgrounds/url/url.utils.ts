@@ -102,19 +102,24 @@ export function decodeUrl(input: string, variant: UrlVariant): string {
 }
 
 /**
- * Heuristic used by auto mode. Any whitespace means plain text, since encoded output
- * never contains raw whitespace. Literal text like "%41" is detected as encoded
+ * Heuristic used by auto mode. Valid `%XX` escapes mean encoded. Raw whitespace never
+ * comes out of an encoder, so input that holds whitespace (e.g. a half-decoded
+ * "50%25 off") only counts as encoded when every `%` starts a valid escape; otherwise
+ * it is plain text like "50% off". Literal text like "%41" is detected as encoded
  * (documented limitation; explicit modes override).
  * Without `%XX` escapes, a `+` only counts as form data when the whole input could be
  * form-encoder output (unreserved characters and `+`); text like "1+1=2" holds `=`,
  * which the encoder would have escaped, so it is plain text.
  */
 export function isLikelyUrlEncoded(input: string, variant: UrlVariant): boolean {
-  if (input === "" || /\s/.test(input)) {
+  if (input === "") {
     return false;
   }
   if (/%[0-9A-Fa-f]{2}/.test(input)) {
-    return true;
+    return !/\s/.test(input) || !/%(?![0-9A-Fa-f]{2})/.test(input);
+  }
+  if (/\s/.test(input)) {
+    return false;
   }
   return variant === "form" && input.includes("+") && /^[A-Za-z0-9\-_.!~*'()+]+$/.test(input);
 }
