@@ -6,7 +6,7 @@ import type { PlaygroundConfig } from "@/types/playground";
  */
 export const sqlFileSettings = {
   inputFileName: "query.sql",
-  outputFileName: "result.json",
+  outputFileName: "output.json",
   mimeType: "application/sql",
   acceptExtensions: ".sql",
 } as const;

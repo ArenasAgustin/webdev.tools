@@ -205,7 +205,7 @@ describe("CssPlayground branches", () => {
     expect(clipboardWriteTextMock).toHaveBeenCalledWith(".card { color: red; }");
     expect(downloadFileMock).toHaveBeenCalledWith(
       ".card { color: red; }",
-      "result.css",
+      "output.css",
       "text/css",
     );
   });

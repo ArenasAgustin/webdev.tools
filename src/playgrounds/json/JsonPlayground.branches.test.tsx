@@ -254,7 +254,7 @@ describe("JsonPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
     expect(downloadFileMock).toHaveBeenCalledWith(
       '{\n  "formatted": true\n}',
-      "result.json",
+      "output.json",
       "application/json",
     );
   });

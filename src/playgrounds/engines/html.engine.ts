@@ -54,7 +54,7 @@ export const htmlEngine = {
   mapActionsParams: mapToHtmlParams,
   fileConfig: {
     inputFileName: "index.html",
-    outputFileName: "result.html",
+    outputFileName: "output.html",
     mimeType: "text/html",
     language: "HTML",
     acceptExtensions: ".html,.htm",

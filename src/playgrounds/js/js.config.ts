@@ -6,7 +6,7 @@ import type { PlaygroundConfig } from "@/types/playground";
  */
 export const jsFileSettings = {
   inputFileName: "script.js",
-  outputFileName: "result.js",
+  outputFileName: "output.js",
   mimeType: "text/javascript",
   acceptExtensions: ".js,.mjs",
 } as const;

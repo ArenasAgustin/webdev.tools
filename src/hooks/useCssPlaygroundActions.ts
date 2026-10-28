@@ -13,7 +13,7 @@ import { cleanCssAsync } from "@/services/css/worker";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "styles.css",
-  outputFileName: "result.css",
+  outputFileName: "output.css",
   mimeType: "text/css",
   language: "CSS",
   acceptExtensions: ".css,.scss",

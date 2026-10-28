@@ -54,7 +54,7 @@ export const cssEngine = {
   mapActionsParams: mapToCssParams,
   fileConfig: {
     inputFileName: "styles.css",
-    outputFileName: "result.css",
+    outputFileName: "output.css",
     mimeType: "text/css",
     language: "CSS",
     acceptExtensions: ".css",

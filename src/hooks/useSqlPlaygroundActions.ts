@@ -28,9 +28,9 @@ const FILE_CONFIG: PlaygroundFileConfig = {
 function outputDownloadFile(output: string): { fileName: string; mimeType: string } {
   try {
     JSON.parse(output);
-    return { fileName: "result.json", mimeType: "application/json" };
+    return { fileName: "output.json", mimeType: "application/json" };
   } catch {
-    return { fileName: "result.sql", mimeType: FILE_CONFIG.mimeType };
+    return { fileName: "output.sql", mimeType: FILE_CONFIG.mimeType };
   }
 }
 

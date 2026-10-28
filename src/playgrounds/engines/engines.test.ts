@@ -63,7 +63,7 @@ describe("Playground Engines", () => {
 
     it("has correct file config", () => {
       expect(jsonEngine.fileConfig.inputFileName).toBe("data.json");
-      expect(jsonEngine.fileConfig.outputFileName).toBe("result.json");
+      expect(jsonEngine.fileConfig.outputFileName).toBe("output.json");
       expect(jsonEngine.fileConfig.mimeType).toBe("application/json");
     });
   });
@@ -236,7 +236,7 @@ describe("Playground Engines", () => {
 
     it("has correct file config", () => {
       expect(sqlEngine.fileConfig.inputFileName).toBe("query.sql");
-      expect(sqlEngine.fileConfig.outputFileName).toBe("result.json");
+      expect(sqlEngine.fileConfig.outputFileName).toBe("output.json");
       expect(sqlEngine.fileConfig.mimeType).toBe("application/sql");
     });
 

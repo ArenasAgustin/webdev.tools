@@ -207,7 +207,7 @@ describe("useSqlPlaygroundActions", () => {
     });
   });
 
-  it("downloads an execution result as result.json with a JSON mime type", () => {
+  it("downloads an execution result as output.json with a JSON mime type", () => {
     const output = JSON.stringify(mockResult, null, 2);
     const { result } = renderHook(() => useSqlPlaygroundActions(makeProps({ output })));
 
@@ -215,10 +215,10 @@ describe("useSqlPlaygroundActions", () => {
       result.current.handleDownloadOutput();
     });
 
-    expect(downloadFileMock).toHaveBeenCalledWith(output, "result.json", "application/json");
+    expect(downloadFileMock).toHaveBeenCalledWith(output, "output.json", "application/json");
   });
 
-  it("downloads formatted SQL as result.sql with the SQL mime type", () => {
+  it("downloads formatted SQL as output.sql with the SQL mime type", () => {
     const output = "SELECT *\nFROM users;";
     const { result } = renderHook(() => useSqlPlaygroundActions(makeProps({ output })));
 
@@ -226,6 +226,6 @@ describe("useSqlPlaygroundActions", () => {
       result.current.handleDownloadOutput();
     });
 
-    expect(downloadFileMock).toHaveBeenCalledWith(output, "result.sql", "application/sql");
+    expect(downloadFileMock).toHaveBeenCalledWith(output, "output.sql", "application/sql");
   });
 });

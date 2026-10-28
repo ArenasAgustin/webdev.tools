@@ -20,7 +20,7 @@ import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/type
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "data.json",
-  outputFileName: "result.json",
+  outputFileName: "output.json",
   mimeType: "application/json",
   language: "JSON",
   acceptExtensions: ".json",

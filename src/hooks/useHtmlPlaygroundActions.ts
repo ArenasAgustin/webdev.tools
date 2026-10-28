@@ -13,7 +13,7 @@ import { cleanHtmlAsync } from "@/services/html/worker";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "index.html",
-  outputFileName: "result.html",
+  outputFileName: "output.html",
   mimeType: "text/html",
   language: "HTML",
   acceptExtensions: ".html,.htm",

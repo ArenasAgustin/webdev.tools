@@ -6,7 +6,7 @@ import type { ToastApi } from "./usePlaygroundActions";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "test.txt",
-  outputFileName: "result.txt",
+  outputFileName: "output.txt",
   mimeType: "text/plain",
   language: "TestLang",
   acceptExtensions: ".txt,.md",
