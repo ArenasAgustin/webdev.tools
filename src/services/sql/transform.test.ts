@@ -211,4 +211,9 @@ SELECT id, name FROM users WHERE id = 1`;
     const result = minifySql("SELECT `a  --b`\n FROM t;");
     expect(result).toEqual({ ok: true, value: "SELECT `a  --b` FROM t;" });
   });
+
+  it("treats a backslash as a plain character in literals, like SQLite", () => {
+    const result = minifySql("SELECT 'C:\\'; -- it's\nSELECT 2 AS two;");
+    expect(result).toEqual({ ok: true, value: "SELECT 'C:\\'; SELECT 2 AS two;" });
+  });
 });

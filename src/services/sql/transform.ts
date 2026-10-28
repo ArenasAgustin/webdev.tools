@@ -81,10 +81,9 @@ function tokenizeSql(source: string): SqlSegment[] {
 
     if (QUOTE_CHARS.has(char)) {
       let j = i + 1;
+      // SQLite has no backslash escapes: `'C:\'` is a complete literal.
       while (j < source.length) {
-        if (source[j] === "\\" && char !== "`") {
-          j += 2;
-        } else if (source[j] === char) {
+        if (source[j] === char) {
           // A doubled quote is an escaped quote inside the literal.
           if (source[j + 1] === char) j += 2;
           else break;
