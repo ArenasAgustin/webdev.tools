@@ -15,6 +15,7 @@ import {
   cleanJsonAsync,
   applyJsonPathAsync,
 } from "@/services/json/worker";
+import { detectJsonLoss } from "@/services/json/lossDetection";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
@@ -49,6 +50,17 @@ async function minifyRunner(input: string, config: JsonMinifyConfig) {
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.value;
+}
+
+/**
+ * JSON.parse/stringify silently round big integers, turn 1e400 into null and keep
+ * only the last of duplicate keys; tell the user when the input had any of those.
+ */
+function warnAboutSilentChanges(input: string, toast: ToastApi | undefined) {
+  if (!toast?.info) return;
+  const { precisionLoss, duplicateKeys } = detectJsonLoss(input);
+  if (precisionLoss) toast.info(translate("messages.json.precisionLoss"));
+  if (duplicateKeys) toast.info(translate("messages.json.duplicateKeys"));
 }
 
 /** Drops the toasts of a JSONPath request that a newer one has superseded. */
@@ -99,6 +111,24 @@ export function useJsonPlaygroundActions({
   cleanConfig,
   toast,
 }: UseJsonPlaygroundActionsProps) {
+  const formatWithWarning = useCallback(
+    async (input: string, config: JsonFormatConfig) => {
+      const value = await formatRunner(input, config);
+      warnAboutSilentChanges(input, toast);
+      return value;
+    },
+    [toast],
+  );
+
+  const minifyWithWarning = useCallback(
+    async (input: string, config: JsonMinifyConfig) => {
+      const value = await minifyRunner(input, config);
+      warnAboutSilentChanges(input, toast);
+      return value;
+    },
+    [toast],
+  );
+
   const generic = useGenericPlaygroundActions({
     input: inputJson,
     setInput: setInputJson,
@@ -112,8 +142,8 @@ export function useJsonPlaygroundActions({
     toast,
     exampleContent,
     fileConfig: FILE_CONFIG,
-    formatRunner,
-    minifyRunner,
+    formatRunner: formatWithWarning,
+    minifyRunner: minifyWithWarning,
   });
 
   // Id of the latest JSONPath request. Queries are not exclusive (the user may refine the
@@ -135,6 +165,7 @@ export function useJsonPlaygroundActions({
         });
         if (!result.ok) throw new Error(result.error.message);
         if (!result.value.trim()) throw new Error(translate("messages.cleanEmpty", { language: "JSON" }));
+        warnAboutSilentChanges(inputJson, toast);
         return result.value;
       },
       setOutput,
@@ -143,7 +174,7 @@ export function useJsonPlaygroundActions({
       successMessage: translate("messages.cleaned", { language: "JSON" }),
       errorMessage: translate("messages.cleanError", { language: "JSON" }),
     });
-  }, [generic.runTransformAction, inputJson, cleanConfig, setError, setOutput]);
+  }, [generic.runTransformAction, inputJson, cleanConfig, setError, setOutput, toast]);
 
   // Extensión: aplicar JSONPath
   const handleApplyJsonPath = useCallback(() => {

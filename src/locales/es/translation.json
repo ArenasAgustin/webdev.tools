@@ -417,7 +417,9 @@
     "json": {
       "jsonPathRequired": "Ingresa una expresión JSONPath",
       "noResults": "El filtro no devolvió resultados",
-      "jsonPathError": "Error al aplicar JSONPath"
+      "jsonPathError": "Error al aplicar JSONPath",
+      "precisionLoss": "Algunos números no se pueden representar con exactitud y cambiaron (enteros muy grandes o valores como 1e400).",
+      "duplicateKeys": "Hay claves duplicadas: solo se conservó el último valor de cada una."
     },
     "php": {
       "minifyUnavailable": "Minify no está disponible para PHP",
