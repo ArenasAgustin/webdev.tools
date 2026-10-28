@@ -232,6 +232,50 @@ echo "end";`,
     });
   });
 
+  it("ignores braces inside single-line block comments", () => {
+    const input = `<?php
+if ($a) { /* { */
+echo "x";
+}
+echo "end"; /* } */
+echo "after";`;
+    const result = formatPhp(input);
+
+    expect(result).toEqual({
+      ok: true,
+      value: `<?php
+if ($a) { /* { */
+  echo "x";
+}
+echo "end"; /* } */
+echo "after";`,
+    });
+  });
+
+  it("ignores braces inside multi-line block comments", () => {
+    const input = `<?php
+/* Usage: if ($x) {
+while (true) {
+*/
+if ($a) {
+echo "x";
+}
+echo "end";`;
+    const result = formatPhp(input);
+
+    expect(result).toEqual({
+      ok: true,
+      value: `<?php
+/* Usage: if ($x) {
+while (true) {
+*/
+if ($a) {
+  echo "x";
+}
+echo "end";`,
+    });
+  });
+
   it("handles throw statement", () => {
     const input = `<?php
 if ($error) {
