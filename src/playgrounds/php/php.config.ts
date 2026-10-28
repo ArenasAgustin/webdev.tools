@@ -46,7 +46,7 @@ class Usuario {
     }
 
     public function saludar(): string {
-        return "Hola, soy {$this->nombre} y tengo {$this->edad} anos";
+        return "Hola, soy {$this->nombre} y tengo {$this->edad} años";
     }
 }
 

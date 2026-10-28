@@ -113,11 +113,15 @@ export function usePhpPlaygroundActions({
         }
 
         setOutput(result.value);
+        return result.value;
       },
       toast,
-      successMessage: translate("messages.php.executed"),
-      onSuccess: () => {
+      onSuccess: (printed) => {
         generic.endProcessing();
+        // A silent script leaves the output empty (nothing to copy or count) and says so here.
+        toast?.success(
+          translate(printed ? "messages.php.executed" : "messages.php.executedNoOutput"),
+        );
       },
       onError: (message) => {
         generic.endProcessing();

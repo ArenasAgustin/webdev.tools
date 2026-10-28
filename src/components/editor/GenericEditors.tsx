@@ -26,6 +26,8 @@ interface GenericEditorsProps {
   inputTitle: string;
   inputPlaceholder: string;
   outputPlaceholder?: string;
+  /** Hint shown in the empty output panel; defaults to the generic one */
+  outputIdleLabel?: string;
   waitingLabel: string;
   validLabel: string;
   invalidLabel: string;
@@ -78,6 +80,7 @@ export const GenericEditors = memo(function GenericEditors({
   inputTitle,
   inputPlaceholder,
   outputPlaceholder: outputPlaceholderProp,
+  outputIdleLabel,
   waitingLabel,
   validLabel,
   invalidLabel,
@@ -204,7 +207,7 @@ export const GenericEditors = memo(function GenericEditors({
         <div className="flex h-full min-h-[220px] items-center justify-center">
           <div className="flex flex-col items-center gap-2 text-white/40">
             <i className={`${outputIcon ?? "fas fa-terminal"} text-2xl`} aria-hidden="true" />
-            <span className="text-sm">{t("editor.outputIdle")}</span>
+            <span className="text-sm">{outputIdleLabel ?? t("editor.outputIdle")}</span>
           </div>
         </div>
       )}

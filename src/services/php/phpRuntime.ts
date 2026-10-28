@@ -6,7 +6,6 @@
  */
 
 import type { Result } from "@/types/common";
-import { serviceMessage } from "@/services/serviceMessage";
 
 /** `output` holds what the script printed before a fatal error. */
 export type PhpExecResult = Result<string, { message: string; output?: string }>;
@@ -21,9 +20,6 @@ export type PhpExecResponse = { type: "started" } | { type: "done"; result: PhpE
 export interface PhpExecOptions {
   onStarted?: () => void;
 }
-
-/** Output reported when the script prints nothing. */
-export const PHP_NO_OUTPUT = serviceMessage("services.php.noOutput");
 
 /** PHP version we bundle the wasm binaries for. */
 export const PHP_VERSION = "7.4";
@@ -92,7 +88,8 @@ export async function executePhp(
       return { ok: false, error: { message: stderr } };
     }
 
-    return { ok: true, value: output || PHP_NO_OUTPUT };
+    // An empty string means the script printed nothing; the UI says so in its toast.
+    return { ok: true, value: output };
   } catch (error) {
     // php-wasm throws on a non-zero exit code; the error carries the response.
     const failed = (error as { response?: { text?: string } } | null)?.response?.text;

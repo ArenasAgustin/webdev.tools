@@ -7,6 +7,7 @@ import { GenericEditors } from "@/components/editor/GenericEditors";
 import { usePlaygroundOverlays } from "@/hooks/usePlaygroundOverlays";
 import { useMergedConfigState } from "@/hooks/useMergedConfigState";
 import { usePlaygroundSetup, usePlaygroundToolbar } from "@/hooks/usePlaygroundSetup";
+import { outputIdleKey } from "@/utils/outputIdle";
 import type {
   PlaygroundEngine,
   PlaygroundEngineWithClean,
@@ -235,6 +236,7 @@ export function GenericPlayground({
             waitingLabel={t("editor.waitingLabel", { language: engine.fileConfig.language })}
             validLabel={t("editor.validLabel", { language: engine.fileConfig.language })}
             invalidLabel={t("editor.invalidLabel", { language: engine.fileConfig.language })}
+            outputIdleLabel={t(outputIdleKey({ hasMinify, hasExecute }))}
             onInputChange={ctx.setInput}
             onClearInput={actions.handleClearInput}
             onLoadExample={actions.handleLoadExample}

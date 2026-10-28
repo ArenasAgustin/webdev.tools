@@ -75,7 +75,7 @@ describe("service errors i18n (English)", () => {
     if (!css.ok) expect(css.error.message).toBe("The CSS is empty");
   });
 
-  it("translates the PHP execution timeout and empty output", async () => {
+  it("translates the PHP execution timeout and keeps empty output empty", async () => {
     vi.useFakeTimers();
     vi.stubGlobal("Worker", FakeWorker);
 
@@ -91,9 +91,9 @@ describe("service errors i18n (English)", () => {
     FakeWorker.instances[1].emit({ type: "started" });
     FakeWorker.instances[1].emit({
       type: "done",
-      result: { ok: true, value: "services.php.noOutput" },
+      result: { ok: true, value: "" },
     });
-    await expect(silent).resolves.toEqual({ ok: true, value: "(no output)" });
+    await expect(silent).resolves.toEqual({ ok: true, value: "" });
   });
 });
 

@@ -140,6 +140,9 @@
     "output": "Output",
     "dropFileHere": "Drop file here",
     "outputIdle": "Format, minify, or run to see a result",
+    "outputIdleFormatRun": "Format or run to see a result",
+    "outputIdleFormatMinify": "Format or minify to see a result",
+    "outputIdleFormat": "Format to see a result",
     "inputPlaceholder": "Write your {{language}} here...",
     "waitingLabel": "Waiting for {{language}}...",
     "validLabel": "{{language}} valid",
@@ -433,7 +436,8 @@
       "minifyUnavailable": "Minify is not available for PHP",
       "formatCodeError": "Error formatting PHP code",
       "sharedArrayBufferUnsupported": "Your browser does not support SharedArrayBuffer, which is required to run PHP. Try an up-to-date Chrome or Firefox.",
-      "executed": "PHP code executed successfully"
+      "executed": "PHP code executed successfully",
+      "executedNoOutput": "PHP code ran (no output)"
     },
     "sql": {
       "executed": "Query executed successfully",
@@ -493,7 +497,6 @@
       "parseError": "Error parsing PHP code",
       "formatError": "Error formatting PHP code",
       "minifyUnavailable": "Minify is not available for PHP",
-      "noOutput": "(no output)",
       "timeout": "Execution exceeded {{seconds}} seconds and was cancelled"
     },
     "sql": {

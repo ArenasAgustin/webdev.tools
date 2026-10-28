@@ -3,7 +3,6 @@
  */
 
 import type { PhpExecRequest, PhpExecResponse, PhpExecResult } from "@/services/php/phpRuntime";
-import { PHP_NO_OUTPUT } from "@/services/php/phpRuntime";
 import { translate } from "@/i18n/translate";
 import { localizeServiceResult } from "@/services/localizeServiceMessage";
 
@@ -19,11 +18,7 @@ const PHP_EXECUTION_TIMEOUT_MS = 5000;
 
 /** Turn the worker's locale-neutral messages into user-facing text. */
 function localizeExecResult(result: PhpExecResult): PhpExecResult {
-  if (result.ok) {
-    return result.value === PHP_NO_OUTPUT
-      ? { ok: true, value: translate("services.php.noOutput") }
-      : result;
-  }
+  if (result.ok) return result;
   return localizeServiceResult(result);
 }
 
