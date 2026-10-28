@@ -157,6 +157,30 @@ describe("HashPlayground branches", () => {
     expect(generateAllHashesMock).not.toHaveBeenCalled();
   });
 
+  it("empty text: Generate shows a hint that disappears once text is typed", async () => {
+    render(<HashPlayground />);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    expect(screen.getByRole("status")).toHaveTextContent(/ingres[aá] un texto/i);
+
+    fireEvent.change(textarea, { target: { value: "x" } });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("file mode: shows small file sizes in bytes", () => {
+    const { container } = render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    fireEvent.change(input, { target: { files: [new File(["abc"], "a.txt")] } });
+
+    expect(screen.getByText("3 B")).toBeInTheDocument();
+  });
+
   it("text mode: generates hashes and displays results", async () => {
     render(<HashPlayground />);
 

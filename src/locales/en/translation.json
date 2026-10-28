@@ -233,7 +233,8 @@
     "compareAction": "Compare",
     "matchSuccess": "Hash matches",
     "matchFail": "Hash does NOT match",
-    "generateError": "Could not generate the hashes. The file may be unreadable or too large."
+    "generateError": "Could not generate the hashes. The file may be unreadable or too large.",
+    "emptyInput": "Enter some text to generate its hashes"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",

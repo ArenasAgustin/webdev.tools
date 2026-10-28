@@ -12,6 +12,7 @@ import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS, removeItem } from "@/services/storage";
+import { formatBytes } from "@/utils/formatBytes";
 
 interface GeneratedHashes {
   mode: InputMode;
@@ -49,6 +50,7 @@ export function HashPlayground() {
   const [generated, setGenerated] = useState<GeneratedHashes | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hashError, setHashError] = useState(false);
+  const [emptyAttempt, setEmptyAttempt] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
@@ -87,12 +89,14 @@ export function HashPlayground() {
   const processInput = useCallback(async () => {
     setIsProcessing(true);
     setHashError(false);
+    setEmptyAttempt(false);
     const source = { mode: inputMode, text: textInput, file: fileInput };
 
     try {
       if (inputMode === "text") {
         if (!textInput) {
           setGenerated(null);
+          setEmptyAttempt(true);
           return;
         }
         const hashes = await generateAllHashes(textInput, outputCase);
@@ -192,7 +196,7 @@ export function HashPlayground() {
               {fileInput ? (
                 <div className="text-center">
                   <p className="text-white font-medium">{fileInput.name}</p>
-                  <p className="text-gray-400 text-sm">{(fileInput.size / 1024).toFixed(2)} KB</p>
+                  <p className="text-gray-400 text-sm">{formatBytes(fileInput.size)}</p>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -241,6 +245,13 @@ export function HashPlayground() {
           </button>
         </div>
       </div>
+
+      {/* Shown after Generate on empty text, until something is typed */}
+      {emptyAttempt && inputMode === "text" && !textInput && (
+        <p role="status" className="text-gray-400 text-sm">
+          {t("hash.emptyInput")}
+        </p>
+      )}
 
       {hashError && (
         <p role="alert" className="text-red-400 text-sm">
