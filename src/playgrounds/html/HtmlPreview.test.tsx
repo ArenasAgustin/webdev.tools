@@ -38,4 +38,27 @@ describe("HtmlPreview", () => {
 
     expect(screen.getByTestId("dom-inspection-summary").textContent).toContain("li (2)");
   });
+
+  it("shows the empty state when the source has no elements of its own", () => {
+    render(<HtmlPreview source="just some text" />);
+
+    expect(screen.queryByTestId("dom-inspection-summary")).toBeNull();
+    expect(screen.getByText("Sin elementos para inspeccionar")).toBeInTheDocument();
+  });
+
+  it("does not count the implicit html, head and body wrappers", () => {
+    render(<HtmlPreview source="<p>a</p>" />);
+
+    expect(screen.getByTestId("dom-inspection-summary").textContent).toBe("p (1)");
+  });
+
+  it("says how many tag types were left out of the summary", () => {
+    const tags = ["a", "b", "i", "p", "s", "u", "em", "h1", "h2", "h3"];
+    render(<HtmlPreview source={tags.map((tag) => `<${tag}>x</${tag}>`).join("")} />);
+
+    const summary = screen.getByTestId("dom-inspection-summary").textContent;
+    expect(summary).toContain("a (1)");
+    expect(summary).not.toContain("h2 (1)");
+    expect(summary).toContain("+2 más");
+  });
 });

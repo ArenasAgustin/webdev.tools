@@ -242,6 +242,7 @@
     "resultLabel": "Resultado",
     "domInspection": "Inspección DOM",
     "noElements": "Sin elementos para inspeccionar",
+    "moreTags": "+{{count}} más",
     "viewPreview": "Ver vista previa",
     "viewResult": "Ver resultado"
   },

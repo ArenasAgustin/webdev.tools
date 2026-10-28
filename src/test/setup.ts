@@ -234,6 +234,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "html.resultLabel": "Resultado",
         "html.domInspection": "Inspección DOM",
         "html.noElements": "Sin elementos para inspeccionar",
+        "html.moreTags": "+{{count}} más",
         "html.viewPreview": "Ver vista previa",
         "html.viewResult": "Ver resultado",
 
@@ -489,6 +490,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "html.resultLabel": "Result",
         "html.domInspection": "DOM Inspection",
         "html.noElements": "No elements to inspect",
+        "html.moreTags": "+{{count}} more",
         "html.viewPreview": "View preview",
         "html.viewResult": "View result",
 
