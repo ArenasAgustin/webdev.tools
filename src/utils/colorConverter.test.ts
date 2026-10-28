@@ -139,6 +139,13 @@ describe("colorConverter - rgbToHsl", () => {
     expect(result).toEqual({ h: 0, s: 100, l: 50 });
   });
 
+  it("parses percentage and decimal rgb channels", () => {
+    expect(parseColor("rgb(100%, 0%, 0%)")).toEqual({ r: 255, g: 0, b: 0 });
+    expect(parseColor("rgb(100% 50% 0% / 50%)")).toEqual({ r: 255, g: 128, b: 0, a: 0.5 });
+    expect(parseColor("rgb(10.4, 0, 255)")).toEqual({ r: 10, g: 0, b: 255 });
+    expect(parseColor("rgb(101%, 0%, 0%)")).toBeNull();
+  });
+
   it("wraps a hue that rounds up to 360 back to 0", () => {
     // raw hue is ~359.76°
     expect(rgbToHsl({ r: 255, g: 0, b: 1 }).h).toBe(0);

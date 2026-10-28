@@ -43,8 +43,10 @@ export interface ColorFormats {
 // the optional alpha follows a comma or a slash, as a number or a percentage.
 const CHANNEL_SEP = String.raw`(?:\s*,\s*|\s+)`;
 const ALPHA = String.raw`(?:\s*[,/]\s*(\d*\.?\d+)(%?))?`;
+// An rgb channel is a number in 0..255 or a percentage, optionally with decimals.
+const RGB_CHANNEL = String.raw`(\d*\.?\d+%?)`;
 const RGB_PATTERN = new RegExp(
-  String.raw`^rgba?\s*\(\s*(\d+)${CHANNEL_SEP}(\d+)${CHANNEL_SEP}(\d+)${ALPHA}\s*\)$`,
+  String.raw`^rgba?\s*\(\s*${RGB_CHANNEL}${CHANNEL_SEP}${RGB_CHANNEL}${CHANNEL_SEP}${RGB_CHANNEL}${ALPHA}\s*\)$`,
 );
 const HSL_PATTERN = new RegExp(
   String.raw`^hsla?\s*\(\s*(\d+)${CHANNEL_SEP}(\d+)%?${CHANNEL_SEP}(\d+)%?${ALPHA}\s*\)$`,
@@ -55,6 +57,12 @@ function parseAlpha(value: string | undefined, percent: string | undefined): num
   if (value === undefined) return undefined;
   const alpha = Number(value) / (percent ? 100 : 1);
   return alpha <= 1 ? alpha : null;
+}
+
+/** Parse an rgb channel ("128", "50%", "10.4") to 0..255; null when out of range. */
+function parseRgbChannel(value: string): number | null {
+  const channel = value.endsWith("%") ? (parseFloat(value) * 255) / 100 : parseFloat(value);
+  return channel <= 255 ? Math.round(channel) : null;
 }
 
 /** Attach alpha only when the color is translucent, so opaque colors stay `{ r, g, b }`. */
@@ -98,11 +106,11 @@ export function parseColor(input: string): RGB | null {
   // RGB / RGBA format
   const rgbMatch = RGB_PATTERN.exec(cleanInput);
   if (rgbMatch) {
-    const r = parseInt(rgbMatch[1], 10);
-    const g = parseInt(rgbMatch[2], 10);
-    const b = parseInt(rgbMatch[3], 10);
+    const r = parseRgbChannel(rgbMatch[1]);
+    const g = parseRgbChannel(rgbMatch[2]);
+    const b = parseRgbChannel(rgbMatch[3]);
     const alpha = parseAlpha(rgbMatch[4], rgbMatch[5]);
-    if (alpha !== null && r <= 255 && g <= 255 && b <= 255) {
+    if (alpha !== null && r !== null && g !== null && b !== null) {
       return withAlpha({ r, g, b }, alpha);
     }
   }
