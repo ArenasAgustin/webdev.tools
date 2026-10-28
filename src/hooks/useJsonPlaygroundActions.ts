@@ -104,7 +104,6 @@ export function useJsonPlaygroundActions({
   inputTooLarge,
   inputTooLargeMessage,
   jsonPathExpression,
-  setJsonPathExpression,
   addToHistory,
   formatConfig,
   minifyConfig,
@@ -223,54 +222,9 @@ export function useJsonPlaygroundActions({
     toast,
   ]);
 
-  // Extensión: reutilizar expresión de historial
-  const handleReuseFromHistory = useCallback(
-    (expression: string) => {
-      const requestId = ++jsonPathRequestRef.current;
-      const isLatest = () => requestId === jsonPathRequestRef.current;
-      void createValidatedHandler({
-        validate: generic.baseActions.createInputValidator,
-        run: async () => {
-          setJsonPathExpression(expression);
-          const result = await applyJsonPathAsync(inputJson, expression);
-          if (!result.ok) throw new Error(result.error.message);
-          return result.value;
-        },
-        onSuccess: (value) => {
-          if (!isLatest()) return;
-          if (!value.trim() || value === "[]" || value === "{}") {
-            setOutput(value);
-            setError(translate("messages.json.noResults"));
-          } else {
-            setOutput(value);
-            setError(null);
-          }
-          void addToHistory(expression);
-        },
-        onError: (message) => {
-          if (!isLatest()) return;
-          setOutput("");
-          setError(compactTransformError(message));
-        },
-        toast: latestOnlyToast(toast, isLatest),
-        errorMessage: translate("messages.json.jsonPathError"),
-      })();
-    },
-    [
-      generic.baseActions,
-      setJsonPathExpression,
-      inputJson,
-      addToHistory,
-      setOutput,
-      setError,
-      toast,
-    ],
-  );
-
   return {
     ...generic,
     handleClean,
     handleApplyJsonPath,
-    handleReuseFromHistory,
   };
 }
