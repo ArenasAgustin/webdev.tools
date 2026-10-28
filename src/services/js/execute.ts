@@ -269,9 +269,9 @@ export function describeError(error: unknown): string {
   return line > 0 ? serviceMessage("services.js.runtimeErrorAtLine", { message, line }) : message;
 }
 
-// Map/Set currently being described, so a collection that contains itself prints
-// "[Circular]" instead of recursing forever.
-const describing = new Set<object>();
+// Bounds that keep a huge or deeply nested value from flooding the output.
+const MAX_DEPTH = 20;
+const MAX_ITEMS = 100;
 
 function describeFunction(fn: (...args: unknown[]) => unknown): string {
   if (Function.prototype.toString.call(fn).startsWith("class")) {
@@ -280,63 +280,132 @@ function describeFunction(fn: (...args: unknown[]) => unknown): string {
   return fn.name ? `[Function: ${fn.name}]` : "[Function (anonymous)]";
 }
 
-function describeCollection(collection: Map<unknown, unknown> | Set<unknown>): string {
-  if (describing.has(collection)) return "[Circular]";
-  describing.add(collection);
-  try {
-    if (collection instanceof Map) {
-      const entries = [...collection].map(([key, val]) => `${formatInline(key)} => ${formatInline(val)}`);
-      return `Map(${collection.size}) {${entries.join(", ")}}`;
-    }
-    const items = [...collection].map((item) => formatInline(item));
-    return `Set(${collection.size}) {${items.join(", ")}}`;
-  } finally {
-    describing.delete(collection);
-  }
+function describeErrorValue(error: Error): string {
+  return error.message ? `${error.name}: ${error.message}` : error.name;
 }
 
 /**
- * Text for values JSON.stringify drops or prints as `{}`: BigInt, symbols, functions,
- * errors, Map and Set. Returns undefined for everything else.
+ * Text for objects printed as a single token: errors, regular expressions, dates and
+ * promises (whose state cannot be read synchronously). Undefined for everything else.
  */
-function describeSpecial(value: unknown): string | undefined {
-  if (typeof value === "bigint") return `${value}n`;
-  if (typeof value === "symbol") return value.toString();
-  if (typeof value === "function") return describeFunction(value as (...args: unknown[]) => unknown);
-  if (value instanceof Error) return value.message ? `${value.name}: ${value.message}` : value.name;
-  if (value instanceof Map || value instanceof Set) return describeCollection(value);
+function describeLeafObject(value: object): string | undefined {
+  if (value instanceof Error) return describeErrorValue(value);
+  if (value instanceof RegExp) return String(value);
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? "Invalid Date" : value.toISOString();
+  }
+  if (value instanceof Promise) return "Promise {}";
   return undefined;
 }
 
-const specialReplacer = (_key: string, value: unknown) => describeSpecial(value) ?? value;
+/** Brackets around items: one per line when `space` is set, compact otherwise. */
+function wrapItems(open: string, close: string, items: string[], space: string, indent: string) {
+  if (items.length === 0) return open + close;
+  if (!space) return open + items.join(",") + close;
+  const inner = indent + space;
+  return `${open}\n${items.map((item) => inner + item).join(",\n")}\n${indent}${close}`;
+}
 
-/** Single-line rendering: strings quoted, objects as compact JSON. */
+function moreItems(total: number, kind: "items" | "properties"): string[] {
+  return total > MAX_ITEMS ? [`... ${total - MAX_ITEMS} more ${kind}`] : [];
+}
+
+/**
+ * Render a value the way the browser console shows it, in a JSON-like layout:
+ * quoted strings and keys, plus NaN, Infinity, -0, undefined, empty array slots,
+ * regular expressions, dates, typed arrays, Map/Set, functions and errors as the
+ * console prints them. `ancestors` holds the objects being rendered around this one,
+ * so a value that contains itself prints "[Circular]" instead of recursing forever.
+ * Getters are read like the console does when expanding them; one that throws prints
+ * "[Exception: …]".
+ */
+function serialize(value: unknown, space: string, indent: string, ancestors: object[]): string {
+  if (value === null) return "null";
+  switch (typeof value) {
+    case "undefined":
+      return "undefined";
+    case "string":
+      return JSON.stringify(value);
+    case "number":
+      return Object.is(value, -0) ? "-0" : String(value);
+    case "boolean":
+      return String(value);
+    case "bigint":
+      return `${value}n`;
+    case "symbol":
+      return value.toString();
+    case "function":
+      return describeFunction(value as (...args: unknown[]) => unknown);
+  }
+
+  const object = value;
+  if (ancestors.includes(object)) return "[Circular]";
+  const leaf = describeLeafObject(object);
+  if (leaf !== undefined) return leaf;
+  if (ancestors.length >= MAX_DEPTH) return Array.isArray(object) ? "[Array]" : "[Object]";
+
+  const nested = [...ancestors, object];
+  const child = (item: unknown) => serialize(item, space, indent + space, nested);
+  // Collection entries stay on one line, like the console's collapsed preview.
+  const inline = (item: unknown) => serialize(item, "", "", nested);
+
+  if (object instanceof Map) {
+    const entries = [...object]
+      .slice(0, MAX_ITEMS)
+      .map(([key, val]) => `${inline(key)} => ${inline(val)}`);
+    return `Map(${object.size}) {${[...entries, ...moreItems(object.size, "items")].join(", ")}}`;
+  }
+  if (object instanceof Set) {
+    const items = [...object].slice(0, MAX_ITEMS).map(inline);
+    return `Set(${object.size}) {${[...items, ...moreItems(object.size, "items")].join(", ")}}`;
+  }
+  if (ArrayBuffer.isView(object) && !(object instanceof DataView)) {
+    const typed = object as unknown as ArrayLike<number | bigint>;
+    const items = Array.from({ length: Math.min(typed.length, MAX_ITEMS) }, (_, i) => inline(typed[i]));
+    const all = [...items, ...moreItems(typed.length, "items")];
+    return `${object.constructor.name}(${typed.length}) [${all.join(", ")}]`;
+  }
+
+  const read = (key: string | number) => {
+    try {
+      return child((object as Record<string | number, unknown>)[key]);
+    } catch (error) {
+      const text = error instanceof Error ? describeErrorValue(error) : String(error);
+      return `[Exception: ${text}]`;
+    }
+  };
+
+  if (Array.isArray(object)) {
+    const items = Array.from({ length: Math.min(object.length, MAX_ITEMS) }, (_, i) =>
+      i in object ? read(i) : "empty",
+    );
+    return wrapItems("[", "]", [...items, ...moreItems(object.length, "items")], space, indent);
+  }
+
+  const keys = Object.keys(object);
+  const separator = space ? ": " : ":";
+  const properties = keys
+    .slice(0, MAX_ITEMS)
+    .map((key) => `${JSON.stringify(key)}${separator}${read(key)}`);
+  return wrapItems("{", "}", [...properties, ...moreItems(keys.length, "properties")], space, indent);
+}
+
+/** Single-line rendering: strings quoted, objects compact. */
 function formatInline(value: unknown): string {
-  const special = describeSpecial(value);
-  if (special !== undefined) return special;
-  if (value === undefined) return "undefined";
   try {
-    return JSON.stringify(value, specialReplacer);
+    return serialize(value, "", "", []);
   } catch {
     return Object.prototype.toString.call(value);
   }
 }
 
 export function formatValue(value: unknown): string {
-  if (value === null) return "null";
-  if (value === undefined) return "undefined";
   if (typeof value === "string") return value;
-  const special = describeSpecial(value);
-  if (special !== undefined) return special;
-  if (typeof value === "object") {
-    try {
-      return JSON.stringify(value, specialReplacer, 2);
-    } catch {
-      return Object.prototype.toString.call(value);
-    }
+  try {
+    return serialize(value, "  ", "", []);
+  } catch {
+    return Object.prototype.toString.call(value);
   }
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return Object.prototype.toString.call(value);
 }
 
 /** Single-line rendering of a `console.table` cell. */

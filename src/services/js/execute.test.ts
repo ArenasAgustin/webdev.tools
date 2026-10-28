@@ -116,7 +116,7 @@ describe("runJavaScript", () => {
 
   it("prints BigInt values with the n suffix, also inside objects", async () => {
     const result = await runJavaScript("console.log(10n, { big: 2n ** 64n });");
-    expect(result.output).toBe('10n {\n  "big": "18446744073709551616n"\n}');
+    expect(result.output).toBe('10n {\n  "big": 18446744073709551616n\n}');
   });
 
   it("names the error type and the user code line of a runtime error", async () => {
@@ -240,10 +240,57 @@ describe("formatValue", () => {
       return 1;
     }
     const value = { err: new RangeError("too big"), tags: new Set(["a"]), handler };
-    expect(JSON.parse(formatValue(value))).toEqual({
-      err: "RangeError: too big",
-      tags: 'Set(1) {"a"}',
-      handler: "[Function: handler]",
-    });
+    expect(formatValue(value)).toBe(
+      '{\n  "err": RangeError: too big,\n  "tags": Set(1) {"a"},\n  "handler": [Function: handler]\n}',
+    );
+  });
+
+  it("prints values JSON cannot represent like the browser console", () => {
+    expect(formatValue(/abc/g)).toBe("/abc/g");
+    expect(formatValue(NaN)).toBe("NaN");
+    expect(formatValue(-0)).toBe("-0");
+    expect(formatValue({ a: NaN, b: Infinity, c: undefined, d: -0, r: /x/i })).toBe(
+      '{\n  "a": NaN,\n  "b": Infinity,\n  "c": undefined,\n  "d": -0,\n  "r": /x/i\n}',
+    );
+    // eslint-disable-next-line no-sparse-arrays -- the hole is the point of the test
+    expect(formatValue([undefined, , 3])).toBe("[\n  undefined,\n  empty,\n  3\n]");
+  });
+
+  it("prints dates, typed arrays and promises by type", () => {
+    expect(formatValue(new Date(0))).toBe("1970-01-01T00:00:00.000Z");
+    expect(formatValue(new Date(NaN))).toBe("Invalid Date");
+    expect(formatValue({ when: new Date(0) })).toBe('{\n  "when": 1970-01-01T00:00:00.000Z\n}');
+    expect(formatValue(new Uint8Array([1, 2]))).toBe("Uint8Array(2) [1, 2]");
+    expect(formatValue(Promise.resolve(1))).toBe("Promise {}");
+  });
+
+  it("prints circular references as [Circular]", () => {
+    const a: Record<string, unknown> = { x: 1 };
+    a.self = a;
+    expect(formatValue(a)).toBe('{\n  "x": 1,\n  "self": [Circular]\n}');
+    const list: unknown[] = [1];
+    list.push(list);
+    expect(formatValue(list)).toBe("[\n  1,\n  [Circular]\n]");
+    const shared = { n: 1 };
+    expect(formatValue([shared, shared])).toBe('[\n  {\n    "n": 1\n  },\n  {\n    "n": 1\n  }\n]');
+  });
+
+  it("does not crash on a throwing getter", () => {
+    const value = {
+      ok: 1,
+      get bad(): number {
+        throw new Error("g");
+      },
+    };
+    expect(formatValue(value)).toBe('{\n  "ok": 1,\n  "bad": [Exception: Error: g]\n}');
+  });
+
+  it("bounds very deep and very long values", () => {
+    let deep: Record<string, unknown> = {};
+    for (let i = 0; i < 100; i++) deep = { d: deep };
+    expect(formatValue(deep)).toContain("[Object]");
+    const long = formatValue(Array.from({ length: 1000 }, (_, i) => i));
+    expect(long).toContain("... 900 more items");
+    expect(long).not.toContain("999");
   });
 });
