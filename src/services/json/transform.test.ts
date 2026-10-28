@@ -416,6 +416,20 @@ describe("cleanJson edge cases", () => {
     if (result.ok) expect(result.value).toBe("");
   });
 
+  it("keeps a __proto__ key when sorting and cleaning", async () => {
+    const input = '{"b":1,"__proto__":{"x":1}}';
+    expect(minifyJson(input, { sortKeys: true })).toEqual({
+      ok: true,
+      value: '{"__proto__":{"x":1},"b":1}',
+    });
+    const formatted = await formatJson(input, { sortKeys: true });
+    expect(formatted.ok && formatted.value).toContain('"__proto__"');
+    expect(cleanJson(input, { outputFormat: "minify" })).toEqual({
+      ok: true,
+      value: '{"b":1,"__proto__":{"x":1}}',
+    });
+  });
+
   it("still removes nulls inside an array or object it keeps empty", () => {
     const keepArray = cleanJson('{"a":[null,null],"b":1}', {
       removeEmptyArray: false,
