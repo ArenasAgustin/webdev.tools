@@ -25,6 +25,32 @@ describe("runJavaScript", () => {
     expect(await runJavaScript("return Promise.resolve(42);")).toEqual({ ok: true, output: "42" });
   });
 
+  it("shows the value of a trailing bare expression when nothing is logged", async () => {
+    expect(await runJavaScript("1 + 2")).toEqual({ ok: true, output: "3" });
+    expect(await runJavaScript("const a = [1, 2];\na.map((n) => n * 2);")).toEqual({
+      ok: true,
+      output: "[\n  2,\n  4\n]",
+    });
+    expect(await runJavaScript('"hi" // trailing comment')).toEqual({ ok: true, output: "hi" });
+  });
+
+  it("awaits a trailing top-level await expression", async () => {
+    expect(await runJavaScript("await Promise.resolve(7)")).toEqual({ ok: true, output: "7" });
+  });
+
+  it("keeps the user code line numbers after rewriting the trailing expression", async () => {
+    const result = await runJavaScript("const x = 1;\nnull.foo");
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe(
+      atLine("TypeError: Cannot read properties of null (reading 'foo')", 2),
+    );
+  });
+
+  it("prints nothing extra when the last statement is not an expression", async () => {
+    expect(await runJavaScript("const a = 1;")).toEqual({ ok: true, output: "" });
+    expect(await runJavaScript("console.log(5)")).toEqual({ ok: true, output: "5" });
+  });
+
   it("supports top-level await", async () => {
     const result = await runJavaScript("const v = await Promise.resolve(3); console.log(v * 2);");
     expect(result).toEqual({ ok: true, output: "6" });

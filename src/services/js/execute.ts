@@ -11,6 +11,7 @@
  * This module runs inside the execution worker: it must stay free of i18next imports.
  */
 
+import type { Directive, Statement } from "@babel/types";
 import { serviceMessage } from "@/services/serviceMessage";
 
 export interface JsRunResult {
@@ -112,7 +113,7 @@ export async function runJavaScript(
       "setInterval",
       "clearTimeout",
       "clearInterval",
-      code,
+      await returnTrailingExpression(code),
     );
     const result = await userFunction(
       sandboxConsole,
@@ -138,6 +139,40 @@ export async function runJavaScript(
   } finally {
     for (const id of pendingTimers) clearTimeout(id);
   }
+}
+
+/**
+ * Like a console/REPL, show the value of a trailing bare expression (`1 + 2`,
+ * `await fetchThing()`): rewrite that last statement into `return (expr);` on the same
+ * line, so stack line numbers are unchanged. Code that doesn't parse is returned as is
+ * and the Function constructor reports the syntax error.
+ */
+async function returnTrailingExpression(code: string): Promise<string> {
+  let program: { body: Statement[]; directives: Directive[] };
+  try {
+    // Loaded on demand: only runs need it, and only inside the execution worker.
+    const { parse } = await import("@babel/parser");
+    program = parse(code, {
+      sourceType: "script",
+      allowAwaitOutsideFunction: true,
+      allowReturnOutsideFunction: true,
+    }).program;
+  } catch {
+    return code;
+  }
+
+  // A lone string literal (`"hi"`) parses as a directive, not as a statement.
+  const last: Statement | Directive | undefined =
+    program.body.at(-1) ?? (program.body.length === 0 ? program.directives.at(-1) : undefined);
+  const expression =
+    last?.type === "ExpressionStatement" ? last.expression : last?.type === "Directive" ? last.value : null;
+  if (!last || !expression) return code;
+
+  const { start, end } = last;
+  const { start: exprStart, end: exprEnd } = expression;
+  if (start == null || end == null || exprStart == null || exprEnd == null) return code;
+
+  return `${code.slice(0, start)}return (${code.slice(exprStart, exprEnd)});${code.slice(end)}`;
 }
 
 function failure(logs: string[], error: unknown): JsRunResult {
