@@ -90,6 +90,20 @@ describe("validateSql", () => {
     }
   });
 
+  it.each(["SELECT [col] FROM t", "SELECT $x", "SELECT :name, ?1", "SELECT @v"])(
+    "accepts the SQLite syntax %s",
+    (sql) => {
+      expect(validateSql(sql).ok).toBe(true);
+    },
+  );
+
+  it("formats SQLite bracket identifiers and parameters", () => {
+    expect(formatSql("SELECT [a b] FROM t WHERE x = $v", { dialect: "sql", tabWidth: 2 })).toEqual({
+      ok: true,
+      value: "SELECT\n  [a b]\nFROM\n  t\nWHERE\n  x = $v",
+    });
+  });
+
   it("returns ok: false for parse-invalid SQL", () => {
     const result = validateSql("SELECT 'unclosed");
 

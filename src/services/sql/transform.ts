@@ -9,6 +9,8 @@ import type { SqlFormatConfig } from "@/types/sql";
 import { DEFAULT_SQL_FORMAT_CONFIG } from "@/types/sql";
 import { serviceMessage } from "@/services/serviceMessage";
 
+const SQL_FORMATTER_LANGUAGE = "sqlite";
+
 /**
  * Format SQL using sql-formatter.
  * Returns Result<string, string> — ok: false if the formatter throws.
@@ -23,7 +25,9 @@ export function formatSql(input: string, config: SqlFormatConfig): Result<string
     const indent = config.tabWidth ?? 2;
     const useTabs = indent === "\t";
     const value = sqlFormat(input, {
-      language: config.dialect,
+      // The playground runs on SQLite (sql.js), so parse its syntax ([col], $x,
+      // :name, ?1) whatever dialect an older persisted config still holds.
+      language: SQL_FORMATTER_LANGUAGE,
       useTabs,
       tabWidth: useTabs ? 2 : indent,
     });

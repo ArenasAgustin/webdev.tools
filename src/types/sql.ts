@@ -4,7 +4,7 @@
 
 import type { IndentStyle } from "@/types/format";
 
-// v1: only default dialect.
+// v1: only default dialect; formatting and validation always use SQLite syntax (the execution engine).
 // v2 will widen to: "postgresql" | "mysql" | "sqlite" | "mariadb" | "transactsql" | ...
 export type SqlDialect = "sql";
 
