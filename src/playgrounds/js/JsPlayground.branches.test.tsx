@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { MAX_INPUT_BYTES } from "@/utils/constants/limits";
+import { stubJsExecWorker } from "@/test/inProcessJsExecWorker";
 
 const {
   toastMocks,
@@ -149,6 +150,7 @@ import { JsPlayground } from "./JsPlayground";
 describe("JsPlayground branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    stubJsExecWorker();
     minifyJsAsyncMock.mockResolvedValue({ ok: true, value: "const x=1;" });
     formatJsAsyncMock.mockResolvedValue({ ok: true, value: "const x = 1;" });
     clipboardWriteTextMock.mockResolvedValue(undefined);
@@ -162,6 +164,7 @@ describe("JsPlayground branches", () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it("executes code and handles runtime errors", async () => {

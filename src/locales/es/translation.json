@@ -418,6 +418,7 @@
       "cleanError": "Error al limpiar código",
       "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
       "workerError": "Error en el worker de ejecución",
+      "workerUnsupported": "Tu navegador no admite Web Workers: el código no se ejecuta para no bloquear ni exponer la página.",
       "unknownError": "Error desconocido al ejecutar código"
     },
     "json": {
