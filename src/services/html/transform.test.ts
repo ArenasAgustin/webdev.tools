@@ -400,3 +400,22 @@ describe("preserved content with replacement patterns", () => {
     expect(result).toEqual({ ok: true, value: dollarScript });
   });
 });
+
+describe("nested preserved blocks", () => {
+  it("cleanHtml restores a style nested in an svg", () => {
+    const result = cleanHtml("<svg><style>.a{fill:red}</style><rect/></svg><div></div>");
+
+    expect(result).toEqual({ ok: true, value: "<svg><style>.a{fill:red}</style><rect/></svg>" });
+  });
+
+  it("minifyHtml restores a style nested in a textarea", async () => {
+    const result = await minifyHtml("<textarea><style>a{color:red}</style></textarea>", {
+      removeComments: false,
+      collapseWhitespace: true,
+      minifyCss: false,
+      minifyJs: false,
+    });
+
+    expect(result).toEqual({ ok: true, value: "<textarea><style>a{color:red}</style></textarea>" });
+  });
+});
