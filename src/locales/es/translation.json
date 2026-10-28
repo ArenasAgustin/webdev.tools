@@ -505,7 +505,8 @@
       "parseError": "Error al parsear código PHP",
       "formatError": "Error al formatear código PHP",
       "minifyUnavailable": "Minify no está disponible para PHP",
-      "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada"
+      "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
+      "exitCode": "El script terminó con el código {{code}}"
     },
     "sql": {
       "noInput": "No hay SQL para procesar",
