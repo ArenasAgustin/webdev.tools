@@ -525,3 +525,21 @@ describe("formatPhp multi-line strings", () => {
     });
   });
 });
+
+describe("formatPhp inline HTML", () => {
+  it("keeps inline HTML verbatim and closes the block at its own level", () => {
+    const input =
+      "<?php if (true) { ?>\n<pre>\n  x\n    y\n</pre>\n<style>a { color: red; }</style>\n<?php } ?>";
+
+    expect(formatPhp(input)).toEqual({ ok: true, value: input });
+  });
+
+  it("ignores braces in inline HTML", () => {
+    const input = "<div>\n<style>\na {\ncolor: red;\n</style>\n</div>\n<?php\nif (1) {\necho 1;\n}";
+
+    expect(formatPhp(input)).toEqual({
+      ok: true,
+      value: "<div>\n<style>\na {\ncolor: red;\n</style>\n</div>\n<?php\nif (1) {\n  echo 1;\n}",
+    });
+  });
+});

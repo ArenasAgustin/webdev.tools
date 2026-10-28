@@ -63,7 +63,8 @@ export function parsePhp(input: string): Result<PhpAst, string> {
  * Heuristic PHP formatter: re-indents code lines by brace depth.
  * It works on php-parser's tokens, so braces and line breaks inside strings,
  * heredocs and comments never affect indentation, and lines that start inside
- * a string are emitted verbatim (their whitespace is part of the value).
+ * a string are emitted verbatim (their whitespace is part of the value), as
+ * are inline HTML lines.
  */
 
 export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<string, string> {
@@ -125,9 +126,9 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
 }
 
 interface PhpLineLayout {
-  /** The line starts inside a string, so it is emitted unchanged. */
+  /** The line starts inside a string or inline HTML, so it is emitted unchanged. */
   verbatim: boolean;
-  /** The line's first character is a code `}`. */
+  /** The line's first token (after any open tag) is a code `}`. */
   leadingClose: boolean;
   /** Code braces on the line (never ones inside strings or comments). */
   open: number;
@@ -165,21 +166,28 @@ function analyzePhpLines(input: string, lines: string[]): PhpLineLayout[] {
   let offset = 0;
   let nextLine = 0;
   let inString = false;
+  // Last line holding a token other than whitespace or an open tag.
+  let lastContentLine = -1;
   for (const token of tokens) {
     const [name, text] = typeof token === "string" ? [token, token] : token;
     const start = offset;
     const end = start + text.length;
     offset = end;
 
-    // Lines starting at or inside this token are verbatim when inside a string.
+    // Lines starting at or inside this token are verbatim when inside a string
+    // or inline HTML (template markup keeps the author's own indentation).
     let tokenLine = nextLine - 1;
     while (nextLine < lineStarts.length && lineStarts[nextLine] < end) {
       const midToken = lineStarts[nextLine] > start;
       if (midToken && name === "T_CONSTANT_ENCAPSED_STRING") layout[nextLine].verbatim = true;
-      if (inString) layout[nextLine].verbatim = true;
+      if (inString || name === "T_INLINE_HTML") layout[nextLine].verbatim = true;
       if (!midToken) tokenLine = nextLine;
       nextLine++;
     }
+
+    const isContent = name !== "T_WHITESPACE" && name !== "T_OPEN_TAG";
+    const firstOnLine = isContent && tokenLine > lastContentLine;
+    if (isContent) lastContentLine = nextLine - 1;
 
     if (name === '"' || name === "`") inString = !inString;
     else if (name === "T_START_HEREDOC") inString = true;
@@ -191,10 +199,8 @@ function analyzePhpLines(input: string, lines: string[]): PhpLineLayout[] {
         line.open++;
       } else {
         line.close++;
-        const raw = lines[tokenLine];
-        if (start === lineStarts[tokenLine] + raw.length - raw.trimStart().length) {
-          line.leadingClose = true;
-        }
+        // `<?php } ?>` closes its block like a bare `}` line does.
+        if (firstOnLine) line.leadingClose = true;
       }
     }
   }
