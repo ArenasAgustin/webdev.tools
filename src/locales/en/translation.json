@@ -184,7 +184,8 @@
       "good": "Good",
       "strong": "Strong"
     },
-    "history": "History:"
+    "history": "History:",
+    "noCharset": "Select at least one character set to generate a password"
   },
   "notifications": "Notifications",
   "close_notification": "Close notification",

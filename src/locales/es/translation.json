@@ -184,7 +184,8 @@
       "good": "Buena",
       "strong": "Fuerte"
     },
-    "history": "Historial:"
+    "history": "Historial:",
+    "noCharset": "Seleccioná al menos un tipo de caracteres para generar una contraseña"
   },
   "notifications": "Notificaciones",
   "close_notification": "Cerrar notificación",
