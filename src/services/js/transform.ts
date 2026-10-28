@@ -128,36 +128,126 @@ function isEmptyConstruct(node: BabelNode | null | undefined, options: JsCleanOp
 }
 
 /**
- * Check if an empty construct can be removed from where it sits.
- * Only contexts whose removal leaves valid code are allowed:
- * - Variable initializers (the declarator or whole declaration is removed)
- * - Standalone statements and assignment statements
- * - Return values
+ * AST keys that hold metadata rather than child nodes.
+ */
+const NON_CHILD_KEYS = new Set([
+  "loc",
+  "start",
+  "end",
+  "range",
+  "extra",
+  "leadingComments",
+  "trailingComments",
+  "innerComments",
+]);
+
+/**
+ * Statement lists: removing a whole statement from one leaves valid code with
+ * the same control flow. A statement that is the direct body of an if, else,
+ * loop or label is never removed: that would change which statement the
+ * construct controls.
+ */
+function isStatementList(node: BabelNode | null): boolean {
+  return node?.type === "Program" || node?.type === "BlockStatement";
+}
+
+/**
+ * Count how many times each name appears as an identifier in the program,
+ * bindings and references alike. Property names after a dot and plain object
+ * keys are not references and are skipped. A binding whose name appears more
+ * than once may be read somewhere, so it is kept.
+ */
+function countIdentifiers(root: BabelNode): Map<string, number> {
+  const counts = new Map<string, number>();
+
+  function visit(value: unknown, parent: BabelNode | null, key: string): void {
+    if (Array.isArray(value)) {
+      value.forEach((item) => visit(item, parent, key));
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+
+    const node = value as BabelNode;
+    if (node.type === "Identifier" || node.type === "JSXIdentifier") {
+      const isPropertyName =
+        (key === "property" &&
+          (parent?.type === "MemberExpression" || parent?.type === "OptionalMemberExpression") &&
+          !parent.computed) ||
+        (key === "key" && parent?.type === "ObjectProperty" && !parent.computed);
+      if (!isPropertyName) {
+        counts.set(node.name, (counts.get(node.name) ?? 0) + 1);
+      }
+    }
+
+    for (const childKey of Object.keys(node)) {
+      if (NON_CHILD_KEYS.has(childKey)) continue;
+      visit((node as unknown as Record<string, unknown>)[childKey], node, childKey);
+    }
+  }
+
+  visit(root, null, "");
+  return counts;
+}
+
+/**
+ * Check whether a binding is a plain identifier that appears nowhere else in
+ * the program, so removing its declaration or assignment cannot affect a read.
+ */
+function isUnusedBinding(
+  id: BabelNode | null | undefined,
+  identifierCounts: Map<string, number>,
+): boolean {
+  return id?.type === "Identifier" && identifierCounts.get(id.name) === 1;
+}
+
+/**
+ * Check if an empty construct can be removed from where it sits without
+ * changing what the rest of the program does. Only these are removed:
+ * - Initializers of a declaration in a statement list whose binding is used
+ *   nowhere else (the declarator or the whole declaration is removed)
+ * - Standalone expression statements in a statement list
+ * - Assignment statements in a statement list to an identifier used nowhere
+ *   else
  * - Array elements (removed together with their comma)
- * - Function declarations in a statement list
- * Object property values, call arguments and operands are kept: removing
- * them would leave invalid syntax or change the meaning of the code.
+ * - Function declarations in a statement list that are never referenced
+ * Exported declarations, return values, object property values, call
+ * arguments, operands and the direct bodies of if/else/loops/labels are kept:
+ * removing them would leave invalid syntax or change the meaning of the code.
  */
 function isRemovableValue(
   node: BabelNode,
-  parent: BabelNode | null,
   key: string,
-  grandparent: BabelNode | null,
+  ancestors: BabelNode[],
+  identifierCounts: Map<string, number>,
 ): boolean {
-  if (!parent) return true;
+  const parent = ancestors[ancestors.length - 1] ?? null;
+  const grandparent = ancestors[ancestors.length - 2] ?? null;
+  const greatGrandparent = ancestors[ancestors.length - 3] ?? null;
+  if (!parent) return false;
 
   switch (parent.type) {
     case "VariableDeclarator":
-      return key === "init" && grandparent?.type === "VariableDeclaration";
+      return (
+        key === "init" &&
+        grandparent?.type === "VariableDeclaration" &&
+        isStatementList(greatGrandparent) &&
+        isUnusedBinding(parent.id, identifierCounts)
+      );
     case "ExpressionStatement":
-    case "ReturnStatement":
+      return isStatementList(grandparent);
     case "ArrayExpression":
       return true;
     case "AssignmentExpression":
-      return key === "right" && grandparent?.type === "ExpressionStatement";
+      return (
+        key === "right" &&
+        parent.operator === "=" &&
+        grandparent?.type === "ExpressionStatement" &&
+        isStatementList(greatGrandparent) &&
+        isUnusedBinding(parent.left, identifierCounts)
+      );
     case "Program":
     case "BlockStatement":
-      return node.type === "FunctionDeclaration";
+      return node.type === "FunctionDeclaration" && isUnusedBinding(node.id, identifierCounts);
     default:
       return false;
   }
@@ -189,12 +279,15 @@ function removalRange(
   parent: BabelNode | null,
   grandparent: BabelNode | null,
   options: JsCleanOptions,
+  identifierCounts: Map<string, number>,
 ): RangeToRemove {
   if (parent?.type === "VariableDeclarator" && grandparent?.type === "VariableDeclaration") {
-    const allEmpty = grandparent.declarations.every((declarator) =>
-      isEmptyConstruct(declarator.init, options),
+    const allRemovable = grandparent.declarations.every(
+      (declarator) =>
+        isEmptyConstruct(declarator.init, options) &&
+        isUnusedBinding(declarator.id, identifierCounts),
     );
-    return allEmpty
+    return allRemovable
       ? { start: grandparent.start ?? 0, end: grandparent.end ?? 0 }
       : listItemRange(grandparent.declarations, parent);
   }
@@ -203,8 +296,12 @@ function removalRange(
     return listItemRange(parent.elements, node);
   }
 
+  // Assignment and expression statements go as a whole, parentheses included
   if (parent?.type === "AssignmentExpression" && grandparent) {
     return { start: grandparent.start ?? 0, end: grandparent.end ?? 0 };
+  }
+  if (parent?.type === "ExpressionStatement") {
+    return { start: parent.start ?? 0, end: parent.end ?? 0 };
   }
 
   return { start: node.start ?? 0, end: node.end ?? 0 };
@@ -252,45 +349,44 @@ function findEmptyConstructs(input: string, options: JsCleanOptions): RangeToRem
     return ranges;
   }
 
+  const identifierCounts = countIdentifiers(ast.program);
+
   /**
-   * Walk the AST and find empty constructs
+   * Walk the AST and find empty constructs. `ancestors` holds the path from
+   * the program down to the parent of `node`.
    */
-  function walk(
-    node: BabelNode | null | undefined,
-    parent: BabelNode | null,
-    parentKey: string,
-    grandparent: BabelNode | null = null,
-  ): void {
+  function walk(node: BabelNode | null | undefined, key: string, ancestors: BabelNode[]): void {
     if (!node || typeof node !== "object") {
       return;
     }
 
-    if (isEmptyConstruct(node, options) && isRemovableValue(node, parent, parentKey, grandparent)) {
-      ranges.push(removalRange(node, parent, grandparent, options));
+    if (
+      isEmptyConstruct(node, options) &&
+      isRemovableValue(node, key, ancestors, identifierCounts)
+    ) {
+      const parent = ancestors[ancestors.length - 1] ?? null;
+      const grandparent = ancestors[ancestors.length - 2] ?? null;
+      ranges.push(removalRange(node, parent, grandparent, options, identifierCounts));
     }
 
     // Recursively walk child nodes
+    const childAncestors = [...ancestors, node];
     for (const childKey of Object.keys(node)) {
-      if (
-        childKey === "loc" ||
-        childKey === "start" ||
-        childKey === "end" ||
-        childKey === "range"
-      ) {
+      if (NON_CHILD_KEYS.has(childKey)) {
         continue;
       }
       const value = (node as unknown as Record<string, unknown>)[childKey];
       if (Array.isArray(value)) {
-        value.forEach((item) => walk(item as BabelNode, node, childKey, parent));
+        value.forEach((item) => walk(item as BabelNode, childKey, childAncestors));
       } else if (value && typeof value === "object") {
-        walk(value as BabelNode, node, childKey, parent);
+        walk(value as BabelNode, childKey, childAncestors);
       }
     }
   }
 
   // Walk the AST
   if (ast.program) {
-    walk(ast.program, null, "", null);
+    walk(ast.program, "", []);
   }
 
   return mergeRanges(ranges);

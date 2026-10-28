@@ -191,3 +191,60 @@ describe("cleanJs - output stays valid and keeps non-empty code", () => {
     expect(clean('const s = "a,,b;;c";')).toBe('const s = "a,,b;;c";');
   });
 });
+
+describe("cleanJs - keeps program semantics", () => {
+  const clean = (input: string) => {
+    const result = cleanJs(input);
+    if (!result.ok) throw new Error(result.error);
+    return result.value;
+  };
+
+  it.each([
+    ["the body of an if", "if (a) x = [];\nconsole.log(1);"],
+    ["the body of an else", "if (a) y = 1; else x = {};\nfoo();"],
+    ["the body of a loop", "while (a) x = [];\nfoo();"],
+    ["a labeled statement", "lbl: x = [];\ny();"],
+  ])("keeps an assignment that is %s", (_, input) => {
+    expect(clean(input)).toBe(input);
+  });
+
+  it("keeps empty return values", () => {
+    expect(clean("function f() { return []; }")).toBe("function f() { return []; }");
+    expect(clean('const g = () => { return ""; };\ng();')).toBe(
+      'const g = () => { return ""; };\ng();',
+    );
+  });
+
+  it("keeps exported declarations", () => {
+    expect(clean("export const x = {};\nexport const y = 1;")).toBe(
+      "export const x = {};\nexport const y = 1;",
+    );
+    expect(clean("export function noop() {}")).toBe("export function noop() {}");
+  });
+
+  it("keeps declarations whose binding is used elsewhere", () => {
+    expect(clean("const list = [];\nlist.push(1);")).toBe("const list = [];\nlist.push(1);");
+    expect(clean("const noop = () => {};\nnoop();")).toBe("const noop = () => {};\nnoop();");
+    expect(clean("function noop() {}\nnoop();")).toBe("function noop() {}\nnoop();");
+    expect(clean("let a = [], b = 1;\nuse(a, b);")).toBe("let a = [], b = 1;\nuse(a, b);");
+    expect(clean("const Empty = () => {};\nrender(<Empty />);")).toBe(
+      "const Empty = () => {};\nrender(<Empty />);",
+    );
+  });
+
+  it("keeps assignments to a binding that is read elsewhere", () => {
+    expect(clean("let x = 1;\nx = [];\nconsole.log(x);")).toBe(
+      "let x = 1;\nx = [];\nconsole.log(x);",
+    );
+    expect(clean("obj.items = [];")).toBe("obj.items = [];");
+  });
+
+  it("still removes unused empty declarations next to used ones", () => {
+    expect(clean("const unused = [];\nconst used = {};\nfoo(used);")).toBe(
+      "const used = {};\nfoo(used);",
+    );
+    expect(clean("const other = { unused: 1 };\nconst unused = [];")).toBe(
+      "const other = { unused: 1 };",
+    );
+  });
+});
