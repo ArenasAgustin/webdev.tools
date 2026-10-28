@@ -3,7 +3,7 @@ import { usePhpParser } from "@/hooks/usePhpParser";
 import { usePhpPlaygroundActions } from "@/hooks/usePhpPlaygroundActions";
 import { DEFAULT_PHP_FORMAT_CONFIG } from "@/types/php";
 import { loadPhpToolsConfig, loadLastPhp, saveLastPhp } from "@/services/storage";
-import { phpPlaygroundConfig } from "../php/php.config";
+import { phpFileSettings, phpPlaygroundConfig } from "../php/php.config";
 import { formatPhp } from "@/services/php/transform";
 import { translate } from "@/i18n/translate";
 
@@ -49,20 +49,12 @@ export const phpEngine = {
   useActions: usePhpPlaygroundActions,
   mapActionsParams: mapToPhpParams,
   fileConfig: {
-    inputFileName: "code.php",
-    outputFileName: "result.php",
-    mimeType: "application/x-php",
+    ...phpFileSettings,
     language: "PHP",
-    acceptExtensions: ".php",
     exampleContent: phpPlaygroundConfig.example,
     formatRunner: formatPhp,
     minifyRunner: async () => {
       throw new Error(translate("messages.php.minifyUnavailable"));
-    },
-    executeRunner: async (input: string) => {
-      const { executePhpWithTimeout } = await import("@/services/php/phpExecutor");
-      const result = await executePhpWithTimeout(input);
-      return result.ok ? result.value : Promise.reject(new Error(result.error.message));
     },
   },
 };

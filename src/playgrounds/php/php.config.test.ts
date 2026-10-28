@@ -25,3 +25,14 @@ describe("phpPlaygroundConfig", () => {
     expect(phpPlaygroundConfig.icon).toBe("fab fa-php");
   });
 });
+
+describe("PHP file settings", () => {
+  it("are the single source for the engine's file config", async () => {
+    const { phpFileSettings } = await import("./php.config");
+    const { phpEngine } = await import("../engines/php.engine");
+
+    expect(phpEngine.fileConfig).toMatchObject(phpFileSettings);
+    // The engine never runs code through its file config; execution lives in the actions hook.
+    expect("executeRunner" in phpEngine.fileConfig).toBe(false);
+  });
+});

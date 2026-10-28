@@ -1,5 +1,16 @@
 import type { PlaygroundConfig } from "@/types/playground";
 
+/**
+ * File names, mime type and import filter shared by the PHP engine and its actions hook.
+ * The output is usually program output rather than PHP code, hence `output.txt`.
+ */
+export const phpFileSettings = {
+  inputFileName: "code.php",
+  outputFileName: "output.txt",
+  mimeType: "application/x-php",
+  acceptExtensions: ".php",
+} as const;
+
 export const phpPlaygroundConfig: PlaygroundConfig = {
   id: "php",
   name: "PHP 7.4 tools",

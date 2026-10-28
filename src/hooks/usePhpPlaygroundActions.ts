@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { phpPlaygroundConfig } from "@/playgrounds/php/php.config";
+import { phpFileSettings, phpPlaygroundConfig } from "@/playgrounds/php/php.config";
 import { phpService } from "@/services/php/service";
 import { createTransformHandler } from "@/utils/createTransformHandler";
 import { createValidatedHandler } from "@/utils/handlerFactory";
@@ -12,11 +12,8 @@ import type { ToastApi } from "./usePlaygroundActions";
 import type { PhpFormatConfig } from "@/types/php";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
-  inputFileName: "code.php",
-  outputFileName: "output.txt",
-  mimeType: "application/x-php",
+  ...phpFileSettings,
   language: "PHP",
-  acceptExtensions: ".php",
 };
 
 async function formatRunner(input: string, config: PhpFormatConfig) {
