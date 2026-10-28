@@ -91,6 +91,22 @@ describe("runStatements", () => {
     expect(result.valuesTruncated).toBeUndefined();
   });
 
+  it("keeps integers beyond 2^53 exact, as decimal strings", () => {
+    const result = runStatements(
+      db,
+      "SELECT 9007199254740993 AS big, 9223372036854775807 AS max, -9223372036854775808 AS min, 9007199254740991 AS safe, 1.5 AS real;",
+      10,
+    );
+
+    expect(result.resultSets[0].rows[0]).toEqual([
+      "9007199254740993",
+      "9223372036854775807",
+      "-9223372036854775808",
+      9007199254740991,
+      1.5,
+    ]);
+  });
+
   it("propagates SQL errors", () => {
     expect(() => runStatements(db, "SELECT * FROM missing_table;", 10)).toThrow(/no such table/);
   });

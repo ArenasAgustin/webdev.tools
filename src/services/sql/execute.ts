@@ -3,7 +3,7 @@
  * Runs inside the SQL worker; kept here so it can be tested without one.
  */
 
-import type { Database } from "sql.js";
+import type { Database, Statement } from "sql.js";
 import type { SqlResultSet } from "@/types/sql";
 import { CELL_CAP } from "@/services/sql/worker.types";
 
@@ -16,6 +16,26 @@ export interface StatementsResult {
   truncated: boolean;
   /** Present (true) when any long text or BLOB value was cut to the cell cap. */
   valuesTruncated?: true;
+}
+
+// sql.js reads integers as bigint with this option; @types/sql.js does not declare it.
+interface BigIntStatement {
+  get(params: null, config: { useBigInt: true }): (Cell | bigint)[];
+}
+
+/**
+ * Read the current row with integers as bigint, so values beyond 2^53 are not
+ * rounded. Safe integers become numbers; larger ones become their exact decimal
+ * string, which JSON (and any reader of the downloaded JSON) keeps as written
+ * instead of silently rounding it as a number.
+ */
+function readRow(stmt: Statement): Cell[] {
+  return (stmt as unknown as BigIntStatement).get(null, { useBigInt: true }).map((value) => {
+    if (typeof value !== "bigint") return value;
+    return value >= BigInt(Number.MIN_SAFE_INTEGER) && value <= BigInt(Number.MAX_SAFE_INTEGER)
+      ? Number(value)
+      : value.toString();
+  });
 }
 
 /**
@@ -74,7 +94,7 @@ export function runStatements(
         truncated = true;
         break;
       }
-      const row = stmt.get();
+      const row = readRow(stmt);
       for (let i = 0; i < row.length; i++) {
         const capped = capCell(row[i], cellCap);
         if (capped !== null) {
