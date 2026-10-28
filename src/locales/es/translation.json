@@ -376,6 +376,7 @@
     "outputLabel": "Salida",
     "outputPlaceholder": "El resultado aparecerá aquí",
     "copy": "Copiar",
+    "copied": "Copiado al portapapeles",
     "copyError": "No se pudo copiar al portapapeles",
     "clear": "Limpiar",
     "swap": "Intercambiar",

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useDeferredValue } from "react";
+import { useCallback, useEffect, useMemo, useDeferredValue, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { urlConfig } from "./url.config";
 import {
@@ -18,7 +18,8 @@ import {
 import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
-import { STORAGE_KEYS } from "@/services/storage";
+import { useToast } from "@/hooks/useToast";
+import { STORAGE_KEYS, removeItem } from "@/services/storage";
 
 type UrlResult = { ok: true; value: string } | { ok: false; code: UrlErrorCode };
 
@@ -41,8 +42,9 @@ export function UrlPlayground() {
     "component",
   );
   const variant: UrlVariant = isUrlVariant(rawVariant) ? rawVariant : "component";
-  const [rawInput, setInput] = usePersistedState<string>(STORAGE_KEYS.URL_INPUT, urlConfig.example);
-  const input = typeof rawInput === "string" ? rawInput : urlConfig.example;
+  // URLs often carry tokens or session ids in their query, so the text is never
+  // persisted: only the non-sensitive options survive a reload.
+  const [input, setInput] = useState(urlConfig.example);
 
   const [storedOptions, setOptions] = usePersistedState<UrlOptions>(
     STORAGE_KEYS.URL_OPTIONS,
@@ -50,7 +52,13 @@ export function UrlPlayground() {
   );
   const options = useMemo(() => normalizeUrlOptions(storedOptions), [storedOptions]);
 
-  const { copy, error: clipboardError } = useClipboardCopy();
+  const { copy } = useClipboardCopy();
+  const toast = useToast();
+
+  // Purge the input copy that earlier versions stored on disk
+  useEffect(() => {
+    removeItem(STORAGE_KEYS.URL_INPUT);
+  }, []);
 
   const deferredInput = useDeferredValue(input);
   const effectiveMode = resolveMode(mode, deferredInput, variant);
@@ -74,8 +82,12 @@ export function UrlPlayground() {
 
   const handleCopy = useCallback(async () => {
     if (!result.ok || !result.value) return;
-    await copy(result.value);
-  }, [result, copy]);
+    if (await copy(result.value)) {
+      toast.success(t("url.copied"));
+    } else {
+      toast.error(t("url.copyError"));
+    }
+  }, [result, copy, toast, t]);
 
   const handleClear = useCallback(() => {
     setInput("");
@@ -212,12 +224,6 @@ export function UrlPlayground() {
           spellCheck={false}
         />
       </div>
-
-      {clipboardError && (
-        <p role="status" aria-live="polite" className="text-red-400 text-sm">
-          {t("url.copyError")}
-        </p>
-      )}
     </div>
   );
 }

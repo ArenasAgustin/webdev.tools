@@ -376,6 +376,7 @@
     "outputLabel": "Output",
     "outputPlaceholder": "Result will appear here",
     "copy": "Copy",
+    "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
     "clear": "Clear",
     "swap": "Swap",

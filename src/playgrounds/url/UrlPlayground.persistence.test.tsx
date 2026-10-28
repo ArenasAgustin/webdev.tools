@@ -3,10 +3,14 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 const storedValues: Record<string, unknown> = {};
 
-const { getItemMock, setItemMock } = vi.hoisted(() => ({
+const { getItemMock, setItemMock, removeItemMock } = vi.hoisted(() => ({
   getItemMock: vi.fn((key: string): unknown => storedValues[key] ?? null),
   setItemMock: vi.fn((key: string, value: unknown) => {
     storedValues[key] = value;
+    return true;
+  }),
+  removeItemMock: vi.fn((key: string) => {
+    delete storedValues[key];
     return true;
   }),
 }));
@@ -14,12 +18,17 @@ const { getItemMock, setItemMock } = vi.hoisted(() => ({
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  removeItem: removeItemMock,
   STORAGE_KEYS: {
     URL_MODE: "urlMode",
     URL_VARIANT: "urlVariant",
     URL_INPUT: "urlInput",
     URL_OPTIONS: "urlOptions",
   },
+}));
+
+vi.mock("@/hooks/useToast", () => ({
+  useToast: () => ({ success: vi.fn(), error: vi.fn() }),
 }));
 
 vi.mock("@/hooks/useDebouncedValue", () => ({
@@ -62,21 +71,24 @@ describe("UrlPlayground persistence", () => {
     vi.clearAllMocks();
   });
 
-  it("restores input, mode, variant and strict from storage", () => {
-    storedValues.urlInput = "a%21b";
+  it("restores mode, variant and strict but never the input text", () => {
+    storedValues.urlInput = "token%3Dsecret";
     storedValues.urlMode = "decode";
     storedValues.urlVariant = "form";
     storedValues.urlOptions = { strict: true };
 
     render(<UrlPlayground />);
 
-    expect(getInput().value).toBe("a%21b");
+    expect(getInput().value).not.toBe("token%3Dsecret");
+    // the copy stored by earlier versions is purged
+    expect(removeItemMock).toHaveBeenCalledWith("urlInput");
+    expect(storedValues.urlInput).toBeUndefined();
     expect(pressed("Decodificar")).toBe("true");
     expect(pressed("Formulario")).toBe("true");
     expect(screen.getByRole("checkbox", { name: "Estricto" })).toBeChecked();
   });
 
-  it("writes mode, variant, input and options on change", () => {
+  it("writes mode, variant and options on change, but not the input", () => {
     render(<UrlPlayground />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Estricto" }));
     fireEvent.click(screen.getByRole("button", { name: "Codificar" }));
@@ -85,7 +97,7 @@ describe("UrlPlayground persistence", () => {
 
     expect(setItemMock).toHaveBeenCalledWith("urlMode", "encode");
     expect(setItemMock).toHaveBeenCalledWith("urlVariant", "uri");
-    expect(setItemMock).toHaveBeenCalledWith("urlInput", "x y");
+    expect(setItemMock).not.toHaveBeenCalledWith("urlInput", expect.anything());
     expect(setItemMock).toHaveBeenCalledWith("urlOptions", { strict: true });
   });
 
@@ -107,10 +119,10 @@ describe("UrlPlayground persistence", () => {
     expect(screen.getByRole("checkbox", { name: "Estricto" })).not.toBeChecked();
   });
 
-  it("stores an empty string when cleared", () => {
-    storedValues.urlInput = "abc";
+  it("clears the input in memory without storing it", () => {
     render(<UrlPlayground />);
     fireEvent.click(screen.getByRole("button", { name: /Limpiar/ }));
-    expect(setItemMock).toHaveBeenCalledWith("urlInput", "");
+    expect(getInput().value).toBe("");
+    expect(setItemMock).not.toHaveBeenCalledWith("urlInput", expect.anything());
   });
 });
