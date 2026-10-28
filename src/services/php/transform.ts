@@ -7,6 +7,7 @@ import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { serviceMessage } from "@/services/serviceMessage";
 import PhpParser from "php-parser";
+import { PHP_VERSION } from "@/services/php/phpRuntime";
 
 export interface PhpFormatOptions {
   indentSize?: IndentStyle;
@@ -21,9 +22,14 @@ interface PhpParserInstance {
 
 function createPhpParser(): PhpParserInstance {
   const PhpParserFactory = PhpParser as unknown as {
-    create: (options: { ast: { withPositions: boolean } }) => PhpParserInstance;
+    create: (options: {
+      parser: { version: string };
+      ast: { withPositions: boolean };
+    }) => PhpParserInstance;
   };
   return PhpParserFactory.create({
+    // Match the bundled runtime, so PHP 8-only syntax is reported, not run.
+    parser: { version: PHP_VERSION },
     ast: {
       withPositions: true,
     },
@@ -36,7 +42,8 @@ export function parsePhp(input: string): Result<PhpAst, string> {
       return { ok: false, error: serviceMessage("services.php.empty") };
     }
 
-    const ast = createPhpParser().parseCode(input);
+    // Parse what the runtime will run: tagless code gets the same open tag.
+    const ast = createPhpParser().parseCode(toPhpSource(input).source);
     return { ok: true, value: ast };
   } catch (error) {
     if (error instanceof SyntaxError) {

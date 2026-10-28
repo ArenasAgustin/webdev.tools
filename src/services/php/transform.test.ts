@@ -543,3 +543,28 @@ describe("formatPhp inline HTML", () => {
     });
   });
 });
+
+describe("validatePhp matches the runtime", () => {
+  it("validates tagless code as PHP, like the runtime runs it", () => {
+    expect(validatePhp('echo "hi";\necho 2;')).toEqual({ ok: true, value: undefined });
+
+    const result = validatePhp('echo "hi"\necho 2;');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain("2");
+    }
+  });
+
+  it.each([
+    ['<?php echo match(1) { 1 => "a", default => "b" };'],
+    ["<?php $a?->b;"],
+    ["<?php enum S { case A; }"],
+    ["<?php f(a: 1);"],
+  ])("rejects PHP 8 syntax the PHP 7.4 runtime cannot run: %s", (code) => {
+    expect(validatePhp(code).ok).toBe(false);
+  });
+
+  it("accepts PHP 7.4 syntax", () => {
+    expect(validatePhp("<?php $f = fn($x) => $x; $a ??= 1;").ok).toBe(true);
+  });
+});
