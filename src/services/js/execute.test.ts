@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
-import { formatValue, runJavaScript } from "@/services/js/execute";
+import {
+  formatValue,
+  MAX_OUTPUT_CHARS,
+  MAX_OUTPUT_LINES,
+  runJavaScript,
+} from "@/services/js/execute";
 import { serviceMessage } from "@/services/serviceMessage";
 
 const atLine = (message: string, line: number) =>
@@ -137,6 +142,44 @@ describe("runJavaScript", () => {
   it("reports thrown non-Error values as they are", async () => {
     const result = await runJavaScript('throw "plain";');
     expect(result).toEqual({ ok: false, output: "", error: "plain" });
+  });
+});
+
+describe("runJavaScript output limits", () => {
+  it("stops collecting and streaming lines after MAX_OUTPUT_LINES", async () => {
+    const streamed: string[] = [];
+    let truncations = 0;
+    const result = await runJavaScript(
+      `for (let i = 0; i < ${MAX_OUTPUT_LINES + 500}; i++) console.log(i)`,
+      { onLog: (line) => streamed.push(line), onTruncate: () => truncations++ },
+    );
+    expect(result.ok).toBe(true);
+    expect(result.truncated).toBe(true);
+    expect(result.output.split("\n")).toHaveLength(MAX_OUTPUT_LINES);
+    expect(streamed).toHaveLength(MAX_OUTPUT_LINES);
+    expect(truncations).toBe(1);
+  });
+
+  it("caps the total characters, also for one huge line or returned value", async () => {
+    const logged = await runJavaScript(`console.log("x".repeat(${MAX_OUTPUT_CHARS * 2}))`);
+    expect(logged.truncated).toBe(true);
+    expect(logged.output).toHaveLength(MAX_OUTPUT_CHARS);
+    const returned = await runJavaScript(`"y".repeat(${MAX_OUTPUT_CHARS * 2})`);
+    expect(returned.truncated).toBe(true);
+    expect(returned.output).toHaveLength(MAX_OUTPUT_CHARS);
+  });
+
+  it("does not let console.clear reset the limit", async () => {
+    const streamed: string[] = [];
+    await runJavaScript(
+      `for (let i = 0; i < ${MAX_OUTPUT_LINES + 500}; i++) { console.log(i); console.clear(); }`,
+      { onLog: (line) => streamed.push(line) },
+    );
+    expect(streamed).toHaveLength(MAX_OUTPUT_LINES);
+  });
+
+  it("reports no truncation for normal output", async () => {
+    expect(await runJavaScript("console.log(1)")).toEqual({ ok: true, output: "1" });
   });
 });
 

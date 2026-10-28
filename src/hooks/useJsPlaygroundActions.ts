@@ -10,6 +10,7 @@ import type { ToastApi } from "./usePlaygroundActions";
 import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
 import { cleanJsAsync } from "@/services/js/worker";
 import type { JsExecRequest, JsExecResponse, JsRunResult } from "@/services/js/execute";
+import { MAX_OUTPUT_CHARS, MAX_OUTPUT_LINES } from "@/services/js/execute";
 import { translate } from "@/i18n/translate";
 import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
@@ -155,10 +156,20 @@ class JsExecutionError extends Error {
   }
 }
 
+/** End output that hit the runner's limit with a note saying it was cut. */
+function withTruncationNote(output: string, truncated: boolean): string {
+  if (!truncated) return output;
+  const note = translate("messages.js.outputTruncated", {
+    lines: MAX_OUTPUT_LINES,
+    chars: MAX_OUTPUT_CHARS,
+  });
+  return output ? `${output}\n${note}` : note;
+}
+
 function toExecutionError(result: JsRunResult): JsExecutionError {
   return new JsExecutionError(
     result.error ? localizeServiceMessage(result.error) : translate("messages.js.unknownError"),
-    result.output,
+    withTruncationNote(result.output, result.truncated ?? false),
   );
 }
 
@@ -170,6 +181,7 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
   }
   return new Promise((resolve, reject) => {
     let settled = false;
+    let truncated = false;
     const logs: string[] = [];
     const worker = new Worker(new URL("../workers/jsExecWorker.ts", import.meta.url), {
       type: "module",
@@ -186,7 +198,7 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
         reject(
           new JsExecutionError(
             translate("messages.js.timeout", { seconds: timeoutMs / 1000 }),
-            logs.join("\n"),
+            withTruncationNote(logs.join("\n"), truncated),
           ),
         ),
       );
@@ -197,13 +209,24 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
         logs.push(message.line);
         return;
       }
+      if (message.type === "truncated") {
+        truncated = true;
+        return;
+      }
       const { result } = message;
-      settle(() => (result.ok ? resolve(result.output) : reject(toExecutionError(result))));
+      settle(() =>
+        result.ok
+          ? resolve(withTruncationNote(result.output, result.truncated ?? false))
+          : reject(toExecutionError(result)),
+      );
     };
     worker.onerror = (event: ErrorEvent) => {
       settle(() =>
         reject(
-          new JsExecutionError(event.message || translate("messages.js.workerError"), logs.join("\n")),
+          new JsExecutionError(
+            event.message || translate("messages.js.workerError"),
+            withTruncationNote(logs.join("\n"), truncated),
+          ),
         ),
       );
     };

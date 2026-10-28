@@ -18,6 +18,8 @@ export interface JsRunResult {
   ok: boolean;
   output: string;
   error?: string;
+  /** Set when output beyond MAX_OUTPUT_LINES / MAX_OUTPUT_CHARS was dropped. */
+  truncated?: boolean;
 }
 
 /** Messages exchanged with the dedicated execution worker (`src/workers/jsExecWorker.ts`). */
@@ -25,12 +27,24 @@ export interface JsExecRequest {
   code: string;
 }
 
-export type JsExecResponse = { type: "log"; line: string } | { type: "done"; result: JsRunResult };
+export type JsExecResponse =
+  | { type: "log"; line: string }
+  | { type: "truncated" }
+  | { type: "done"; result: JsRunResult };
 
 export interface JsRunOptions {
   /** Called with each console line as soon as it is written. */
   onLog?: (line: string) => void;
+  /** Called once when the output limit is reached and further output is dropped. */
+  onTruncate?: () => void;
 }
+
+/**
+ * Output limits of one run. A loop that logs endlessly would otherwise flood the page
+ * with messages until the timeout and build a huge output string.
+ */
+export const MAX_OUTPUT_LINES = 5000;
+export const MAX_OUTPUT_CHARS = 1_000_000;
 
 const IDLE_POLL_MS = 10;
 
@@ -56,18 +70,41 @@ export async function runJavaScript(
   const timers = new Map<string, number>();
   const counters = new Map<string, number>();
 
+  // Lines and characters written so far. console.clear does not reset them: the
+  // limit bounds what is streamed to the page, not only what is kept.
+  let emittedLines = 0;
+  let emittedChars = 0;
+  let truncated = false;
+
+  const truncate = () => {
+    truncated = true;
+    options.onTruncate?.();
+  };
+
   const emit = (line: string) => {
+    if (truncated) return;
+    if (emittedLines >= MAX_OUTPUT_LINES) {
+      truncate();
+      return;
+    }
     const indented = groupIndent
       ? line
           .split("\n")
           .map((part) => groupIndent + part)
           .join("\n")
       : line;
-    logs.push(indented);
-    options.onLog?.(indented);
+    const remaining = MAX_OUTPUT_CHARS - emittedChars;
+    const kept = indented.length > remaining ? indented.slice(0, remaining) : indented;
+    emittedLines++;
+    // One more character for the newline that joins this line to the next.
+    emittedChars += kept.length + 1;
+    logs.push(kept);
+    options.onLog?.(kept);
+    if (kept.length < indented.length) truncate();
   };
 
   const log = (prefix: string, args: unknown[]) => {
+    if (truncated) return;
     emit(prefix + args.map((arg) => formatValue(arg)).join(" "));
   };
 
@@ -195,13 +232,16 @@ export async function runJavaScript(
     // One more macrotask lets promise callbacks queued by the last timer run.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    if (hasAsyncError) return failure(logs, asyncError);
+    if (hasAsyncError) return withTruncation(failure(logs, asyncError), truncated);
     if (logs.length === 0 && result !== undefined && result !== null) {
-      return { ok: true, output: formatValue(result) };
+      const value = formatValue(result);
+      return value.length > MAX_OUTPUT_CHARS
+        ? { ok: true, output: value.slice(0, MAX_OUTPUT_CHARS), truncated: true }
+        : { ok: true, output: value };
     }
-    return { ok: true, output: logs.join("\n") };
+    return withTruncation({ ok: true, output: logs.join("\n") }, truncated);
   } catch (error) {
-    return failure(logs, error);
+    return withTruncation(failure(logs, error), truncated);
   } finally {
     for (const id of pendingTimers) clearTimeout(id);
   }
@@ -239,6 +279,10 @@ async function returnTrailingExpression(code: string): Promise<string> {
   if (start == null || end == null || exprStart == null || exprEnd == null) return code;
 
   return `${code.slice(0, start)}return (${code.slice(exprStart, exprEnd)});${code.slice(end)}`;
+}
+
+function withTruncation(result: JsRunResult, truncated: boolean): JsRunResult {
+  return truncated ? { ...result, truncated } : result;
 }
 
 function failure(logs: string[], error: unknown): JsRunResult {

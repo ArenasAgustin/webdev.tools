@@ -431,6 +431,7 @@
       "timeout": "Execution exceeded {{seconds}} seconds and was cancelled",
       "workerError": "Execution worker error",
       "workerUnsupported": "Your browser doesn't support Web Workers: the code isn't run so it can't block or reach the page.",
+      "outputTruncated": "… output truncated: only the first {{lines}} lines or {{chars}} characters are shown.",
       "unknownError": "Unknown error while running code"
     },
     "json": {
