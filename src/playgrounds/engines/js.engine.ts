@@ -7,7 +7,7 @@ import {
   DEFAULT_JS_CLEAN_CONFIG,
 } from "@/types/js";
 import { loadJsToolsConfig, loadLastJs, saveLastJs } from "@/services/storage";
-import { jsPlaygroundConfig } from "../js/js.config";
+import { jsFileSettings, jsPlaygroundConfig } from "../js/js.config";
 import { formatJs, minifyJs } from "@/services/js/transform";
 
 /**
@@ -53,11 +53,8 @@ export const jsEngine = {
   useActions: useJsPlaygroundActions,
   mapActionsParams: mapToJsParams,
   fileConfig: {
-    inputFileName: "script.js",
-    outputFileName: "result.js",
-    mimeType: "text/javascript",
+    ...jsFileSettings,
     language: "JavaScript",
-    acceptExtensions: ".js,.ts,.mjs",
     exampleContent: jsPlaygroundConfig.example,
     formatRunner: formatJs,
     minifyRunner: minifyJs,

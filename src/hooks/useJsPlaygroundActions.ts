@@ -1,4 +1,4 @@
-import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
+import { jsFileSettings, jsPlaygroundConfig } from "@/playgrounds/js/js.config";
 import { jsService } from "@/services/js/service";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { createTransformHandler } from "@/utils/createTransformHandler";
@@ -16,14 +16,11 @@ import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 const JS_EXEC_TIMEOUT_MS = 5000;
 
 const FILE_CONFIG: PlaygroundFileConfig = {
-  inputFileName: "code.js",
-  outputFileName: "output.txt",
-  mimeType: "application/javascript",
+  ...jsFileSettings,
   // Getter so the translated name is resolved each time a message is built.
   get language() {
     return translate("messages.js.languageName");
   },
-  acceptExtensions: ".js,.ts,.mjs,.mts",
 };
 
 async function formatRunner(input: string, config: JsFormatConfig) {

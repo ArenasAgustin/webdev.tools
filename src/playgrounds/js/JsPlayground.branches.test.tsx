@@ -205,8 +205,8 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
     expect(downloadFileMock).toHaveBeenCalledWith(
       "const x = 1;",
-      "code.js",
-      "application/javascript",
+      "script.js",
+      "text/javascript",
     );
 
     fireEvent.click(screen.getByRole("button", { name: "set-return" }));
@@ -226,7 +226,7 @@ describe("JsPlayground branches", () => {
     expect(clipboardWriteTextMock).toHaveBeenCalledWith("2");
 
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
-    expect(downloadFileMock).toHaveBeenCalledWith("2", "output.txt", "application/javascript");
+    expect(downloadFileMock).toHaveBeenCalledWith("2", "result.js", "text/javascript");
   });
 
   it("runs format and minify success and error flows", async () => {

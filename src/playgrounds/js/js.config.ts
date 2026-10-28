@@ -1,5 +1,16 @@
 import type { PlaygroundConfig } from "@/types/playground";
 
+/**
+ * File names, mime type and import filter shared by the JS engine and its actions hook.
+ * TypeScript files are not accepted: the runner executes plain JavaScript only.
+ */
+export const jsFileSettings = {
+  inputFileName: "script.js",
+  outputFileName: "result.js",
+  mimeType: "text/javascript",
+  acceptExtensions: ".js,.mjs",
+} as const;
+
 export const jsPlaygroundConfig: PlaygroundConfig = {
   id: "js",
   name: "JavaScript tools",
