@@ -146,6 +146,26 @@ describe("colorConverter - rgbToHsl", () => {
     expect(parseColor("rgb(101%, 0%, 0%)")).toBeNull();
   });
 
+  it("round-trips hsl, hsv and cmyk input without drifting", () => {
+    const drifts: string[] = [];
+    for (let h = 0; h < 360; h += 13) {
+      for (let a = 5; a <= 100; a += 15) {
+        for (let b = 5; b <= 95; b += 15) {
+          const hsl = `hsl(${h}, ${a}%, ${b}%)`;
+          const hsv = `hsv(${h}, ${a}%, ${b}%)`;
+          if (convertColor(hsl)?.hsl !== hsl) drifts.push(hsl);
+          if (convertColor(hsv)?.hsv !== hsv) drifts.push(hsv);
+        }
+      }
+    }
+    // cmyk round-trips when it is in canonical form (one of c/m/y is 0); otherwise the
+    // shared component is folded into k, which is a different notation, not drift
+    for (const cmyk of ["cmyk(0%, 20%, 30%, 40%)", "cmyk(0%, 33%, 77%, 12%)", "cmyk(61%, 0%, 7%, 3%)"]) {
+      if (convertColor(cmyk)?.cmyk !== cmyk) drifts.push(cmyk);
+    }
+    expect(drifts).toEqual([]);
+  });
+
   it("wraps a hue that rounds up to 360 back to 0", () => {
     // raw hue is ~359.76°
     expect(rgbToHsl({ r: 255, g: 0, b: 1 }).h).toBe(0);
