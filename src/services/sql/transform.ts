@@ -95,6 +95,13 @@ function tokenizeSql(source: string): SqlSegment[] {
       continue;
     }
 
+    // A [bracket] identifier (SQLite/MS-style) runs to the first `]`, with no escapes.
+    if (char === "[") {
+      const close = source.indexOf("]", i + 1);
+      push("literal", close === -1 ? source.length : close + 1);
+      continue;
+    }
+
     if (char === "-" && source[i + 1] === "-") {
       const newline = source.indexOf("\n", i);
       push("comment", newline === -1 ? source.length : newline);

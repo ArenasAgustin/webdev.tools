@@ -212,6 +212,14 @@ SELECT id, name FROM users WHERE id = 1`;
     expect(result).toEqual({ ok: true, value: "SELECT `a  --b` FROM t;" });
   });
 
+  it("keeps [bracket] identifiers verbatim", () => {
+    const result = minifySql("SELECT [a--b], [x  /* y]\nFROM (SELECT 1 AS [a--b], 2 AS [x  /* y])\nWHERE 1;");
+    expect(result).toEqual({
+      ok: true,
+      value: "SELECT [a--b], [x  /* y] FROM (SELECT 1 AS [a--b], 2 AS [x  /* y]) WHERE 1;",
+    });
+  });
+
   it("treats a backslash as a plain character in literals, like SQLite", () => {
     const result = minifySql("SELECT 'C:\\'; -- it's\nSELECT 2 AS two;");
     expect(result).toEqual({ ok: true, value: "SELECT 'C:\\'; SELECT 2 AS two;" });
