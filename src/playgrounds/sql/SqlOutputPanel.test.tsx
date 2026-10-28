@@ -31,7 +31,7 @@ function renderPanel(output: string) {
 
 describe("SqlOutputPanel", () => {
   it("shows the row cap from ROW_CAP in the truncation banner", () => {
-    renderPanel(JSON.stringify({ columns: ["a"], rows: [[1]], elapsedMs: 1, truncated: true }));
+    renderPanel(JSON.stringify({ resultSets: [{ statement: 1, columns: ["a"], rows: [[1]], truncated: true }], elapsedMs: 1, truncated: true }));
     expect(screen.getByTestId("sql-truncation-banner")).toHaveTextContent("25");
   });
 });

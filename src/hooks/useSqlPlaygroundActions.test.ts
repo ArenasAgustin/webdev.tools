@@ -24,8 +24,7 @@ vi.mock("@/services/sql/worker", () => ({
 }));
 
 const mockResult: SqlExecuteResult = {
-  columns: ["id", "name"],
-  rows: [[1, "Alice"]],
+  resultSets: [{ statement: 1, columns: ["id", "name"], rows: [[1, "Alice"]], truncated: false }],
   elapsedMs: 10,
   truncated: false,
 };

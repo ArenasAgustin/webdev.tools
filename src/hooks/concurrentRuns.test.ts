@@ -157,7 +157,7 @@ describe("overlapping runs", () => {
       result.current.handleExecute();
     });
     await act(async () => {
-      first.resolve({ ok: true, value: { columns: [], rows: [], elapsedMs: 1, truncated: false } });
+      first.resolve({ ok: true, value: { resultSets: [], elapsedMs: 1, truncated: false } });
       await first.promise;
     });
 

@@ -109,7 +109,7 @@ describe("sqlWorkerAdapter action round-trips", () => {
       id: call.id,
       ok: true,
       action: "execute",
-      value: { columns: ["n"], rows: [[1]], elapsedMs: 5, truncated: false },
+      value: { resultSets: [{ statement: 1, columns: ["n"], rows: [[1]], truncated: false }], elapsedMs: 5, truncated: false },
     });
 
     const result = await pending;
