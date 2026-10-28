@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { sqlPlaygroundConfig } from "@/playgrounds/sql/sql.config";
+import { sqlFileSettings, sqlPlaygroundConfig } from "@/playgrounds/sql/sql.config";
 import {
   executeSqlAsync,
   resetSqlAsync,
@@ -16,11 +16,8 @@ import type { ToastApi } from "./usePlaygroundActions";
 import type { SqlFormatConfig, SqlMinifyConfig, SqlExecuteResult } from "@/types/sql";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
-  inputFileName: "query.sql",
-  outputFileName: "result.json",
-  mimeType: "application/sql",
+  ...sqlFileSettings,
   language: "SQL",
-  acceptExtensions: ".sql",
 };
 
 /**
@@ -37,13 +34,15 @@ function outputDownloadFile(output: string): { fileName: string; mimeType: strin
   }
 }
 
-async function formatRunner(input: string, config: SqlFormatConfig): Promise<string> {
+/** Formats through the worker and unwraps its result; shared with the SQL engine. */
+export async function formatRunner(input: string, config: SqlFormatConfig): Promise<string> {
   const result = await formatSqlAsync(input, config);
   if (!result.ok) throw new Error(result.error ?? translate("messages.formatError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
-async function minifyRunner(input: string): Promise<string> {
+/** Minifies through the worker and unwraps its result; shared with the SQL engine. */
+export async function minifyRunner(input: string): Promise<string> {
   const result = await minifySqlAsync(input);
   if (!result.ok) throw new Error(result.error ?? translate("messages.minifyError", { language: FILE_CONFIG.language }));
   return result.value;

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { sqlPlaygroundConfig } from "./sql.config";
 
 describe("sqlPlaygroundConfig", () => {
@@ -39,5 +39,28 @@ describe("sqlPlaygroundConfig", () => {
     const keywords = sqlPlaygroundConfig.keywords ?? [];
     const hasSqlKeyword = keywords.some((k) => k.toLowerCase().includes("sql"));
     expect(hasSqlKeyword).toBe(true);
+  });
+});
+
+vi.mock("@/services/sql/worker", () => ({
+  formatSqlAsync: vi.fn(() => Promise.resolve({ ok: true, value: "SELECT 1;" })),
+  minifySqlAsync: vi.fn(() => Promise.resolve({ ok: true, value: "SELECT 1" })),
+  executeSqlAsync: vi.fn(),
+  resetSqlAsync: vi.fn(),
+}));
+
+describe("SQL file settings", () => {
+  it("are the single source for the engine and actions file config", async () => {
+    const { sqlFileSettings } = await import("./sql.config");
+    const { sqlEngine } = await import("../engines/sql.engine");
+
+    expect(sqlEngine.fileConfig).toMatchObject(sqlFileSettings);
+  });
+
+  it("engine runners return the transformed SQL, not the worker result object", async () => {
+    const { sqlEngine } = await import("../engines/sql.engine");
+
+    await expect(sqlEngine.fileConfig.formatRunner("select 1", { dialect: "sql", tabWidth: 2 })).resolves.toBe("SELECT 1;");
+    await expect(sqlEngine.fileConfig.minifyRunner("select 1")).resolves.toBe("SELECT 1");
   });
 });

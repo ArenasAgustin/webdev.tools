@@ -2,11 +2,10 @@ import type { ReactNode } from "react";
 import type { BaseActionsParams, OutputPanelProps } from "./types";
 import { useSqlParser } from "@/hooks/useSqlParser";
 import type { ValidationState } from "@/hooks/useAsyncValidator";
-import { useSqlPlaygroundActions } from "@/hooks/useSqlPlaygroundActions";
+import { useSqlPlaygroundActions, formatRunner, minifyRunner } from "@/hooks/useSqlPlaygroundActions";
 import { DEFAULT_SQL_FORMAT_CONFIG } from "@/types/sql";
 import { loadSqlToolsConfig, loadLastSql, saveLastSql } from "@/services/storage";
-import { sqlPlaygroundConfig } from "../sql/sql.config";
-import { formatSqlAsync, minifySqlAsync } from "@/services/sql/worker";
+import { sqlFileSettings, sqlPlaygroundConfig } from "../sql/sql.config";
 import type { SqlFormatConfig, SqlMinifyConfig } from "@/types/sql";
 import { SqlOutputPanel } from "../sql/SqlOutputPanel";
 
@@ -62,14 +61,11 @@ export const sqlEngine = {
   mapActionsParams: mapToSqlParams,
   renderOutputPanel: SqlOutputPanel as (props: OutputPanelProps) => ReactNode,
   fileConfig: {
-    inputFileName: "query.sql",
-    outputFileName: "result.json",
-    mimeType: "application/sql",
+    ...sqlFileSettings,
     language: "SQL",
-    acceptExtensions: ".sql",
     exampleContent: sqlPlaygroundConfig.example,
-    formatRunner: formatSqlAsync,
-    minifyRunner: minifySqlAsync,
+    formatRunner,
+    minifyRunner,
   },
 };
 
