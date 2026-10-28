@@ -11,7 +11,10 @@ export function LanguageSelector() {
   const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentLang = languages.find((lang) => lang.code === i18n.language) ?? languages[0];
+  // resolvedLanguage is the translation in use: "en" for a regional en-US and for
+  // an untranslated fr-FR (English fallback), where i18n.language keeps the raw tag.
+  const currentLang =
+    languages.find((lang) => lang.code === (i18n.resolvedLanguage ?? i18n.language)) ?? languages[1];
 
   const handleLanguageChange = (code: string) => {
     i18n.changeLanguage(code);
