@@ -51,24 +51,90 @@ export async function runJavaScript(
   let asyncError: unknown;
   let hasAsyncError = false;
 
-  const log = (prefix: string, args: unknown[]) => {
-    const line = prefix + args.map((arg) => formatValue(arg)).join(" ");
-    logs.push(line);
-    options.onLog?.(line);
+  // Indentation added by console.group, two spaces per open group.
+  let groupIndent = "";
+  const timers = new Map<string, number>();
+  const counters = new Map<string, number>();
+
+  const emit = (line: string) => {
+    const indented = groupIndent
+      ? line
+          .split("\n")
+          .map((part) => groupIndent + part)
+          .join("\n")
+      : line;
+    logs.push(indented);
+    options.onLog?.(indented);
   };
 
+  const log = (prefix: string, args: unknown[]) => {
+    emit(prefix + args.map((arg) => formatValue(arg)).join(" "));
+  };
+
+  const elapsed = (label: string, start: number) =>
+    `${label}: ${(performance.now() - start).toFixed(3)} ms`;
+
+  const group = (...args: unknown[]) => {
+    if (args.length > 0) log("", args);
+    groupIndent += "  ";
+  };
+
+  // Browser-like versions of the console methods: they never throw, and timer or
+  // counter misuse prints a warning like the browser console does.
   const sandboxConsole = {
     log: (...args: unknown[]) => log("", args),
     info: (...args: unknown[]) => log("", args),
     debug: (...args: unknown[]) => log("", args),
+    dir: (value: unknown) => log("", [value]),
     table: (data: unknown) => {
-      for (const line of formatTable(data)) {
-        logs.push(line);
-        options.onLog?.(line);
-      }
+      for (const line of formatTable(data)) emit(line);
     },
     error: (...args: unknown[]) => log("ERROR: ", args),
     warn: (...args: unknown[]) => log("WARN: ", args),
+    trace: (...args: unknown[]) => log("Trace: ", args),
+    assert: (condition?: unknown, ...args: unknown[]) => {
+      if (!condition) log(args.length > 0 ? "ERROR: Assertion failed: " : "ERROR: Assertion failed", args);
+    },
+    group,
+    groupCollapsed: group,
+    groupEnd: () => {
+      groupIndent = groupIndent.slice(2);
+    },
+    time: (label: unknown = "default") => {
+      const name = String(label);
+      if (timers.has(name)) log("WARN: ", [`Timer '${name}' already exists`]);
+      else timers.set(name, performance.now());
+    },
+    timeLog: (label: unknown = "default", ...args: unknown[]) => {
+      const name = String(label);
+      const start = timers.get(name);
+      if (start === undefined) log("WARN: ", [`Timer '${name}' does not exist`]);
+      else log("", [elapsed(name, start), ...args]);
+    },
+    timeEnd: (label: unknown = "default") => {
+      const name = String(label);
+      const start = timers.get(name);
+      if (start === undefined) {
+        log("WARN: ", [`Timer '${name}' does not exist`]);
+        return;
+      }
+      timers.delete(name);
+      log("", [elapsed(name, start)]);
+    },
+    count: (label: unknown = "default") => {
+      const name = String(label);
+      const count = (counters.get(name) ?? 0) + 1;
+      counters.set(name, count);
+      log("", [`${name}: ${count}`]);
+    },
+    countReset: (label: unknown = "default") => {
+      const name = String(label);
+      if (counters.has(name)) counters.set(name, 0);
+      else log("WARN: ", [`Count for '${name}' does not exist`]);
+    },
+    clear: () => {
+      logs.length = 0;
+    },
   };
 
   const recordAsyncError = (error: unknown) => {

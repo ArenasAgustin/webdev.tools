@@ -140,6 +140,59 @@ describe("runJavaScript", () => {
   });
 });
 
+describe("runJavaScript console methods", () => {
+  const run = async (code: string) => {
+    const result = await runJavaScript(code);
+    expect(result.ok).toBe(true);
+    return result.output;
+  };
+
+  it("prints console.dir like console.log", async () => {
+    expect(await run("console.dir({ a: 1 })")).toBe('{\n  "a": 1\n}');
+  });
+
+  it("measures console.time / timeLog / timeEnd and warns on unknown timers", async () => {
+    const output = await run(
+      'console.time("t"); console.timeLog("t", "mid"); console.timeEnd("t"); console.timeEnd("t"); console.time(); console.timeEnd();',
+    );
+    const lines = output.split("\n");
+    expect(lines[0]).toMatch(/^t: \d+(\.\d+)? ms mid$/);
+    expect(lines[1]).toMatch(/^t: \d+(\.\d+)? ms$/);
+    expect(lines[2]).toBe("WARN: Timer 't' does not exist");
+    expect(lines[3]).toMatch(/^default: \d+(\.\d+)? ms$/);
+  });
+
+  it("indents output inside console.group / groupCollapsed until groupEnd", async () => {
+    expect(
+      await run(
+        'console.group("g"); console.log(1); console.groupCollapsed("h"); console.log({ a: 1 }); console.groupEnd(); console.groupEnd(); console.groupEnd(); console.log(2)',
+      ),
+    ).toBe('g\n  1\n  h\n    {\n      "a": 1\n    }\n2');
+  });
+
+  it("prints failed assertions only", async () => {
+    expect(
+      await run('console.assert(true, "no"); console.assert(false, "boom", 1); console.assert(0)'),
+    ).toBe("ERROR: Assertion failed: boom 1\nERROR: Assertion failed");
+  });
+
+  it("counts per label and resets counters", async () => {
+    expect(
+      await run(
+        'console.count(); console.count(); console.count("x"); console.countReset(); console.count(); console.countReset("y")',
+      ),
+    ).toBe("default: 1\ndefault: 2\nx: 1\ndefault: 1\nWARN: Count for 'y' does not exist");
+  });
+
+  it("prints console.trace with its message", async () => {
+    expect(await run('console.trace("here", 1)')).toBe("Trace: here 1");
+  });
+
+  it("drops earlier output on console.clear", async () => {
+    expect(await run('console.log("old"); console.clear(); console.log("new")')).toBe("new");
+  });
+});
+
 describe("formatValue", () => {
   it("formats a bare BigInt", () => {
     expect(formatValue(5n)).toBe("5n");
