@@ -54,9 +54,8 @@ function toPercentHex(char: string): string {
 
 /**
  * Percent-encode text for the given variant.
- * Note: the `form` variant intentionally follows encodeURIComponent (spaces become `+`),
- * so it leaves `!'()~` unescaped unless `strict` is set. This differs slightly from the
- * WHATWG application/x-www-form-urlencoded serializer.
+ * The `form` variant matches the WHATWG application/x-www-form-urlencoded serializer
+ * (URLSearchParams): spaces become `+` and `~!'()` are escaped; only `*-._` stay raw.
  * `strict` escapes `!'()*` for `component` and `form`; it is ignored for `uri`.
  * The `uri` variant keeps existing valid `%XX` escapes (like the WHATWG URL parser),
  * so encoding a partially encoded URL does not double-encode them.
@@ -81,7 +80,7 @@ export function encodeUrl(text: string, variant: UrlVariant, opts?: Partial<UrlO
   }
 
   if (variant === "form") {
-    result = result.replace(/%20/g, "+");
+    result = result.replace(/[~!'()]/g, toPercentHex).replace(/%20/g, "+");
   }
   if (strict && variant !== "uri") {
     result = result.replace(/[!'()*]/g, toPercentHex);

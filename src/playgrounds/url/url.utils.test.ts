@@ -51,9 +51,19 @@ describe("encodeUrl", () => {
     expect(encodeUrl("", variant)).toBe("");
   });
 
-  it("leaves !'()~ unescaped when not strict", () => {
+  it("leaves !'()~ unescaped in component when not strict", () => {
     expect(encodeUrl("a!b'c(d)e~", "component")).toBe("a!b'c(d)e~");
-    expect(encodeUrl("a!b'c(d)e~", "form")).toBe("a!b'c(d)e~");
+  });
+
+  it("matches URLSearchParams serialization for form", () => {
+    const text = "a b~!*'()-_.é&=+/";
+    const expected = new URLSearchParams({ q: text }).toString().slice("q=".length);
+    expect(encodeUrl(text, "form")).toBe(expected);
+    expect(encodeUrl("a!b'c(d)e~*", "form")).toBe("a%21b%27c%28d%29e%7E*");
+  });
+
+  it("auto detects URLSearchParams form output as encoded", () => {
+    expect(isLikelyUrlEncoded("a+b*c", "form")).toBe(true);
   });
 
   describe("strict", () => {
