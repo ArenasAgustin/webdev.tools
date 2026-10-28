@@ -108,6 +108,25 @@ describe("HashPlayground branches", () => {
     expect(screen.getByText("ddeeff")).toBeInTheDocument();
   });
 
+  it("file mode: resets the file input so the same file can be picked again", () => {
+    const { container } = render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    let value = "C:\\fakepath\\a.txt";
+    Object.defineProperty(input, "value", {
+      configurable: true,
+      get: () => value,
+      set: (next: string) => {
+        value = next;
+      },
+    });
+
+    fireEvent.change(input, { target: { files: [new File(["hello"], "a.txt")] } });
+
+    expect(screen.getByText("a.txt")).toBeInTheDocument();
+    expect(input.value).toBe("");
+  });
+
   it("file mode: shows a translated error when the file cannot be hashed", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     generateAllHashesFromFileMock.mockRejectedValue(new DOMException("NotReadableError"));

@@ -164,6 +164,8 @@ export function HashPlayground() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) setFileInput(file);
+                // Reset so picking the same file again still fires a change event
+                e.target.value = "";
               }}
             />
             <div
