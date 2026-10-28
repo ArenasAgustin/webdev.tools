@@ -416,6 +416,19 @@ describe("cleanJson edge cases", () => {
     if (result.ok) expect(result.value).toBe("");
   });
 
+  it("still removes nulls inside an array or object it keeps empty", () => {
+    const keepArray = cleanJson('{"a":[null,null],"b":1}', {
+      removeEmptyArray: false,
+      outputFormat: "minify",
+    });
+    expect(keepArray).toEqual({ ok: true, value: '{"a":[],"b":1}' });
+    const keepObject = cleanJson('{"a":{"x":null},"b":1}', {
+      removeEmptyObject: false,
+      outputFormat: "minify",
+    });
+    expect(keepObject).toEqual({ ok: true, value: '{"a":{},"b":1}' });
+  });
+
   it("minify output returns error when internal minify fails", () => {
     // cleanJson with minify path on valid input should succeed
     const result = cleanJson('{"a": 1, "b": null}', { outputFormat: "minify" });
