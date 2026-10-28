@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { jsonPlaygroundConfig } from "@/playgrounds/json/json.config";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { createTransformHandler } from "@/utils/createTransformHandler";
@@ -15,11 +15,12 @@ import {
   cleanJsonAsync,
   applyJsonPathAsync,
 } from "@/services/json/worker";
+import { detectJsonLoss } from "@/services/json/lossDetection";
 import type { JsonFormatConfig, JsonMinifyConfig, JsonCleanConfig } from "@/types/json";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   inputFileName: "data.json",
-  outputFileName: "result.json",
+  outputFileName: "output.json",
   mimeType: "application/json",
   language: "JSON",
   acceptExtensions: ".json",
@@ -49,6 +50,17 @@ async function minifyRunner(input: string, config: JsonMinifyConfig) {
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.value;
+}
+
+/**
+ * JSON.parse/stringify silently round big integers, turn 1e400 into null and keep
+ * only the last of duplicate keys; tell the user when the input had any of those.
+ */
+function warnAboutSilentChanges(input: string, toast: ToastApi | undefined) {
+  if (!toast?.info) return;
+  const { precisionLoss, duplicateKeys } = detectJsonLoss(input);
+  if (precisionLoss) toast.info(translate("messages.json.precisionLoss"));
+  if (duplicateKeys) toast.info(translate("messages.json.duplicateKeys"));
 }
 
 /** Drops the toasts of a JSONPath request that a newer one has superseded. */
@@ -92,17 +104,38 @@ export function useJsonPlaygroundActions({
   inputTooLarge,
   inputTooLargeMessage,
   jsonPathExpression,
-  setJsonPathExpression,
   addToHistory,
   formatConfig,
   minifyConfig,
   cleanConfig,
   toast,
 }: UseJsonPlaygroundActionsProps) {
+  const formatWithWarning = useCallback(
+    async (input: string, config: JsonFormatConfig) => {
+      const value = await formatRunner(input, config);
+      warnAboutSilentChanges(input, toast);
+      return value;
+    },
+    [toast],
+  );
+
+  const minifyWithWarning = useCallback(
+    async (input: string, config: JsonMinifyConfig) => {
+      const value = await minifyRunner(input, config);
+      warnAboutSilentChanges(input, toast);
+      return value;
+    },
+    [toast],
+  );
+
+  // JSON line breaks are only whitespace, so hand copy/download a LF-only output
+  // (an input loaded from a Windows file and reused as result would keep CRLF).
+  const outputLf = useMemo(() => output.replace(/\r\n?/g, "\n"), [output]);
+
   const generic = useGenericPlaygroundActions({
     input: inputJson,
     setInput: setInputJson,
-    output,
+    output: outputLf,
     setOutput,
     setError,
     inputTooLarge,
@@ -112,8 +145,8 @@ export function useJsonPlaygroundActions({
     toast,
     exampleContent,
     fileConfig: FILE_CONFIG,
-    formatRunner,
-    minifyRunner,
+    formatRunner: formatWithWarning,
+    minifyRunner: minifyWithWarning,
   });
 
   // Id of the latest JSONPath request. Queries are not exclusive (the user may refine the
@@ -135,6 +168,7 @@ export function useJsonPlaygroundActions({
         });
         if (!result.ok) throw new Error(result.error.message);
         if (!result.value.trim()) throw new Error(translate("messages.cleanEmpty", { language: "JSON" }));
+        warnAboutSilentChanges(inputJson, toast);
         return result.value;
       },
       setOutput,
@@ -143,7 +177,7 @@ export function useJsonPlaygroundActions({
       successMessage: translate("messages.cleaned", { language: "JSON" }),
       errorMessage: translate("messages.cleanError", { language: "JSON" }),
     });
-  }, [generic.runTransformAction, inputJson, cleanConfig, setError, setOutput]);
+  }, [generic.runTransformAction, inputJson, cleanConfig, setError, setOutput, toast]);
 
   // Extensión: aplicar JSONPath
   const handleApplyJsonPath = useCallback(() => {
@@ -188,54 +222,9 @@ export function useJsonPlaygroundActions({
     toast,
   ]);
 
-  // Extensión: reutilizar expresión de historial
-  const handleReuseFromHistory = useCallback(
-    (expression: string) => {
-      const requestId = ++jsonPathRequestRef.current;
-      const isLatest = () => requestId === jsonPathRequestRef.current;
-      void createValidatedHandler({
-        validate: generic.baseActions.createInputValidator,
-        run: async () => {
-          setJsonPathExpression(expression);
-          const result = await applyJsonPathAsync(inputJson, expression);
-          if (!result.ok) throw new Error(result.error.message);
-          return result.value;
-        },
-        onSuccess: (value) => {
-          if (!isLatest()) return;
-          if (!value.trim() || value === "[]" || value === "{}") {
-            setOutput(value);
-            setError(translate("messages.json.noResults"));
-          } else {
-            setOutput(value);
-            setError(null);
-          }
-          void addToHistory(expression);
-        },
-        onError: (message) => {
-          if (!isLatest()) return;
-          setOutput("");
-          setError(compactTransformError(message));
-        },
-        toast: latestOnlyToast(toast, isLatest),
-        errorMessage: translate("messages.json.jsonPathError"),
-      })();
-    },
-    [
-      generic.baseActions,
-      setJsonPathExpression,
-      inputJson,
-      addToHistory,
-      setOutput,
-      setError,
-      toast,
-    ],
-  );
-
   return {
     ...generic,
     handleClean,
     handleApplyJsonPath,
-    handleReuseFromHistory,
   };
 }

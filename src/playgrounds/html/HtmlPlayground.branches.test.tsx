@@ -216,7 +216,7 @@ describe("HtmlPlayground branches", () => {
     expect(clipboardWriteTextMock).toHaveBeenCalledWith("<div>formatted</div>");
     expect(downloadFileMock).toHaveBeenCalledWith(
       "<div>formatted</div>",
-      "result.html",
+      "output.html",
       "text/html",
     );
   });

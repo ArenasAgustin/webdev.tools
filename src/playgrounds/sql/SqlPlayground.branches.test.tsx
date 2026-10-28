@@ -199,8 +199,7 @@ describe("SqlPlayground branches", () => {
     executeSqlAsyncMock.mockResolvedValue({
       ok: true,
       value: {
-        columns: ["id", "name"],
-        rows: [[1, "Alice"]],
+        resultSets: [{ statement: 1, columns: ["id", "name"], rows: [[1, "Alice"]], truncated: false }],
         elapsedMs: 5,
         truncated: false,
       },
@@ -287,8 +286,7 @@ describe("SqlPlayground branches", () => {
     expect(toastMocks.success).toHaveBeenCalledWith("Consulta ejecutada correctamente");
 
     const expectedResult = {
-      columns: ["id", "name"],
-      rows: [[1, "Alice"]],
+      resultSets: [{ statement: 1, columns: ["id", "name"], rows: [[1, "Alice"]], truncated: false }],
       elapsedMs: 5,
       truncated: false,
     };
@@ -384,7 +382,7 @@ describe("SqlPlayground branches", () => {
     await act(async () => {
       resolveExecute({
         ok: true,
-        value: { columns: [], rows: [], elapsedMs: 1, truncated: false },
+        value: { resultSets: [], elapsedMs: 1, truncated: false },
       });
     });
 

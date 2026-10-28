@@ -1,4 +1,4 @@
-import { jsPlaygroundConfig } from "@/playgrounds/js/js.config";
+import { jsFileSettings, jsPlaygroundConfig } from "@/playgrounds/js/js.config";
 import { jsService } from "@/services/js/service";
 import { createValidatedHandler } from "@/utils/handlerFactory";
 import { createTransformHandler } from "@/utils/createTransformHandler";
@@ -9,7 +9,6 @@ import {
 import type { ToastApi } from "./usePlaygroundActions";
 import type { JsFormatConfig, JsMinifyConfig, JsCleanConfig } from "@/types/js";
 import { cleanJsAsync } from "@/services/js/worker";
-import { runJavaScript } from "@/services/js/execute";
 import type { JsExecRequest, JsExecResponse, JsRunResult } from "@/services/js/execute";
 import { translate } from "@/i18n/translate";
 import { localizeServiceMessage } from "@/services/localizeServiceMessage";
@@ -17,14 +16,11 @@ import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 const JS_EXEC_TIMEOUT_MS = 5000;
 
 const FILE_CONFIG: PlaygroundFileConfig = {
-  inputFileName: "code.js",
-  outputFileName: "output.txt",
-  mimeType: "application/javascript",
+  ...jsFileSettings,
   // Getter so the translated name is resolved each time a message is built.
   get language() {
     return translate("messages.js.languageName");
   },
-  acceptExtensions: ".js,.ts,.mjs,.mts",
 };
 
 async function formatRunner(input: string, config: JsFormatConfig) {
@@ -167,10 +163,10 @@ function toExecutionError(result: JsRunResult): JsExecutionError {
 }
 
 async function executeJavaScript(code: string, timeoutMs: number): Promise<string> {
+  // Without a Worker the code would run on the page itself: no timeout could stop an
+  // endless loop and it would reach the page's storage. Refuse instead.
   if (typeof Worker === "undefined") {
-    const result = await runJavaScript(code);
-    if (!result.ok) throw toExecutionError(result);
-    return result.output;
+    throw new JsExecutionError(translate("messages.js.workerUnsupported"), "");
   }
   return new Promise((resolve, reject) => {
     let settled = false;

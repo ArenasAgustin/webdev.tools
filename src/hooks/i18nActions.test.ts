@@ -48,7 +48,7 @@ describe("playground action hooks i18n (English)", () => {
   it("useSqlPlaygroundActions reports execution and reset in English", async () => {
     executeSqlAsyncMock.mockResolvedValue({
       ok: true,
-      value: { columns: [], rows: [], elapsedMs: 1, truncated: false },
+      value: { resultSets: [], elapsedMs: 1, truncated: false },
     });
     resetSqlAsyncMock.mockResolvedValue({ ok: true, value: "reset" });
     const toast = makeToast();

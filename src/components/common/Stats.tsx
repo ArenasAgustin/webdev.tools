@@ -40,7 +40,11 @@ export const Stats = memo(function Stats({
   return (
     <span className="text-gray-400" data-testid={dataTestId}>
       {leadingSeparator ? "· " : ""}
-      {t("stats.summary", { lines, characters: characters.toLocaleString(), bytes: formatBytes(bytes) })}
+      {t("stats.summary", {
+        lines: t("stats.lines", { count: lines }),
+        characters: t("stats.characters", { count: characters, value: characters.toLocaleString() }),
+        bytes: formatBytes(bytes),
+      })}
       {hasComparison && (
         <span className={`ml-1 ${percentageColor}`}>
           ({Math.abs(percentage)}% {percentageLabel})

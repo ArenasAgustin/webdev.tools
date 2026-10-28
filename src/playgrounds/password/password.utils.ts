@@ -60,7 +60,21 @@ export function calculateStrength(password: string): { strength: number; level: 
 }
 
 /**
- * Generate a secure random password
+ * Whether the options select at least one character set to draw from
+ */
+export function hasCharset(options: PasswordOptions): boolean {
+  return (
+    options.includeUppercase ||
+    options.includeLowercase ||
+    options.includeNumbers ||
+    options.includeSymbols
+  );
+}
+
+/**
+ * Generate a secure random password.
+ * Throws when no character set is selected: the UI blocks that case, and a
+ * silent fallback would produce a password that does not match the options.
  */
 export function generatePassword(rawOptions: PasswordOptions): string {
   const options = { ...rawOptions, length: clampPasswordLength(rawOptions.length) };
@@ -71,9 +85,8 @@ export function generatePassword(rawOptions: PasswordOptions): string {
   if (options.includeNumbers) charset += NUMBERS;
   if (options.includeSymbols) charset += SYMBOLS;
 
-  // Fallback if no options selected
   if (!charset) {
-    charset = LOWERCASE;
+    throw new Error("No character set selected");
   }
 
   /**
@@ -110,11 +123,6 @@ export function generatePassword(rawOptions: PasswordOptions): string {
   }
   if (options.includeSymbols) {
     ensureCharacters.push(SYMBOLS[unbiasedRandom(SYMBOLS.length)]);
-  }
-
-  // If no character types selected, just return random password
-  if (ensureCharacters.length === 0) {
-    return password;
   }
 
   // Replace random positions with guaranteed characters (using unique positions).

@@ -32,7 +32,7 @@ describe("generic hooks i18n (English)", () => {
         exampleContent: "example",
         fileConfig: {
           inputFileName: "test.txt",
-          outputFileName: "result.txt",
+          outputFileName: "output.txt",
           mimeType: "text/plain",
           language: "TestLang",
           acceptExtensions: ".txt",

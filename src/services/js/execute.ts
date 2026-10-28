@@ -11,6 +11,7 @@
  * This module runs inside the execution worker: it must stay free of i18next imports.
  */
 
+import type { Directive, Statement } from "@babel/types";
 import { serviceMessage } from "@/services/serviceMessage";
 
 export interface JsRunResult {
@@ -112,7 +113,7 @@ export async function runJavaScript(
       "setInterval",
       "clearTimeout",
       "clearInterval",
-      code,
+      await returnTrailingExpression(code),
     );
     const result = await userFunction(
       sandboxConsole,
@@ -138,6 +139,40 @@ export async function runJavaScript(
   } finally {
     for (const id of pendingTimers) clearTimeout(id);
   }
+}
+
+/**
+ * Like a console/REPL, show the value of a trailing bare expression (`1 + 2`,
+ * `await fetchThing()`): rewrite that last statement into `return (expr);` on the same
+ * line, so stack line numbers are unchanged. Code that doesn't parse is returned as is
+ * and the Function constructor reports the syntax error.
+ */
+async function returnTrailingExpression(code: string): Promise<string> {
+  let program: { body: Statement[]; directives: Directive[] };
+  try {
+    // Loaded on demand: only runs need it, and only inside the execution worker.
+    const { parse } = await import("@babel/parser");
+    program = parse(code, {
+      sourceType: "script",
+      allowAwaitOutsideFunction: true,
+      allowReturnOutsideFunction: true,
+    }).program;
+  } catch {
+    return code;
+  }
+
+  // A lone string literal (`"hi"`) parses as a directive, not as a statement.
+  const last: Statement | Directive | undefined =
+    program.body.at(-1) ?? (program.body.length === 0 ? program.directives.at(-1) : undefined);
+  const expression =
+    last?.type === "ExpressionStatement" ? last.expression : last?.type === "Directive" ? last.value : null;
+  if (!last || !expression) return code;
+
+  const { start, end } = last;
+  const { start: exprStart, end: exprEnd } = expression;
+  if (start == null || end == null || exprStart == null || exprEnd == null) return code;
+
+  return `${code.slice(0, start)}return (${code.slice(exprStart, exprEnd)});${code.slice(end)}`;
 }
 
 function failure(logs: string[], error: unknown): JsRunResult {
@@ -168,35 +203,79 @@ export function describeError(error: unknown): string {
   return line > 0 ? serviceMessage("services.js.runtimeErrorAtLine", { message, line }) : message;
 }
 
-const bigintReplacer = (_key: string, value: unknown) =>
-  typeof value === "bigint" ? `${value}n` : value;
+// Map/Set currently being described, so a collection that contains itself prints
+// "[Circular]" instead of recursing forever.
+const describing = new Set<object>();
+
+function describeFunction(fn: (...args: unknown[]) => unknown): string {
+  if (Function.prototype.toString.call(fn).startsWith("class")) {
+    return `[class ${fn.name || "(anonymous)"}]`;
+  }
+  return fn.name ? `[Function: ${fn.name}]` : "[Function (anonymous)]";
+}
+
+function describeCollection(collection: Map<unknown, unknown> | Set<unknown>): string {
+  if (describing.has(collection)) return "[Circular]";
+  describing.add(collection);
+  try {
+    if (collection instanceof Map) {
+      const entries = [...collection].map(([key, val]) => `${formatInline(key)} => ${formatInline(val)}`);
+      return `Map(${collection.size}) {${entries.join(", ")}}`;
+    }
+    const items = [...collection].map((item) => formatInline(item));
+    return `Set(${collection.size}) {${items.join(", ")}}`;
+  } finally {
+    describing.delete(collection);
+  }
+}
+
+/**
+ * Text for values JSON.stringify drops or prints as `{}`: BigInt, symbols, functions,
+ * errors, Map and Set. Returns undefined for everything else.
+ */
+function describeSpecial(value: unknown): string | undefined {
+  if (typeof value === "bigint") return `${value}n`;
+  if (typeof value === "symbol") return value.toString();
+  if (typeof value === "function") return describeFunction(value as (...args: unknown[]) => unknown);
+  if (value instanceof Error) return value.message ? `${value.name}: ${value.message}` : value.name;
+  if (value instanceof Map || value instanceof Set) return describeCollection(value);
+  return undefined;
+}
+
+const specialReplacer = (_key: string, value: unknown) => describeSpecial(value) ?? value;
+
+/** Single-line rendering: strings quoted, objects as compact JSON. */
+function formatInline(value: unknown): string {
+  const special = describeSpecial(value);
+  if (special !== undefined) return special;
+  if (value === undefined) return "undefined";
+  try {
+    return JSON.stringify(value, specialReplacer);
+  } catch {
+    return Object.prototype.toString.call(value);
+  }
+}
 
 export function formatValue(value: unknown): string {
   if (value === null) return "null";
   if (value === undefined) return "undefined";
   if (typeof value === "string") return value;
-  if (typeof value === "bigint") return `${value}n`;
+  const special = describeSpecial(value);
+  if (special !== undefined) return special;
   if (typeof value === "object") {
     try {
-      return JSON.stringify(value, bigintReplacer, 2);
+      return JSON.stringify(value, specialReplacer, 2);
     } catch {
       return Object.prototype.toString.call(value);
     }
   }
-  if (typeof value === "number") return String(value);
-  if (typeof value === "boolean") return String(value);
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
   return Object.prototype.toString.call(value);
 }
 
 /** Single-line rendering of a `console.table` cell. */
 function formatCell(value: unknown): string {
-  if (typeof value === "object" && value !== null) {
-    try {
-      return JSON.stringify(value, bigintReplacer);
-    } catch {
-      return Object.prototype.toString.call(value);
-    }
-  }
+  if (typeof value === "object" && value !== null) return formatInline(value);
   return formatValue(value);
 }
 

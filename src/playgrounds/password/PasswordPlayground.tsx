@@ -5,6 +5,7 @@ import {
   defaultPasswordOptions,
   calculateStrength,
   clampPasswordLength,
+  hasCharset,
   PASSWORD_LENGTH_MIN,
   PASSWORD_LENGTH_MAX,
   type PasswordOptions,
@@ -23,12 +24,14 @@ export function PasswordPlayground() {
     const merged = { ...defaultPasswordOptions, ...storedOptions };
     return { ...merged, length: clampPasswordLength(merged.length) };
   }, [storedOptions]);
+  const canGenerate = hasCharset(options);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [history, setHistory] = useState<{ id: string; value: string }[]>([]);
   const { copy, copied, reset: resetCopied } = useClipboardCopy();
 
   const handleGenerate = useCallback(() => {
+    if (!hasCharset(options)) return;
     const result = generatePasswordWithStrength(options);
     setPassword(result.password);
     resetCopied();
@@ -93,7 +96,8 @@ export function PasswordPlayground() {
           <button
             type="button"
             onClick={handleGenerate}
-            className="grow sm:grow-0 px-4 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
+            disabled={!canGenerate}
+            className="grow sm:grow-0 px-4 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <i className="fas fa-sync-alt mr-2"></i>
             {t("password.generate")}
@@ -173,6 +177,12 @@ export function PasswordPlayground() {
             {t("password.charsetSymbols")}
           </label>
         </div>
+
+        {!canGenerate && (
+          <p role="alert" className="text-yellow-400 text-sm">
+            {t("password.noCharset")}
+          </p>
+        )}
       </div>
 
       {/* Strength Indicator */}

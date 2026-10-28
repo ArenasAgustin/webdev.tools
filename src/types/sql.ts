@@ -33,10 +33,20 @@ export const DEFAULT_SQL_TOOLS_CONFIG: SqlToolsConfig = {
   minify: { autoCopy: false },
 };
 
-export interface SqlExecuteResult {
+/** Rows produced by one statement of an executed script. */
+export interface SqlResultSet {
+  /** 1-based position of the statement in the script */
+  statement: number;
   columns: string[];
-  rows: unknown[][];
+  rows: (number | string | Uint8Array | null)[][];
+  /** true when the row cap stopped reading this result set */
+  truncated: boolean;
+}
+
+export interface SqlExecuteResult {
+  /** Every statement that produced rows, in order (a multi-statement script yields several) */
+  resultSets: SqlResultSet[];
   elapsedMs: number;
-  /** true when the row cap (1000) was hit and results were truncated */
+  /** true when the row cap (1000, shared by all result sets) was hit and results were truncated */
   truncated: boolean;
 }

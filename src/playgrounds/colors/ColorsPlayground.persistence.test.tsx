@@ -30,6 +30,10 @@ vi.mock("react-colorful", () => ({
   ),
 }));
 
+vi.mock("@/hooks/useToast", () => ({
+  useToast: () => ({ success: vi.fn(), error: vi.fn() }),
+}));
+
 import { ColorsPlayground } from "./ColorsPlayground";
 
 describe("ColorsPlayground persistence", () => {

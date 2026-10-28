@@ -1,15 +1,30 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 
-const { getItemMock, setItemMock, clipboardWriteTextMock } = vi.hoisted(() => ({
+const {
+  getItemMock,
+  setItemMock,
+  removeItemMock,
+  clipboardWriteTextMock,
+  toastSuccessMock,
+  toastErrorMock,
+} = vi.hoisted(() => ({
   getItemMock: vi.fn((): unknown => null),
   setItemMock: vi.fn(),
+  removeItemMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
+  toastSuccessMock: vi.fn(),
+  toastErrorMock: vi.fn(),
+}));
+
+vi.mock("@/hooks/useToast", () => ({
+  useToast: () => ({ success: toastSuccessMock, error: toastErrorMock }),
 }));
 
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  removeItem: removeItemMock,
   STORAGE_KEYS: {
     URL_MODE: "urlMode",
     URL_VARIANT: "urlVariant",
@@ -152,7 +167,7 @@ describe("UrlPlayground branches (core)", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Secuencia porcentual malformada");
   });
 
-  it("copy writes the output, is disabled on empty/error and shows no success message", async () => {
+  it("copy writes the output, is disabled on empty/error and confirms with a toast", async () => {
     render(<UrlPlayground />);
     const copy = screen.getByRole("button", { name: /Copiar/ });
 
@@ -169,40 +184,21 @@ describe("UrlPlayground branches (core)", () => {
       fireEvent.click(copy);
     });
     expect(clipboardWriteTextMock).toHaveBeenCalledWith("a%20b");
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(toastSuccessMock).toHaveBeenCalledWith("url.copied");
+    expect(toastErrorMock).not.toHaveBeenCalled();
   });
 
-  it("shows a transient copy error on clipboard failure and cleans up on unmount", async () => {
+  it("shows an error toast on clipboard failure", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     clipboardWriteTextMock.mockRejectedValue(new Error("denied"));
-    const { unmount } = render(<UrlPlayground />);
+    render(<UrlPlayground />);
     typeInput("a b");
-    const copy = screen.getByRole("button", { name: /Copiar/ });
 
     await act(async () => {
-      fireEvent.click(copy);
+      fireEvent.click(screen.getByRole("button", { name: /Copiar/ }));
     });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    await act(async () => {
-      fireEvent.click(copy);
-    });
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(screen.getByRole("status")).toHaveTextContent("No se pudo copiar al portapapeles");
-
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.click(copy);
-    });
-    unmount();
-    expect(vi.getTimerCount()).toBe(0);
+    expect(toastErrorMock).toHaveBeenCalledWith("No se pudo copiar al portapapeles");
+    expect(toastSuccessMock).not.toHaveBeenCalled();
   });
 
   it("clear empties input and error but keeps mode", () => {
@@ -219,11 +215,43 @@ describe("UrlPlayground branches (core)", () => {
     );
   });
 
-  it("swap exchanges input/output, makes the flipped mode explicit and keeps the variant", () => {
+  it("swap from auto stays in auto when detection flips the direction", () => {
+    render(<UrlPlayground />);
+    typeInput("a b");
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("a%20b");
+    expect(getOutput().value).toBe("a b");
+    expect(screen.getByRole("button", { name: "Auto (decode)" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("a b");
+    expect(screen.getByRole("button", { name: "Auto (encode)" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("swap from auto pins the flipped mode when detection would not flip", () => {
+    render(<UrlPlayground />);
+    // decoding "%2541" yields "%41", which auto would decode again
+    typeInput("%2541");
+    click(/Intercambiar/);
+    expect(getInput().value).toBe("%41");
+    expect(screen.getByRole("button", { name: "Codificar" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(getOutput().value).toBe("%2541");
+  });
+
+  it("swap exchanges input/output, flips an explicit mode and keeps the variant", () => {
     render(<UrlPlayground />);
     click("URI completa");
+    click("Codificar");
     typeInput("a b");
-    expect(screen.getByRole("button", { name: "Auto (encode)" })).toBeInTheDocument();
 
     click(/Intercambiar/);
     expect(getInput().value).toBe("a%20b");

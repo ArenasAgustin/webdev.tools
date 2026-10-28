@@ -5,6 +5,7 @@ import { colorsConfig } from "./colors.config";
 import { convertColor, getAllFormats, type ColorFormats } from "@/utils/colorConverter";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
+import { useToast } from "@/hooks/useToast";
 import { STORAGE_KEYS } from "@/services/storage";
 
 export function ColorsPlayground() {
@@ -51,7 +52,18 @@ export function ColorsPlayground() {
   const displayFormats: ColorFormats =
     inputFormats ?? convertColor(color) ?? getAllFormats({ r: 0, g: 0, b: 0 });
 
-  const { copy: copyToClipboard } = useClipboardCopy();
+  const { copy } = useClipboardCopy();
+  const toast = useToast();
+  const copyToClipboard = useCallback(
+    async (value: string) => {
+      if (await copy(value)) {
+        toast.success(t("colors.copied"));
+      } else {
+        toast.error(t("colors.copyError"));
+      }
+    },
+    [copy, toast, t],
+  );
 
   return (
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col lg:flex-row gap-4">

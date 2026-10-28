@@ -123,6 +123,9 @@
     "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
     "noResults": "No results",
+    "detectedUnit": "Read as Unix time in {{unit}}",
+    "unitSeconds": "seconds",
+    "unitMilliseconds": "milliseconds",
     "formats": {
       "unixSeconds": "Unix (s)",
       "unixMilliseconds": "Unix (ms)",
@@ -140,6 +143,9 @@
     "output": "Output",
     "dropFileHere": "Drop file here",
     "outputIdle": "Format, minify, or run to see a result",
+    "outputIdleFormatRun": "Format or run to see a result",
+    "outputIdleFormatMinify": "Format or minify to see a result",
+    "outputIdleFormat": "Format to see a result",
     "inputPlaceholder": "Write your {{language}} here...",
     "waitingLabel": "Waiting for {{language}}...",
     "validLabel": "{{language}} valid",
@@ -181,14 +187,21 @@
       "good": "Good",
       "strong": "Strong"
     },
-    "history": "History:"
+    "history": "History:",
+    "noCharset": "Select at least one character set to generate a password"
   },
   "notifications": "Notifications",
   "close_notification": "Close notification",
   "stats": {
     "smaller": "smaller",
     "larger": "larger",
-    "summary": "{{lines}} lines · {{characters}} characters · {{bytes}}"
+    "summary": "{{lines}} · {{characters}} · {{bytes}}",
+    "lines_one": "{{count}} line",
+    "lines_many": "{{count}} lines",
+    "lines_other": "{{count}} lines",
+    "characters_one": "{{value}} character",
+    "characters_many": "{{value}} characters",
+    "characters_other": "{{value}} characters"
   },
   "home": {
     "tagline": "Web developer tools",
@@ -224,11 +237,14 @@
     "compareAction": "Compare",
     "matchSuccess": "Hash matches",
     "matchFail": "Hash does NOT match",
-    "generateError": "Could not generate the hashes. The file may be unreadable or too large."
+    "generateError": "Could not generate the hashes. The file may be unreadable or too large.",
+    "emptyInput": "Enter some text to generate its hashes"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
     "copy": "Copy {{format}}",
+    "copied": "Copied to clipboard",
+    "copyError": "Could not copy to clipboard",
     "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK."
   },
   "html": {
@@ -236,6 +252,7 @@
     "resultLabel": "Result",
     "domInspection": "DOM Inspection",
     "noElements": "No elements to inspect",
+    "moreTags": "+{{count}} more",
     "viewPreview": "View preview",
     "viewResult": "View result"
   },
@@ -292,7 +309,7 @@
     }
   },
   "loader": {
-    "loading": "Loading {{name}} Tools",
+    "loading": "Loading {{name}}",
     "preparing": "Preparing the playground..."
   },
   "card": {
@@ -364,6 +381,7 @@
     "outputLabel": "Output",
     "outputPlaceholder": "Result will appear here",
     "copy": "Copy",
+    "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
     "clear": "Clear",
     "swap": "Swap",
@@ -412,18 +430,22 @@
       "cleanError": "Error cleaning code",
       "timeout": "Execution exceeded {{seconds}} seconds and was cancelled",
       "workerError": "Execution worker error",
+      "workerUnsupported": "Your browser doesn't support Web Workers: the code isn't run so it can't block or reach the page.",
       "unknownError": "Unknown error while running code"
     },
     "json": {
       "jsonPathRequired": "Enter a JSONPath expression",
       "noResults": "The filter returned no results",
-      "jsonPathError": "Error applying JSONPath"
+      "jsonPathError": "Error applying JSONPath",
+      "precisionLoss": "Some numbers can't be represented exactly and were changed (very large integers or values like 1e400).",
+      "duplicateKeys": "Duplicate keys found: only the last value of each was kept."
     },
     "php": {
       "minifyUnavailable": "Minify is not available for PHP",
       "formatCodeError": "Error formatting PHP code",
       "sharedArrayBufferUnsupported": "Your browser does not support SharedArrayBuffer, which is required to run PHP. Try an up-to-date Chrome or Firefox.",
-      "executed": "PHP code executed successfully"
+      "executed": "PHP code executed successfully",
+      "executedNoOutput": "PHP code ran (no output)"
     },
     "sql": {
       "executed": "Query executed successfully",
@@ -483,7 +505,6 @@
       "parseError": "Error parsing PHP code",
       "formatError": "Error formatting PHP code",
       "minifyUnavailable": "Minify is not available for PHP",
-      "noOutput": "(no output)",
       "timeout": "Execution exceeded {{seconds}} seconds and was cancelled"
     },
     "sql": {

@@ -7,7 +7,7 @@ import { translate } from "@/i18n/translate";
 export interface PlaygroundFileConfig {
   /** Input file name for download (e.g. "styles.css") */
   inputFileName: string;
-  /** Output file name for download (e.g. "result.css") */
+  /** Output file name for download (e.g. "output.css") */
   outputFileName: string;
   /** MIME type for downloads (e.g. "text/css") */
   mimeType: string;

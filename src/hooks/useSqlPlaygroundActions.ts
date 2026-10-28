@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { sqlPlaygroundConfig } from "@/playgrounds/sql/sql.config";
+import { sqlFileSettings, sqlPlaygroundConfig } from "@/playgrounds/sql/sql.config";
 import {
   executeSqlAsync,
   resetSqlAsync,
@@ -16,20 +16,33 @@ import type { ToastApi } from "./usePlaygroundActions";
 import type { SqlFormatConfig, SqlMinifyConfig, SqlExecuteResult } from "@/types/sql";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
-  inputFileName: "query.sql",
-  outputFileName: "result.json",
-  mimeType: "application/sql",
+  ...sqlFileSettings,
   language: "SQL",
-  acceptExtensions: ".sql",
 };
 
-async function formatRunner(input: string, config: SqlFormatConfig): Promise<string> {
+/**
+ * The output holds either an execution result (JSON) or formatted/minified SQL.
+ * Name and type the download after what is actually there, the same way the
+ * output panel picks its editor language.
+ */
+function outputDownloadFile(output: string): { fileName: string; mimeType: string } {
+  try {
+    JSON.parse(output);
+    return { fileName: "output.json", mimeType: "application/json" };
+  } catch {
+    return { fileName: "output.sql", mimeType: FILE_CONFIG.mimeType };
+  }
+}
+
+/** Formats through the worker and unwraps its result; shared with the SQL engine. */
+export async function formatRunner(input: string, config: SqlFormatConfig): Promise<string> {
   const result = await formatSqlAsync(input, config);
   if (!result.ok) throw new Error(result.error ?? translate("messages.formatError", { language: FILE_CONFIG.language }));
   return result.value;
 }
 
-async function minifyRunner(input: string): Promise<string> {
+/** Minifies through the worker and unwraps its result; shared with the SQL engine. */
+export async function minifyRunner(input: string): Promise<string> {
   const result = await minifySqlAsync(input);
   if (!result.ok) throw new Error(result.error ?? translate("messages.minifyError", { language: FILE_CONFIG.language }));
   return result.value;
@@ -80,7 +93,18 @@ export function useSqlPlaygroundActions({
     minifyRunner,
   });
 
-  const { beginProcessing, endProcessing } = generic;
+  const { beginProcessing, endProcessing, baseActions } = generic;
+
+  const handleDownloadOutput = useCallback(() => {
+    const { fileName, mimeType } = outputDownloadFile(output);
+    baseActions.handleDownload({
+      content: output,
+      fileName,
+      mimeType,
+      successMessage: translate("messages.downloadedAs", { fileName }),
+      validate: () => (!output ? translate("messages.noOutputToDownload") : null),
+    });
+  }, [baseActions, output]);
 
   const handleExecute = useCallback(() => {
     // Ignore a second trigger (button or Ctrl+Shift+Enter) while a query is running:
@@ -152,6 +176,7 @@ export function useSqlPlaygroundActions({
 
   return {
     ...generic,
+    handleDownloadOutput,
     handleExecute,
     handleReset,
     isExecuting,

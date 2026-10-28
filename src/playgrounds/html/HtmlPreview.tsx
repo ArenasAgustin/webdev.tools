@@ -4,16 +4,24 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 const PREVIEW_DEBOUNCE_MS = 300;
 
+const MAX_SUMMARY_TAGS = 8;
+
+interface DomInspection {
+  summary: string;
+  hiddenTags: number;
+}
+
 /**
- * DOM inspection helper
+ * DOM inspection helper. The parser always synthesizes html/head/body, so only
+ * the elements inside them are counted.
  */
-function inspectDom(source: string): string | null {
+function inspectDom(source: string): DomInspection | null {
   if (!source.trim()) {
     return null;
   }
 
   const parsed = new DOMParser().parseFromString(source, "text/html");
-  const tags = Array.from(parsed.querySelectorAll("*"));
+  const tags = Array.from(parsed.querySelectorAll("head *, body *"));
 
   if (tags.length === 0) {
     return null;
@@ -25,10 +33,14 @@ function inspectDom(source: string): string | null {
     counters.set(tagName, (counters.get(tagName) ?? 0) + 1);
   }
 
-  return Array.from(counters.entries())
-    .slice(0, 8)
-    .map(([tag, count]) => `${tag} (${count})`)
-    .join(" · ");
+  const entries = Array.from(counters.entries());
+  return {
+    summary: entries
+      .slice(0, MAX_SUMMARY_TAGS)
+      .map(([tag, count]) => `${tag} (${count})`)
+      .join(" · "),
+    hiddenTags: Math.max(0, entries.length - MAX_SUMMARY_TAGS),
+  };
 }
 
 /**
@@ -51,7 +63,11 @@ export function HtmlPreview({ source }: { source: string }) {
       <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80">
         <div className="mb-1 font-medium text-cyan-300">{t("html.domInspection")}</div>
         {domInspection ? (
-          <span data-testid="dom-inspection-summary">{domInspection}</span>
+          <span data-testid="dom-inspection-summary">
+            {domInspection.summary}
+            {domInspection.hiddenTags > 0 &&
+              ` · ${t("html.moreTags", { count: domInspection.hiddenTags })}`}
+          </span>
         ) : (
           <span className="text-gray-400">{t("html.noElements")}</span>
         )}

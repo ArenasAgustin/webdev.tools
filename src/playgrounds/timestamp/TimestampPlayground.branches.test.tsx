@@ -145,6 +145,30 @@ describe("TimestampPlayground branches", () => {
     expect(screen.getByText("timestamp.formats.unixSeconds")).toBeInTheDocument();
   });
 
+  it("handleNow: the relative time keeps ticking after the snapshot", () => {
+    vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+    render(<TimestampPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /timestamp.now/i }));
+    expect(screen.getByText("ahora mismo")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("hace 5 segundos")).toBeInTheDocument();
+  });
+
+  it("shows which unit a unix input was read as", () => {
+    render(<TimestampPlayground />);
+    const input = screen.getByPlaceholderText("timestamp.placeholder");
+    fireEvent.change(input, { target: { value: "1704067200" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp.convert/i }));
+    expect(screen.getByText("timestamp.detectedUnit")).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "2024-01-01" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp.convert/i }));
+    expect(screen.queryByText("timestamp.detectedUnit")).not.toBeInTheDocument();
+  });
+
   it("handleClear: resets input, result and error", () => {
     render(<TimestampPlayground />);
 

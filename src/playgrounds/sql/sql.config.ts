@@ -1,5 +1,16 @@
 import type { PlaygroundConfig } from "@/types/playground";
 
+/**
+ * File names, mime type and import filter shared by the SQL engine and its actions hook.
+ * The result download picks its own name and type from the output (JSON result or SQL).
+ */
+export const sqlFileSettings = {
+  inputFileName: "query.sql",
+  outputFileName: "output.json",
+  mimeType: "application/sql",
+  acceptExtensions: ".sql",
+} as const;
+
 export const sqlPlaygroundConfig: PlaygroundConfig = {
   id: "sql",
   name: "SQL tools",

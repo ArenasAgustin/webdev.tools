@@ -1,5 +1,15 @@
 import type { PlaygroundConfig } from "@/types/playground";
 
+/**
+ * File names, mime type and import filter shared by the PHP engine and its actions hook.
+ */
+export const phpFileSettings = {
+  inputFileName: "code.php",
+  outputFileName: "output.php",
+  mimeType: "application/x-php",
+  acceptExtensions: ".php",
+} as const;
+
 export const phpPlaygroundConfig: PlaygroundConfig = {
   id: "php",
   name: "PHP 7.4 tools",
@@ -35,7 +45,7 @@ class Usuario {
     }
 
     public function saludar(): string {
-        return "Hola, soy {$this->nombre} y tengo {$this->edad} anos";
+        return "Hola, soy {$this->nombre} y tengo {$this->edad} años";
     }
 }
 

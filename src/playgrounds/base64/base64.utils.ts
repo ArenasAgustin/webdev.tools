@@ -40,7 +40,8 @@ export class Base64Error extends Error {
  * lives in a textarea, and much larger inputs exceed the engine's max string
  * length (RangeError) or freeze the page.
  */
-export const MAX_FILE_BYTES = 10 * 1024 * 1024;
+// Base-1000 like formatBytes and the other input limits, so the limit and the shown size agree.
+export const MAX_FILE_BYTES = 10_000_000;
 
 /** Max chunk size passed to String.fromCharCode.apply to avoid call-stack overflow. */
 const CHUNK_SIZE = 0x8000;

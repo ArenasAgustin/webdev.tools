@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest";
 import {
   generatePassword,
+  hasCharset,
   generatePasswordWithStrength,
   calculateStrength,
   defaultPasswordOptions,
@@ -66,16 +67,17 @@ describe("password.utils", () => {
       expect(password).toMatch(/[!@#$%^&*()_+=[\]{}|;':",.<>?]/);
     });
 
-    it("falls back to lowercase when no options selected", () => {
-      const password = generatePassword({
+    it("refuses to generate when no character set is selected", () => {
+      const none = {
         length: 16,
         includeUppercase: false,
         includeLowercase: false,
         includeNumbers: false,
         includeSymbols: false,
-      });
-      expect(password).toHaveLength(16);
-      expect(password).toMatch(/[a-z]/);
+      };
+      expect(hasCharset(none)).toBe(false);
+      expect(hasCharset({ ...none, includeSymbols: true })).toBe(true);
+      expect(() => generatePassword(none)).toThrow();
     });
   });
 

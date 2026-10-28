@@ -76,7 +76,11 @@ const newI18nKeys: Record<string, string | ((vars?: Record<string, unknown>) => 
   "stats.smaller": "más pequeño",
   "stats.larger": "más grande",
   "stats.summary": (vars?: Record<string, unknown>) =>
-    `${vars?.lines ?? ""} líneas · ${vars?.characters ?? ""} caracteres · ${vars?.bytes ?? ""}`,
+    `${vars?.lines ?? ""} · ${vars?.characters ?? ""} · ${vars?.bytes ?? ""}`,
+  "stats.lines": (vars?: Record<string, unknown>) =>
+    `${String(vars?.count ?? "")} ${vars?.count === 1 ? "línea" : "líneas"}`,
+  "stats.characters": (vars?: Record<string, unknown>) =>
+    `${String(vars?.value ?? "")} ${vars?.count === 1 ? "carácter" : "caracteres"}`,
   // Toast / notifications
   "notifications": "Notificaciones",
   "close_notification": "Cerrar notificación",

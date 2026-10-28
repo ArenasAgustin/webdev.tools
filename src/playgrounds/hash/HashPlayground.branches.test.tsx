@@ -18,6 +18,7 @@ const {
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  removeItem: vi.fn(() => true),
   STORAGE_KEYS: {
     HASH_INPUT_MODE: "hashInputMode",
     HASH_TEXT_INPUT: "hashTextInput",
@@ -108,6 +109,25 @@ describe("HashPlayground branches", () => {
     expect(screen.getByText("ddeeff")).toBeInTheDocument();
   });
 
+  it("file mode: resets the file input so the same file can be picked again", () => {
+    const { container } = render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    let value = "C:\\fakepath\\a.txt";
+    Object.defineProperty(input, "value", {
+      configurable: true,
+      get: () => value,
+      set: (next: string) => {
+        value = next;
+      },
+    });
+
+    fireEvent.change(input, { target: { files: [new File(["hello"], "a.txt")] } });
+
+    expect(screen.getByText("a.txt")).toBeInTheDocument();
+    expect(input.value).toBe("");
+  });
+
   it("file mode: shows a translated error when the file cannot be hashed", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     generateAllHashesFromFileMock.mockRejectedValue(new DOMException("NotReadableError"));
@@ -135,6 +155,30 @@ describe("HashPlayground branches", () => {
     });
 
     expect(generateAllHashesMock).not.toHaveBeenCalled();
+  });
+
+  it("empty text: Generate shows a hint that disappears once text is typed", async () => {
+    render(<HashPlayground />);
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    expect(screen.getByRole("status")).toHaveTextContent(/ingres[aá] un texto/i);
+
+    fireEvent.change(textarea, { target: { value: "x" } });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("file mode: shows small file sizes in bytes", () => {
+    const { container } = render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    fireEvent.change(input, { target: { files: [new File(["abc"], "a.txt")] } });
+
+    expect(screen.getByText("3 B")).toBeInTheDocument();
   });
 
   it("text mode: generates hashes and displays results", async () => {
@@ -315,6 +359,24 @@ describe("HashPlayground branches", () => {
     fireEvent.change(compareInput, { target: { value: "xxxxxx" } });
     fireEvent.click(screen.getByRole("button", { name: /comparar/i }));
     expect(screen.getByText(/no coincide/i)).toBeInTheDocument();
+  });
+
+  it("compare ignores surrounding whitespace and letter case", async () => {
+    render(<HashPlayground />);
+
+    const textarea = screen.getByPlaceholderText(/ingres[aá] el texto/i);
+    fireEvent.change(textarea, { target: { value: "compare-test" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    const compareInput = screen.getByPlaceholderText(/ingres[aá] un hash para comparar/i);
+    fireEvent.change(compareInput, { target: { value: "  AABBCC\n" } });
+    fireEvent.click(screen.getByRole("button", { name: /comparar/i }));
+
+    expect(screen.getByText(/coincide/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no coincide/i)).not.toBeInTheDocument();
   });
 
   it("compare guard: empty compareValue or no results — does nothing", () => {

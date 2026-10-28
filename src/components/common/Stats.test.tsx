@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { render } from "@testing-library/react";
 import { renderWithI18n } from "@/test/test-utils";
 import { Stats } from "./Stats";
 
@@ -10,6 +11,20 @@ describe("Stats", () => {
     expect(text).toContain("caracteres");
     expect(text).toContain("1.5 KB");
     expect(text).not.toContain("bytes");
+  });
+
+  it("uses singular forms for one line and one character (real translations)", () => {
+    const { container } = render(<Stats lines={1} characters={1} bytes={1} />);
+    const text = container.textContent ?? "";
+    expect(text).toContain("1 línea ·");
+    expect(text).toContain("1 carácter ·");
+  });
+
+  it("uses plural forms otherwise (real translations)", () => {
+    const { container } = render(<Stats lines={2} characters={0} bytes={0} />);
+    const text = container.textContent ?? "";
+    expect(text).toContain("2 líneas ·");
+    expect(text).toContain("0 caracteres ·");
   });
 
   it("formats large sizes in MB", () => {

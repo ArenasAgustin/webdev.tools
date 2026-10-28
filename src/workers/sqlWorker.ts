@@ -7,7 +7,7 @@
 import type { SqlWorkerRequest, SqlWorkerResponse } from "@/services/sql/worker.types";
 import { ROW_CAP } from "@/services/sql/worker.types";
 import { formatSql, validateSql, minifySql } from "@/services/sql/transform";
-import { runStatements } from "@/services/sql/execute";
+import { roundElapsedMs, runStatements } from "@/services/sql/execute";
 import type { Database } from "sql.js";
 import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
@@ -73,12 +73,12 @@ ctx.onmessage = (event: MessageEvent<SqlWorkerRequest>) => {
         case "execute": {
           const db = await getDb();
           const start = performance.now();
-          const { columns, rows, truncated } = runStatements(db, req.input, ROW_CAP);
+          const { resultSets, truncated } = runStatements(db, req.input, ROW_CAP);
           ctx.postMessage({
             id: req.id,
             ok: true,
             action: "execute",
-            value: { columns, rows, elapsedMs: performance.now() - start, truncated },
+            value: { resultSets, elapsedMs: roundElapsedMs(performance.now() - start), truncated },
           });
           return;
         }

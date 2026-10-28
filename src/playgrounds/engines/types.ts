@@ -30,6 +30,8 @@ export interface OutputPanelProps {
   input: string;
   output: string;
   error: string | null;
+  /** True while a format/minify/execute action is running */
+  isProcessing: boolean;
   outputStats: { lines: number; characters: number; bytes: number };
   comparisonBytes: number;
   expandOutput: () => void;

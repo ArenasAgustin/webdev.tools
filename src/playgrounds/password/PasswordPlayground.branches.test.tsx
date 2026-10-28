@@ -231,6 +231,24 @@ describe("PasswordPlayground branches", () => {
     expect(screen.getByRole("checkbox", { name: "password.aria.symbols" })).toBeInTheDocument();
   });
 
+  it("unchecking every character set disables Generate and shows a warning", () => {
+    render(<PasswordPlayground />);
+    const generateBtn = screen.getByRole("button", { name: /generar/i });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    for (const name of ["uppercase", "lowercase", "numbers", "symbols"]) {
+      const checkbox = screen.getByRole("checkbox", { name: `password.aria.${name}` });
+      if ((checkbox as HTMLInputElement).checked) fireEvent.click(checkbox);
+    }
+
+    expect(generateBtn).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent("password.noCharset");
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "password.aria.numbers" }));
+    expect(generateBtn).toBeEnabled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("toggling checkbox changes password options", () => {
     render(<PasswordPlayground />);
 

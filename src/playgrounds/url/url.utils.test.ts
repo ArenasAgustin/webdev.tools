@@ -51,9 +51,19 @@ describe("encodeUrl", () => {
     expect(encodeUrl("", variant)).toBe("");
   });
 
-  it("leaves !'()~ unescaped when not strict", () => {
+  it("leaves !'()~ unescaped in component when not strict", () => {
     expect(encodeUrl("a!b'c(d)e~", "component")).toBe("a!b'c(d)e~");
-    expect(encodeUrl("a!b'c(d)e~", "form")).toBe("a!b'c(d)e~");
+  });
+
+  it("matches URLSearchParams serialization for form", () => {
+    const text = "a b~!*'()-_.é&=+/";
+    const expected = new URLSearchParams({ q: text }).toString().slice("q=".length);
+    expect(encodeUrl(text, "form")).toBe(expected);
+    expect(encodeUrl("a!b'c(d)e~*", "form")).toBe("a%21b%27c%28d%29e%7E*");
+  });
+
+  it("auto detects URLSearchParams form output as encoded", () => {
+    expect(isLikelyUrlEncoded("a+b*c", "form")).toBe(true);
   });
 
   describe("strict", () => {
@@ -172,9 +182,13 @@ describe("isLikelyUrlEncoded", () => {
     ["a%20b", "component", true],
     ["%41", "component", true],
     ["hello world", "component", false],
-    ["a b%20c", "component", false],
-    ["a%20b\tc", "component", false],
-    ["a%20b\nc", "component", false],
+    // whitespace alongside escapes: decode only when every "%" starts a valid escape
+    ["a b%20c", "component", true],
+    ["50%25 off", "component", true],
+    ["a%20b\tc", "component", true],
+    ["a%20b\nc", "component", true],
+    ["50% off %41", "component", false],
+    ["100%25 or 100%", "component", false],
     ["plain", "component", false],
     ["%zz", "component", false],
     ["100%", "component", false],
@@ -204,6 +218,7 @@ describe("resolveMode", () => {
   it("auto-detects direction", () => {
     expect(resolveMode("auto", "a%20b", "component")).toBe("decode");
     expect(resolveMode("auto", "a b", "component")).toBe("encode");
+    expect(resolveMode("auto", "50%25 off", "component")).toBe("decode");
     expect(resolveMode("auto", "", "component")).toBe("encode");
   });
 

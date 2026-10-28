@@ -1,9 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useJsPlaygroundActions } from "./useJsPlaygroundActions";
 import { usePhpPlaygroundActions } from "./usePhpPlaygroundActions";
 import { useSqlPlaygroundActions } from "./useSqlPlaygroundActions";
 import { useJsonPlaygroundActions } from "./useJsonPlaygroundActions";
+import { stubJsExecWorker } from "@/test/inProcessJsExecWorker";
 
 const mocks = vi.hoisted(() => ({
   runJavaScript: vi.fn(),
@@ -53,7 +54,12 @@ describe("overlapping runs", () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("JS execute ignores a second call while the first is running", async () => {
+    stubJsExecWorker();
     const first = deferred<{ ok: true; output: string }>();
     mocks.runJavaScript.mockReturnValueOnce(first.promise);
     const { setOutput, setError, toast } = makeCallbacks();
@@ -151,7 +157,7 @@ describe("overlapping runs", () => {
       result.current.handleExecute();
     });
     await act(async () => {
-      first.resolve({ ok: true, value: { columns: [], rows: [], elapsedMs: 1, truncated: false } });
+      first.resolve({ ok: true, value: { resultSets: [], elapsedMs: 1, truncated: false } });
       await first.promise;
     });
 

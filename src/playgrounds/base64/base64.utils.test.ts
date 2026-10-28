@@ -8,7 +8,9 @@ import {
   isLikelyBase64,
   resolveMode,
   Base64Error,
+  MAX_FILE_BYTES,
 } from "./base64.utils";
+import { formatBytes } from "@/utils/formatBytes";
 
 describe("base64.utils", () => {
   describe("round-trip encodeText/decodeText", () => {
@@ -165,5 +167,12 @@ describe("base64.utils", () => {
       expect(resolveMode("auto", "VGVzdDEyMzQ=")).toBe("decode");
       expect(resolveMode("auto", "8J+YgA==")).toBe("decode");
     });
+  });
+});
+
+describe("MAX_FILE_BYTES", () => {
+  it("uses the same base-1000 units as the size display", () => {
+    expect(formatBytes(MAX_FILE_BYTES)).toBe("10 MB");
+    expect(formatBytes(MAX_FILE_BYTES - 1)).toBe("10 MB");
   });
 });

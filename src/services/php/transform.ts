@@ -78,6 +78,7 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
     const formatted: string[] = [];
 
     let heredocLabel: string | null = null;
+    let inBlockComment = false;
 
     for (const line of lines) {
       // Heredoc/nowdoc bodies and their closing label are emitted verbatim: their
@@ -102,10 +103,13 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       if (heredocMatch) heredocLabel = heredocMatch[2];
       const code = heredocMatch ? trimmed.slice(0, heredocMatch.index) : trimmed;
 
-      const braces = countOuterBraces(code);
+      const startsInComment = inBlockComment;
+      const braces = countOuterBraces(code, inBlockComment);
+      inBlockComment = braces.inBlockComment;
+      const leadingClose = !startsInComment && trimmed.startsWith("}");
 
       // Decrease indent BEFORE for a leading closing brace
-      if (trimmed.startsWith("}")) {
+      if (leadingClose) {
         if (indentLevel > 0) indentLevel--;
       }
 
@@ -119,7 +123,7 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       }
 
       // Decrease for closing braces not already handled above
-      const trailingClose = trimmed.startsWith("}") ? braces.close - 1 : braces.close;
+      const trailingClose = leadingClose ? braces.close - 1 : braces.close;
       if (trailingClose > 0) {
         indentLevel = Math.max(0, indentLevel - trailingClose);
       }
@@ -144,40 +148,28 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
  * - Interpolated strings with {$var}
  * - Escaped characters
  * - Single and double quoted strings
- * - Line and block comments
+ * - Line and block comments (a block comment may span lines: `inBlockComment`
+ *   says the line starts inside one, and the result says whether it ends inside one)
  */
-function countOuterBraces(line: string): { open: number; close: number } {
+function countOuterBraces(
+  line: string,
+  inBlockComment = false,
+): { open: number; close: number; inBlockComment: boolean } {
   let open = 0;
   let close = 0;
-  type StringState = "outside" | "single" | "double";
-  let state: StringState = "outside";
+  type StringState = "outside" | "single" | "double" | "comment";
+  let state: StringState = inBlockComment ? "comment" : "outside";
   let i = 0;
 
   while (i < line.length) {
     const ch = line[i];
 
     if (state === "outside") {
-      // Check for block comment start
+      // Block comment start: its braces are not code
       if (ch === "/" && line[i + 1] === "*") {
-        // Find end of block comment
-        const commentEnd = line.indexOf("*/", i + 2);
-        if (commentEnd !== -1) {
-          // Count braces INSIDE block comments
-          for (let j = i + 2; j < commentEnd; j++) {
-            if (line[j] === "{") open++;
-            else if (line[j] === "}") close++;
-          }
-          i = commentEnd + 2;
-          continue;
-        } else {
-          // Block comment continues to next line (rare case)
-          // Count braces in rest of line
-          for (let j = i + 2; j < line.length; j++) {
-            if (line[j] === "{") open++;
-            else if (line[j] === "}") close++;
-          }
-          break;
-        }
+        state = "comment";
+        i += 2;
+        continue;
       }
       // Line comment
       if (ch === "/" && line[i + 1] === "/") break;
@@ -204,6 +196,11 @@ function countOuterBraces(line: string): { open: number; close: number } {
         continue;
       }
       i++;
+    } else if (state === "comment") {
+      const commentEnd = line.indexOf("*/", i);
+      if (commentEnd === -1) break;
+      state = "outside";
+      i = commentEnd + 2;
     } else if (state === "single") {
       if (ch === "\\" && i + 1 < line.length) {
         i += 2; // Skip escaped character
@@ -238,7 +235,7 @@ function countOuterBraces(line: string): { open: number; close: number } {
     }
   }
 
-  return { open, close };
+  return { open, close, inBlockComment: state === "comment" };
 }
 
 export function validatePhp(input: string): Result<void, string> {

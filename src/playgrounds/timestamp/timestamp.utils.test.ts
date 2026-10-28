@@ -1,6 +1,13 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
-import { parseInput, unixToDate, convertTimestamp, getCurrentTimestamp } from "./timestamp.utils";
+import {
+  parseInput,
+  unixToDate,
+  convertTimestamp,
+  getCurrentTimestamp,
+  detectUnixUnit,
+  withUtc,
+} from "./timestamp.utils";
 
 describe("timestamp.utils", () => {
   describe("parseInput", () => {
@@ -110,6 +117,39 @@ describe("timestamp.utils", () => {
     it("returns null for invalid input", () => {
       const result = convertTimestamp("invalid");
       expect(result).toBeNull();
+    });
+  });
+
+  describe("detectUnixUnit", () => {
+    it("reads values up to 1e11 as seconds and larger ones as milliseconds", () => {
+      expect(detectUnixUnit(1712160000)).toBe("seconds");
+      expect(detectUnixUnit(1e11)).toBe("seconds");
+      expect(detectUnixUnit(1e11 + 1)).toBe("milliseconds");
+      expect(detectUnixUnit(-1712160000000)).toBe("milliseconds");
+    });
+
+    it("reports the detected unit on the result (null for date strings)", () => {
+      expect(convertTimestamp("1712160000")?.unit).toBe("seconds");
+      expect(convertTimestamp("1712160000000")?.unit).toBe("milliseconds");
+      expect(convertTimestamp("2024-04-03")?.unit).toBeNull();
+    });
+  });
+
+  describe("relative time", () => {
+    it("says just now for differences under a second instead of 0 seconds", () => {
+      const now = 1712160000_500;
+      expect(convertTimestamp("1712160000", "UTC", "es", now)?.relative).toBe("ahora mismo");
+      expect(convertTimestamp("1712160000", "UTC", "en", now)?.relative).toBe("just now");
+      expect(convertTimestamp("1712160000", "UTC", "es", now + 4600)?.relative).toBe(
+        "hace 5 segundos",
+      );
+    });
+  });
+
+  describe("withUtc", () => {
+    it("adds UTC when the engine list lacks it", () => {
+      expect(withUtc(["Europe/Paris"])).toEqual(["UTC", "Europe/Paris"]);
+      expect(withUtc(["UTC", "Europe/Paris"])).toEqual(["UTC", "Europe/Paris"]);
     });
   });
 

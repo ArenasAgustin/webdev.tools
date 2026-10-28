@@ -152,6 +152,44 @@ describe("useKeyboardShortcuts", () => {
       expect(onClean).toHaveBeenCalled();
       document.body.removeChild(div);
     });
+
+    it("still fires when the editor stops keydown propagation (Monaco's own Ctrl+Shift+L binding)", () => {
+      renderShortcuts();
+      const editor = document.createElement("div");
+      editor.className = "monaco-editor";
+      const editContext = document.createElement("div");
+      editor.appendChild(editContext);
+      document.body.appendChild(editor);
+      // Monaco handles its keybindings on the editor node and stops propagation
+      editor.addEventListener("keydown", (event) => event.stopPropagation());
+
+      const event = new KeyboardEvent("keydown", {
+        key: "L",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      editContext.dispatchEvent(event);
+
+      expect(onClean).toHaveBeenCalledTimes(1);
+      expect(event.defaultPrevented).toBe(true);
+      document.body.removeChild(editor);
+    });
+
+    it("treats a textarea inside a Monaco editor as the editor, not a form field", () => {
+      renderShortcuts();
+      const editor = document.createElement("div");
+      editor.className = "monaco-editor";
+      const textarea = document.createElement("textarea");
+      editor.appendChild(textarea);
+      document.body.appendChild(editor);
+
+      fireEvent.keyDown(textarea, { key: "M", ctrlKey: true, shiftKey: true });
+
+      expect(onMinify).toHaveBeenCalledTimes(1);
+      document.body.removeChild(editor);
+    });
   });
 
   describe("edge cases", () => {
@@ -197,10 +235,10 @@ describe("useKeyboardShortcuts", () => {
       const removeSpy = vi.spyOn(window, "removeEventListener");
 
       const { unmount } = renderShortcuts();
-      expect(addSpy).toHaveBeenCalledWith("keydown", expect.any(Function));
+      expect(addSpy).toHaveBeenCalledWith("keydown", expect.any(Function), true);
 
       unmount();
-      expect(removeSpy).toHaveBeenCalledWith("keydown", expect.any(Function));
+      expect(removeSpy).toHaveBeenCalledWith("keydown", expect.any(Function), true);
     });
   });
 });

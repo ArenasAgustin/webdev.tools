@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { hashConfig } from "./hash.config";
 import {
@@ -11,7 +11,8 @@ import {
 import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
-import { STORAGE_KEYS } from "@/services/storage";
+import { STORAGE_KEYS, removeItem } from "@/services/storage";
+import { formatBytes } from "@/utils/formatBytes";
 
 interface GeneratedHashes {
   mode: InputMode;
@@ -38,10 +39,9 @@ export function HashPlayground() {
     STORAGE_KEYS.HASH_INPUT_MODE,
     "text",
   );
-  const [textInput, setTextInput] = usePersistedState(
-    STORAGE_KEYS.HASH_TEXT_INPUT,
-    hashConfig.example,
-  );
+  // The text is often a secret (password, token), so it is never persisted:
+  // only non-sensitive options survive a reload.
+  const [textInput, setTextInput] = useState(hashConfig.example);
   const [fileInput, setFileInput] = useState<File | null>(null);
   const [outputCase, setOutputCase] = usePersistedState<HashOutputCase>(
     STORAGE_KEYS.HASH_OUTPUT_CASE,
@@ -50,10 +50,16 @@ export function HashPlayground() {
   const [generated, setGenerated] = useState<GeneratedHashes | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hashError, setHashError] = useState(false);
+  const [emptyAttempt, setEmptyAttempt] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Purge the plain-text copy that earlier versions stored on disk
+  useEffect(() => {
+    removeItem(STORAGE_KEYS.HASH_TEXT_INPUT);
+  }, []);
 
   // Results only belong to the input they were generated from: once the text,
   // file or mode changes they are hidden, which also drops slow results that land
@@ -83,12 +89,14 @@ export function HashPlayground() {
   const processInput = useCallback(async () => {
     setIsProcessing(true);
     setHashError(false);
+    setEmptyAttempt(false);
     const source = { mode: inputMode, text: textInput, file: fileInput };
 
     try {
       if (inputMode === "text") {
         if (!textInput) {
           setGenerated(null);
+          setEmptyAttempt(true);
           return;
         }
         const hashes = await generateAllHashes(textInput, outputCase);
@@ -121,10 +129,11 @@ export function HashPlayground() {
   }, []);
 
   const handleCompare = useCallback(() => {
-    if (!compareValue || !generated || results.length === 0) return;
+    // Pasted hashes often carry stray whitespace or the other letter case
+    const expected = compareValue.trim().toLowerCase();
+    if (!expected || !generated || results.length === 0) return;
 
-    // Find matching hash
-    const match = results.find((r) => r.hash.toLowerCase() === compareValue.toLowerCase());
+    const match = results.find((r) => r.hash.toLowerCase() === expected);
     setComparison({ value: compareValue, source: generated, match: match !== undefined });
   }, [compareValue, generated, results]);
 
@@ -163,6 +172,8 @@ export function HashPlayground() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) setFileInput(file);
+                // Reset so picking the same file again still fires a change event
+                e.target.value = "";
               }}
             />
             <div
@@ -185,7 +196,7 @@ export function HashPlayground() {
               {fileInput ? (
                 <div className="text-center">
                   <p className="text-white font-medium">{fileInput.name}</p>
-                  <p className="text-gray-400 text-sm">{(fileInput.size / 1024).toFixed(2)} KB</p>
+                  <p className="text-gray-400 text-sm">{formatBytes(fileInput.size)}</p>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -234,6 +245,13 @@ export function HashPlayground() {
           </button>
         </div>
       </div>
+
+      {/* Shown after Generate on empty text, until something is typed */}
+      {emptyAttempt && inputMode === "text" && !textInput && (
+        <p role="status" className="text-gray-400 text-sm">
+          {t("hash.emptyInput")}
+        </p>
+      )}
 
       {hashError && (
         <p role="alert" className="text-red-400 text-sm">

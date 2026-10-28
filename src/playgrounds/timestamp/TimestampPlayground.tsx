@@ -1,14 +1,20 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { timestampConfig } from "./timestamp.config";
-import { convertTimestamp, getCurrentTimestamp, type TimestampResult } from "./timestamp.utils";
+import {
+  convertTimestamp,
+  getCurrentTimestamp,
+  withUtc,
+  type TimestampResult,
+  type UnixUnit,
+} from "./timestamp.utils";
 import { useToast } from "@/hooks/useToast";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { STORAGE_KEYS } from "@/services/storage";
 
-const ALL_TIMEZONES: string[] =
+const ALL_TIMEZONES: string[] = withUtc(
   typeof Intl.supportedValuesOf === "function"
     ? Intl.supportedValuesOf("timeZone")
     : [
@@ -24,7 +30,16 @@ const ALL_TIMEZONES: string[] =
         "Asia/Shanghai",
         "Asia/Tokyo",
         "Australia/Sydney",
-      ];
+      ],
+);
+
+const UNIT_KEYS: Record<UnixUnit, string> = {
+  seconds: "timestamp.unitSeconds",
+  milliseconds: "timestamp.unitMilliseconds",
+};
+
+/** How often the relative time is refreshed while a result is shown, in ms. */
+const RELATIVE_TICK_MS = 1000;
 
 export function TimestampPlayground() {
   const { t, i18n } = useTranslation();
@@ -44,9 +59,19 @@ export function TimestampPlayground() {
     "America/Argentina/Buenos_Aires",
   );
 
+  // Reference clock for the relative time; refreshed every second while a result is
+  // shown so "5 seconds ago" keeps moving instead of freezing at conversion time.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (convertedInput === null) return;
+    const id = setInterval(() => setNow(Date.now()), RELATIVE_TICK_MS);
+    return () => clearInterval(id);
+  }, [convertedInput]);
+
   const result = useMemo<TimestampResult | null>(
-    () => (convertedInput === null ? null : convertTimestamp(convertedInput, timezone, lang)),
-    [convertedInput, timezone, lang],
+    () =>
+      convertedInput === null ? null : convertTimestamp(convertedInput, timezone, lang, now),
+    [convertedInput, timezone, lang, now],
   );
 
   const handleConvert = useCallback(() => {
@@ -58,6 +83,7 @@ export function TimestampPlayground() {
     }
 
     if (convertTimestamp(input, timezone, lang)) {
+      setNow(Date.now());
       setConvertedInput(input);
     } else {
       setError(t("timestamp.invalidInput"));
@@ -66,10 +92,11 @@ export function TimestampPlayground() {
   }, [input, timezone, lang, t]);
 
   const handleNow = useCallback(() => {
-    const now = String(getCurrentTimestamp());
-    setInput(now);
+    const current = String(getCurrentTimestamp());
+    setInput(current);
     setError(null);
-    setConvertedInput(now);
+    setNow(Date.now());
+    setConvertedInput(current);
   }, [setInput]);
 
   const handleClear = useCallback(() => {
@@ -170,6 +197,12 @@ export function TimestampPlayground() {
             <div className="p-2 bg-cyan-500/20 border border-cyan-500/50 rounded-lg text-cyan-300 text-sm">
               ⏱️ {t("timestamp.futureDate")}
             </div>
+          )}
+
+          {result.unit && (
+            <p className="text-gray-400 text-sm">
+              {t("timestamp.detectedUnit", { unit: t(UNIT_KEYS[result.unit]) })}
+            </p>
           )}
 
           {formatLabels.map(({ key, label }) => (

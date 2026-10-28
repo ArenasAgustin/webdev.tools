@@ -123,6 +123,9 @@
     "copied": "Copiado al portapapeles",
     "copyError": "No se pudo copiar al portapapeles",
     "noResults": "Sin resultados",
+    "detectedUnit": "Interpretado como tiempo Unix en {{unit}}",
+    "unitSeconds": "segundos",
+    "unitMilliseconds": "milisegundos",
     "formats": {
       "unixSeconds": "Unix (s)",
       "unixMilliseconds": "Unix (ms)",
@@ -140,6 +143,9 @@
     "output": "Salida",
     "dropFileHere": "Soltar archivo aquí",
     "outputIdle": "Formateá, minificá o ejecutá para ver un resultado",
+    "outputIdleFormatRun": "Formateá o ejecutá para ver un resultado",
+    "outputIdleFormatMinify": "Formateá o minificá para ver un resultado",
+    "outputIdleFormat": "Formateá para ver un resultado",
     "inputPlaceholder": "Escribí tu {{language}} aquí...",
     "waitingLabel": "Esperando {{language}}...",
     "validLabel": "{{language}} válido",
@@ -181,14 +187,21 @@
       "good": "Buena",
       "strong": "Fuerte"
     },
-    "history": "Historial:"
+    "history": "Historial:",
+    "noCharset": "Seleccioná al menos un tipo de caracteres para generar una contraseña"
   },
   "notifications": "Notificaciones",
   "close_notification": "Cerrar notificación",
   "stats": {
     "smaller": "más pequeño",
     "larger": "más grande",
-    "summary": "{{lines}} líneas · {{characters}} caracteres · {{bytes}}"
+    "summary": "{{lines}} · {{characters}} · {{bytes}}",
+    "lines_one": "{{count}} línea",
+    "lines_many": "{{count}} líneas",
+    "lines_other": "{{count}} líneas",
+    "characters_one": "{{value}} carácter",
+    "characters_many": "{{value}} caracteres",
+    "characters_other": "{{value}} caracteres"
   },
   "home": {
     "tagline": "Herramientas para desarrolladores web",
@@ -224,11 +237,14 @@
     "compareAction": "Comparar",
     "matchSuccess": "El hash coincide",
     "matchFail": "El hash NO coincide",
-    "generateError": "No se pudieron generar los hashes. El archivo puede ser ilegible o demasiado grande."
+    "generateError": "No se pudieron generar los hashes. El archivo puede ser ilegible o demasiado grande.",
+    "emptyInput": "Ingresá un texto para generar sus hashes"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
     "copy": "Copiar {{format}}",
+    "copied": "Copiado al portapapeles",
+    "copyError": "No se pudo copiar al portapapeles",
     "invalidColor": "Color no válido. Usá HEX, RGB, HSL, HSV o CMYK."
   },
   "html": {
@@ -236,6 +252,7 @@
     "resultLabel": "Resultado",
     "domInspection": "Inspección DOM",
     "noElements": "Sin elementos para inspeccionar",
+    "moreTags": "+{{count}} más",
     "viewPreview": "Ver vista previa",
     "viewResult": "Ver resultado"
   },
@@ -292,7 +309,7 @@
     }
   },
   "loader": {
-    "loading": "Cargando {{name}} Tools",
+    "loading": "Cargando {{name}}",
     "preparing": "Preparando el playground..."
   },
   "card": {
@@ -364,6 +381,7 @@
     "outputLabel": "Salida",
     "outputPlaceholder": "El resultado aparecerá aquí",
     "copy": "Copiar",
+    "copied": "Copiado al portapapeles",
     "copyError": "No se pudo copiar al portapapeles",
     "clear": "Limpiar",
     "swap": "Intercambiar",
@@ -412,18 +430,22 @@
       "cleanError": "Error al limpiar código",
       "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
       "workerError": "Error en el worker de ejecución",
+      "workerUnsupported": "Tu navegador no admite Web Workers: el código no se ejecuta para no bloquear ni exponer la página.",
       "unknownError": "Error desconocido al ejecutar código"
     },
     "json": {
       "jsonPathRequired": "Ingresa una expresión JSONPath",
       "noResults": "El filtro no devolvió resultados",
-      "jsonPathError": "Error al aplicar JSONPath"
+      "jsonPathError": "Error al aplicar JSONPath",
+      "precisionLoss": "Algunos números no se pueden representar con exactitud y cambiaron (enteros muy grandes o valores como 1e400).",
+      "duplicateKeys": "Hay claves duplicadas: solo se conservó el último valor de cada una."
     },
     "php": {
       "minifyUnavailable": "Minify no está disponible para PHP",
       "formatCodeError": "Error al formatear código PHP",
       "sharedArrayBufferUnsupported": "Tu navegador no soporta SharedArrayBuffer, necesario para ejecutar PHP. Probá con Chrome o Firefox actualizado.",
-      "executed": "Código PHP ejecutado correctamente"
+      "executed": "Código PHP ejecutado correctamente",
+      "executedNoOutput": "Código PHP ejecutado (sin salida)"
     },
     "sql": {
       "executed": "Consulta ejecutada correctamente",
@@ -483,7 +505,6 @@
       "parseError": "Error al parsear código PHP",
       "formatError": "Error al formatear código PHP",
       "minifyUnavailable": "Minify no está disponible para PHP",
-      "noOutput": "(sin salida)",
       "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada"
     },
     "sql": {

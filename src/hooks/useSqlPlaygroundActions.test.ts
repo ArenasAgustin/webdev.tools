@@ -3,13 +3,18 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSqlPlaygroundActions } from "./useSqlPlaygroundActions";
 import type { SqlExecuteResult } from "@/types/sql";
 
-const { executeSqlAsyncMock, resetSqlAsyncMock, formatSqlAsyncMock, minifySqlAsyncMock } =
+const { executeSqlAsyncMock, resetSqlAsyncMock, formatSqlAsyncMock, minifySqlAsyncMock, downloadFileMock } =
   vi.hoisted(() => ({
+    downloadFileMock: vi.fn(),
     executeSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: SqlExecuteResult; error?: string }>>(),
     resetSqlAsyncMock: vi.fn<() => Promise<{ ok: boolean; value?: string; error?: string }>>(),
     formatSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
     minifySqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
   }));
+
+vi.mock("@/utils/download", () => ({
+  downloadFile: downloadFileMock,
+}));
 
 vi.mock("@/services/sql/worker", () => ({
   executeSqlAsync: executeSqlAsyncMock,
@@ -19,8 +24,7 @@ vi.mock("@/services/sql/worker", () => ({
 }));
 
 const mockResult: SqlExecuteResult = {
-  columns: ["id", "name"],
-  rows: [[1, "Alice"]],
+  resultSets: [{ statement: 1, columns: ["id", "name"], rows: [[1, "Alice"]], truncated: false }],
   elapsedMs: 10,
   truncated: false,
 };
@@ -201,5 +205,27 @@ describe("useSqlPlaygroundActions", () => {
     await waitFor(() => {
       expect(result.current.isProcessing).toBe(false);
     });
+  });
+
+  it("downloads an execution result as output.json with a JSON mime type", () => {
+    const output = JSON.stringify(mockResult, null, 2);
+    const { result } = renderHook(() => useSqlPlaygroundActions(makeProps({ output })));
+
+    act(() => {
+      result.current.handleDownloadOutput();
+    });
+
+    expect(downloadFileMock).toHaveBeenCalledWith(output, "output.json", "application/json");
+  });
+
+  it("downloads formatted SQL as output.sql with the SQL mime type", () => {
+    const output = "SELECT *\nFROM users;";
+    const { result } = renderHook(() => useSqlPlaygroundActions(makeProps({ output })));
+
+    act(() => {
+      result.current.handleDownloadOutput();
+    });
+
+    expect(downloadFileMock).toHaveBeenCalledWith(output, "output.sql", "application/sql");
   });
 });

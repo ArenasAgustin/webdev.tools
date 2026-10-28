@@ -67,7 +67,7 @@ export const jsonEngine = {
   cleanConfig: DEFAULT_JSON_CLEAN_CONFIG,
   fileConfig: {
     inputFileName: "data.json",
-    outputFileName: "result.json",
+    outputFileName: "output.json",
     mimeType: "application/json",
     language: "JSON",
     acceptExtensions: ".json",

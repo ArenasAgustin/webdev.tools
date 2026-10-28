@@ -25,6 +25,32 @@ describe("runJavaScript", () => {
     expect(await runJavaScript("return Promise.resolve(42);")).toEqual({ ok: true, output: "42" });
   });
 
+  it("shows the value of a trailing bare expression when nothing is logged", async () => {
+    expect(await runJavaScript("1 + 2")).toEqual({ ok: true, output: "3" });
+    expect(await runJavaScript("const a = [1, 2];\na.map((n) => n * 2);")).toEqual({
+      ok: true,
+      output: "[\n  2,\n  4\n]",
+    });
+    expect(await runJavaScript('"hi" // trailing comment')).toEqual({ ok: true, output: "hi" });
+  });
+
+  it("awaits a trailing top-level await expression", async () => {
+    expect(await runJavaScript("await Promise.resolve(7)")).toEqual({ ok: true, output: "7" });
+  });
+
+  it("keeps the user code line numbers after rewriting the trailing expression", async () => {
+    const result = await runJavaScript("const x = 1;\nnull.foo");
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe(
+      atLine("TypeError: Cannot read properties of null (reading 'foo')", 2),
+    );
+  });
+
+  it("prints nothing extra when the last statement is not an expression", async () => {
+    expect(await runJavaScript("const a = 1;")).toEqual({ ok: true, output: "" });
+    expect(await runJavaScript("console.log(5)")).toEqual({ ok: true, output: "5" });
+  });
+
   it("supports top-level await", async () => {
     const result = await runJavaScript("const v = await Promise.resolve(3); console.log(v * 2);");
     expect(result).toEqual({ ok: true, output: "6" });
@@ -117,5 +143,54 @@ describe("runJavaScript", () => {
 describe("formatValue", () => {
   it("formats a bare BigInt", () => {
     expect(formatValue(5n)).toBe("5n");
+  });
+
+  it("formats an Error as name and message instead of {}", () => {
+    expect(formatValue(new TypeError("bad input"))).toBe("TypeError: bad input");
+    expect(formatValue(new Error(""))).toBe("Error");
+  });
+
+  it("formats Map and Set with their entries instead of {}", () => {
+    expect(
+      formatValue(
+        new Map<unknown, unknown>([
+          ["a", 1],
+          [2, { b: true }],
+        ]),
+      ),
+    ).toBe('Map(2) {"a" => 1, 2 => {"b":true}}');
+    expect(formatValue(new Set([1, "x"]))).toBe('Set(2) {1, "x"}');
+    expect(formatValue(new Map())).toBe("Map(0) {}");
+  });
+
+  it("prints a collection that contains itself as [Circular]", () => {
+    const set = new Set<unknown>();
+    set.add(set);
+    expect(formatValue(set)).toBe("Set(1) {[Circular]}");
+  });
+
+  it("formats functions by name instead of [object Function]", () => {
+    function namedFn() {
+      return 1;
+    }
+    expect(formatValue(namedFn)).toBe("[Function: namedFn]");
+    expect(formatValue(() => 1)).toBe("[Function (anonymous)]");
+    expect(formatValue(class Point {})).toBe("[class Point]");
+  });
+
+  it("formats symbols by description", () => {
+    expect(formatValue(Symbol("id"))).toBe("Symbol(id)");
+  });
+
+  it("keeps special values readable when nested inside objects", () => {
+    function handler() {
+      return 1;
+    }
+    const value = { err: new RangeError("too big"), tags: new Set(["a"]), handler };
+    expect(JSON.parse(formatValue(value))).toEqual({
+      err: "RangeError: too big",
+      tags: 'Set(1) {"a"}',
+      handler: "[Function: handler]",
+    });
   });
 });

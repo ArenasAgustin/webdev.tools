@@ -1,5 +1,16 @@
 import type { PlaygroundConfig } from "@/types/playground";
 
+/**
+ * File names, mime type and import filter shared by the JS engine and its actions hook.
+ * TypeScript files are not accepted: the runner executes plain JavaScript only.
+ */
+export const jsFileSettings = {
+  inputFileName: "script.js",
+  outputFileName: "output.js",
+  mimeType: "text/javascript",
+  acceptExtensions: ".js,.mjs",
+} as const;
+
 export const jsPlaygroundConfig: PlaygroundConfig = {
   id: "js",
   name: "JavaScript tools",
@@ -28,7 +39,7 @@ const usuario = {
   nombre: "Juan",
   edad: 28,
   saludar() {
-    return \`Hola, soy \${this.nombre} y tengo \${this.edad} anos\`;
+    return \`Hola, soy \${this.nombre} y tengo \${this.edad} años\`;
   }
 };
 

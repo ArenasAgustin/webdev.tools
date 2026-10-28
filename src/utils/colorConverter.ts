@@ -43,8 +43,10 @@ export interface ColorFormats {
 // the optional alpha follows a comma or a slash, as a number or a percentage.
 const CHANNEL_SEP = String.raw`(?:\s*,\s*|\s+)`;
 const ALPHA = String.raw`(?:\s*[,/]\s*(\d*\.?\d+)(%?))?`;
+// An rgb channel is a number in 0..255 or a percentage, optionally with decimals.
+const RGB_CHANNEL = String.raw`(\d*\.?\d+%?)`;
 const RGB_PATTERN = new RegExp(
-  String.raw`^rgba?\s*\(\s*(\d+)${CHANNEL_SEP}(\d+)${CHANNEL_SEP}(\d+)${ALPHA}\s*\)$`,
+  String.raw`^rgba?\s*\(\s*${RGB_CHANNEL}${CHANNEL_SEP}${RGB_CHANNEL}${CHANNEL_SEP}${RGB_CHANNEL}${ALPHA}\s*\)$`,
 );
 const HSL_PATTERN = new RegExp(
   String.raw`^hsla?\s*\(\s*(\d+)${CHANNEL_SEP}(\d+)%?${CHANNEL_SEP}(\d+)%?${ALPHA}\s*\)$`,
@@ -57,6 +59,12 @@ function parseAlpha(value: string | undefined, percent: string | undefined): num
   return alpha <= 1 ? alpha : null;
 }
 
+/** Parse an rgb channel ("128", "50%", "10.4") to 0..255; null when out of range. */
+function parseRgbChannel(value: string): number | null {
+  const channel = value.endsWith("%") ? (parseFloat(value) * 255) / 100 : parseFloat(value);
+  return channel <= 255 ? Math.round(channel) : null;
+}
+
 /** Attach alpha only when the color is translucent, so opaque colors stay `{ r, g, b }`. */
 function withAlpha(rgb: RGB, alpha: number | undefined): RGB {
   return alpha === undefined || alpha >= 1 ? rgb : { ...rgb, a: alpha };
@@ -65,8 +73,15 @@ function withAlpha(rgb: RGB, alpha: number | undefined): RGB {
 /**
  * Parse a color string to RGB. Supports hex (3, 4, 6 or 8 digits), CSS named colors,
  * rgb()/rgba() and hsl()/hsla() (comma or space syntax, optional alpha), hsv() and cmyk().
+ * Channels are rounded to integers.
  */
 export function parseColor(input: string): RGB | null {
+  const rgb = parseColorExact(input);
+  return rgb && roundRgb(rgb);
+}
+
+/** Like parseColor, but hsl/hsv/cmyk input keeps fractional channels (no rounding). */
+function parseColorExact(input: string): RGB | null {
   const cleanInput = input.trim().toLowerCase();
 
   if (cleanInput === "transparent") {
@@ -98,11 +113,11 @@ export function parseColor(input: string): RGB | null {
   // RGB / RGBA format
   const rgbMatch = RGB_PATTERN.exec(cleanInput);
   if (rgbMatch) {
-    const r = parseInt(rgbMatch[1], 10);
-    const g = parseInt(rgbMatch[2], 10);
-    const b = parseInt(rgbMatch[3], 10);
+    const r = parseRgbChannel(rgbMatch[1]);
+    const g = parseRgbChannel(rgbMatch[2]);
+    const b = parseRgbChannel(rgbMatch[3]);
     const alpha = parseAlpha(rgbMatch[4], rgbMatch[5]);
-    if (alpha !== null && r <= 255 && g <= 255 && b <= 255) {
+    if (alpha !== null && r !== null && g !== null && b !== null) {
       return withAlpha({ r, g, b }, alpha);
     }
   }
@@ -115,7 +130,7 @@ export function parseColor(input: string): RGB | null {
     const l = parseInt(hslMatch[3], 10);
     const alpha = parseAlpha(hslMatch[4], hslMatch[5]);
     if (alpha !== null && h <= 360 && s <= 100 && l <= 100) {
-      return withAlpha(hslToRgb(h, s, l), alpha);
+      return withAlpha(hslToRgbExact(h, s, l), alpha);
     }
   }
 
@@ -126,7 +141,7 @@ export function parseColor(input: string): RGB | null {
     const s = parseInt(hsvMatch[2], 10);
     const v = parseInt(hsvMatch[3], 10);
     if (h >= 0 && h <= 360 && s >= 0 && s <= 100 && v >= 0 && v <= 100) {
-      return hsvToRgb(h, s, v);
+      return hsvToRgbExact(h, s, v);
     }
   }
 
@@ -140,11 +155,16 @@ export function parseColor(input: string): RGB | null {
     const y = parseInt(cmykMatch[3], 10);
     const k = parseInt(cmykMatch[4], 10);
     if (c >= 0 && c <= 100 && m >= 0 && m <= 100 && y >= 0 && y <= 100 && k >= 0 && k <= 100) {
-      return cmykToRgb(c, m, y, k);
+      return cmykToRgbExact(c, m, y, k);
     }
   }
 
   return null;
+}
+
+/** Round channels to integers for display; alpha is kept as is. */
+function roundRgb(rgb: RGB): RGB {
+  return { ...rgb, r: Math.round(rgb.r), g: Math.round(rgb.g), b: Math.round(rgb.b) };
 }
 
 /**
@@ -191,7 +211,7 @@ export function rgbToHsl(rgb: RGB): HSL {
   }
 
   return {
-    h: Math.round(h * 360),
+    h: Math.round(h * 360) % 360,
     s: Math.round(s * 100),
     l: Math.round(l * 100),
   };
@@ -201,6 +221,11 @@ export function rgbToHsl(rgb: RGB): HSL {
  * Convert HSL to RGB
  */
 export function hslToRgb(h: number, s: number, l: number): RGB {
+  return roundRgb(hslToRgbExact(h, s, l));
+}
+
+/** HSL to RGB without rounding, so parsed colors keep full precision. */
+function hslToRgbExact(h: number, s: number, l: number): RGB {
   h = h / 360;
   s = s / 100;
   l = l / 100;
@@ -226,11 +251,7 @@ export function hslToRgb(h: number, s: number, l: number): RGB {
     b = hue2rgb(p, q, h - 1 / 3);
   }
 
-  return {
-    r: Math.round(r * 255),
-    g: Math.round(g * 255),
-    b: Math.round(b * 255),
-  };
+  return { r: r * 255, g: g * 255, b: b * 255 };
 }
 
 /**
@@ -264,7 +285,7 @@ export function rgbToHsv(rgb: RGB): HSV {
   }
 
   return {
-    h: Math.round(h * 360),
+    h: Math.round(h * 360) % 360,
     s: Math.round(s * 100),
     v: Math.round(v * 100),
   };
@@ -274,6 +295,11 @@ export function rgbToHsv(rgb: RGB): HSV {
  * Convert HSV to RGB
  */
 export function hsvToRgb(h: number, s: number, v: number): RGB {
+  return roundRgb(hsvToRgbExact(h, s, v));
+}
+
+/** HSV to RGB without rounding, so parsed colors keep full precision. */
+function hsvToRgbExact(h: number, s: number, v: number): RGB {
   h = h / 360;
   s = s / 100;
   v = v / 100;
@@ -320,11 +346,7 @@ export function hsvToRgb(h: number, s: number, v: number): RGB {
       break;
   }
 
-  return {
-    r: Math.round(r * 255),
-    g: Math.round(g * 255),
-    b: Math.round(b * 255),
-  };
+  return { r: r * 255, g: g * 255, b: b * 255 };
 }
 
 /**
@@ -353,26 +375,34 @@ export function rgbToCmyk(rgb: RGB): CMYK {
  * Convert CMYK to RGB
  */
 export function cmykToRgb(c: number, m: number, y: number, k: number): RGB {
+  return roundRgb(cmykToRgbExact(c, m, y, k));
+}
+
+/** CMYK to RGB without rounding, so parsed colors keep full precision. */
+function cmykToRgbExact(c: number, m: number, y: number, k: number): RGB {
   c = c / 100;
   m = m / 100;
   y = y / 100;
   k = k / 100;
 
   return {
-    r: Math.round(255 * (1 - c) * (1 - k)),
-    g: Math.round(255 * (1 - m) * (1 - k)),
-    b: Math.round(255 * (1 - y) * (1 - k)),
+    r: 255 * (1 - c) * (1 - k),
+    g: 255 * (1 - m) * (1 - k),
+    b: 255 * (1 - y) * (1 - k),
   };
 }
 
 /**
  * Get all color formats from RGB. A translucent color keeps its alpha in hex (8 digits),
  * rgba() and hsla(); hsv and cmyk have no alpha channel.
+ * Channels may be fractional (parsed hsl/hsv/cmyk keep full precision): every format is
+ * derived from the exact value and rounded only for display, so input does not drift.
  */
-export function getAllFormats(rgb: RGB): ColorFormats {
-  const hsl = rgbToHsl(rgb);
-  const hsv = rgbToHsv(rgb);
-  const cmyk = rgbToCmyk(rgb);
+export function getAllFormats(exact: RGB): ColorFormats {
+  const hsl = rgbToHsl(exact);
+  const hsv = rgbToHsv(exact);
+  const cmyk = rgbToCmyk(exact);
+  const rgb = roundRgb(exact);
 
   if (rgb.a !== undefined && rgb.a < 1) {
     const alpha = Math.round(rgb.a * 100) / 100;
@@ -399,7 +429,7 @@ export function getAllFormats(rgb: RGB): ColorFormats {
  * Convert any color format to all formats
  */
 export function convertColor(input: string): ColorFormats | null {
-  const rgb = parseColor(input);
+  const rgb = parseColorExact(input);
   if (!rgb) return null;
   return getAllFormats(rgb);
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { MAX_INPUT_BYTES } from "@/utils/constants/limits";
+import { stubJsExecWorker } from "@/test/inProcessJsExecWorker";
 
 const {
   toastMocks,
@@ -149,6 +150,7 @@ import { JsPlayground } from "./JsPlayground";
 describe("JsPlayground branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    stubJsExecWorker();
     minifyJsAsyncMock.mockResolvedValue({ ok: true, value: "const x=1;" });
     formatJsAsyncMock.mockResolvedValue({ ok: true, value: "const x = 1;" });
     clipboardWriteTextMock.mockResolvedValue(undefined);
@@ -162,6 +164,7 @@ describe("JsPlayground branches", () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it("executes code and handles runtime errors", async () => {
@@ -202,8 +205,8 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "download-input" }));
     expect(downloadFileMock).toHaveBeenCalledWith(
       "const x = 1;",
-      "code.js",
-      "application/javascript",
+      "script.js",
+      "text/javascript",
     );
 
     fireEvent.click(screen.getByRole("button", { name: "set-return" }));
@@ -223,7 +226,7 @@ describe("JsPlayground branches", () => {
     expect(clipboardWriteTextMock).toHaveBeenCalledWith("2");
 
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
-    expect(downloadFileMock).toHaveBeenCalledWith("2", "output.txt", "application/javascript");
+    expect(downloadFileMock).toHaveBeenCalledWith("2", "output.js", "text/javascript");
   });
 
   it("runs format and minify success and error flows", async () => {

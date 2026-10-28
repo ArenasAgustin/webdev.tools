@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { phpPlaygroundConfig } from "@/playgrounds/php/php.config";
+import { phpFileSettings, phpPlaygroundConfig } from "@/playgrounds/php/php.config";
 import { phpService } from "@/services/php/service";
 import { createTransformHandler } from "@/utils/createTransformHandler";
 import { createValidatedHandler } from "@/utils/handlerFactory";
@@ -12,11 +12,8 @@ import type { ToastApi } from "./usePlaygroundActions";
 import type { PhpFormatConfig } from "@/types/php";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
-  inputFileName: "code.php",
-  outputFileName: "output.txt",
-  mimeType: "application/x-php",
+  ...phpFileSettings,
   language: "PHP",
-  acceptExtensions: ".php",
 };
 
 async function formatRunner(input: string, config: PhpFormatConfig) {
@@ -116,11 +113,15 @@ export function usePhpPlaygroundActions({
         }
 
         setOutput(result.value);
+        return result.value;
       },
       toast,
-      successMessage: translate("messages.php.executed"),
-      onSuccess: () => {
+      onSuccess: (printed) => {
         generic.endProcessing();
+        // A silent script leaves the output empty (nothing to copy or count) and says so here.
+        toast?.success(
+          translate(printed ? "messages.php.executed" : "messages.php.executedNoOutput"),
+        );
       },
       onError: (message) => {
         generic.endProcessing();
