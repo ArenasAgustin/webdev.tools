@@ -118,4 +118,53 @@ describe("formatValue", () => {
   it("formats a bare BigInt", () => {
     expect(formatValue(5n)).toBe("5n");
   });
+
+  it("formats an Error as name and message instead of {}", () => {
+    expect(formatValue(new TypeError("bad input"))).toBe("TypeError: bad input");
+    expect(formatValue(new Error(""))).toBe("Error");
+  });
+
+  it("formats Map and Set with their entries instead of {}", () => {
+    expect(
+      formatValue(
+        new Map<unknown, unknown>([
+          ["a", 1],
+          [2, { b: true }],
+        ]),
+      ),
+    ).toBe('Map(2) {"a" => 1, 2 => {"b":true}}');
+    expect(formatValue(new Set([1, "x"]))).toBe('Set(2) {1, "x"}');
+    expect(formatValue(new Map())).toBe("Map(0) {}");
+  });
+
+  it("prints a collection that contains itself as [Circular]", () => {
+    const set = new Set<unknown>();
+    set.add(set);
+    expect(formatValue(set)).toBe("Set(1) {[Circular]}");
+  });
+
+  it("formats functions by name instead of [object Function]", () => {
+    function namedFn() {
+      return 1;
+    }
+    expect(formatValue(namedFn)).toBe("[Function: namedFn]");
+    expect(formatValue(() => 1)).toBe("[Function (anonymous)]");
+    expect(formatValue(class Point {})).toBe("[class Point]");
+  });
+
+  it("formats symbols by description", () => {
+    expect(formatValue(Symbol("id"))).toBe("Symbol(id)");
+  });
+
+  it("keeps special values readable when nested inside objects", () => {
+    function handler() {
+      return 1;
+    }
+    const value = { err: new RangeError("too big"), tags: new Set(["a"]), handler };
+    expect(JSON.parse(formatValue(value))).toEqual({
+      err: "RangeError: too big",
+      tags: 'Set(1) {"a"}',
+      handler: "[Function: handler]",
+    });
+  });
 });
