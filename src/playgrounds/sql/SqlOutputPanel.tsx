@@ -4,7 +4,7 @@ import { LazyCodeEditor } from "@/components/editor/LazyCodeEditor";
 import { OutputActions } from "@/components/editor/OutputActions";
 import { EditorFooter } from "@/components/common/EditorFooter";
 import type { OutputPanelProps } from "../engines/types";
-import { ROW_CAP } from "@/services/sql/worker.types";
+import { CELL_CAP, ROW_CAP } from "@/services/sql/worker.types";
 import { SqlResetButton } from "./SqlResetButton";
 
 export interface SqlOutputPanelProps extends OutputPanelProps {
@@ -116,14 +116,15 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
   }
 
   // Success state — detect language from content
-  let parsed: { truncated?: boolean } | null;
+  let parsed: { truncated?: boolean; valuesTruncated?: boolean } | null;
   try {
-    parsed = JSON.parse(output) as { truncated?: boolean };
+    parsed = JSON.parse(output) as { truncated?: boolean; valuesTruncated?: boolean };
   } catch {
     parsed = null;
   }
   const isJsonOutput = parsed !== null;
   const isTruncated = parsed?.truncated === true;
+  const hasCutValues = parsed?.valuesTruncated === true;
 
   return (
     <Panel
@@ -159,6 +160,15 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
         >
           <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
           <span>{t("sql.truncated", { count: ROW_CAP })}</span>
+        </div>
+      )}
+      {hasCutValues && (
+        <div
+          className="flex items-center gap-2 rounded-md border border-yellow-400/30 bg-yellow-400/10 px-3 py-2 text-sm text-yellow-300"
+          data-testid="sql-values-truncated-banner"
+        >
+          <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
+          <span>{t("sql.valuesTruncated", { count: CELL_CAP })}</span>
         </div>
       )}
       <LazyCodeEditor

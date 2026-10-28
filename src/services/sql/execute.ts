@@ -5,12 +5,33 @@
 
 import type { Database } from "sql.js";
 import type { SqlResultSet } from "@/types/sql";
+import { CELL_CAP } from "@/services/sql/worker.types";
+
+type Cell = SqlResultSet["rows"][number][number];
 
 export interface StatementsResult {
   /** One entry per statement that produced rows, in execution order. */
   resultSets: SqlResultSet[];
   /** True when any result set was cut by the row cap. */
   truncated: boolean;
+  /** Present (true) when any long text or BLOB value was cut to the cell cap. */
+  valuesTruncated?: true;
+}
+
+/**
+ * Cut a text value to `cellCap` characters (marked with a trailing "…") and a
+ * BLOB to half as many bytes, so one huge value (randomblob(1e6), a 50 MB
+ * string) cannot make the output unusable. Returns null when nothing was cut.
+ */
+function capCell(value: Cell, cellCap: number): Cell | null {
+  if (typeof value === "string" && value.length > cellCap) {
+    return `${value.slice(0, cellCap)}…`;
+  }
+  const maxBytes = Math.floor(cellCap / 2);
+  if (value instanceof Uint8Array && value.length > maxBytes) {
+    return value.slice(0, maxBytes);
+  }
+  return null;
 }
 
 /** Round a performance.now() delta to one decimal, so the result shows 3.3 instead of 3.2999999999999545. */
@@ -25,9 +46,15 @@ export function roundElapsedMs(ms: number): number {
  * so a huge (or unbounded) result never has to fit in memory. Once the cap is
  * reached, later statements still run (for their side effects) but keep no rows.
  * Stopping early is safe: SELECTs have no side effects, and SQLite applies every
- * change of a `RETURNING` statement on its first step.
+ * change of a `RETURNING` statement on its first step. Each value is also bounded
+ * by `cellCap` (see capCell).
  */
-export function runStatements(db: Database, sql: string, rowCap: number): StatementsResult {
+export function runStatements(
+  db: Database,
+  sql: string,
+  rowCap: number,
+  cellCap: number = CELL_CAP,
+): StatementsResult {
   const resultSets: SqlResultSet[] = [];
   let remaining = rowCap;
   let statement = 0;
@@ -41,16 +68,31 @@ export function runStatements(db: Database, sql: string, rowCap: number): Statem
     const columns = stmt.getColumnNames();
     const rows: SqlResultSet["rows"] = [];
     let truncated = false;
+    let valuesTruncated = false;
     do {
       if (remaining === 0) {
         truncated = true;
         break;
       }
-      rows.push(stmt.get());
+      const row = stmt.get();
+      for (let i = 0; i < row.length; i++) {
+        const capped = capCell(row[i], cellCap);
+        if (capped !== null) {
+          row[i] = capped;
+          valuesTruncated = true;
+        }
+      }
+      rows.push(row);
       remaining--;
     } while (stmt.step());
-    resultSets.push({ statement, columns, rows, truncated });
+    resultSets.push(
+      valuesTruncated
+        ? { statement, columns, rows, truncated, valuesTruncated: true }
+        : { statement, columns, rows, truncated },
+    );
   }
 
-  return { resultSets, truncated: resultSets.some((set) => set.truncated) };
+  const result: StatementsResult = { resultSets, truncated: resultSets.some((set) => set.truncated) };
+  if (resultSets.some((set) => set.valuesTruncated)) result.valuesTruncated = true;
+  return result;
 }

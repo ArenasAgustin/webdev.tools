@@ -262,6 +262,7 @@
     "executionError": "Error de ejecución",
     "sqlError": "Error SQL",
     "truncated": "Resultado truncado a {{count}} filas",
+    "valuesTruncated": "Valores largos recortados a {{count}} caracteres (los BLOB a la mitad de bytes)",
     "resetDatabase": "Resetear base de datos"
   },
   "json": {

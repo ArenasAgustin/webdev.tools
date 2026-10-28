@@ -41,6 +41,8 @@ export interface SqlResultSet {
   rows: (number | string | Uint8Array | null)[][];
   /** true when the row cap stopped reading this result set */
   truncated: boolean;
+  /** present (true) when a long text or BLOB value of this result set was cut */
+  valuesTruncated?: true;
 }
 
 export interface SqlExecuteResult {
@@ -49,4 +51,6 @@ export interface SqlExecuteResult {
   elapsedMs: number;
   /** true when the row cap (1000, shared by all result sets) was hit and results were truncated */
   truncated: boolean;
+  /** present (true) when any long text or BLOB value was cut to the cell cap */
+  valuesTruncated?: true;
 }
