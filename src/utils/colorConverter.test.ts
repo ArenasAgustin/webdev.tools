@@ -138,6 +138,12 @@ describe("colorConverter - rgbToHsl", () => {
     const result = rgbToHsl({ r: 255, g: 0, b: 0 });
     expect(result).toEqual({ h: 0, s: 100, l: 50 });
   });
+
+  it("wraps a hue that rounds up to 360 back to 0", () => {
+    // raw hue is ~359.76°
+    expect(rgbToHsl({ r: 255, g: 0, b: 1 }).h).toBe(0);
+    expect(rgbToHsv({ r: 255, g: 0, b: 1 }).h).toBe(0);
+  });
 });
 
 describe("colorConverter - hslToRgb", () => {

@@ -191,7 +191,7 @@ export function rgbToHsl(rgb: RGB): HSL {
   }
 
   return {
-    h: Math.round(h * 360),
+    h: Math.round(h * 360) % 360,
     s: Math.round(s * 100),
     l: Math.round(l * 100),
   };
@@ -264,7 +264,7 @@ export function rgbToHsv(rgb: RGB): HSV {
   }
 
   return {
-    h: Math.round(h * 360),
+    h: Math.round(h * 360) % 360,
     s: Math.round(s * 100),
     v: Math.round(v * 100),
   };

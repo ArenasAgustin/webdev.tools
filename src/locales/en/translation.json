@@ -240,6 +240,8 @@
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
     "copy": "Copy {{format}}",
+    "copied": "Copied to clipboard",
+    "copyError": "Could not copy to clipboard",
     "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK."
   },
   "html": {

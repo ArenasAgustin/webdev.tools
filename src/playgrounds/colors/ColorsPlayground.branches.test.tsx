@@ -5,10 +5,18 @@ const {
   getItemMock,
   setItemMock,
   clipboardWriteTextMock,
+  toastSuccessMock,
+  toastErrorMock,
 } = vi.hoisted(() => ({
   getItemMock: vi.fn(() => null),
   setItemMock: vi.fn(),
   clipboardWriteTextMock: vi.fn(),
+  toastSuccessMock: vi.fn(),
+  toastErrorMock: vi.fn(),
+}));
+
+vi.mock("@/hooks/useToast", () => ({
+  useToast: () => ({ success: toastSuccessMock, error: toastErrorMock }),
 }));
 
 vi.mock("@/services/storage", () => ({
@@ -159,9 +167,12 @@ describe("ColorsPlayground branches", () => {
     const firstCallArg = clipboardWriteTextMock.mock.calls[0][0];
     expect(typeof firstCallArg).toBe("string");
     expect(firstCallArg.length).toBeGreaterThan(0);
+    expect(toastSuccessMock).toHaveBeenCalledWith("Copiado al portapapeles");
+    expect(toastErrorMock).not.toHaveBeenCalled();
   });
 
-  it("clipboard copy error: swallows exception silently", async () => {
+  it("clipboard copy error: shows an error toast instead of throwing", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     clipboardWriteTextMock.mockRejectedValueOnce(new Error("denied"));
 
     render(<ColorsPlayground />);
@@ -174,8 +185,9 @@ describe("ColorsPlayground branches", () => {
       expect(() => fireEvent.click(copyButtons[0])).not.toThrow();
     });
 
-    // No error UI expected — ColorsPlayground silently swallows clipboard errors
     expect(clipboardWriteTextMock).toHaveBeenCalled();
+    expect(toastErrorMock).toHaveBeenCalledWith("No se pudo copiar al portapapeles");
+    expect(toastSuccessMock).not.toHaveBeenCalled();
   });
 
   it("getItem is NOT imported or called by ColorsPlayground (single storage read)", () => {
