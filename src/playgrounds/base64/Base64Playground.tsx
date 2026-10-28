@@ -28,7 +28,7 @@ type Base64Result =
   | { ok: true; value: string }
   | { ok: false; code: Base64ErrorCode | FileErrorCode };
 
-const MAX_FILE_MB = MAX_FILE_BYTES / (1024 * 1024);
+const MAX_FILE_MB = MAX_FILE_BYTES / 1_000_000;
 
 const ERROR_KEYS: Record<Base64ErrorCode | FileErrorCode, string> = {
   fileTooLarge: "base64.errorFileTooLarge",
