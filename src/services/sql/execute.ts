@@ -12,6 +12,11 @@ export interface StatementsResult {
   truncated: boolean;
 }
 
+/** Round a performance.now() delta to one decimal, so the result shows 3.3 instead of 3.2999999999999545. */
+export function roundElapsedMs(ms: number): number {
+  return Math.round(ms * 10) / 10;
+}
+
 /**
  * Run every statement in `sql` and return the last result set that produced
  * rows, like `Database.exec`. Unlike `exec`, rows are read one at a time and

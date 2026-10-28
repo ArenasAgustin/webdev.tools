@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import initSqlJs, { type Database } from "sql.js";
-import { runStatements } from "@/services/sql/execute";
+import { roundElapsedMs, runStatements } from "@/services/sql/execute";
 
 describe("runStatements", () => {
   let db: Database;
@@ -45,5 +45,13 @@ describe("runStatements", () => {
 
   it("propagates SQL errors", () => {
     expect(() => runStatements(db, "SELECT * FROM missing_table;", 10)).toThrow(/no such table/);
+  });
+});
+
+describe("roundElapsedMs", () => {
+  it("keeps one decimal so timings read cleanly", () => {
+    expect(roundElapsedMs(3.2999999999999545)).toBe(3.3);
+    expect(roundElapsedMs(0.04)).toBe(0);
+    expect(roundElapsedMs(12)).toBe(12);
   });
 });
