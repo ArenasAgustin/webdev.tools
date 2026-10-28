@@ -148,6 +148,21 @@ describe("Base64Playground branches (text mode)", () => {
     expect(output.value.endsWith("=")).toBe(false);
   });
 
+  it("urlSafe and padding are disabled while decoding, since decode accepts both alphabets", () => {
+    render(<Base64Playground />);
+    const urlSafeCheckbox = screen.getByRole("checkbox", { name: "URL-safe" });
+    const paddingCheckbox = screen.getByRole("checkbox", { name: "Padding" });
+    expect(urlSafeCheckbox).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /^decodificar$/i }));
+    expect(urlSafeCheckbox).toBeDisabled();
+    expect(paddingCheckbox).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /^codificar$/i }));
+    expect(urlSafeCheckbox).toBeEnabled();
+    expect(paddingCheckbox).toBeEnabled();
+  });
+
   it("invalid input in decode mode shows a translated inline error without throwing", () => {
     render(<Base64Playground />);
 
@@ -291,6 +306,36 @@ describe("Base64Playground branches (file mode)", () => {
     expect(screen.getByText("test.txt")).toBeInTheDocument();
     const output = screen.getByLabelText<HTMLTextAreaElement>("Salida");
     expect(output.value).toBe("aGVsbG8=");
+  });
+
+  it("shows the file size with a unit that fits small files", async () => {
+    render(<Base64Playground />);
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+    const fileInput = document.querySelector("input[type=\"file\"]");
+    if (!fileInput) throw new Error("file input not found");
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File(["hello"], "test.txt")] } });
+    });
+
+    expect(screen.getByText("5 B")).toBeInTheDocument();
+  });
+
+  it("clear in file mode drops the file but keeps the typed text", async () => {
+    render(<Base64Playground />);
+    fireEvent.change(screen.getByLabelText("Entrada"), { target: { value: "keep me" } });
+    fireEvent.click(screen.getByRole("button", { name: /^archivo$/i }));
+    const fileInput = document.querySelector("input[type=\"file\"]");
+    if (!fileInput) throw new Error("file input not found");
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File(["hello"], "test.txt")] } });
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^limpiar$/i }));
+    expect(screen.queryByText("test.txt")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^texto$/i }));
+    expect(screen.getByLabelText<HTMLTextAreaElement>("Entrada").value).toBe("keep me");
   });
 
   it("change file button clears the selected file and shows the drop zone again", async () => {

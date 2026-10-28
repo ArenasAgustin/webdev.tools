@@ -18,6 +18,7 @@ import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
+import { formatBytes } from "@/utils/formatBytes";
 
 type FileState = { file: File; bytes: Uint8Array } | null;
 
@@ -146,13 +147,22 @@ export function Base64Playground() {
     await copy(result.value);
   }, [result, copy]);
 
+  // Clear only touches the active input type: the typed text survives a
+  // detour through file mode and vice versa.
   const handleClear = useCallback(() => {
-    setInput("");
+    if (inputMode === "text") {
+      setInput("");
+      return;
+    }
     latestFileRef.current = null; // drop any file read still in flight
     setFileState(null);
     setFileError(null);
     resetFileInput();
-  }, [setInput, resetFileInput]);
+  }, [inputMode, setInput, resetFileInput]);
+
+  // Decoding accepts both alphabets with or without padding, so the options
+  // only apply when encoding.
+  const optionsDisabled = inputMode === "text" && effectiveMode === "decode";
 
   const canSwap = inputMode === "text" && result.ok && result.value !== "";
 
@@ -199,20 +209,22 @@ export function Base64Playground() {
 
       {/* Options */}
       <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 text-gray-300">
+        <label className="flex items-center gap-2 text-gray-300 has-[:disabled]:opacity-50">
           <input
             type="checkbox"
             checked={options.urlSafe}
             onChange={(e) => handleOptionChange("urlSafe", e.target.checked)}
+            disabled={optionsDisabled}
             className="w-4 h-4 rounded bg-white/10 border-white/20"
           />
           {t("base64.urlSafe")}
         </label>
-        <label className="flex items-center gap-2 text-gray-300">
+        <label className="flex items-center gap-2 text-gray-300 has-[:disabled]:opacity-50">
           <input
             type="checkbox"
             checked={options.padding}
             onChange={(e) => handleOptionChange("padding", e.target.checked)}
+            disabled={optionsDisabled}
             className="w-4 h-4 rounded bg-white/10 border-white/20"
           />
           {t("base64.padding")}
@@ -274,7 +286,7 @@ export function Base64Playground() {
               <div className="text-center">
                 <p className="text-white font-medium">{fileState.file.name}</p>
                 <p className="text-gray-400 text-sm">
-                  {(fileState.file.size / 1024).toFixed(2)} KB
+                  {formatBytes(fileState.file.size)}
                 </p>
                 <button
                   type="button"
