@@ -80,6 +80,8 @@
     "minify": "Minify",
     "clean": "Clean Empty Values",
     "indent": "Indentation",
+    "indentSpaces": "{{count}} spaces",
+    "indentTab": "Tab",
     "sortKeys": "Sort keys alphabetically",
     "enableSort": "Enable sorting",
     "autoCopy": "Auto copy on format",
