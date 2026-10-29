@@ -199,7 +199,12 @@ export function Base64Playground() {
               value: "auto",
               label:
                 mode === "auto"
-                  ? t("base64.modeAutoDetected", { mode: effectiveMode })
+                  ? t("base64.modeAutoDetected", {
+                      // the translated direction, not the internal "encode"/"decode" token
+                      mode: t(
+                        effectiveMode === "encode" ? "base64.modeEncode" : "base64.modeDecode",
+                      ),
+                    })
                   : t("base64.modeAuto"),
             },
             { value: "encode", label: t("base64.modeEncode") },

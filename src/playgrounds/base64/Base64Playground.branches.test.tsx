@@ -113,6 +113,17 @@ describe("Base64Playground branches (text mode)", () => {
     expect(output.value).toBe("Hello World");
   });
 
+  it("labels the detected auto direction in the UI language", () => {
+    render(<Base64Playground />);
+    const input = screen.getByLabelText<HTMLTextAreaElement>("Entrada");
+
+    fireEvent.change(input, { target: { value: "Hello World" } });
+    expect(screen.getByRole("button", { name: "Auto (Codificar)" })).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "SGVsbG8gV29ybGQ=" } });
+    expect(screen.getByRole("button", { name: "Auto (Decodificar)" })).toBeInTheDocument();
+  });
+
   it("manual mode override is not flipped back by auto-detect", () => {
     render(<Base64Playground />);
 
