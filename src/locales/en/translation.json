@@ -348,6 +348,7 @@
     "inputTypeText": "Text",
     "inputTypeFile": "File",
     "inputLabel": "Input",
+    "inputNotSaved": "This input is too large to be saved in the browser; it will not be restored after a reload.",
     "inputPlaceholderEncode": "Enter text to encode...",
     "inputPlaceholderDecode": "Enter Base64 to decode...",
     "outputLabel": "Output",

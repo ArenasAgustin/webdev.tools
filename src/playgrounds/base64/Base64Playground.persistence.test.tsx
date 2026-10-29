@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 const storedValues: Record<string, unknown> = {};
 
@@ -95,6 +95,18 @@ describe("Base64Playground persistence", () => {
     const paddingCheckbox = screen.getByRole("checkbox", { name: "Padding" });
     expect(urlSafeCheckbox).toBeChecked();
     expect(paddingCheckbox).not.toBeChecked();
+  });
+
+  it("tells the user when the input is too large to be saved", () => {
+    // Only the long input below exceeds the (simulated) storage quota.
+    setItemMock.mockImplementation((key: string, value: unknown) => key !== "base64Input" || value !== "too long to store");
+
+    render(<Base64Playground />);
+    expect(screen.queryByText("base64.inputNotSaved")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Entrada"), { target: { value: "too long to store" } });
+
+    expect(screen.getByRole("status")).toHaveTextContent("base64.inputNotSaved");
   });
 
   it("inputMode='file' restored → drop zone is shown instead of the textarea", () => {

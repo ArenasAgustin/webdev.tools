@@ -12,14 +12,19 @@ import { useDebouncedValue } from "./useDebouncedValue";
  * Flush-on-unmount: a separate cleanup-only effect keyed on [key] writes the
  * latest in-memory value synchronously when the component unmounts, ensuring
  * no data is lost if unmount happens before the debounce fires.
+ *
+ * The third element is true while the latest debounced value could not be
+ * saved (e.g. it exceeds the storage quota), so the caller can tell the user it
+ * will not survive a reload.
  */
 export function usePersistedState<T>(
   key: string,
   defaultValue: T,
   debounceMs = 300,
-): [T, Dispatch<SetStateAction<T>>] {
+): [T, Dispatch<SetStateAction<T>>, boolean] {
   const [value, setValue] = useState<T>(() => getItem<T>(key) ?? defaultValue);
   const debouncedValue = useDebouncedValue(value, debounceMs);
+  const [persistFailed, setPersistFailed] = useState(false);
 
   // Track the live value so the unmount-flush effect always sees the latest.
   const valueRef = useRef(value);
@@ -29,7 +34,9 @@ export function usePersistedState<T>(
 
   // Debounced write — normal operation path.
   useEffect(() => {
-    setItem(key, debouncedValue);
+    const saved = setItem(key, debouncedValue);
+    // eslint-disable-next-line react-hooks/set-state-in-effect, @eslint-react/set-state-in-effect -- the outcome of the localStorage write is only known after it runs
+    setPersistFailed(!saved);
   }, [key, debouncedValue]);
 
   // Flush-on-unmount: keyed on [key] so it only runs the cleanup on unmount
@@ -41,5 +48,5 @@ export function usePersistedState<T>(
     };
   }, [key]);
 
-  return [value, setValue];
+  return [value, setValue, persistFailed];
 }

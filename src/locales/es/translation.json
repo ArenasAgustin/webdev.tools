@@ -348,6 +348,7 @@
     "inputTypeText": "Texto",
     "inputTypeFile": "Archivo",
     "inputLabel": "Entrada",
+    "inputNotSaved": "Esta entrada es demasiado grande para guardarse en el navegador; no se restaurará al recargar.",
     "inputPlaceholderEncode": "Ingresá el texto para codificar...",
     "inputPlaceholderDecode": "Ingresá el Base64 para decodificar...",
     "outputLabel": "Salida",

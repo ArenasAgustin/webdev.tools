@@ -45,7 +45,10 @@ export function Base64Playground() {
     STORAGE_KEYS.BASE64_INPUT_MODE,
     "text",
   );
-  const [input, setInput] = usePersistedState(STORAGE_KEYS.BASE64_INPUT, base64Config.example);
+  const [input, setInput, inputNotSaved] = usePersistedState(
+    STORAGE_KEYS.BASE64_INPUT,
+    base64Config.example,
+  );
   const [mode, setMode] = usePersistedState<Base64Mode>(STORAGE_KEYS.BASE64_MODE, "auto");
   const [storedOptions, setOptions] = usePersistedState<Base64Options>(
     STORAGE_KEYS.BASE64_OPTIONS,
@@ -251,6 +254,11 @@ export function Base64Playground() {
             className="w-full h-32 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono resize-none focus:outline-none focus:ring-1 focus:ring-cyan-400"
             spellCheck={false}
           />
+          {inputNotSaved && (
+            <p role="status" className="text-yellow-300 text-sm">
+              {t("base64.inputNotSaved")}
+            </p>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-2">
