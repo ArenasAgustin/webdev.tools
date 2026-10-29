@@ -10,9 +10,20 @@ interface HeaderRule {
   headers: { key: string; value: string }[];
 }
 
+type Middleware = (
+  req: { url?: string },
+  res: { setHeader: (key: string, value: string) => void },
+  next: () => void,
+) => void;
+
+interface FakeServer {
+  middlewares: { use: (middleware: Middleware) => void };
+}
+
 interface ViteConfigLike {
   server?: { headers?: Record<string, string> };
   preview?: { headers?: Record<string, string> };
+  plugins?: unknown[];
 }
 
 const root = process.cwd();
@@ -53,6 +64,45 @@ describe("cross-origin isolation headers", () => {
     for (const headers of [config.server?.headers, config.preview?.headers]) {
       expect(headers?.["Cross-Origin-Opener-Policy"]).toBe("same-origin");
       expect(headers?.["Cross-Origin-Embedder-Policy"]).toBe("credentialless");
+    }
+  });
+});
+
+describe("JS runner worker Content-Security-Policy", () => {
+  it("blocks network and remote imports for the built runner worker on Vercel", () => {
+    const csp = vercelHeadersFor("/assets/jsExecWorker-B5mqWJFL.js")["Content-Security-Policy"];
+    expect(csp).toContain("default-src 'none'");
+    expect(csp).toContain("script-src 'self' 'unsafe-eval'");
+    expect(csp).not.toMatch(/connect-src|https:|data:|blob:/);
+  });
+
+  it("leaves other assets and pages without that policy", () => {
+    expect(vercelHeadersFor("/assets/jsonWorker-DM7zA3Se.js")["Content-Security-Policy"]).toBeUndefined();
+    expect(vercelHeadersFor("/playground/js")["Content-Security-Policy"]).toBeUndefined();
+  });
+
+  it("sends the same policy for the runner worker from the Vite dev and preview servers", async () => {
+    const config = await loadViteConfig();
+    const plugin = (config.plugins ?? [])
+      .flat(Infinity)
+      .find((p) => (p as { name?: string } | null)?.name === "js-runner-worker-csp") as
+      | { configureServer: (s: FakeServer) => void; configurePreviewServer: (s: FakeServer) => void }
+      | undefined;
+    expect(plugin).toBeDefined();
+
+    for (const hook of ["configureServer", "configurePreviewServer"] as const) {
+      const middlewares: Middleware[] = [];
+      plugin?.[hook]({ middlewares: { use: (m) => middlewares.push(m) } });
+      const headersFor = (url: string) => {
+        const headers: Record<string, string> = {};
+        for (const m of middlewares) m({ url }, { setHeader: (k, v) => (headers[k] = v) }, () => {});
+        return headers;
+      };
+      expect(
+        headersFor("/src/workers/jsExecWorker.ts?worker_file&type=module")["Content-Security-Policy"],
+      ).toBe(vercelHeadersFor("/assets/jsExecWorker-B5mqWJFL.js")["Content-Security-Policy"]);
+      expect(headersFor("/assets/jsExecWorker-B5mqWJFL.js")["Content-Security-Policy"]).toBeDefined();
+      expect(headersFor("/src/workers/jsonWorker.ts?worker_file")["Content-Security-Policy"]).toBeUndefined();
     }
   });
 });

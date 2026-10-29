@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Connect, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -17,6 +17,35 @@ const CROSS_ORIGIN_ISOLATION_HEADERS = {
   "Cross-Origin-Opener-Policy": "same-origin",
   "Cross-Origin-Embedder-Policy": "credentialless",
 };
+
+/**
+ * Content-Security-Policy for the JS playground runner worker (src/workers/jsExecWorker.ts).
+ * A dedicated worker enforces the policy delivered with its own script, so user code
+ * there cannot fetch, open sockets or import() remote/data:/blob: modules (dynamic
+ * import is syntax, so workerLockdown cannot remove it). 'unsafe-eval' is needed:
+ * the runner compiles user code with the AsyncFunction constructor. Keep in sync
+ * with vercel.json.
+ */
+const JS_RUNNER_WORKER_CSP = "default-src 'none'; script-src 'self' 'unsafe-eval'";
+/** Dev: /src/workers/jsExecWorker.ts?worker_file…; build: /assets/jsExecWorker-<hash>.js */
+const JS_RUNNER_WORKER_URL = /\/jsExecWorker(?:-[\w-]+)?\.(?:ts|js)(?:\?|$)/;
+
+/** Adds JS_RUNNER_WORKER_CSP to the runner worker script in the dev and preview servers. */
+function jsRunnerWorkerCsp(): Plugin {
+  const addHeader = (server: { middlewares: Connect.Server }) => {
+    server.middlewares.use((req, res, next) => {
+      if (req.url && JS_RUNNER_WORKER_URL.test(req.url)) {
+        res.setHeader("Content-Security-Policy", JS_RUNNER_WORKER_CSP);
+      }
+      next();
+    });
+  };
+  return {
+    name: "js-runner-worker-csp",
+    configureServer: addHeader,
+    configurePreviewServer: addHeader,
+  };
+}
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -46,6 +75,7 @@ export default defineConfig(({ mode }) => ({
         }
       },
     },
+    jsRunnerWorkerCsp(),
     wasm(),
     react(),
     nodePolyfills(),
