@@ -47,10 +47,123 @@ function looksLikeDate(value: string): boolean {
   );
 }
 
+interface WallTime {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+  ms: number;
+}
+
+/** Numeric dates: 2024-01-15, 2024-1-5, 2024-12, with an optional time (T or space). */
+const ISO_LIKE =
+  /^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?$/;
+/** 2024/01/15, 2024.01.15 (year first) or 01/15/2024 (month first, as the engine reads it), optional time. */
+const SLASH_OR_DOT =
+  /^(\d{1,4})[/.](\d{1,2})[/.](\d{1,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?$/;
+/** An explicit zone (Z, +02:00, -0500, GMT, UTC) makes a date string absolute. */
+const EXPLICIT_ZONE = /\d(?:Z|[+-]\d{2}:?\d{2})$|\b(?:GMT|UTC)\b/i;
+
+function wallClock(hour?: string, minute?: string, second?: string, ms?: string) {
+  return {
+    hour: Number(hour ?? 0),
+    minute: Number(minute ?? 0),
+    second: Number(second ?? 0),
+    ms: Number((ms ?? "0").padEnd(3, "0")),
+  };
+}
+
+/** Wall-clock fields of a numeric date string, or null when it is not one of those shapes. */
+function numericWallTime(value: string): WallTime | null {
+  const iso = ISO_LIKE.exec(value);
+  if (iso) {
+    const [, year, month, day, hour, minute, second, ms] = iso;
+    return {
+      year: Number(year),
+      month: Number(month),
+      day: Number(day ?? 1),
+      ...wallClock(hour, minute, second, ms),
+    };
+  }
+
+  const slash = SLASH_OR_DOT.exec(value);
+  if (slash) {
+    const [, a, b, c, hour, minute, second, ms] = slash;
+    const clock = wallClock(hour, minute, second, ms);
+    if (a.length === 4) return { year: Number(a), month: Number(b), day: Number(c), ...clock };
+    if (c.length === 4) return { year: Number(c), month: Number(a), day: Number(b), ...clock };
+  }
+  return null;
+}
+
+/** True when the fields name a real calendar date and time (no 2024-02-30, no 25:00). */
+function isValidWallTime(w: WallTime): boolean {
+  const date = new Date(0);
+  date.setUTCFullYear(w.year, w.month - 1, w.day);
+  return (
+    date.getUTCFullYear() === w.year &&
+    date.getUTCMonth() === w.month - 1 &&
+    date.getUTCDate() === w.day &&
+    w.hour <= 23 &&
+    w.minute <= 59 &&
+    w.second <= 59
+  );
+}
+
+const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
+
+/** Offset of `timezone` from UTC at the instant `epochMs`, in ms (whole seconds). */
+function timezoneOffsetMs(epochMs: number, timezone: string): number {
+  let formatter = offsetFormatters.get(timezone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      hourCycle: "h23",
+      era: "short",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    });
+    offsetFormatters.set(timezone, formatter);
+  }
+  const fields: Record<string, number> = {};
+  let bc = false;
+  for (const part of formatter.formatToParts(new Date(epochMs))) {
+    if (part.type === "era") bc = part.value.startsWith("B");
+    else if (part.type !== "literal") fields[part.type] = Number(part.value);
+  }
+  const shown = new Date(0);
+  shown.setUTCFullYear(bc ? 1 - fields.year : fields.year, fields.month - 1, fields.day);
+  shown.setUTCHours(fields.hour, fields.minute, fields.second, 0);
+  return shown.getTime() - Math.floor(epochMs / 1000) * 1000;
+}
+
+/** The instant at which the clock in `timezone` shows the given wall time. */
+function wallTimeToDate(w: WallTime, timezone: string): Date {
+  const date = new Date(0);
+  date.setUTCFullYear(w.year, w.month - 1, w.day);
+  date.setUTCHours(w.hour, w.minute, w.second, w.ms);
+  const guess = date.getTime();
+  // A second pass settles the offset next to a DST change.
+  const first = guess - timezoneOffsetMs(guess, timezone);
+  return new Date(guess - timezoneOffsetMs(first, timezone));
+}
+
 /**
- * Parse input and determine if it's a Unix timestamp or a date string
+ * Parse input and determine if it's a Unix timestamp or a date string.
+ * A date string without an explicit zone is read as wall-clock time in `timezone`
+ * (date-only and date-time alike), and an impossible date (2024-02-30) is
+ * rejected instead of rolling over.
  */
-export function parseInput(input: string): { type: InputType; value: number | Date } | null {
+export function parseInput(
+  input: string,
+  timezone: string = Intl.DateTimeFormat().resolvedOptions().timeZone,
+): { type: InputType; value: number | Date } | null {
   const trimmed = input.trim();
 
   if (!trimmed) return null;
@@ -61,12 +174,31 @@ export function parseInput(input: string): { type: InputType; value: number | Da
     return { type: "unix", value: Number(trimmed) };
   }
 
+  // Numeric dates are read field by field, so the engine can neither roll
+  // 2024-02-30 over to March nor read a date-only ISO string as UTC.
+  const wall = numericWallTime(trimmed);
+  if (wall) {
+    return isValidWallTime(wall) ? { type: "date", value: wallTimeToDate(wall, timezone) } : null;
+  }
+
   // Then, try to parse as date string. The engine's parser is lenient ("hello 5" becomes
   // a date in 2001), so only hand it strings with a recognizable date shape.
   if (looksLikeDate(trimmed)) {
     const date = new Date(trimmed);
     if (!isNaN(date.getTime())) {
-      return { type: "date", value: date };
+      if (EXPLICIT_ZONE.test(trimmed)) return { type: "date", value: date };
+      // The engine read a zone-less string (Jan 15 2024) in the browser's zone:
+      // keep its wall-clock fields and read them in the selected timezone instead.
+      const wallTime: WallTime = {
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+        hour: date.getHours(),
+        minute: date.getMinutes(),
+        second: date.getSeconds(),
+        ms: date.getMilliseconds(),
+      };
+      return { type: "date", value: wallTimeToDate(wallTime, timezone) };
     }
   }
 
@@ -156,7 +288,7 @@ export function convertTimestamp(
   /** Reference time (epoch ms) for isFuture and the relative time. */
   now = Date.now(),
 ): TimestampResult | null {
-  const parsed = parseInput(input);
+  const parsed = parseInput(input, timezone || undefined);
   if (!parsed) return null;
 
   let date: Date;
