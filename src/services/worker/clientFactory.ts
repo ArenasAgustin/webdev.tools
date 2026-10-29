@@ -19,6 +19,17 @@ export class WorkerTimeoutError extends Error {
   }
 }
 
+/**
+ * Rejection reason when no worker can run here at all (no Worker support, or the
+ * worker could not be created). Only then may a caller run the job elsewhere.
+ */
+export class WorkerUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WorkerUnavailableError";
+  }
+}
+
 interface PendingRequest<TRequest, TResponse> {
   message: TRequest;
   resolve: (value: TResponse) => void;
@@ -134,11 +145,16 @@ export function createWorkerClient<
   };
 
   const run = (payload: TPayload, runOptions?: WorkerRunOptions): Promise<TResponse> => {
-    const instance = ensureWorker();
+    const unavailable = () =>
+      new WorkerUnavailableError(options.unavailableMessage ?? translate("services.worker.unavailable"));
+    let instance: Worker | null;
+    try {
+      instance = ensureWorker();
+    } catch {
+      return Promise.reject(unavailable());
+    }
     if (!instance) {
-      return Promise.reject(
-        new Error(options.unavailableMessage ?? translate("services.worker.unavailable")),
-      );
+      return Promise.reject(unavailable());
     }
 
     const id = createId();

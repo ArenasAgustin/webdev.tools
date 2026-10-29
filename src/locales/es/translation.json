@@ -469,7 +469,8 @@
     },
     "worker": {
       "error": "Error en worker",
-      "unavailable": "Worker no disponible"
+      "unavailable": "Worker no disponible",
+      "timeout": "La operación tardó más de {{seconds}} segundos y se canceló"
     },
     "json": {
       "noInput": "No hay JSON para procesar",

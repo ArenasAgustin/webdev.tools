@@ -24,7 +24,7 @@ describe("cleanCssAsync on large input", () => {
     globalThis.Worker = originalWorker;
   });
 
-  it("falls back to the sync clean when the worker never answers", async () => {
+  it("reports a timeout instead of rerunning on the main thread when the worker never answers", async () => {
     const { cleanCssAsync } = await import("@/services/css/worker");
     const rule = "a { color: red; }\nb {}\n";
     const input = rule.repeat(Math.ceil(WORKER_THRESHOLD_BYTES / rule.length) + 1);
@@ -33,10 +33,9 @@ describe("cleanCssAsync on large input", () => {
     await vi.advanceTimersByTimeAsync(DEFAULT_WORKER_TIMEOUT_MS);
     const result = await pending;
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.value).toContain("color: red");
-      expect(result.value).not.toContain("b {}");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.message).toBe("La operación tardó más de 60 segundos y se canceló");
     }
   });
 });

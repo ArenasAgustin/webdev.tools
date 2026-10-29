@@ -59,7 +59,7 @@ function stripInternalPaths(text: string): string {
  * Vite bundles the wasm as a same-origin hashed asset and sets the loader's
  * `dependencyFilename` to its absolute URL (e.g. "/assets/php_7_4-HASH.wasm").
  * We return that URL unchanged from `locateFile` so Emscripten fetches it
- * same-origin — cross-origin loads from a CDN are blocked by COEP `require-corp`.
+ * same-origin — cross-origin loads from a CDN would need CORS under COEP.
  */
 export async function executePhp(
   code: string,
