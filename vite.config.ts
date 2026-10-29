@@ -6,6 +6,18 @@ import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import wasm from "vite-plugin-wasm";
 
+/**
+ * Cross-origin isolation (SharedArrayBuffer for php-wasm). COEP credentialless,
+ * not require-corp: cross-origin images/CSS/scripts without a CORP header still
+ * load (without cookies), so the HTML preview can show external resources.
+ * Safari does not support credentialless, so PHP is not isolated there.
+ * Keep in sync with vercel.json.
+ */
+const CROSS_ORIGIN_ISOLATION_HEADERS = {
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Embedder-Policy": "credentialless",
+};
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   test: {
@@ -91,10 +103,10 @@ export default defineConfig(({ mode }) => ({
     }) as never,
   ],
   server: {
-    headers: {
-      "Cross-Origin-Opener-Policy": "same-origin",
-      "Cross-Origin-Embedder-Policy": "require-corp",
-    },
+    headers: CROSS_ORIGIN_ISOLATION_HEADERS,
+  },
+  preview: {
+    headers: CROSS_ORIGIN_ISOLATION_HEADERS,
   },
   resolve: {
     alias: {
