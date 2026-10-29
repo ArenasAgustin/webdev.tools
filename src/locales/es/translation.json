@@ -160,6 +160,8 @@
     "diffOriginalLabel": "Código original (solo lectura)",
     "diffModifiedLabel": "Código resultante (solo lectura)",
     "loading": "Cargando editor...",
+    "loadError": "No se pudo cargar el editor. Revisá tu conexión e intentá de nuevo.",
+    "retry": "Reintentar",
     "diffTitle": "Diferencias",
     "expandedPlaceholder": "Contenido de {{title}}..."
   },

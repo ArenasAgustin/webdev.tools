@@ -160,6 +160,8 @@
     "diffOriginalLabel": "Original code (read-only)",
     "diffModifiedLabel": "Result code (read-only)",
     "loading": "Loading editor...",
+    "loadError": "The editor could not be loaded. Check your connection and try again.",
+    "retry": "Retry",
     "diffTitle": "Differences",
     "expandedPlaceholder": "{{title}} content..."
   },

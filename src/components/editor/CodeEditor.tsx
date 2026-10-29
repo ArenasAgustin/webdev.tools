@@ -1,5 +1,6 @@
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EditorLoadError } from "./EditorLoadError";
 import { isCancelation, loadMonaco, type MonacoApi, type MonacoCodeEditor } from "./monaco";
 
 interface CodeEditorProps {
@@ -40,6 +41,7 @@ export const CodeEditor = memo(function CodeEditor({
   const monacoRef = useRef<MonacoApi | null>(null);
   const applyingValueRef = useRef(false);
   const [isReady, setIsReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   // Latest props for the async creation path and the change listener.
   const latestRef = useRef({ value, language, readOnly, ariaLabel, onChange });
@@ -79,6 +81,7 @@ export const CodeEditor = memo(function CodeEditor({
       .catch((error: unknown) => {
         if (!isCancelation(error)) {
           console.error("Monaco initialization: error:", error);
+          if (active) setLoadFailed(true);
         }
       });
     return () => {
@@ -128,7 +131,8 @@ export const CodeEditor = memo(function CodeEditor({
 
   return (
     <div className="relative w-full h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
-      {!isReady && (
+      {loadFailed && <EditorLoadError />}
+      {!isReady && !loadFailed && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-xs">
           {placeholder ?? t("editor.loading")}
         </div>
