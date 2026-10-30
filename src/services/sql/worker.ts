@@ -19,6 +19,18 @@ import { translate } from "@/i18n/translate";
  */
 export const SQL_EXECUTION_TIMEOUT_MS = 10_000;
 
+/** The worker's error message, localized, or a localized fallback when it sent none. */
+function workerErrorMessage(response: unknown, fallback: () => string): string {
+  const message = (response as { error?: { message?: string } }).error?.message;
+  return message ? localizeServiceMessage(message) : fallback();
+}
+
+const formatFallback = () => translate("messages.formatError", { language: "SQL" });
+const validateFallback = () => translate("services.sql.validateError");
+const minifyFallback = () => translate("messages.minifyError", { language: "SQL" });
+const executeFallback = () => translate("services.sql.executeError");
+const resetFallback = () => translate("services.sql.resetError");
+
 export const formatSqlAsync = async (
   input: string,
   config: SqlFormatConfig = { dialect: "sql", tabWidth: 2 },
@@ -28,8 +40,7 @@ export const formatSqlAsync = async (
     if (response.ok) {
       return { ok: true, value: (response as { value: string }).value ?? "" };
     }
-    const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: localizeServiceMessage(err?.message ?? "Format error") };
+    return { ok: false, error: workerErrorMessage(response, formatFallback) };
   } catch (err) {
     return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
@@ -44,8 +55,7 @@ export const validateSqlAsync = async (
     if (response.ok) {
       return { ok: true, value: true };
     }
-    const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: localizeServiceMessage(err?.message ?? "Validate error") };
+    return { ok: false, error: workerErrorMessage(response, validateFallback) };
   } catch (err) {
     return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
@@ -57,8 +67,7 @@ export const minifySqlAsync = async (input: string): Promise<Result<string, stri
     if (response.ok) {
       return { ok: true, value: (response as { value: string }).value ?? "" };
     }
-    const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: localizeServiceMessage(err?.message ?? "Minify error") };
+    return { ok: false, error: workerErrorMessage(response, minifyFallback) };
   } catch (err) {
     return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }
@@ -77,8 +86,7 @@ export const executeSqlAsync = async (input: string): Promise<SqlExecuteOutcome>
     // download and compile do not count against the query.
     const loaded = await sqlWorkerAdapter.run({ action: "load", input: "" });
     if (!loaded.ok) {
-      const err = (loaded as { error?: { message?: string } }).error;
-      return { ok: false, error: localizeServiceMessage(err?.message ?? "Execute error") };
+      return { ok: false, error: workerErrorMessage(loaded, executeFallback) };
     }
     const response = await sqlWorkerAdapter.run(
       { action: "execute", input },
@@ -91,10 +99,9 @@ export const executeSqlAsync = async (input: string): Promise<SqlExecuteOutcome>
       };
     }
     if (!response.ok) {
-      const err = (response as { error?: { message?: string } }).error;
-      return { ok: false, error: localizeServiceMessage(err?.message ?? "Execute error") };
+      return { ok: false, error: workerErrorMessage(response, executeFallback) };
     }
-    return { ok: false, error: "Unexpected execute response" };
+    return { ok: false, error: executeFallback() };
   } catch (err) {
     // The adapter only throws when the worker itself failed and was dropped.
     if (err instanceof WorkerTimeoutError) {
@@ -118,8 +125,7 @@ export const resetSqlAsync = async (): Promise<Result<string, string>> => {
     if (response.ok) {
       return { ok: true, value: "reset" };
     }
-    const err = (response as { error?: { message?: string } }).error;
-    return { ok: false, error: localizeServiceMessage(err?.message ?? "Reset error") };
+    return { ok: false, error: workerErrorMessage(response, resetFallback) };
   } catch (err) {
     return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
   }

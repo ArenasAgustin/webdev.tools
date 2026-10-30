@@ -97,7 +97,7 @@ export function PlaygroundSidebar({
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-xl border border-white/5 px-3 py-2 text-sm text-white/70 transition hover:border-white/20 hover:bg-white/5 hover:text-white"
-            aria-label="GitHub repository"
+            aria-label={t("sidebar.githubRepository")}
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
               <i className="fab fa-github text-sm"></i>

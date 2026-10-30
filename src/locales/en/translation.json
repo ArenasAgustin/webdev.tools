@@ -25,7 +25,8 @@
     "playgrounds": "Playgrounds",
     "navigation": "Navigation panel",
     "closeSidebar": "Close panel",
-    "availablePlaygrounds": "Available playgrounds"
+    "availablePlaygrounds": "Available playgrounds",
+    "githubRepository": "GitHub repository"
   },
   "actions": {
     "clearInput": "Clear input",
@@ -164,7 +165,8 @@
     "loadError": "The editor could not be loaded. Check your connection and try again.",
     "retry": "Retry",
     "diffTitle": "Differences",
-    "expandedPlaceholder": "{{title}} content..."
+    "expandedPlaceholder": "{{title}} content...",
+    "panelsLabel": "Editor panels"
   },
   "password": {
     "aria": {
@@ -257,7 +259,9 @@
     "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
     "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK.",
-    "inputLabel": "Color value"
+    "inputLabel": "Color value",
+    "saturationLabel": "Saturation and brightness",
+    "hueLabel": "Hue"
   },
   "html": {
     "previewLabel": "Preview",
@@ -528,7 +532,10 @@
       "noInput": "No SQL to process",
       "empty": "The SQL is empty",
       "timeout": "The query exceeded {{seconds}} seconds and was cancelled. The database was reset.",
-      "statementError": "Statement {{statement}}: {{message}}"
+      "statementError": "Statement {{statement}}: {{message}}",
+      "validateError": "Error validating SQL",
+      "executeError": "Error running SQL",
+      "resetError": "Error resetting the database"
     }
   }
 }

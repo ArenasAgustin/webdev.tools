@@ -25,7 +25,8 @@
     "playgrounds": "Playgrounds",
     "navigation": "Panel de navegación",
     "closeSidebar": "Cerrar panel",
-    "availablePlaygrounds": "Playgrounds disponibles"
+    "availablePlaygrounds": "Playgrounds disponibles",
+    "githubRepository": "Repositorio en GitHub"
   },
   "actions": {
     "clearInput": "Limpiar entrada",
@@ -164,7 +165,8 @@
     "loadError": "No se pudo cargar el editor. Revisá tu conexión e intentá de nuevo.",
     "retry": "Reintentar",
     "diffTitle": "Diferencias",
-    "expandedPlaceholder": "Contenido de {{title}}..."
+    "expandedPlaceholder": "Contenido de {{title}}...",
+    "panelsLabel": "Paneles del editor"
   },
   "password": {
     "aria": {
@@ -257,7 +259,9 @@
     "copied": "Copiado al portapapeles",
     "copyError": "No se pudo copiar al portapapeles",
     "invalidColor": "Color no válido. Usá HEX, RGB, HSL, HSV o CMYK.",
-    "inputLabel": "Valor del color"
+    "inputLabel": "Valor del color",
+    "saturationLabel": "Saturación y brillo",
+    "hueLabel": "Tono"
   },
   "html": {
     "previewLabel": "Vista previa",
@@ -528,7 +532,10 @@
       "noInput": "No hay SQL para procesar",
       "empty": "El SQL está vacío",
       "timeout": "La consulta superó los {{seconds}} segundos y se canceló. La base de datos se reinició.",
-      "statementError": "Sentencia {{statement}}: {{message}}"
+      "statementError": "Sentencia {{statement}}: {{message}}",
+      "validateError": "Error al validar SQL",
+      "executeError": "Error al ejecutar SQL",
+      "resetError": "Error al reiniciar la base de datos"
     }
   }
 }
