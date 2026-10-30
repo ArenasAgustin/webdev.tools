@@ -237,7 +237,8 @@ function getRelativeTime(date: Date, lang = "es", now = Date.now()): string {
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
-  const months = Math.floor(days / 30);
+  // 30-day months reach 12 at 360 days, before a 365-day year; cap them at 11.
+  const months = Math.min(11, Math.floor(days / 30));
   const years = Math.floor(days / 365);
 
   // Determine value and unit first

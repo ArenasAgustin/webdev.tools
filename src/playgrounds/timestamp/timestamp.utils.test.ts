@@ -176,6 +176,13 @@ describe("timestamp.utils", () => {
         "hace 5 segundos",
       );
     });
+
+    it.each([360, 362, 364])("says 11 months, not 12, for %i days", (days) => {
+      const now = 1712160000_000;
+      const past = String(1712160000 - days * 86400);
+      expect(convertTimestamp(past, "UTC", "es", now)?.relative).toBe("hace 11 meses");
+      expect(convertTimestamp(past, "UTC", "en", now)?.relative).toBe("11 months ago");
+    });
   });
 
   describe("withUtc", () => {
