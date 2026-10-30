@@ -15,14 +15,22 @@ describe("ShortcutsModal", () => {
     expect(within(row).getByText("M")).toBeInTheDocument();
   });
 
-  describe("Delete key label", () => {
+  it("shows Alt/⌥ + Shift + M for Minify", () => {
+    render(<ShortcutsModal isOpen onClose={vi.fn()} />);
+
+    const row = screen.getByText(i18n.t("shortcuts.minify")).parentElement!;
+    expect(within(row).getByText("Alt/⌥")).toBeInTheDocument();
+    expect(within(row).getByText("M")).toBeInTheDocument();
+  });
+
+  describe("Backspace key label", () => {
     afterEach(async () => {
       await act(() => i18n.changeLanguage("es"));
     });
 
     it.each([
-      ["es", "Supr"],
-      ["en", "Delete"],
+      ["es", "Retroceso"],
+      ["en", "Backspace"],
     ])("uses the %s keyboard name for the clear-input shortcut", async (lng, key) => {
       await act(() => i18n.changeLanguage(lng));
       render(<ShortcutsModal isOpen onClose={vi.fn()} />);

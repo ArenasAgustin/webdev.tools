@@ -55,7 +55,7 @@ export function ShortcutsModal({
           </h4>
           <div>
             <ShortcutRow keys={["Ctrl/⌘", "Shift", "F"]} description={t("shortcuts.format")} />
-            <ShortcutRow keys={["Ctrl/⌘", "Shift", "M"]} description={t("shortcuts.minify")} />
+            <ShortcutRow keys={["Alt/⌥", "Shift", "M"]} description={t("shortcuts.minify")} />
             {hasClean && (
               <ShortcutRow
                 keys={["Ctrl/⌘", "Shift", "L"]}
@@ -76,7 +76,7 @@ export function ShortcutsModal({
             )}
             <ShortcutRow keys={["Ctrl/⌘", "Shift", "C"]} description={t("shortcuts.copyResult")} />
             <ShortcutRow
-              keys={["Ctrl/⌘", "Shift", t("shortcuts.deleteKey")]}
+              keys={["Ctrl/⌘", "Shift", t("shortcuts.backspaceKey")]}
               description={t("shortcuts.clearInput")}
             />
           </div>

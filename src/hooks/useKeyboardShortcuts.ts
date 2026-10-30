@@ -16,10 +16,12 @@ interface KeyboardShortcutsConfig {
  * Hook to handle keyboard shortcuts for JSON tools
  * Shortcuts:
  * - Ctrl+Shift+F / Cmd+Shift+F: Format
- * - Ctrl+Shift+M / Cmd+Shift+M: Minify
+ * - Alt+Shift+M / Option+Shift+M: Minify (Ctrl+Shift+M is the browser's profile /
+ *   responsive-design shortcut, which the page never receives)
  * - Ctrl+Shift+L / Cmd+Shift+L: Clean
  * - Ctrl+Shift+C / Cmd+Shift+C: Copy output
- * - Ctrl+Shift+Delete / Cmd+Shift+Delete: Clear input
+ * - Ctrl+Shift+Backspace / Cmd+Shift+Backspace: Clear input (Ctrl+Shift+Delete opens the
+ *   browser's "Clear browsing data")
  * - Ctrl+Shift+Enter / Cmd+Shift+Enter: Execute (only when onExecute is provided)
  * - Ctrl+, / Cmd+,: Open config
  */
@@ -41,13 +43,15 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
       // shortcuts active so the playground actions remain reachable.
       const target = event.target as HTMLElement;
       const ctrlKey = event.ctrlKey || event.metaKey;
+      // Alt+Shift without Ctrl/Cmd: the Minify shortcut's modifiers.
+      const altShift = event.altKey && event.shiftKey && !ctrlKey;
       // Monaco may receive input through a hidden textarea; that is the code
       // editor, not a form field, so it gets the same treatment as contentEditable.
       const inCodeEditor = typeof target.closest === "function" && target.closest(".monaco-editor") !== null;
       if ((target.tagName === "INPUT" || target.tagName === "TEXTAREA") && !inCodeEditor) {
         return;
       }
-      if (target.contentEditable !== "false" && !ctrlKey) {
+      if (target.contentEditable !== "false" && !ctrlKey && !altShift) {
         return;
       }
       const normalizedKey = event.key.length === 1 ? event.key.toUpperCase() : event.key;
@@ -66,8 +70,9 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
         run(config.onFormat);
       }
 
-      // Ctrl/Cmd+Shift+M: Minify
-      if (ctrlKey && event.shiftKey && normalizedKey === "M") {
+      // Alt/Option+Shift+M: Minify. Matched by physical key: on a Mac, Option+Shift+M
+      // types "Â", so event.key is not "M".
+      if (altShift && event.code === "KeyM") {
         event.preventDefault();
         run(config.onMinify);
       }
@@ -84,8 +89,8 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
         run(config.onCopyOutput);
       }
 
-      // Ctrl/Cmd+Shift+Delete: Clear input
-      if (ctrlKey && event.shiftKey && normalizedKey === "Delete") {
+      // Ctrl/Cmd+Shift+Backspace: Clear input
+      if (ctrlKey && event.shiftKey && normalizedKey === "Backspace") {
         event.preventDefault();
         run(config.onClearInput);
       }

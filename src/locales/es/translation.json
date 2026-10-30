@@ -72,7 +72,7 @@
     "viewDifferences": "Ver diferencias",
     "editor": "Editor",
     "toggleTabFocus": "Alternar Tab: indentar / mover el foco fuera del editor",
-    "deleteKey": "Supr"
+    "backspaceKey": "Retroceso"
   },
   "tips": {
     "quickExamples": "Ejemplos Rápidos"

@@ -72,7 +72,7 @@
     "viewDifferences": "View differences",
     "editor": "Editor",
     "toggleTabFocus": "Toggle Tab: indent / move focus out of the editor",
-    "deleteKey": "Delete"
+    "backspaceKey": "Backspace"
   },
   "tips": {
     "quickExamples": "Quick Examples"
