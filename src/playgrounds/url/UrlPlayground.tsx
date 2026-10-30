@@ -128,7 +128,10 @@ export function UrlPlayground() {
             value: "auto",
             label:
               mode === "auto"
-                ? t("url.modeAutoDetected", { mode: effectiveMode })
+                ? t("url.modeAutoDetected", {
+                    // the translated direction, not the internal "encode"/"decode" token
+                    mode: t(effectiveMode === "encode" ? "url.modeEncode" : "url.modeDecode"),
+                  })
                 : t("url.modeAuto"),
           },
           { value: "encode", label: t("url.modeEncode") },

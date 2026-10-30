@@ -3,6 +3,11 @@ import { JSON_ERROR_MESSAGES } from "./transform";
 import { serviceMessage } from "@/services/serviceMessage";
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
 
+// jsonpath-plus caches parsed paths in a plain object keyed by the path text, so a
+// path such as "constructor" or "toString" hits an Object.prototype member and fails
+// with "cache[expr].concat is not a function". A prototype-less cache avoids that.
+JSONPath.cache = Object.create(null) as Record<string, unknown>;
+
 /**
  * Apply JSONPath filter to JSON data
  * Pure function - no side effects

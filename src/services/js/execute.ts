@@ -18,6 +18,8 @@ export interface JsRunResult {
   ok: boolean;
   output: string;
   error?: string;
+  /** Set when output beyond MAX_OUTPUT_LINES / MAX_OUTPUT_CHARS was dropped. */
+  truncated?: boolean;
 }
 
 /** Messages exchanged with the dedicated execution worker (`src/workers/jsExecWorker.ts`). */
@@ -25,12 +27,24 @@ export interface JsExecRequest {
   code: string;
 }
 
-export type JsExecResponse = { type: "log"; line: string } | { type: "done"; result: JsRunResult };
+export type JsExecResponse =
+  | { type: "log"; line: string }
+  | { type: "truncated" }
+  | { type: "done"; result: JsRunResult };
 
 export interface JsRunOptions {
   /** Called with each console line as soon as it is written. */
   onLog?: (line: string) => void;
+  /** Called once when the output limit is reached and further output is dropped. */
+  onTruncate?: () => void;
 }
+
+/**
+ * Output limits of one run. A loop that logs endlessly would otherwise flood the page
+ * with messages until the timeout and build a huge output string.
+ */
+export const MAX_OUTPUT_LINES = 5000;
+export const MAX_OUTPUT_CHARS = 1_000_000;
 
 const IDLE_POLL_MS = 10;
 
@@ -51,24 +65,113 @@ export async function runJavaScript(
   let asyncError: unknown;
   let hasAsyncError = false;
 
-  const log = (prefix: string, args: unknown[]) => {
-    const line = prefix + args.map((arg) => formatValue(arg)).join(" ");
-    logs.push(line);
-    options.onLog?.(line);
+  // Indentation added by console.group, two spaces per open group.
+  let groupIndent = "";
+  const timers = new Map<string, number>();
+  const counters = new Map<string, number>();
+
+  // Lines and characters written so far. console.clear does not reset them: the
+  // limit bounds what is streamed to the page, not only what is kept.
+  let emittedLines = 0;
+  let emittedChars = 0;
+  let truncated = false;
+
+  const truncate = () => {
+    truncated = true;
+    options.onTruncate?.();
   };
 
+  const emit = (line: string) => {
+    if (truncated) return;
+    if (emittedLines >= MAX_OUTPUT_LINES) {
+      truncate();
+      return;
+    }
+    const indented = groupIndent
+      ? line
+          .split("\n")
+          .map((part) => groupIndent + part)
+          .join("\n")
+      : line;
+    const remaining = MAX_OUTPUT_CHARS - emittedChars;
+    const kept = indented.length > remaining ? indented.slice(0, remaining) : indented;
+    emittedLines++;
+    // One more character for the newline that joins this line to the next.
+    emittedChars += kept.length + 1;
+    logs.push(kept);
+    options.onLog?.(kept);
+    if (kept.length < indented.length) truncate();
+  };
+
+  const log = (prefix: string, args: unknown[]) => {
+    if (truncated) return;
+    emit(prefix + args.map((arg) => formatValue(arg)).join(" "));
+  };
+
+  const elapsed = (label: string, start: number) =>
+    `${label}: ${(performance.now() - start).toFixed(3)} ms`;
+
+  const group = (...args: unknown[]) => {
+    if (args.length > 0) log("", args);
+    groupIndent += "  ";
+  };
+
+  // Browser-like versions of the console methods: they never throw, and timer or
+  // counter misuse prints a warning like the browser console does.
   const sandboxConsole = {
     log: (...args: unknown[]) => log("", args),
     info: (...args: unknown[]) => log("", args),
     debug: (...args: unknown[]) => log("", args),
+    dir: (value: unknown) => log("", [value]),
     table: (data: unknown) => {
-      for (const line of formatTable(data)) {
-        logs.push(line);
-        options.onLog?.(line);
-      }
+      for (const line of formatTable(data)) emit(line);
     },
     error: (...args: unknown[]) => log("ERROR: ", args),
     warn: (...args: unknown[]) => log("WARN: ", args),
+    trace: (...args: unknown[]) => log("Trace: ", args),
+    assert: (condition?: unknown, ...args: unknown[]) => {
+      if (!condition) log(args.length > 0 ? "ERROR: Assertion failed: " : "ERROR: Assertion failed", args);
+    },
+    group,
+    groupCollapsed: group,
+    groupEnd: () => {
+      groupIndent = groupIndent.slice(2);
+    },
+    time: (label: unknown = "default") => {
+      const name = String(label);
+      if (timers.has(name)) log("WARN: ", [`Timer '${name}' already exists`]);
+      else timers.set(name, performance.now());
+    },
+    timeLog: (label: unknown = "default", ...args: unknown[]) => {
+      const name = String(label);
+      const start = timers.get(name);
+      if (start === undefined) log("WARN: ", [`Timer '${name}' does not exist`]);
+      else log("", [elapsed(name, start), ...args]);
+    },
+    timeEnd: (label: unknown = "default") => {
+      const name = String(label);
+      const start = timers.get(name);
+      if (start === undefined) {
+        log("WARN: ", [`Timer '${name}' does not exist`]);
+        return;
+      }
+      timers.delete(name);
+      log("", [elapsed(name, start)]);
+    },
+    count: (label: unknown = "default") => {
+      const name = String(label);
+      const count = (counters.get(name) ?? 0) + 1;
+      counters.set(name, count);
+      log("", [`${name}: ${count}`]);
+    },
+    countReset: (label: unknown = "default") => {
+      const name = String(label);
+      if (counters.has(name)) counters.set(name, 0);
+      else log("WARN: ", [`Count for '${name}' does not exist`]);
+    },
+    clear: () => {
+      logs.length = 0;
+    },
   };
 
   const recordAsyncError = (error: unknown) => {
@@ -129,13 +232,16 @@ export async function runJavaScript(
     // One more macrotask lets promise callbacks queued by the last timer run.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    if (hasAsyncError) return failure(logs, asyncError);
+    if (hasAsyncError) return withTruncation(failure(logs, asyncError), truncated);
     if (logs.length === 0 && result !== undefined && result !== null) {
-      return { ok: true, output: formatValue(result) };
+      const value = formatValue(result);
+      return value.length > MAX_OUTPUT_CHARS
+        ? { ok: true, output: value.slice(0, MAX_OUTPUT_CHARS), truncated: true }
+        : { ok: true, output: value };
     }
-    return { ok: true, output: logs.join("\n") };
+    return withTruncation({ ok: true, output: logs.join("\n") }, truncated);
   } catch (error) {
-    return failure(logs, error);
+    return withTruncation(failure(logs, error), truncated);
   } finally {
     for (const id of pendingTimers) clearTimeout(id);
   }
@@ -175,6 +281,10 @@ async function returnTrailingExpression(code: string): Promise<string> {
   return `${code.slice(0, start)}return (${code.slice(exprStart, exprEnd)});${code.slice(end)}`;
 }
 
+function withTruncation(result: JsRunResult, truncated: boolean): JsRunResult {
+  return truncated ? { ...result, truncated } : result;
+}
+
 function failure(logs: string[], error: unknown): JsRunResult {
   return {
     ok: false,
@@ -203,9 +313,9 @@ export function describeError(error: unknown): string {
   return line > 0 ? serviceMessage("services.js.runtimeErrorAtLine", { message, line }) : message;
 }
 
-// Map/Set currently being described, so a collection that contains itself prints
-// "[Circular]" instead of recursing forever.
-const describing = new Set<object>();
+// Bounds that keep a huge or deeply nested value from flooding the output.
+const MAX_DEPTH = 20;
+const MAX_ITEMS = 100;
 
 function describeFunction(fn: (...args: unknown[]) => unknown): string {
   if (Function.prototype.toString.call(fn).startsWith("class")) {
@@ -214,63 +324,132 @@ function describeFunction(fn: (...args: unknown[]) => unknown): string {
   return fn.name ? `[Function: ${fn.name}]` : "[Function (anonymous)]";
 }
 
-function describeCollection(collection: Map<unknown, unknown> | Set<unknown>): string {
-  if (describing.has(collection)) return "[Circular]";
-  describing.add(collection);
-  try {
-    if (collection instanceof Map) {
-      const entries = [...collection].map(([key, val]) => `${formatInline(key)} => ${formatInline(val)}`);
-      return `Map(${collection.size}) {${entries.join(", ")}}`;
-    }
-    const items = [...collection].map((item) => formatInline(item));
-    return `Set(${collection.size}) {${items.join(", ")}}`;
-  } finally {
-    describing.delete(collection);
-  }
+function describeErrorValue(error: Error): string {
+  return error.message ? `${error.name}: ${error.message}` : error.name;
 }
 
 /**
- * Text for values JSON.stringify drops or prints as `{}`: BigInt, symbols, functions,
- * errors, Map and Set. Returns undefined for everything else.
+ * Text for objects printed as a single token: errors, regular expressions, dates and
+ * promises (whose state cannot be read synchronously). Undefined for everything else.
  */
-function describeSpecial(value: unknown): string | undefined {
-  if (typeof value === "bigint") return `${value}n`;
-  if (typeof value === "symbol") return value.toString();
-  if (typeof value === "function") return describeFunction(value as (...args: unknown[]) => unknown);
-  if (value instanceof Error) return value.message ? `${value.name}: ${value.message}` : value.name;
-  if (value instanceof Map || value instanceof Set) return describeCollection(value);
+function describeLeafObject(value: object): string | undefined {
+  if (value instanceof Error) return describeErrorValue(value);
+  if (value instanceof RegExp) return String(value);
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? "Invalid Date" : value.toISOString();
+  }
+  if (value instanceof Promise) return "Promise {}";
   return undefined;
 }
 
-const specialReplacer = (_key: string, value: unknown) => describeSpecial(value) ?? value;
+/** Brackets around items: one per line when `space` is set, compact otherwise. */
+function wrapItems(open: string, close: string, items: string[], space: string, indent: string) {
+  if (items.length === 0) return open + close;
+  if (!space) return open + items.join(",") + close;
+  const inner = indent + space;
+  return `${open}\n${items.map((item) => inner + item).join(",\n")}\n${indent}${close}`;
+}
 
-/** Single-line rendering: strings quoted, objects as compact JSON. */
+function moreItems(total: number, kind: "items" | "properties"): string[] {
+  return total > MAX_ITEMS ? [`... ${total - MAX_ITEMS} more ${kind}`] : [];
+}
+
+/**
+ * Render a value the way the browser console shows it, in a JSON-like layout:
+ * quoted strings and keys, plus NaN, Infinity, -0, undefined, empty array slots,
+ * regular expressions, dates, typed arrays, Map/Set, functions and errors as the
+ * console prints them. `ancestors` holds the objects being rendered around this one,
+ * so a value that contains itself prints "[Circular]" instead of recursing forever.
+ * Getters are read like the console does when expanding them; one that throws prints
+ * "[Exception: …]".
+ */
+function serialize(value: unknown, space: string, indent: string, ancestors: object[]): string {
+  if (value === null) return "null";
+  switch (typeof value) {
+    case "undefined":
+      return "undefined";
+    case "string":
+      return JSON.stringify(value);
+    case "number":
+      return Object.is(value, -0) ? "-0" : String(value);
+    case "boolean":
+      return String(value);
+    case "bigint":
+      return `${value}n`;
+    case "symbol":
+      return value.toString();
+    case "function":
+      return describeFunction(value as (...args: unknown[]) => unknown);
+  }
+
+  const object = value;
+  if (ancestors.includes(object)) return "[Circular]";
+  const leaf = describeLeafObject(object);
+  if (leaf !== undefined) return leaf;
+  if (ancestors.length >= MAX_DEPTH) return Array.isArray(object) ? "[Array]" : "[Object]";
+
+  const nested = [...ancestors, object];
+  const child = (item: unknown) => serialize(item, space, indent + space, nested);
+  // Collection entries stay on one line, like the console's collapsed preview.
+  const inline = (item: unknown) => serialize(item, "", "", nested);
+
+  if (object instanceof Map) {
+    const entries = [...object]
+      .slice(0, MAX_ITEMS)
+      .map(([key, val]) => `${inline(key)} => ${inline(val)}`);
+    return `Map(${object.size}) {${[...entries, ...moreItems(object.size, "items")].join(", ")}}`;
+  }
+  if (object instanceof Set) {
+    const items = [...object].slice(0, MAX_ITEMS).map(inline);
+    return `Set(${object.size}) {${[...items, ...moreItems(object.size, "items")].join(", ")}}`;
+  }
+  if (ArrayBuffer.isView(object) && !(object instanceof DataView)) {
+    const typed = object as unknown as ArrayLike<number | bigint>;
+    const items = Array.from({ length: Math.min(typed.length, MAX_ITEMS) }, (_, i) => inline(typed[i]));
+    const all = [...items, ...moreItems(typed.length, "items")];
+    return `${object.constructor.name}(${typed.length}) [${all.join(", ")}]`;
+  }
+
+  const read = (key: string | number) => {
+    try {
+      return child((object as Record<string | number, unknown>)[key]);
+    } catch (error) {
+      const text = error instanceof Error ? describeErrorValue(error) : String(error);
+      return `[Exception: ${text}]`;
+    }
+  };
+
+  if (Array.isArray(object)) {
+    const items = Array.from({ length: Math.min(object.length, MAX_ITEMS) }, (_, i) =>
+      i in object ? read(i) : "empty",
+    );
+    return wrapItems("[", "]", [...items, ...moreItems(object.length, "items")], space, indent);
+  }
+
+  const keys = Object.keys(object);
+  const separator = space ? ": " : ":";
+  const properties = keys
+    .slice(0, MAX_ITEMS)
+    .map((key) => `${JSON.stringify(key)}${separator}${read(key)}`);
+  return wrapItems("{", "}", [...properties, ...moreItems(keys.length, "properties")], space, indent);
+}
+
+/** Single-line rendering: strings quoted, objects compact. */
 function formatInline(value: unknown): string {
-  const special = describeSpecial(value);
-  if (special !== undefined) return special;
-  if (value === undefined) return "undefined";
   try {
-    return JSON.stringify(value, specialReplacer);
+    return serialize(value, "", "", []);
   } catch {
     return Object.prototype.toString.call(value);
   }
 }
 
 export function formatValue(value: unknown): string {
-  if (value === null) return "null";
-  if (value === undefined) return "undefined";
   if (typeof value === "string") return value;
-  const special = describeSpecial(value);
-  if (special !== undefined) return special;
-  if (typeof value === "object") {
-    try {
-      return JSON.stringify(value, specialReplacer, 2);
-    } catch {
-      return Object.prototype.toString.call(value);
-    }
+  try {
+    return serialize(value, "  ", "", []);
+  } catch {
+    return Object.prototype.toString.call(value);
   }
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return Object.prototype.toString.call(value);
 }
 
 /** Single-line rendering of a `console.table` cell. */

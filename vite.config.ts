@@ -1,10 +1,51 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Connect, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import wasm from "vite-plugin-wasm";
+
+/**
+ * Cross-origin isolation (SharedArrayBuffer for php-wasm). COEP credentialless,
+ * not require-corp: cross-origin images/CSS/scripts without a CORP header still
+ * load (without cookies), so the HTML preview can show external resources.
+ * Safari does not support credentialless, so PHP is not isolated there.
+ * Keep in sync with vercel.json.
+ */
+const CROSS_ORIGIN_ISOLATION_HEADERS = {
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Embedder-Policy": "credentialless",
+};
+
+/**
+ * Content-Security-Policy for the JS playground runner worker (src/workers/jsExecWorker.ts).
+ * A dedicated worker enforces the policy delivered with its own script, so user code
+ * there cannot fetch, open sockets or import() remote/data:/blob: modules (dynamic
+ * import is syntax, so workerLockdown cannot remove it). 'unsafe-eval' is needed:
+ * the runner compiles user code with the AsyncFunction constructor. Keep in sync
+ * with vercel.json.
+ */
+const JS_RUNNER_WORKER_CSP = "default-src 'none'; script-src 'self' 'unsafe-eval'";
+/** Dev: /src/workers/jsExecWorker.ts?worker_file…; build: /assets/jsExecWorker-<hash>.js */
+const JS_RUNNER_WORKER_URL = /\/jsExecWorker(?:-[\w-]+)?\.(?:ts|js)(?:\?|$)/;
+
+/** Adds JS_RUNNER_WORKER_CSP to the runner worker script in the dev and preview servers. */
+function jsRunnerWorkerCsp(): Plugin {
+  const addHeader = (server: { middlewares: Connect.Server }) => {
+    server.middlewares.use((req, res, next) => {
+      if (req.url && JS_RUNNER_WORKER_URL.test(req.url)) {
+        res.setHeader("Content-Security-Policy", JS_RUNNER_WORKER_CSP);
+      }
+      next();
+    });
+  };
+  return {
+    name: "js-runner-worker-csp",
+    configureServer: addHeader,
+    configurePreviewServer: addHeader,
+  };
+}
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -34,6 +75,7 @@ export default defineConfig(({ mode }) => ({
         }
       },
     },
+    jsRunnerWorkerCsp(),
     wasm(),
     react(),
     nodePolyfills(),
@@ -59,6 +101,18 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
+            // Monaco is loaded at runtime from jsDelivr (@monaco-editor/loader). The URL is
+            // pinned to a version, so its files never change: cache them for offline use.
+            // They arrive as no-cors <script>/worker loads, hence the opaque status 0.
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/npm\/monaco-editor@/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "monaco-editor",
+              expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             urlPattern: /fonts\.googleapis\.com|fonts\.gstatic\.com/,
             handler: "StaleWhileRevalidate",
             options: {
@@ -79,10 +133,10 @@ export default defineConfig(({ mode }) => ({
     }) as never,
   ],
   server: {
-    headers: {
-      "Cross-Origin-Opener-Policy": "same-origin",
-      "Cross-Origin-Embedder-Policy": "require-corp",
-    },
+    headers: CROSS_ORIGIN_ISOLATION_HEADERS,
+  },
+  preview: {
+    headers: CROSS_ORIGIN_ISOLATION_HEADERS,
   },
   resolve: {
     alias: {

@@ -35,6 +35,33 @@ describe("lockDownWorkerGlobals", () => {
     expect(scope.caches).toBeUndefined();
   });
 
+  it("removes nested workers and WebTransport, which would start with full network access", () => {
+    const scope = {
+      ...makeScope(),
+      Worker: class {},
+      SharedWorker: class {},
+      WebTransport: class {},
+    };
+    lockDownWorkerGlobals(scope);
+    expect(scope.Worker).toBeUndefined();
+    expect(scope.SharedWorker).toBeUndefined();
+    expect(scope.WebTransport).toBeUndefined();
+  });
+
+  it("removes navigator.storage (origin private file system), also from the prototype", () => {
+    class FakeNavigator {
+      get storage() {
+        return { getDirectory: () => "opfs" };
+      }
+    }
+    const navigator = new FakeNavigator();
+    const scope = { ...makeScope(), navigator };
+    lockDownWorkerGlobals(scope);
+    expect(navigator.storage).toBeUndefined();
+    const getter = Object.getOwnPropertyDescriptor(FakeNavigator.prototype, "storage")?.get;
+    expect(getter?.call(navigator)).toBeUndefined();
+  });
+
   it("cannot be undone by reassigning", () => {
     const scope = makeScope() as Record<string, unknown>;
     lockDownWorkerGlobals(scope);

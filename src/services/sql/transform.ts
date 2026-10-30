@@ -9,6 +9,8 @@ import type { SqlFormatConfig } from "@/types/sql";
 import { DEFAULT_SQL_FORMAT_CONFIG } from "@/types/sql";
 import { serviceMessage } from "@/services/serviceMessage";
 
+const SQL_FORMATTER_LANGUAGE = "sqlite";
+
 /**
  * Format SQL using sql-formatter.
  * Returns Result<string, string> — ok: false if the formatter throws.
@@ -23,7 +25,9 @@ export function formatSql(input: string, config: SqlFormatConfig): Result<string
     const indent = config.tabWidth ?? 2;
     const useTabs = indent === "\t";
     const value = sqlFormat(input, {
-      language: config.dialect,
+      // The playground runs on SQLite (sql.js), so parse its syntax ([col], $x,
+      // :name, ?1) whatever dialect an older persisted config still holds.
+      language: SQL_FORMATTER_LANGUAGE,
       useTabs,
       tabWidth: useTabs ? 2 : indent,
     });
@@ -81,10 +85,9 @@ function tokenizeSql(source: string): SqlSegment[] {
 
     if (QUOTE_CHARS.has(char)) {
       let j = i + 1;
+      // SQLite has no backslash escapes: `'C:\'` is a complete literal.
       while (j < source.length) {
-        if (source[j] === "\\" && char !== "`") {
-          j += 2;
-        } else if (source[j] === char) {
+        if (source[j] === char) {
           // A doubled quote is an escaped quote inside the literal.
           if (source[j + 1] === char) j += 2;
           else break;
@@ -93,6 +96,13 @@ function tokenizeSql(source: string): SqlSegment[] {
         }
       }
       push("literal", Math.min(j + 1, source.length));
+      continue;
+    }
+
+    // A [bracket] identifier (SQLite/MS-style) runs to the first `]`, with no escapes.
+    if (char === "[") {
+      const close = source.indexOf("]", i + 1);
+      push("literal", close === -1 ? source.length : close + 1);
       continue;
     }
 

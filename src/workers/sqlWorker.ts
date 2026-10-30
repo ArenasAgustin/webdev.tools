@@ -73,12 +73,17 @@ ctx.onmessage = (event: MessageEvent<SqlWorkerRequest>) => {
         case "execute": {
           const db = await getDb();
           const start = performance.now();
-          const { resultSets, truncated } = runStatements(db, req.input, ROW_CAP);
+          const { resultSets, truncated, valuesTruncated } = runStatements(db, req.input, ROW_CAP);
           ctx.postMessage({
             id: req.id,
             ok: true,
             action: "execute",
-            value: { resultSets, elapsedMs: roundElapsedMs(performance.now() - start), truncated },
+            value: {
+              resultSets,
+              elapsedMs: roundElapsedMs(performance.now() - start),
+              truncated,
+              ...(valuesTruncated ? { valuesTruncated } : {}),
+            },
           });
           return;
         }

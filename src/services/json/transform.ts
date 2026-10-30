@@ -44,6 +44,14 @@ export function parseJson(input: string): Result<JsonValue, JsonError> {
 }
 
 /**
+ * Set an own property, also for keys like `__proto__` that a plain assignment would
+ * treat as the prototype setter (silently dropping the key from the output).
+ */
+function setOwnProperty(target: Record<string, JsonValue>, key: string, value: JsonValue): void {
+  Object.defineProperty(target, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
+/**
  * Sort JSON object keys recursively
  * Pure function - no side effects
  * @param value - The JSON value to process
@@ -58,7 +66,7 @@ export function sortJsonKeys(value: JsonValue): JsonValue {
     Object.keys(value)
       .sort()
       .forEach((key) => {
-        sorted[key] = sortJsonKeys((value as Record<string, JsonValue>)[key]);
+        setOwnProperty(sorted, key, sortJsonKeys((value as Record<string, JsonValue>)[key]));
       });
     return sorted;
   }
@@ -153,11 +161,11 @@ function removeEmpty(value: JsonValue, options: CleanOptions = {}): JsonValue | 
       .map((v) => removeEmpty(v, options))
       .filter((v): v is JsonValue => v !== undefined);
     // If all items were removed and removeEmptyArray is true, return undefined
-    // If removeEmptyArray is false, keep the empty array
+    // If removeEmptyArray is false, keep the (now) empty array
     if (cleaned.length === 0 && opts.removeEmptyArray) {
       return undefined;
     }
-    return cleaned.length > 0 ? cleaned : opts.removeEmptyArray ? undefined : value;
+    return cleaned;
   }
 
   if (typeof value === "object" && value !== null) {
@@ -165,13 +173,13 @@ function removeEmpty(value: JsonValue, options: CleanOptions = {}): JsonValue | 
     for (const [key, val] of Object.entries(value)) {
       const cleanedVal = removeEmpty(val, options);
       if (cleanedVal !== undefined) {
-        cleaned[key] = cleanedVal;
+        setOwnProperty(cleaned, key, cleanedVal);
       }
     }
     if (Object.keys(cleaned).length === 0 && opts.removeEmptyObject) {
       return undefined;
     }
-    return Object.keys(cleaned).length > 0 ? cleaned : opts.removeEmptyObject ? undefined : value;
+    return cleaned;
   }
 
   return value;

@@ -2,6 +2,7 @@ import type { Result } from "@/types/common";
 import { WORKER_THRESHOLD_BYTES } from "@/utils/constants/limits";
 import { localizeServiceResult } from "@/services/localizeServiceMessage";
 import { serviceMessage } from "@/services/serviceMessage";
+import { WorkerTimeoutError, WorkerUnavailableError } from "@/services/worker/clientFactory";
 
 interface WorkerResponseLike {
   ok: boolean;
@@ -26,8 +27,11 @@ export const shouldUseWorkerForInput = (input: string, thresholdBytes = WORKER_T
 
 /**
  * Runs an operation in its worker (or synchronously for small inputs) on the
- * main thread. Errors carrying `services.*` message keys are localized here, so
- * callers always receive user-facing text.
+ * main thread. A large input whose worker times out or crashes is not rerun on
+ * the main thread (that would freeze the page on the very input the worker is
+ * for); only when no worker can run at all does it fall back to running there.
+ * Errors carrying `services.*` message keys are localized here, so callers
+ * always receive user-facing text.
  */
 export const executeWorkerOperation = async <
   TPayload,
@@ -61,7 +65,14 @@ export const executeWorkerOperation = async <
       ok: false,
       error: toError(response.error?.message ?? workerErrorMessage),
     });
-  } catch {
-    return localizeServiceResult(await runSync());
+  } catch (error) {
+    if (error instanceof WorkerUnavailableError) {
+      return localizeServiceResult(await runSync());
+    }
+    const message =
+      error instanceof WorkerTimeoutError
+        ? serviceMessage("services.worker.timeout", { seconds: Math.round(error.timeoutMs / 1000) })
+        : workerErrorMessage;
+    return localizeServiceResult<string, TError>({ ok: false, error: toError(message) });
   }
 };

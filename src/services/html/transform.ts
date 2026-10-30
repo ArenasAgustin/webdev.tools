@@ -289,8 +289,11 @@ function preserveEmbeddedTagContent(
 function restorePreservedContent(source: string, preservedBlocks: Map<string, string>): string {
   let output = source;
 
-  for (const [token, content] of preservedBlocks.entries()) {
-    output = output.replace(new RegExp(escapeRegExp(token), "g"), content);
+  // Restore in reverse so tokens of blocks nested inside later blocks (a style
+  // inside a textarea) are back in the output before their own turn comes.
+  for (const [token, content] of [...preservedBlocks.entries()].reverse()) {
+    // A replacer function keeps `    output = output.replace(new RegExp(escapeRegExp(token), "g"), content);`, `$` and friends in the content literal.
+    output = output.replace(new RegExp(escapeRegExp(token), "g"), () => content);
   }
 
   return output;
@@ -384,9 +387,10 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
         return SELF_CLOSING_VOID_TAGS.includes(name.toLowerCase()) ? _match : "";
       });
 
-      // Restore preserved blocks
-      for (const [token, content] of preservedBlocks.entries()) {
-        result = result.replace(token, content);
+      // Restore preserved blocks in reverse so tokens nested in a later block
+      // (a style inside an svg) are restored after their container.
+      for (const [token, content] of [...preservedBlocks.entries()].reverse()) {
+        result = result.replace(token, () => content);
       }
     }
 

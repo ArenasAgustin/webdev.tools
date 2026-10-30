@@ -4,7 +4,7 @@
 
 import type { IndentStyle } from "@/types/format";
 
-// v1: only default dialect.
+// v1: only default dialect; formatting and validation always use SQLite syntax (the execution engine).
 // v2 will widen to: "postgresql" | "mysql" | "sqlite" | "mariadb" | "transactsql" | ...
 export type SqlDialect = "sql";
 
@@ -38,9 +38,12 @@ export interface SqlResultSet {
   /** 1-based position of the statement in the script */
   statement: number;
   columns: string[];
-  rows: (number | string | Uint8Array | null)[][];
+  /** BLOBs arrive as SQLite hex literals (x'0102FF'); integers beyond 2^53 as decimal strings */
+  rows: (number | string | null)[][];
   /** true when the row cap stopped reading this result set */
   truncated: boolean;
+  /** present (true) when a long text or BLOB value of this result set was cut */
+  valuesTruncated?: true;
 }
 
 export interface SqlExecuteResult {
@@ -49,4 +52,6 @@ export interface SqlExecuteResult {
   elapsedMs: number;
   /** true when the row cap (1000, shared by all result sets) was hit and results were truncated */
   truncated: boolean;
+  /** present (true) when any long text or BLOB value was cut to the cell cap */
+  valuesTruncated?: true;
 }

@@ -489,3 +489,82 @@ describe("validatePhp", () => {
     expect(result.ok).toBe(false);
   });
 });
+
+describe("formatPhp multi-line strings", () => {
+  it("keeps every line of a multi-line double-quoted string verbatim", () => {
+    const input = '<?php\nif (true) {\n$s = "a\n    b {\n  c";\necho $s;\n}';
+
+    expect(formatPhp(input)).toEqual({
+      ok: true,
+      value: '<?php\nif (true) {\n  $s = "a\n    b {\n  c";\n  echo $s;\n}',
+    });
+  });
+
+  it("keeps a multi-line single-quoted string verbatim and ignores its braces", () => {
+    const input = "<?php\n$s = 'a {\n  b';\nif (1) {\necho 1;\n}";
+
+    expect(formatPhp(input)).toEqual({
+      ok: true,
+      value: "<?php\n$s = 'a {\n  b';\nif (1) {\n  echo 1;\n}",
+    });
+  });
+
+  it("keeps interpolated multi-line strings verbatim", () => {
+    const input = '<?php\nfunction f($b) {\nreturn "x\n{$b}\n   y";\n}';
+
+    expect(formatPhp(input)).toEqual({
+      ok: true,
+      value: '<?php\nfunction f($b) {\n  return "x\n{$b}\n   y";\n}',
+    });
+  });
+
+  it("still formats tagless code", () => {
+    expect(formatPhp("if (1) {\necho 1;\n}")).toEqual({
+      ok: true,
+      value: "if (1) {\n  echo 1;\n}",
+    });
+  });
+});
+
+describe("formatPhp inline HTML", () => {
+  it("keeps inline HTML verbatim and closes the block at its own level", () => {
+    const input =
+      "<?php if (true) { ?>\n<pre>\n  x\n    y\n</pre>\n<style>a { color: red; }</style>\n<?php } ?>";
+
+    expect(formatPhp(input)).toEqual({ ok: true, value: input });
+  });
+
+  it("ignores braces in inline HTML", () => {
+    const input = "<div>\n<style>\na {\ncolor: red;\n</style>\n</div>\n<?php\nif (1) {\necho 1;\n}";
+
+    expect(formatPhp(input)).toEqual({
+      ok: true,
+      value: "<div>\n<style>\na {\ncolor: red;\n</style>\n</div>\n<?php\nif (1) {\n  echo 1;\n}",
+    });
+  });
+});
+
+describe("validatePhp matches the runtime", () => {
+  it("validates tagless code as PHP, like the runtime runs it", () => {
+    expect(validatePhp('echo "hi";\necho 2;')).toEqual({ ok: true, value: undefined });
+
+    const result = validatePhp('echo "hi"\necho 2;');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain("2");
+    }
+  });
+
+  it.each([
+    ['<?php echo match(1) { 1 => "a", default => "b" };'],
+    ["<?php $a?->b;"],
+    ["<?php enum S { case A; }"],
+    ["<?php f(a: 1);"],
+  ])("rejects PHP 8 syntax the PHP 7.4 runtime cannot run: %s", (code) => {
+    expect(validatePhp(code).ok).toBe(false);
+  });
+
+  it("accepts PHP 7.4 syntax", () => {
+    expect(validatePhp("<?php $f = fn($x) => $x; $a ??= 1;").ok).toBe(true);
+  });
+});

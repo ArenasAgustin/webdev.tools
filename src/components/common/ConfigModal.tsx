@@ -132,6 +132,10 @@ const MODE_LABELS: Record<string, string> = {
 
 export function ConfigModal(props: ConfigModalProps) {
   const { t } = useTranslation();
+  const indentOptions = INDENT_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey, option.labelParams),
+  }));
   const mode = props.mode ?? "json";
   const modeLabel = MODE_LABELS[mode];
 
@@ -243,7 +247,7 @@ export function ConfigModal(props: ConfigModalProps) {
               <div>
                 <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
                 <ToggleButtonGroup
-                  options={INDENT_OPTIONS}
+                  options={indentOptions}
                   ariaLabel={t("config.indent")}
                   value={(props.formatConfig as { indentSize?: number }).indentSize ?? 2}
                   onChange={(indentSize) => updateFormat({ indentSize })}
@@ -255,7 +259,7 @@ export function ConfigModal(props: ConfigModalProps) {
               <div>
                 <label className="block text-gray-300 mb-1">{t("config.indent")}</label>
                 <ToggleButtonGroup
-                  options={INDENT_OPTIONS}
+                  options={indentOptions}
                   ariaLabel={t("config.indent")}
                   value={sqlProps.formatConfig.tabWidth ?? 2}
                   onChange={(tabWidth) => updateFormat({ tabWidth })}

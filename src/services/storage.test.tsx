@@ -102,6 +102,19 @@ describe("Storage Service", () => {
       expect(getItem("testKey")).toBeNull();
     });
 
+    it("drops the stored value when a write fails, so a stale one is not restored", () => {
+      setItem("quotaKey", "old");
+      const spy = vi.spyOn(localStorageMock, "setItem").mockImplementation(() => {
+        throw new DOMException("quota", "QuotaExceededError");
+      });
+      vi.spyOn(console, "error").mockImplementation(() => {});
+
+      expect(setItem("quotaKey", "new and huge")).toBe(false);
+      spy.mockRestore();
+
+      expect(getItem("quotaKey")).toBeNull();
+    });
+
     it("should handle large data structures", () => {
       const largeArray = Array.from({ length: 1000 }, (_, i) => ({
         id: i,

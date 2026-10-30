@@ -152,8 +152,9 @@ describe("PasswordPlayground branches", () => {
     const historyBtns = screen.getAllByRole("button", { name: /\.\.\./i });
     expect(historyBtns.length).toBeGreaterThanOrEqual(2);
 
-    // The second history entry (index 1) corresponds to firstPassword
+    // The second history entry (index 1) corresponds to firstPassword (its text shows once unmasked)
     const secondHistoryBtn = historyBtns[1];
+    fireEvent.click(screen.getByRole("button", { name: /mostrar contraseña/i }));
     expect(secondHistoryBtn).toHaveTextContent(`${firstPassword.slice(0, 8)}...`);
 
     fireEvent.click(secondHistoryBtn);
@@ -175,6 +176,38 @@ describe("PasswordPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: /mostrar contraseña/i }));
 
     expect(historyBtn).toHaveAttribute("title", password);
+  });
+
+  it("history chips are masked while the password is hidden", () => {
+    render(<PasswordPlayground />);
+
+    fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    const password = screen.getByPlaceholderText<HTMLInputElement>(/contraseña aparecerá aquí/i).value;
+    const historyBtn = screen.getByRole("button", { name: /\.\.\./i });
+
+    expect(historyBtn).not.toHaveTextContent(password.slice(0, 8));
+    expect(historyBtn).toHaveTextContent("••••••••...");
+
+    fireEvent.click(screen.getByRole("button", { name: /mostrar contraseña/i }));
+
+    expect(historyBtn).toHaveTextContent(`${password.slice(0, 8)}...`);
+  });
+
+  it("clears the password and its strength when no character set is left", () => {
+    render(<PasswordPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    const passwordInput = screen.getByPlaceholderText<HTMLInputElement>(/contraseña aparecerá aquí/i);
+    expect(passwordInput.value).not.toBe("");
+    expect(screen.getByText("Fortaleza:")).toBeInTheDocument();
+
+    for (const name of ["uppercase", "lowercase", "numbers", "symbols"]) {
+      const checkbox = screen.getByRole("checkbox", { name: `password.aria.${name}` });
+      if ((checkbox as HTMLInputElement).checked) fireEvent.click(checkbox);
+    }
+
+    expect(passwordInput.value).toBe("");
+    expect(screen.queryByText("Fortaleza:")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copiar contraseña" })).toBeDisabled();
   });
 
   it("strengthResult colors: weak(<40), medium(<60), good(<80), strong(>=80)", () => {

@@ -52,8 +52,14 @@ export function PasswordPlayground() {
   const handleOptionChange = useCallback(
     (key: keyof PasswordOptions, value: boolean | number) => {
       setOptions((prev) => ({ ...prev, [key]: value }));
+      // With no character set left nothing can be generated: drop the old
+      // password (and with it its strength) instead of leaving it on screen.
+      if (!hasCharset({ ...options, [key]: value })) {
+        setPassword("");
+        resetCopied();
+      }
     },
-    [setOptions],
+    [options, resetCopied, setOptions],
   );
 
   const handleHistoryClick = useCallback(
@@ -217,7 +223,8 @@ export function PasswordPlayground() {
                 // The full value only goes in the tooltip while the password is shown
                 title={showPassword ? entry.value : undefined}
               >
-                {entry.value.slice(0, 8)}...
+                {/* Masked like the field: the chip only shows a prefix while the password is shown */}
+                {showPassword ? entry.value.slice(0, 8) : "••••••••"}...
               </button>
             ))}
           </div>

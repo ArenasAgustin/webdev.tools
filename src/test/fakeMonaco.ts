@@ -192,11 +192,15 @@ export type FakeMonaco = ReturnType<typeof createFakeMonaco>;
  */
 export function createFakeLoader(monaco: unknown) {
   let resolveLoad: () => void = () => {};
-  const loaded = new Promise<void>((resolve) => {
+  let rejectLoad: (error: unknown) => void = () => {};
+  const loaded = new Promise<void>((resolve, reject) => {
     resolveLoad = resolve;
+    rejectLoad = reject;
   });
   return {
     resolve: () => resolveLoad(),
+    /** Fail the load, like a CDN script that cannot be fetched. */
+    reject: (error: unknown = new Error("network")) => rejectLoad(error),
     init: () => {
       let cancelled = false;
       const promise = loaded.then(() => {

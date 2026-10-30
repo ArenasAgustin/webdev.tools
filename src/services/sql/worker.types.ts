@@ -5,6 +5,9 @@ import type { SqlExecuteResult, SqlFormatConfig } from "@/types/sql";
 /** Maximum rows returned by a single EXECUTE response */
 export const ROW_CAP = 1000;
 
+/** Longest text value (in characters) kept per cell; a BLOB keeps half as many bytes. */
+export const CELL_CAP = 10_000;
+
 export type SqlWorkerPayload =
   | ({ action: "format"; options: SqlFormatConfig } & WorkerPayloadBase)
   | ({ action: "validate"; options: SqlFormatConfig } & WorkerPayloadBase)

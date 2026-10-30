@@ -1,5 +1,6 @@
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EditorLoadError } from "./EditorLoadError";
 import { isCancelation, loadMonaco, type MonacoApi, type MonacoDiffEditor } from "./monaco";
 import { CodeEditorLoader } from "./CodeEditorLoader";
 
@@ -35,6 +36,7 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
   const editorRef = useRef<MonacoDiffEditor | null>(null);
   const monacoRef = useRef<MonacoApi | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const latestRef = useRef({ original, modified, language, originalAriaLabel, modifiedAriaLabel });
   useLayoutEffect(() => {
@@ -71,6 +73,7 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
       .catch((error: unknown) => {
         if (!isCancelation(error)) {
           console.error("Monaco initialization: error:", error);
+          if (active) setLoadFailed(true);
         }
       });
     return () => {
@@ -115,7 +118,8 @@ export const DiffCodeEditor = memo(function DiffCodeEditor({
 
   return (
     <div className="relative w-full h-full min-w-0 rounded-lg overflow-hidden border border-white/10">
-      {!isReady && (
+      {loadFailed && <EditorLoadError />}
+      {!isReady && !loadFailed && (
         <div className="absolute inset-0">
           <CodeEditorLoader />
         </div>

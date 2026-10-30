@@ -69,6 +69,38 @@ describe("timestamp.utils", () => {
       },
     );
 
+    it.each([
+      ["2024-01-15", "America/New_York", Date.UTC(2024, 0, 15, 5)],
+      ["2024-01-15 10:00", "Asia/Tokyo", Date.UTC(2024, 0, 15, 1)],
+      ["2024-01-15T10:00:30", "UTC", Date.UTC(2024, 0, 15, 10, 0, 30)],
+      ["2024/01/15", "Europe/Madrid", Date.UTC(2024, 0, 14, 23)],
+      ["2024.01.15", "UTC", Date.UTC(2024, 0, 15)],
+      ["01/15/2024 10:30", "UTC", Date.UTC(2024, 0, 15, 10, 30)],
+      ["2024-12", "UTC", Date.UTC(2024, 11, 1)],
+      ["Jan 15 2024", "America/New_York", Date.UTC(2024, 0, 15, 5)],
+      ["2024-07-01T12:00", "Europe/London", Date.UTC(2024, 6, 1, 11)],
+      ["2024-02-29", "UTC", Date.UTC(2024, 1, 29)],
+    ])("reads the zone-less date %j in the selected timezone %s", (value, timezone, expected) => {
+      expect(convertTimestamp(value, timezone, "en")?.unixMilliseconds).toBe(expected);
+    });
+
+    it("keeps an explicit offset or Z whatever the selected timezone", () => {
+      expect(convertTimestamp("2024-01-15T10:00:00Z", "Asia/Tokyo", "en")?.unixMilliseconds).toBe(
+        Date.UTC(2024, 0, 15, 10),
+      );
+      expect(convertTimestamp("2024-01-15T10:00:00+02:00", "UTC", "en")?.unixMilliseconds).toBe(
+        Date.UTC(2024, 0, 15, 8),
+      );
+    });
+
+    it.each(["2024-02-30", "2023-02-29", "2024-13-01", "2024-04-31 10:00", "2024-01-15 25:00", "2024-01-15T10:60", "02/30/2024", "2024/02/30"])(
+      "rejects the impossible date %j instead of rolling it over",
+      (value) => {
+        expect(parseInput(value, "UTC")).toBeNull();
+        expect(convertTimestamp(value, "UTC", "en")).toBeNull();
+      },
+    );
+
     it.each(["not-a-valid-timestamp 3", "hello 5", "version 2"])(
       "rejects free text that the engine would read as a date: %j",
       (value) => {

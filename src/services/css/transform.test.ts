@@ -20,6 +20,17 @@ describe("validateCss", () => {
     if (!result.ok) expect(result.error.length).toBeGreaterThan(0);
   });
 
+  it.each([["a { color: red"], ["a { color: red; }\n}"], ['a { content: "x }']])(
+    "rejects structurally broken CSS that Minify rejects: %s",
+    async (input) => {
+      const minified = await minifyCss(input);
+      const result = await validateCss(input);
+
+      expect(minified.ok).toBe(false);
+      expect(result.ok).toBe(false);
+    },
+  );
+
   it("returns ok:true with empty value for empty string", async () => {
     const result = await validateCss("");
     expect(result).toEqual({ ok: true, value: "" });

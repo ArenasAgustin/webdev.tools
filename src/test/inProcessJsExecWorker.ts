@@ -16,6 +16,7 @@ export class InProcessJsExecWorker {
   postMessage(request: JsExecRequest) {
     void runJavaScript(request.code, {
       onLog: (line) => this.emit({ type: "log", line }),
+      onTruncate: () => this.emit({ type: "truncated" }),
     }).then((result) => this.emit({ type: "done", result }));
   }
 

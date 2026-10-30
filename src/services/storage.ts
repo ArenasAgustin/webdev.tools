@@ -92,6 +92,13 @@ export function setItem<T>(key: string, value: T): boolean {
     return true;
   } catch (error) {
     console.error(`Error writing to localStorage (${key}):`, error);
+    // The write failed (typically QuotaExceededError on a large input): drop the
+    // previous value so a reload does not bring back an outdated one.
+    try {
+      getStorage()?.removeItem(key);
+    } catch {
+      // nothing more to do
+    }
     return false;
   }
 }

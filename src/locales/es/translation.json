@@ -80,6 +80,8 @@
     "minify": "Minificar",
     "clean": "Limpiar Valores Vacíos",
     "indent": "Espaciado",
+    "indentSpaces": "{{count}} espacios",
+    "indentTab": "Tab",
     "sortKeys": "Ordenar claves alfabéticamente",
     "enableSort": "Habilitar ordenamiento",
     "autoCopy": "Copiar automáticamente",
@@ -158,6 +160,8 @@
     "diffOriginalLabel": "Código original (solo lectura)",
     "diffModifiedLabel": "Código resultante (solo lectura)",
     "loading": "Cargando editor...",
+    "loadError": "No se pudo cargar el editor. Revisá tu conexión e intentá de nuevo.",
+    "retry": "Reintentar",
     "diffTitle": "Diferencias",
     "expandedPlaceholder": "Contenido de {{title}}..."
   },
@@ -262,6 +266,7 @@
     "executionError": "Error de ejecución",
     "sqlError": "Error SQL",
     "truncated": "Resultado truncado a {{count}} filas",
+    "valuesTruncated": "Valores largos recortados a {{count}} caracteres (los BLOB a la mitad de bytes)",
     "resetDatabase": "Resetear base de datos"
   },
   "json": {
@@ -345,6 +350,7 @@
     "inputTypeText": "Texto",
     "inputTypeFile": "Archivo",
     "inputLabel": "Entrada",
+    "inputNotSaved": "Esta entrada es demasiado grande para guardarse en el navegador; no se restaurará al recargar.",
     "inputPlaceholderEncode": "Ingresá el texto para codificar...",
     "inputPlaceholderDecode": "Ingresá el Base64 para decodificar...",
     "outputLabel": "Salida",
@@ -431,6 +437,7 @@
       "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
       "workerError": "Error en el worker de ejecución",
       "workerUnsupported": "Tu navegador no admite Web Workers: el código no se ejecuta para no bloquear ni exponer la página.",
+      "outputTruncated": "… salida truncada: solo se muestran las primeras {{lines}} líneas o {{chars}} caracteres.",
       "unknownError": "Error desconocido al ejecutar código"
     },
     "json": {
@@ -462,7 +469,8 @@
     },
     "worker": {
       "error": "Error en worker",
-      "unavailable": "Worker no disponible"
+      "unavailable": "Worker no disponible",
+      "timeout": "La operación tardó más de {{seconds}} segundos y se canceló"
     },
     "json": {
       "noInput": "No hay JSON para procesar",
@@ -505,7 +513,8 @@
       "parseError": "Error al parsear código PHP",
       "formatError": "Error al formatear código PHP",
       "minifyUnavailable": "Minify no está disponible para PHP",
-      "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada"
+      "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
+      "exitCode": "El script terminó con el código {{code}}"
     },
     "sql": {
       "noInput": "No hay SQL para procesar",

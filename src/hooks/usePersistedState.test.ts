@@ -102,4 +102,30 @@ describe("usePersistedState", () => {
 
     expect(result.current[0]).toEqual({ fallback: true });
   });
+
+  it("reports when the latest value could not be saved", () => {
+    getItemMock.mockReturnValue(null);
+    setItemMock.mockReturnValue(true);
+
+    const { result } = renderHook(() => usePersistedState("test-key", "a"));
+    expect(result.current[2]).toBe(false);
+
+    setItemMock.mockReturnValue(false);
+    act(() => {
+      result.current[1]("huge");
+    });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(result.current[2]).toBe(true);
+
+    setItemMock.mockReturnValue(true);
+    act(() => {
+      result.current[1]("small");
+    });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(result.current[2]).toBe(false);
+  });
 });

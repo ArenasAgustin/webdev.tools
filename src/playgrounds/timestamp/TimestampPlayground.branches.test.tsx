@@ -9,7 +9,7 @@ const {
   clipboardWriteTextMock,
   i18nState,
 } = vi.hoisted(() => ({
-  i18nState: { language: "es" },
+  i18nState: { language: "es", resolvedLanguage: "es" },
   getItemMock: vi.fn(() => null),
   setItemMock: vi.fn(),
   toastSuccessMock: vi.fn(),
@@ -108,7 +108,7 @@ describe("TimestampPlayground branches", () => {
   });
 
   it("handleConvert: formats the relative time in the active UI language", () => {
-    i18nState.language = "en";
+    Object.assign(i18nState, { language: "en", resolvedLanguage: "en" });
     render(<TimestampPlayground />);
 
     const input = screen.getByPlaceholderText("timestamp.placeholder");
@@ -116,7 +116,20 @@ describe("TimestampPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
 
     expect(screen.getByText(/years ago$/)).toBeInTheDocument();
-    i18nState.language = "es";
+    Object.assign(i18nState, { language: "es", resolvedLanguage: "es" });
+  });
+
+  it("handleConvert: uses the resolved language for a browser locale with no translation (fr-FR)", () => {
+    // i18next falls back to English for fr-FR: the relative time must follow it, not Spanish.
+    Object.assign(i18nState, { language: "fr-FR", resolvedLanguage: "en" });
+    render(<TimestampPlayground />);
+
+    const input = screen.getByPlaceholderText("timestamp.placeholder");
+    fireEvent.change(input, { target: { value: "0" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp.convert/i }));
+
+    expect(screen.getByText(/years ago$/)).toBeInTheDocument();
+    Object.assign(i18nState, { language: "es", resolvedLanguage: "es" });
   });
 
   it("handleConvert: invalid input shows error message", () => {

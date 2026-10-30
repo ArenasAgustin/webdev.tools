@@ -14,8 +14,8 @@ export interface CssCleanOptions {
   removeRulesWithOnlyComments?: boolean;
 }
 
-export function validateCss(input: string): Promise<Result<string, string>> {
-  if (!input.trim()) return Promise.resolve({ ok: true, value: "" });
+export async function validateCss(input: string): Promise<Result<string, string>> {
+  if (!input.trim()) return { ok: true, value: "" };
 
   let errorMessage: string | null = null;
 
@@ -27,14 +27,21 @@ export function validateCss(input: string): Promise<Result<string, string>> {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    return Promise.resolve({ ok: false, error: message });
+    return { ok: false, error: message };
   }
 
   if (errorMessage !== null) {
-    return Promise.resolve({ ok: false, error: errorMessage });
+    return { ok: false, error: errorMessage };
   }
 
-  return Promise.resolve({ ok: true, value: input });
+  // css-tree recovers from unclosed blocks and strings; Minify refuses them,
+  // so the indicator must too.
+  const structureError = await findCssSyntaxError(input);
+  if (structureError !== null) {
+    return { ok: false, error: structureError };
+  }
+
+  return { ok: true, value: input };
 }
 
 export async function formatCss(

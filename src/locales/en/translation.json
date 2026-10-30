@@ -80,6 +80,8 @@
     "minify": "Minify",
     "clean": "Clean Empty Values",
     "indent": "Indentation",
+    "indentSpaces": "{{count}} spaces",
+    "indentTab": "Tab",
     "sortKeys": "Sort keys alphabetically",
     "enableSort": "Enable sorting",
     "autoCopy": "Auto copy on format",
@@ -158,6 +160,8 @@
     "diffOriginalLabel": "Original code (read-only)",
     "diffModifiedLabel": "Result code (read-only)",
     "loading": "Loading editor...",
+    "loadError": "The editor could not be loaded. Check your connection and try again.",
+    "retry": "Retry",
     "diffTitle": "Differences",
     "expandedPlaceholder": "{{title}} content..."
   },
@@ -262,6 +266,7 @@
     "executionError": "Execution Error",
     "sqlError": "SQL Error",
     "truncated": "Result truncated to {{count}} rows",
+    "valuesTruncated": "Long values cut to {{count}} characters (BLOBs to half as many bytes)",
     "resetDatabase": "Reset database"
   },
   "json": {
@@ -345,6 +350,7 @@
     "inputTypeText": "Text",
     "inputTypeFile": "File",
     "inputLabel": "Input",
+    "inputNotSaved": "This input is too large to be saved in the browser; it will not be restored after a reload.",
     "inputPlaceholderEncode": "Enter text to encode...",
     "inputPlaceholderDecode": "Enter Base64 to decode...",
     "outputLabel": "Output",
@@ -431,6 +437,7 @@
       "timeout": "Execution exceeded {{seconds}} seconds and was cancelled",
       "workerError": "Execution worker error",
       "workerUnsupported": "Your browser doesn't support Web Workers: the code isn't run so it can't block or reach the page.",
+      "outputTruncated": "… output truncated: only the first {{lines}} lines or {{chars}} characters are shown.",
       "unknownError": "Unknown error while running code"
     },
     "json": {
@@ -462,7 +469,8 @@
     },
     "worker": {
       "error": "Worker error",
-      "unavailable": "Worker not available"
+      "unavailable": "Worker not available",
+      "timeout": "The operation took longer than {{seconds}} seconds and was cancelled"
     },
     "json": {
       "noInput": "No JSON to process",
@@ -505,7 +513,8 @@
       "parseError": "Error parsing PHP code",
       "formatError": "Error formatting PHP code",
       "minifyUnavailable": "Minify is not available for PHP",
-      "timeout": "Execution exceeded {{seconds}} seconds and was cancelled"
+      "timeout": "Execution exceeded {{seconds}} seconds and was cancelled",
+      "exitCode": "The script exited with code {{code}}"
     },
     "sql": {
       "noInput": "No SQL to process",

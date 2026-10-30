@@ -33,6 +33,7 @@ ctx.onmessage = (event: MessageEvent<JsExecRequest>) => {
 
   void runJavaScript(event.data.code, {
     onLog: (line) => ctx.postMessage({ type: "log", line }),
+    onTruncate: () => ctx.postMessage({ type: "truncated" }),
   }).then(async (result) => {
     await new Promise((resolve) => setTimeout(resolve, REJECTION_SETTLE_MS));
     const final =

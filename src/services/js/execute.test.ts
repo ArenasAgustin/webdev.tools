@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
-import { formatValue, runJavaScript } from "@/services/js/execute";
+import {
+  formatValue,
+  MAX_OUTPUT_CHARS,
+  MAX_OUTPUT_LINES,
+  runJavaScript,
+} from "@/services/js/execute";
 import { serviceMessage } from "@/services/serviceMessage";
 
 const atLine = (message: string, line: number) =>
@@ -116,7 +121,7 @@ describe("runJavaScript", () => {
 
   it("prints BigInt values with the n suffix, also inside objects", async () => {
     const result = await runJavaScript("console.log(10n, { big: 2n ** 64n });");
-    expect(result.output).toBe('10n {\n  "big": "18446744073709551616n"\n}');
+    expect(result.output).toBe('10n {\n  "big": 18446744073709551616n\n}');
   });
 
   it("names the error type and the user code line of a runtime error", async () => {
@@ -137,6 +142,97 @@ describe("runJavaScript", () => {
   it("reports thrown non-Error values as they are", async () => {
     const result = await runJavaScript('throw "plain";');
     expect(result).toEqual({ ok: false, output: "", error: "plain" });
+  });
+});
+
+describe("runJavaScript output limits", () => {
+  it("stops collecting and streaming lines after MAX_OUTPUT_LINES", async () => {
+    const streamed: string[] = [];
+    let truncations = 0;
+    const result = await runJavaScript(
+      `for (let i = 0; i < ${MAX_OUTPUT_LINES + 500}; i++) console.log(i)`,
+      { onLog: (line) => streamed.push(line), onTruncate: () => truncations++ },
+    );
+    expect(result.ok).toBe(true);
+    expect(result.truncated).toBe(true);
+    expect(result.output.split("\n")).toHaveLength(MAX_OUTPUT_LINES);
+    expect(streamed).toHaveLength(MAX_OUTPUT_LINES);
+    expect(truncations).toBe(1);
+  });
+
+  it("caps the total characters, also for one huge line or returned value", async () => {
+    const logged = await runJavaScript(`console.log("x".repeat(${MAX_OUTPUT_CHARS * 2}))`);
+    expect(logged.truncated).toBe(true);
+    expect(logged.output).toHaveLength(MAX_OUTPUT_CHARS);
+    const returned = await runJavaScript(`"y".repeat(${MAX_OUTPUT_CHARS * 2})`);
+    expect(returned.truncated).toBe(true);
+    expect(returned.output).toHaveLength(MAX_OUTPUT_CHARS);
+  });
+
+  it("does not let console.clear reset the limit", async () => {
+    const streamed: string[] = [];
+    await runJavaScript(
+      `for (let i = 0; i < ${MAX_OUTPUT_LINES + 500}; i++) { console.log(i); console.clear(); }`,
+      { onLog: (line) => streamed.push(line) },
+    );
+    expect(streamed).toHaveLength(MAX_OUTPUT_LINES);
+  });
+
+  it("reports no truncation for normal output", async () => {
+    expect(await runJavaScript("console.log(1)")).toEqual({ ok: true, output: "1" });
+  });
+});
+
+describe("runJavaScript console methods", () => {
+  const run = async (code: string) => {
+    const result = await runJavaScript(code);
+    expect(result.ok).toBe(true);
+    return result.output;
+  };
+
+  it("prints console.dir like console.log", async () => {
+    expect(await run("console.dir({ a: 1 })")).toBe('{\n  "a": 1\n}');
+  });
+
+  it("measures console.time / timeLog / timeEnd and warns on unknown timers", async () => {
+    const output = await run(
+      'console.time("t"); console.timeLog("t", "mid"); console.timeEnd("t"); console.timeEnd("t"); console.time(); console.timeEnd();',
+    );
+    const lines = output.split("\n");
+    expect(lines[0]).toMatch(/^t: \d+(\.\d+)? ms mid$/);
+    expect(lines[1]).toMatch(/^t: \d+(\.\d+)? ms$/);
+    expect(lines[2]).toBe("WARN: Timer 't' does not exist");
+    expect(lines[3]).toMatch(/^default: \d+(\.\d+)? ms$/);
+  });
+
+  it("indents output inside console.group / groupCollapsed until groupEnd", async () => {
+    expect(
+      await run(
+        'console.group("g"); console.log(1); console.groupCollapsed("h"); console.log({ a: 1 }); console.groupEnd(); console.groupEnd(); console.groupEnd(); console.log(2)',
+      ),
+    ).toBe('g\n  1\n  h\n    {\n      "a": 1\n    }\n2');
+  });
+
+  it("prints failed assertions only", async () => {
+    expect(
+      await run('console.assert(true, "no"); console.assert(false, "boom", 1); console.assert(0)'),
+    ).toBe("ERROR: Assertion failed: boom 1\nERROR: Assertion failed");
+  });
+
+  it("counts per label and resets counters", async () => {
+    expect(
+      await run(
+        'console.count(); console.count(); console.count("x"); console.countReset(); console.count(); console.countReset("y")',
+      ),
+    ).toBe("default: 1\ndefault: 2\nx: 1\ndefault: 1\nWARN: Count for 'y' does not exist");
+  });
+
+  it("prints console.trace with its message", async () => {
+    expect(await run('console.trace("here", 1)')).toBe("Trace: here 1");
+  });
+
+  it("drops earlier output on console.clear", async () => {
+    expect(await run('console.log("old"); console.clear(); console.log("new")')).toBe("new");
   });
 });
 
@@ -187,10 +283,57 @@ describe("formatValue", () => {
       return 1;
     }
     const value = { err: new RangeError("too big"), tags: new Set(["a"]), handler };
-    expect(JSON.parse(formatValue(value))).toEqual({
-      err: "RangeError: too big",
-      tags: 'Set(1) {"a"}',
-      handler: "[Function: handler]",
-    });
+    expect(formatValue(value)).toBe(
+      '{\n  "err": RangeError: too big,\n  "tags": Set(1) {"a"},\n  "handler": [Function: handler]\n}',
+    );
+  });
+
+  it("prints values JSON cannot represent like the browser console", () => {
+    expect(formatValue(/abc/g)).toBe("/abc/g");
+    expect(formatValue(NaN)).toBe("NaN");
+    expect(formatValue(-0)).toBe("-0");
+    expect(formatValue({ a: NaN, b: Infinity, c: undefined, d: -0, r: /x/i })).toBe(
+      '{\n  "a": NaN,\n  "b": Infinity,\n  "c": undefined,\n  "d": -0,\n  "r": /x/i\n}',
+    );
+    // eslint-disable-next-line no-sparse-arrays -- the hole is the point of the test
+    expect(formatValue([undefined, , 3])).toBe("[\n  undefined,\n  empty,\n  3\n]");
+  });
+
+  it("prints dates, typed arrays and promises by type", () => {
+    expect(formatValue(new Date(0))).toBe("1970-01-01T00:00:00.000Z");
+    expect(formatValue(new Date(NaN))).toBe("Invalid Date");
+    expect(formatValue({ when: new Date(0) })).toBe('{\n  "when": 1970-01-01T00:00:00.000Z\n}');
+    expect(formatValue(new Uint8Array([1, 2]))).toBe("Uint8Array(2) [1, 2]");
+    expect(formatValue(Promise.resolve(1))).toBe("Promise {}");
+  });
+
+  it("prints circular references as [Circular]", () => {
+    const a: Record<string, unknown> = { x: 1 };
+    a.self = a;
+    expect(formatValue(a)).toBe('{\n  "x": 1,\n  "self": [Circular]\n}');
+    const list: unknown[] = [1];
+    list.push(list);
+    expect(formatValue(list)).toBe("[\n  1,\n  [Circular]\n]");
+    const shared = { n: 1 };
+    expect(formatValue([shared, shared])).toBe('[\n  {\n    "n": 1\n  },\n  {\n    "n": 1\n  }\n]');
+  });
+
+  it("does not crash on a throwing getter", () => {
+    const value = {
+      ok: 1,
+      get bad(): number {
+        throw new Error("g");
+      },
+    };
+    expect(formatValue(value)).toBe('{\n  "ok": 1,\n  "bad": [Exception: Error: g]\n}');
+  });
+
+  it("bounds very deep and very long values", () => {
+    let deep: Record<string, unknown> = {};
+    for (let i = 0; i < 100; i++) deep = { d: deep };
+    expect(formatValue(deep)).toContain("[Object]");
+    const long = formatValue(Array.from({ length: 1000 }, (_, i) => i));
+    expect(long).toContain("... 900 more items");
+    expect(long).not.toContain("999");
   });
 });

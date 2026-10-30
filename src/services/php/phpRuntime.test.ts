@@ -14,12 +14,13 @@ vi.mock("@php-wasm/universal", () => ({
 }));
 
 import { executePhp } from "./phpRuntime";
+import { serviceMessage } from "@/services/serviceMessage";
 
 /** Shape of what php-wasm returns, or throws on a non-zero exit code. */
 const response = (text: string, exitCode = 0) => ({ text, errors: "", exitCode });
-const failure = (text: string) =>
-  Object.assign(new Error("PHP.run() failed with exit code 255.\n\n=== Stdout ===\n ..."), {
-    response: response(text, 255),
+const failure = (text: string, exitCode = 255) =>
+  Object.assign(new Error(`PHP.run() failed with exit code ${exitCode}.\n\n=== Stdout ===\n ...`), {
+    response: response(text, exitCode),
   });
 
 describe("executePhp", () => {
@@ -90,6 +91,28 @@ describe("executePhp", () => {
     expect(result).toEqual({
       ok: false,
       error: { message: "Parse error: syntax error, unexpected ';' on line 2" },
+    });
+  });
+
+  it("keeps the output of a script that exits with a non-zero code", async () => {
+    run.mockRejectedValue(failure("hello\n", 1));
+
+    const result = await executePhp('echo "hello\n"; exit(1);');
+
+    expect(result).toEqual({
+      ok: false,
+      error: { message: serviceMessage("services.php.exitCode", { code: 1 }), output: "hello\n" },
+    });
+  });
+
+  it("reports a silent non-zero exit without php-wasm's internal dump", async () => {
+    run.mockRejectedValue(failure("", 3));
+
+    const result = await executePhp("exit(3);");
+
+    expect(result).toEqual({
+      ok: false,
+      error: { message: serviceMessage("services.php.exitCode", { code: 3 }) },
     });
   });
 });

@@ -110,11 +110,11 @@ describe("UrlPlayground branches (core)", () => {
     render(<UrlPlayground />);
     typeInput("a b");
     expect(getOutput().value).toBe("a%20b");
-    expect(screen.getByRole("button", { name: "Auto (encode)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Auto (Codificar)" })).toBeInTheDocument();
 
     typeInput("a%20b");
     expect(getOutput().value).toBe("a b");
-    expect(screen.getByRole("button", { name: "Auto (decode)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Auto (Decodificar)" })).toBeInTheDocument();
   });
 
   it("explicit modes skip detection and hide the detected label", () => {
@@ -221,14 +221,14 @@ describe("UrlPlayground branches (core)", () => {
     click(/Intercambiar/);
     expect(getInput().value).toBe("a%20b");
     expect(getOutput().value).toBe("a b");
-    expect(screen.getByRole("button", { name: "Auto (decode)" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Auto (Decodificar)" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
 
     click(/Intercambiar/);
     expect(getInput().value).toBe("a b");
-    expect(screen.getByRole("button", { name: "Auto (encode)" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Auto (Codificar)" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );

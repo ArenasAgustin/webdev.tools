@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createFakeLoader, createFakeMonaco, type FakeMonaco } from "@/test/fakeMonaco";
 import { DiffCodeEditor } from "./DiffCodeEditor";
 
@@ -71,5 +71,20 @@ describe("DiffCodeEditor", () => {
     const models = fake.diffEditors[0].getModel();
     expect(models?.original.getValue()).toBe("c");
     expect(models?.modified.getValue()).toBe("d");
+  });
+
+  it("shows a localized error with Retry instead of loading forever when Monaco fails to load", async () => {
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    render(<DiffCodeEditor original="a" modified="b" language="json" />);
+
+    await act(async () => fakeLoader.reject());
+
+    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo cargar el editor");
+    expect(screen.queryByText("Cargando editor...")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    expect(reload).toHaveBeenCalledOnce();
+    vi.unstubAllGlobals();
   });
 });
