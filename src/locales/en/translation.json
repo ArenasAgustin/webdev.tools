@@ -242,7 +242,10 @@
     "matchSuccess": "Hash matches",
     "matchFail": "Hash does NOT match",
     "generateError": "Could not generate the hashes. The file may be unreadable or too large.",
-    "emptyInput": "Enter some text to generate its hashes"
+    "emptyInput": "Enter some text to generate its hashes",
+    "emptyFile": "Select a file to generate its hashes",
+    "compareEmpty": "Enter a hash to compare",
+    "compareNeedsHashes": "Generate the hashes first, then compare"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",

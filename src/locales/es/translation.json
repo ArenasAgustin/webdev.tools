@@ -242,7 +242,10 @@
     "matchSuccess": "El hash coincide",
     "matchFail": "El hash NO coincide",
     "generateError": "No se pudieron generar los hashes. El archivo puede ser ilegible o demasiado grande.",
-    "emptyInput": "Ingresá un texto para generar sus hashes"
+    "emptyInput": "Ingresá un texto para generar sus hashes",
+    "emptyFile": "Seleccioná un archivo para generar sus hashes",
+    "compareEmpty": "Ingresá un hash para comparar",
+    "compareNeedsHashes": "Generá los hashes primero y después compará"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",

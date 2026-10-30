@@ -53,6 +53,8 @@ export function HashPlayground() {
   const [emptyAttempt, setEmptyAttempt] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [comparison, setComparison] = useState<Comparison | null>(null);
+  // Why the last Compare click did nothing; shown only while that still holds.
+  const [compareHint, setCompareHint] = useState<"emptyValue" | "noHashes" | null>(null);
   const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,6 +108,7 @@ export function HashPlayground() {
         setGenerated({ ...source, results: hashes });
       } else {
         setGenerated(null);
+        setEmptyAttempt(true);
       }
     } catch (error) {
       console.error("Hash generation error:", error);
@@ -131,7 +134,15 @@ export function HashPlayground() {
   const handleCompare = useCallback(() => {
     // Pasted hashes often carry stray whitespace or the other letter case
     const expected = compareValue.trim().toLowerCase();
-    if (!expected || !generated || results.length === 0) return;
+    if (!expected) {
+      setCompareHint("emptyValue");
+      return;
+    }
+    if (!generated || results.length === 0) {
+      setCompareHint("noHashes");
+      return;
+    }
+    setCompareHint(null);
 
     const match = results.find((r) => r.hash.toLowerCase() === expected);
     setComparison({ value: compareValue, source: generated, match: match !== undefined });
@@ -246,10 +257,10 @@ export function HashPlayground() {
         </div>
       </div>
 
-      {/* Shown after Generate on empty text, until something is typed */}
-      {emptyAttempt && inputMode === "text" && !textInput && (
+      {/* Shown after Generate on empty input, until text is typed or a file picked */}
+      {emptyAttempt && (inputMode === "text" ? !textInput : !fileInput) && (
         <p role="status" className="text-gray-400 text-sm">
-          {t("hash.emptyInput")}
+          {t(inputMode === "text" ? "hash.emptyInput" : "hash.emptyFile")}
         </p>
       )}
 
@@ -310,6 +321,16 @@ export function HashPlayground() {
             {t("hash.compareAction")}
           </button>
         </div>
+        {compareHint === "emptyValue" && !compareValue.trim() && (
+          <p role="status" className="text-gray-400 text-sm">
+            {t("hash.compareEmpty")}
+          </p>
+        )}
+        {compareHint === "noHashes" && compareValue.trim() && results.length === 0 && (
+          <p role="status" className="text-gray-400 text-sm">
+            {t("hash.compareNeedsHashes")}
+          </p>
+        )}
         {compareResult !== null && (
           <p className={`text-sm font-medium ${compareResult ? "text-green-400" : "text-red-400"}`}>
             {compareResult ? `✅ ${t("hash.matchSuccess")}` : `❌ ${t("hash.matchFail")}`}
