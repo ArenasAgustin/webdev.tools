@@ -128,4 +128,25 @@ describe("usePersistedState", () => {
     });
     expect(result.current[2]).toBe(false);
   });
+
+  it("saves a pending value when the page is hidden or unloaded, before the debounce fires", () => {
+    getItemMock.mockReturnValue(null);
+    const { result } = renderHook(() => usePersistedState("test-key", "a"));
+    setItemMock.mockClear();
+
+    act(() => {
+      result.current[1]("typed just before closing");
+    });
+    window.dispatchEvent(new Event("pagehide"));
+    expect(setItemMock).toHaveBeenCalledWith("test-key", "typed just before closing");
+
+    setItemMock.mockClear();
+    act(() => {
+      result.current[1]("typed before switching tabs");
+    });
+    vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+    document.dispatchEvent(new Event("visibilitychange"));
+    expect(setItemMock).toHaveBeenCalledWith("test-key", "typed before switching tabs");
+    vi.restoreAllMocks();
+  });
 });

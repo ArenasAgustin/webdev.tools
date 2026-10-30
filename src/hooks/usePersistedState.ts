@@ -12,6 +12,8 @@ import { useDebouncedValue } from "./useDebouncedValue";
  * Flush-on-unmount: a separate cleanup-only effect keyed on [key] writes the
  * latest in-memory value synchronously when the component unmounts, ensuring
  * no data is lost if unmount happens before the debounce fires.
+ * The same write runs on pagehide / visibilitychange to hidden, since closing
+ * or reloading the tab does not unmount.
  *
  * The third element is true while the latest debounced value could not be
  * saved (e.g. it exceeds the storage quota), so the caller can tell the user it
@@ -38,6 +40,23 @@ export function usePersistedState<T>(
     // eslint-disable-next-line react-hooks/set-state-in-effect, @eslint-react/set-state-in-effect -- the outcome of the localStorage write is only known after it runs
     setPersistFailed(!saved);
   }, [key, debouncedValue]);
+
+  // Closing or reloading the tab does not unmount React, so a value typed within
+  // the debounce window would be lost: save it when the page is hidden or left.
+  useEffect(() => {
+    const flush = () => {
+      setItem(key, valueRef.current);
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [key]);
 
   // Flush-on-unmount: keyed on [key] so it only runs the cleanup on unmount
   // (not on every value change). Writes valueRef.current which always holds
