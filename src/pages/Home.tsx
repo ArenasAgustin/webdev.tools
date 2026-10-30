@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PlaygroundCard } from "@/components/layout/PlaygroundCard";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import {
   playgroundRegistry,
   preloadAllPlaygrounds,
@@ -33,16 +34,21 @@ export function Home() {
         <div className="pointer-events-none absolute top-40 -left-24 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-3xl"></div>
 
         <div className="relative container mx-auto px-4 py-14 sm:py-20 h-full">
-          <header className="mx-auto max-w-3xl text-center">
-            <p className="text-xs uppercase tracking-[0.35em] text-cyan-200/70">
-              {t("home.tagline")}
-            </p>
-            <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              {t("home.headline")}
-            </h1>
-            <p className="mt-4 text-base text-white/70 sm:text-lg">
-              {t("home.description")}
-            </p>
+          <header>
+            <div className="-mt-8 mb-6 flex justify-end sm:-mt-12">
+              <LanguageSelector />
+            </div>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-xs uppercase tracking-[0.35em] text-cyan-200/70">
+                {t("home.tagline")}
+              </p>
+              <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
+                {t("home.headline")}
+              </h1>
+              <p className="mt-4 text-base text-white/70 sm:text-lg">
+                {t("home.description")}
+              </p>
+            </div>
           </header>
 
           <main className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
