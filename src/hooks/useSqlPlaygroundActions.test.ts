@@ -6,7 +6,15 @@ import type { SqlExecuteResult } from "@/types/sql";
 const { executeSqlAsyncMock, resetSqlAsyncMock, formatSqlAsyncMock, minifySqlAsyncMock, downloadFileMock } =
   vi.hoisted(() => ({
     downloadFileMock: vi.fn(),
-    executeSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: SqlExecuteResult; error?: string }>>(),
+    executeSqlAsyncMock: vi.fn<
+      (input: string) => Promise<{
+        ok: boolean;
+        value?: SqlExecuteResult;
+        error?: string;
+        databaseReset?: true;
+        partial?: SqlExecuteResult;
+      }>
+    >(),
     resetSqlAsyncMock: vi.fn<() => Promise<{ ok: boolean; value?: string; error?: string }>>(),
     formatSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
     minifySqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
@@ -119,6 +127,24 @@ describe("useSqlPlaygroundActions", () => {
     expect(result.current.isFirstRun).toBe(false);
   });
 
+  it("execute error keeps the result sets of the statements that ran before it", async () => {
+    executeSqlAsyncMock.mockResolvedValue({ ok: false, error: "Sentencia 2: no such table: nope", partial: mockResult });
+    const props = makeProps();
+    const { result } = renderHook(() => useSqlPlaygroundActions(props));
+
+    act(() => {
+      result.current.handleExecute();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isExecuting).toBe(false);
+    });
+
+    expect(props.setOutput).toHaveBeenLastCalledWith(JSON.stringify(mockResult, null, 2));
+    expect(props.setError).toHaveBeenLastCalledWith("Sentencia 2: no such table: nope");
+    expect(props.toast.error).toHaveBeenCalledWith("Sentencia 2: no such table: nope");
+  });
+
   it("execute error toast shows a compact message, the panel keeps the details", async () => {
     const error = `Parse error on line 1:\n${"SELEKT * FROM users\n^---\n".repeat(200)}`;
     executeSqlAsyncMock.mockResolvedValue({ ok: false, error });
@@ -181,6 +207,38 @@ describe("useSqlPlaygroundActions", () => {
     expect(props.setOutput).toHaveBeenCalledWith("");
     expect(props.setError).toHaveBeenCalledWith(null);
     expect(props.toast.success).toHaveBeenCalledWith("Base de datos reseteada");
+  });
+
+  it("after a timeout reset the next run shows the loading state again", async () => {
+    executeSqlAsyncMock.mockResolvedValue({ ok: false, error: "timed out", databaseReset: true });
+    const props = makeProps();
+    const { result } = renderHook(() => useSqlPlaygroundActions(props));
+
+    act(() => {
+      result.current.handleExecute();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isExecuting).toBe(false);
+    });
+    expect(props.toast.error).toHaveBeenCalledWith("timed out");
+    expect(result.current.isFirstRun).toBe(true);
+  });
+
+  it("reset failure shows the error and keeps the output", async () => {
+    resetSqlAsyncMock.mockResolvedValue({ ok: false, error: "Reset failed" });
+    const props = makeProps({ output: "some output" });
+    const { result } = renderHook(() => useSqlPlaygroundActions(props));
+
+    act(() => {
+      result.current.handleReset();
+    });
+
+    await waitFor(() => {
+      expect(props.toast.error).toHaveBeenCalledWith("Reset failed");
+    });
+    expect(props.toast.success).not.toHaveBeenCalled();
+    expect(props.setOutput).not.toHaveBeenCalled();
   });
 
   it("isProcessing is true while executing", async () => {

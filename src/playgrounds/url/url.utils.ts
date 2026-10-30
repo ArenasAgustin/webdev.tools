@@ -110,6 +110,7 @@ export function decodeUrl(input: string, variant: UrlVariant): string {
  * Without `%XX` escapes, a `+` only counts as form data when the whole input could be
  * form-encoder output (unreserved characters and `+`); text like "1+1=2" holds `=`,
  * which the encoder would have escaped, so it is plain text.
+ * Each `+` must also join two words, so "C++" or "+1" stay plain text.
  */
 export function isLikelyUrlEncoded(input: string, variant: UrlVariant): boolean {
   if (input === "") {
@@ -121,7 +122,9 @@ export function isLikelyUrlEncoded(input: string, variant: UrlVariant): boolean 
   if (/\s/.test(input)) {
     return false;
   }
-  return variant === "form" && input.includes("+") && /^[A-Za-z0-9\-_.!~*'()+]+$/.test(input);
+  // Every "+" must join two words: a leading, trailing or doubled "+" ("C++", "+1")
+  // would be an encoded edge or double space, which is far less likely than plain text.
+  return variant === "form" && /^[A-Za-z0-9\-_.!~*'()]+(?:\+[A-Za-z0-9\-_.!~*'()]+)+$/.test(input);
 }
 
 /** Resolve the effective encode/decode direction from mode + current input. */

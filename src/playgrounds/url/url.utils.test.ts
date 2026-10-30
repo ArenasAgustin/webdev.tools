@@ -204,6 +204,12 @@ describe("isLikelyUrlEncoded", () => {
     ["c++/notes", "form", false],
     ["a+b&c", "form", false],
     ["1+1=2%21", "form", true],
+    // a "+" that does not join two words would encode a leading, trailing or doubled
+    // space, which real text rarely has; "C++" is plain text
+    ["C++", "form", false],
+    ["+1", "form", false],
+    ["a++b", "form", false],
+    ["what+is+C", "form", true],
   ] as [string, UrlVariant, boolean][])("%j (%s) -> %s", (input, variant, expected) => {
     expect(isLikelyUrlEncoded(input, variant)).toBe(expected);
   });

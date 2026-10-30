@@ -46,6 +46,25 @@ describe("executePhp", () => {
     expect(run).toHaveBeenCalledWith({ code: "<?php echo 1;\necho 2;" });
   });
 
+  it("runs tagless code whose string holds an open tag as PHP, not inline HTML", async () => {
+    run.mockResolvedValue(response("<?php"));
+
+    await executePhp('echo "<?php";');
+
+    expect(run).toHaveBeenCalledWith({ code: '<?php echo "<?php";' });
+  });
+
+  it("keeps leading blank lines so error line numbers match the editor", async () => {
+    run.mockResolvedValue(response("1"));
+
+    await executePhp("\n\necho 1;");
+    expect(run).toHaveBeenLastCalledWith({ code: "<?php \n\necho 1;" });
+
+    // Before an open tag the blank lines move inside it, so they print nothing.
+    await executePhp("\n\n<?php echo 1;");
+    expect(run).toHaveBeenLastCalledWith({ code: "<?php\n\n echo 1;" });
+  });
+
   it("reports warnings as plain text, in order with the output", async () => {
     run.mockResolvedValue(
       response("a\nNotice: Undefined variable: undef in /internal/eval.php on line 2\nb"),

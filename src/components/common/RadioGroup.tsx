@@ -6,7 +6,10 @@ interface RadioOption<T> {
 }
 
 interface RadioGroupProps<T extends string> {
+  /** Form name shared by the radios (not shown or announced) */
   name: string;
+  /** Accessible name of the group, announced by screen readers */
+  label: string;
   value: T;
   options: RadioOption<T>[];
   onChange: (value: T) => void;
@@ -27,6 +30,7 @@ const colorMap = {
  */
 export function RadioGroup<T extends string>({
   name,
+  label,
   value,
   options,
   onChange,
@@ -37,7 +41,7 @@ export function RadioGroup<T extends string>({
 
   return (
     <fieldset className={cn("flex gap-4 mt-2", className)}>
-      <legend className="sr-only">{name}</legend>
+      <legend className="sr-only">{label}</legend>
       {options.map((option) => (
         <label key={option.value} className="flex items-center gap-2 cursor-pointer">
           <input

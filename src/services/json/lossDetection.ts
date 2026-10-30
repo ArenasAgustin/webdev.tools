@@ -13,30 +13,37 @@ export interface JsonLossReport {
   duplicateKeys: boolean;
 }
 
-/** Max significant decimal digits that always survive a double round-trip unchanged. */
-const MAX_SIGNIFICANT_DIGITS = 17;
-
 const NUMBER_PATTERN = /-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
 
-function significantDigits(token: string): string {
-  const mantissa = token.replace(/^-/, "").replace(/[eE].*$/, "").replace(".", "");
-  return mantissa.replace(/^0+/, "").replace(/0+$/, "");
+/**
+ * The decimal value a number literal names, independent of how it is written:
+ * sign, significant digits and the position of the decimal point
+ * ("1e3", "1000" and "1000.0" all give "1e4"; zero gives "0").
+ */
+function canonicalDecimal(literal: string): string {
+  const [mantissa, exponent = "0"] = literal.toLowerCase().split("e");
+  const negative = mantissa.startsWith("-");
+  const [integer, fraction = ""] = mantissa.replace("-", "").split(".");
+  let digits = integer + fraction;
+  let point = integer.length + Number(exponent);
+  const leadingZeros = /^0*/.exec(digits)?.[0].length ?? 0;
+  digits = digits.slice(leadingZeros).replace(/0+$/, "");
+  point -= leadingZeros;
+  if (!digits) return "0";
+  return `${negative ? "-" : ""}${digits}e${point}`;
 }
 
+/**
+ * True when JSON.parse + JSON.stringify would not write back the same value:
+ * overflow to Infinity, underflow to 0, more digits than a double keeps
+ * (big integers, most 17+ digit decimals), or -0 (written as 0).
+ */
 function losesPrecision(token: string): boolean {
   const value = Number(token);
-  if (!Number.isFinite(value)) return true;
-
-  const isPlainInteger = /^-?\d+$/.test(token);
-  if (isPlainInteger) {
-    if (Number.isSafeInteger(value)) return false;
-    return BigInt(token) !== BigInt(value);
-  }
-
-  const digits = significantDigits(token);
-  // Underflow: a non-zero literal that became 0
-  if (value === 0) return digits.length > 0;
-  return digits.length > MAX_SIGNIFICANT_DIGITS;
+  if (!Number.isFinite(value) || Object.is(value, -0)) return true;
+  // String(value) is the shortest literal that reads back as this double,
+  // the same digits JSON.stringify writes.
+  return canonicalDecimal(token) !== canonicalDecimal(String(value));
 }
 
 interface Frame {

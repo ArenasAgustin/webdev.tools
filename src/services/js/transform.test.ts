@@ -54,6 +54,19 @@ describe("minifyJs", () => {
     expect(minifyJs("   \n  ")).toEqual({ ok: true, value: "" });
   });
 
+  it("minifies module code with top-level await, keeping top-level names", () => {
+    const result = minifyJs("const data = await fetch('x');\nexport const total = 1;");
+
+    expect(result).toEqual({
+      ok: true,
+      value: 'const data=await fetch("x");export const total=1;',
+    });
+  });
+
+  it("still minifies sloppy-mode scripts as scripts", () => {
+    expect(minifyJs("var a = 010; with (obj) { a; }").ok).toBe(true);
+  });
+
   it("removes comments and spaces by default", () => {
     const input = `
       // one

@@ -53,10 +53,23 @@ describe("useKeyboardShortcuts", () => {
       expect(onFormat).toHaveBeenCalledTimes(1);
     });
 
-    it("Ctrl+Shift+M triggers onMinify", () => {
+    it("Alt+Shift+M triggers onMinify, matched by key code (Option+Shift+M types Â on a Mac)", () => {
       renderShortcuts();
-      fireEvent.keyDown(window, { key: "M", ctrlKey: true, shiftKey: true });
-      expect(onMinify).toHaveBeenCalledTimes(1);
+      fireEvent.keyDown(window, { key: "M", code: "KeyM", altKey: true, shiftKey: true });
+      fireEvent.keyDown(window, { key: "Â", code: "KeyM", altKey: true, shiftKey: true });
+      expect(onMinify).toHaveBeenCalledTimes(2);
+    });
+
+    it("leaves the browser-reserved Ctrl+Shift+M and Ctrl+Shift+Delete alone", () => {
+      renderShortcuts();
+      const minify = new KeyboardEvent("keydown", { key: "M", code: "KeyM", ctrlKey: true, shiftKey: true, cancelable: true });
+      const clear = new KeyboardEvent("keydown", { key: "Delete", ctrlKey: true, shiftKey: true, cancelable: true });
+      window.dispatchEvent(minify);
+      window.dispatchEvent(clear);
+      expect(onMinify).not.toHaveBeenCalled();
+      expect(onClearInput).not.toHaveBeenCalled();
+      expect(minify.defaultPrevented).toBe(false);
+      expect(clear.defaultPrevented).toBe(false);
     });
 
     it("Ctrl+Shift+L triggers onClean", () => {
@@ -71,9 +84,9 @@ describe("useKeyboardShortcuts", () => {
       expect(onCopyOutput).toHaveBeenCalledTimes(1);
     });
 
-    it("Ctrl+Shift+Delete triggers onClearInput", () => {
+    it("Ctrl+Shift+Backspace triggers onClearInput", () => {
       renderShortcuts();
-      fireEvent.keyDown(window, { key: "Delete", ctrlKey: true, shiftKey: true });
+      fireEvent.keyDown(window, { key: "Backspace", ctrlKey: true, shiftKey: true });
       expect(onClearInput).toHaveBeenCalledTimes(1);
     });
 
@@ -185,7 +198,7 @@ describe("useKeyboardShortcuts", () => {
       editor.appendChild(textarea);
       document.body.appendChild(editor);
 
-      fireEvent.keyDown(textarea, { key: "M", ctrlKey: true, shiftKey: true });
+      fireEvent.keyDown(textarea, { key: "M", code: "KeyM", altKey: true, shiftKey: true });
 
       expect(onMinify).toHaveBeenCalledTimes(1);
       document.body.removeChild(editor);

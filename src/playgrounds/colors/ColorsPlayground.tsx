@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { HexColorPicker } from "react-colorful";
 import { colorsConfig } from "./colors.config";
@@ -10,6 +10,15 @@ import { STORAGE_KEYS } from "@/services/storage";
 
 export function ColorsPlayground() {
   const { t } = useTranslation();
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // react-colorful hardcodes English slider names ("Color", "Hue") and takes no
+  // label props; React never rewrites them, so set the translated names here.
+  useEffect(() => {
+    const [saturation, hue] = pickerRef.current?.querySelectorAll('[role="slider"]') ?? [];
+    saturation?.setAttribute("aria-label", t("colors.saturationLabel"));
+    hue?.setAttribute("aria-label", t("colors.hueLabel"));
+  }, [t]);
   // Only valid colors are persisted; the text box itself may hold an invalid draft.
   const [storedInput, setStoredInput] = usePersistedState(
     STORAGE_KEYS.COLORS_INPUT,
@@ -69,13 +78,16 @@ export function ColorsPlayground() {
     <div className="flex flex-1 min-h-0 overflow-y-auto flex-col lg:flex-row gap-4">
       {/* Left: Color picker + text input */}
       <div className="flex flex-col gap-4 lg:w-1/2">
-        <HexColorPicker color={color} onChange={handleColorChange} className="!w-full" />
+        <div ref={pickerRef}>
+          <HexColorPicker color={color} onChange={handleColorChange} className="!w-full" />
+        </div>
         <input
           type="text"
           value={input}
           onChange={(e) => handleInputChange(e.target.value)}
           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono text-center focus:outline-none focus:ring-1 focus:ring-cyan-400"
           placeholder={t("colors.placeholder")}
+          aria-label={t("colors.inputLabel")}
           spellCheck={false}
           aria-invalid={isInvalid}
           aria-describedby={isInvalid ? "colors-input-error" : undefined}
@@ -107,7 +119,7 @@ export function ColorsPlayground() {
               <button
                 type="button"
                 onClick={() => copyToClipboard(value)}
-                className="ml-3 text-gray-400 hover:text-white transition-colors"
+                className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors"
                 title={t("colors.copy", { format })}
                 aria-label={t("colors.copy", { format })}
               >

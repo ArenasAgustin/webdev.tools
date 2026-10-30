@@ -47,6 +47,13 @@ describe("ConfigModal indent options", () => {
     expect(screen.queryByText(/espacios/)).not.toBeInTheDocument();
   });
 
+  it("names the clean output format group in the UI language", () => {
+    renderJsonConfig();
+
+    expect(screen.getByRole("group", { name: "Formato de salida" })).toBeInTheDocument();
+    expect(screen.queryByText("cleanOutputMode")).not.toBeInTheDocument();
+  });
+
   it("keeps the Spanish labels in Spanish", () => {
     renderJsonConfig();
 

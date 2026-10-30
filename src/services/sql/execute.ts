@@ -6,6 +6,7 @@
 import type { Database, Statement } from "sql.js";
 import type { SqlResultSet } from "@/types/sql";
 import { CELL_CAP } from "@/services/sql/worker.types";
+import { serviceMessage } from "@/services/serviceMessage";
 
 type Cell = SqlResultSet["rows"][number][number];
 /** A value as sql.js reads it, before toCell turns it into a Cell. */
@@ -18,6 +19,20 @@ export interface StatementsResult {
   truncated: boolean;
   /** Present (true) when any long text or BLOB value was cut to the cell cap. */
   valuesTruncated?: true;
+}
+
+/**
+ * A statement of the script failed. `partial` holds the result sets of the
+ * statements that ran before it, so they can be shown next to the error.
+ */
+export class SqlStatementError extends Error {
+  readonly partial: StatementsResult;
+
+  constructor(message: string, partial: StatementsResult, options?: ErrorOptions) {
+    super(message, options);
+    this.name = "SqlStatementError";
+    this.partial = partial;
+  }
 }
 
 // sql.js reads integers as bigint with this option; @types/sql.js does not declare it.
@@ -80,6 +95,10 @@ export function roundElapsedMs(ms: number): number {
  * Stopping early is safe: SELECTs have no side effects, and SQLite applies every
  * change of a `RETURNING` statement on its first step. Each value is also bounded
  * by `cellCap` (see toCell).
+ *
+ * A failing statement throws a `services.sql.statementError` message naming its
+ * statement number, so the user can tell which part of the script broke, as a
+ * SqlStatementError carrying the result sets read before it.
  */
 export function runStatements(
   db: Database,
@@ -91,11 +110,40 @@ export function runStatements(
   let remaining = rowCap;
   let statement = 0;
 
-  // The iterator frees each statement when it advances to the next one.
-  for (const stmt of db.iterateStatements(sql)) {
-    statement++;
+  // The statement being read, until the iterator advances (and frees it). The
+  // iterator has no return(), so a statement whose step() throws is freed here.
+  let current: Statement | null = null;
+  try {
+    for (const stmt of db.iterateStatements(sql)) {
+      current = stmt;
+      statement++;
+      readStatement(stmt);
+      current = null;
+    }
+  } catch (err) {
+    current?.free();
+    // Without a current statement, the next one failed to prepare.
+    throw new SqlStatementError(
+      serviceMessage("services.sql.statementError", {
+        statement: current ? statement : statement + 1,
+        message: err instanceof Error ? err.message : String(err),
+      }),
+      collect(),
+      { cause: err },
+    );
+  }
+
+  return collect();
+
+  function collect(): StatementsResult {
+    const result: StatementsResult = { resultSets, truncated: resultSets.some((set) => set.truncated) };
+    if (resultSets.some((set) => set.valuesTruncated)) result.valuesTruncated = true;
+    return result;
+  }
+
+  function readStatement(stmt: Statement): void {
     if (!stmt.step()) {
-      continue;
+      return;
     }
     const columns = stmt.getColumnNames();
     const rows: SqlResultSet["rows"] = [];
@@ -121,8 +169,4 @@ export function runStatements(
         : { statement, columns, rows, truncated },
     );
   }
-
-  const result: StatementsResult = { resultSets, truncated: resultSets.some((set) => set.truncated) };
-  if (resultSets.some((set) => set.valuesTruncated)) result.valuesTruncated = true;
-  return result;
 }

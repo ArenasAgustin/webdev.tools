@@ -1,9 +1,11 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { timestampConfig } from "./timestamp.config";
 import {
+  ambiguousDayMonth,
   convertTimestamp,
   getCurrentTimestamp,
+  isSupportedTimezone,
   withUtc,
   type TimestampResult,
   type UnixUnit,
@@ -38,11 +40,14 @@ const UNIT_KEYS: Record<UnixUnit, string> = {
   milliseconds: "timestamp.unitMilliseconds",
 };
 
+const DEFAULT_TIMEZONE = "America/Argentina/Buenos_Aires";
+
 /** How often the relative time is refreshed while a result is shown, in ms. */
 const RELATIVE_TICK_MS = 1000;
 
 export function TimestampPlayground() {
   const { t, i18n } = useTranslation();
+  const timezoneLabelId = useId();
   // resolvedLanguage is the translation in use (en for en-US, and the English
   // fallback for fr-FR); the raw detected language would read those as Spanish.
   const lang = (i18n.resolvedLanguage ?? i18n.language) === "es" ? "es" : "en";
@@ -56,10 +61,13 @@ export function TimestampPlayground() {
   // language change refreshes the shown formats without converting again.
   const [convertedInput, setConvertedInput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [timezone, setTimezone] = usePersistedState(
+  const [savedTimezone, setTimezone] = usePersistedState(
     STORAGE_KEYS.TIMESTAMP_TIMEZONE,
-    "America/Argentina/Buenos_Aires",
+    DEFAULT_TIMEZONE,
   );
+  // A saved zone this browser does not know (renamed, or saved by another engine)
+  // would make every conversion throw a RangeError; use the default instead.
+  const timezone = isSupportedTimezone(savedTimezone) ? savedTimezone : DEFAULT_TIMEZONE;
 
   // Reference clock for the relative time; refreshed every second while a result is
   // shown so "5 seconds ago" keeps moving instead of freezing at conversion time.
@@ -88,7 +96,8 @@ export function TimestampPlayground() {
       setNow(Date.now());
       setConvertedInput(input);
     } else {
-      setError(t("timestamp.invalidInput"));
+      const ambiguous = ambiguousDayMonth(input);
+      setError(ambiguous ? t("timestamp.ambiguousDate", ambiguous) : t("timestamp.invalidInput"));
       setConvertedInput(null);
     }
   }, [input, timezone, lang, t]);
@@ -140,14 +149,18 @@ export function TimestampPlayground() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleConvert()}
           placeholder={t("timestamp.placeholder")}
+          aria-label={t("timestamp.inputLabel")}
           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-3 text-white font-mono focus:outline-none focus:ring-1 focus:ring-cyan-400"
           spellCheck={false}
         />
 
         {/* Timezone selector */}
         <div className="flex items-center gap-2">
-          <label className="text-gray-300 text-sm">{t("timestamp.timezoneLabel")}:</label>
+          <span id={timezoneLabelId} className="text-gray-300 text-sm">
+            {t("timestamp.timezoneLabel")}:
+          </span>
           <SearchableSelect
+            labelId={timezoneLabelId}
             value={timezone}
             onChange={setTimezone}
             options={ALL_TIMEZONES}
@@ -219,7 +232,7 @@ export function TimestampPlayground() {
               <button
                 type="button"
                 onClick={() => copyToClipboard(String(result[key]))}
-                className="ml-3 text-gray-400 hover:text-white transition-colors"
+                className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors"
                 title={t("common.copy")}
                 aria-label={`${t("common.copy")} ${label}`}
               >

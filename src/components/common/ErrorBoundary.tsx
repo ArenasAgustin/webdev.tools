@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from "react";
+import { Component, createRef, type ReactNode } from "react";
 import { withTranslation, type WithTranslation } from "react-i18next";
 
 interface ErrorBoundaryOwnProps {
@@ -14,6 +14,8 @@ interface ErrorBoundaryState {
 }
 
 class ErrorBoundaryBase extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private headingRef = createRef<HTMLHeadingElement>();
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -29,9 +31,8 @@ class ErrorBoundaryBase extends Component<ErrorBoundaryProps, ErrorBoundaryState
 
   componentDidUpdate(_prevProps: ErrorBoundaryProps, prevState: ErrorBoundaryState) {
     if (this.state.hasError && !prevState.hasError) {
-      // Focus the error heading for keyboard/screen reader users
-      const heading = document.querySelector(".text-lg.font-semibold.text-white");
-      if (heading instanceof HTMLElement) heading.focus();
+      // Focus this boundary's error heading for keyboard/screen reader users
+      this.headingRef.current?.focus();
     }
   }
 
@@ -49,9 +50,14 @@ class ErrorBoundaryBase extends Component<ErrorBoundaryProps, ErrorBoundaryState
             <i className="fas fa-triangle-exclamation text-2xl text-red-400" aria-hidden="true"></i>
           </div>
           <div className="space-y-2">
-             <h2 className="text-lg font-semibold text-white" title={this.state.error?.message}>
-               {name ? t("error.title", { name }) : t("error.titleDefault")}
-             </h2>
+            <h2
+              ref={this.headingRef}
+              tabIndex={-1}
+              className="text-lg font-semibold text-white focus:outline-none"
+              title={this.state.error?.message}
+            >
+              {name ? t("error.title", { name }) : t("error.titleDefault")}
+            </h2>
             <p className="max-w-sm text-sm text-white/60">
               {t("error.message")}
             </p>

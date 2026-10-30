@@ -59,4 +59,9 @@ describe("Stats", () => {
     const { container } = renderWithI18n(<Stats lines={1} characters={1} bytes={500} />);
     expect(container.textContent).not.toContain("%");
   });
+
+  it("separates the size from the comparison with a space", () => {
+    const { container } = render(<Stats lines={1} characters={10} bytes={150} comparisonBytes={1000} />);
+    expect(container.textContent).toContain("B (85% ");
+  });
 });

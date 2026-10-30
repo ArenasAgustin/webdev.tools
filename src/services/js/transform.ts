@@ -1,6 +1,7 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { serviceMessage } from "@/services/serviceMessage";
+import { friendlySyntaxError } from "@/services/syntaxErrors";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 import { minify_sync as terserMinifySync } from "terser";
 import * as babelParser from "@babel/parser";
@@ -35,6 +36,7 @@ type TerserSyncMinifyFn = (
       comments: boolean;
       beautify: boolean;
     };
+    parse?: { module: boolean };
   },
 ) => TerserSyncResult | null | undefined;
 
@@ -51,7 +53,10 @@ export async function formatJs(
     return { ok: true, value: formatted };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || serviceMessage("services.js.formatError") };
+    return {
+      ok: false,
+      error: friendlySyntaxError(error) ?? (message || serviceMessage("services.js.formatError")),
+    };
   }
 }
 
@@ -70,20 +75,33 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
 
     const minifySync = minifySyncUnknown as TerserSyncMinifyFn;
 
-    const result = minifySync(input, {
+    const minifyOptions = {
       compress: removeSpaces,
       mangle: removeSpaces,
       format: {
         comments: !removeComments,
         beautify: !removeSpaces,
       },
-    });
+    };
+    let result: ReturnType<TerserSyncMinifyFn>;
+    try {
+      // Parsed as a script first: module parsing is strict and rejects sloppy code.
+      result = minifySync(input, minifyOptions);
+    } catch (scriptError) {
+      // Top-level await (and import/export) only parse as a module. Only the
+      // parser is told so: top-level names are kept, as in script mode.
+      try {
+        result = minifySync(input, { ...minifyOptions, parse: { module: true } });
+      } catch {
+        throw scriptError;
+      }
+    }
 
     const code = typeof result?.code === "string" ? result.code : "";
     return { ok: true, value: code.trim() };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message };
+    return { ok: false, error: friendlySyntaxError(error) ?? message };
   }
 }
 

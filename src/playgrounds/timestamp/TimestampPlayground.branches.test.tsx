@@ -142,6 +142,17 @@ describe("TimestampPlayground branches", () => {
     expect(screen.getByText("timestamp.invalidInput")).toBeInTheDocument();
   });
 
+  it("handleConvert: an ambiguous day/month date asks for an unambiguous format", () => {
+    render(<TimestampPlayground />);
+
+    const input = screen.getByPlaceholderText("timestamp.placeholder");
+    fireEvent.change(input, { target: { value: "01/02/2024" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
+
+    expect(screen.getByText("timestamp.ambiguousDate")).toBeInTheDocument();
+    expect(screen.queryByText("timestamp.invalidInput")).not.toBeInTheDocument();
+  });
+
   it("handleNow: populates input with current unix timestamp and converts", () => {
     render(<TimestampPlayground />);
 
@@ -267,6 +278,21 @@ describe("TimestampPlayground branches", () => {
 
     // Component still renders correctly with the new timezone
     expect(screen.getByText("timestamp.formats.humanReadable")).toBeInTheDocument();
+  });
+
+  it("falls back to the default timezone when the saved one is unknown to the browser", () => {
+    getItemMock.mockImplementation(
+      ((key: string) => (key === "timestampTimezone" ? "Mars/Olympus" : null)) as never,
+    );
+    render(<TimestampPlayground />);
+
+    fireEvent.change(screen.getByPlaceholderText("timestamp.placeholder"), {
+      target: { value: "1704067200" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
+
+    expect(screen.getByText("31/12/2023, 21:00:00")).toBeInTheDocument();
+    getItemMock.mockImplementation(() => null);
   });
 
   it("timezone change refreshes the shown result without converting again", () => {

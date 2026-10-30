@@ -48,9 +48,24 @@ const RGB_CHANNEL = String.raw`(\d*\.?\d+%?)`;
 const RGB_PATTERN = new RegExp(
   String.raw`^rgba?\s*\(\s*${RGB_CHANNEL}${CHANNEL_SEP}${RGB_CHANNEL}${CHANNEL_SEP}${RGB_CHANNEL}${ALPHA}\s*\)$`,
 );
+// A hue is a signed number with an optional angle unit; it wraps around the color wheel.
+const HUE = String.raw`(-?\d*\.?\d+)(deg|grad|rad|turn)?`;
+// A saturation / lightness / value channel: a decimal number, optionally with %.
+const PERCENT_CHANNEL = String.raw`(\d*\.?\d+)%?`;
 const HSL_PATTERN = new RegExp(
-  String.raw`^hsla?\s*\(\s*(\d+)${CHANNEL_SEP}(\d+)%?${CHANNEL_SEP}(\d+)%?${ALPHA}\s*\)$`,
+  String.raw`^hsla?\s*\(\s*${HUE}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}${ALPHA}\s*\)$`,
 );
+const HSV_PATTERN = new RegExp(
+  String.raw`^hsv\s*\(\s*${HUE}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}\s*\)$`,
+);
+
+const DEGREES_PER_UNIT: Record<string, number> = { deg: 1, grad: 0.9, rad: 180 / Math.PI, turn: 360 };
+
+/** Parse a hue ("120", "-90", "0.5turn") to degrees in 0..360. */
+function parseHue(value: string, unit: string | undefined): number {
+  const degrees = Number(value) * DEGREES_PER_UNIT[unit ?? "deg"];
+  return ((degrees % 360) + 360) % 360;
+}
 
 /** Parse a captured alpha; undefined when absent, null when out of range. */
 function parseAlpha(value: string | undefined, percent: string | undefined): number | null | undefined {
@@ -59,10 +74,17 @@ function parseAlpha(value: string | undefined, percent: string | undefined): num
   return alpha <= 1 ? alpha : null;
 }
 
-/** Parse an rgb channel ("128", "50%", "10.4") to 0..255; null when out of range. */
+/**
+ * Parse an rgb channel ("128", "50%", "10.4") to 0..255; null when out of range.
+ * A fraction just above 255 ("255.5") is clamped, since it still names the top value.
+ */
 function parseRgbChannel(value: string): number | null {
-  const channel = value.endsWith("%") ? (parseFloat(value) * 255) / 100 : parseFloat(value);
-  return channel <= 255 ? Math.round(channel) : null;
+  if (value.endsWith("%")) {
+    const percent = parseFloat(value);
+    return percent <= 100 ? Math.round((percent * 255) / 100) : null;
+  }
+  const channel = parseFloat(value);
+  return channel < 256 ? Math.min(255, Math.round(channel)) : null;
 }
 
 /** Attach alpha only when the color is translucent, so opaque colors stay `{ r, g, b }`. */
@@ -125,22 +147,22 @@ function parseColorExact(input: string): RGB | null {
   // HSL / HSLA format
   const hslMatch = HSL_PATTERN.exec(cleanInput);
   if (hslMatch) {
-    const h = parseInt(hslMatch[1], 10);
-    const s = parseInt(hslMatch[2], 10);
-    const l = parseInt(hslMatch[3], 10);
-    const alpha = parseAlpha(hslMatch[4], hslMatch[5]);
-    if (alpha !== null && h <= 360 && s <= 100 && l <= 100) {
+    const h = parseHue(hslMatch[1], hslMatch[2]);
+    const s = Number(hslMatch[3]);
+    const l = Number(hslMatch[4]);
+    const alpha = parseAlpha(hslMatch[5], hslMatch[6]);
+    if (alpha !== null && s <= 100 && l <= 100) {
       return withAlpha(hslToRgbExact(h, s, l), alpha);
     }
   }
 
   // HSV format
-  const hsvMatch = /^hsv\s*\(\s*(\d+)\s*,\s*(\d+)%?\s*,\s*(\d+)%?\s*\)$/.exec(cleanInput);
+  const hsvMatch = HSV_PATTERN.exec(cleanInput);
   if (hsvMatch) {
-    const h = parseInt(hsvMatch[1], 10);
-    const s = parseInt(hsvMatch[2], 10);
-    const v = parseInt(hsvMatch[3], 10);
-    if (h >= 0 && h <= 360 && s >= 0 && s <= 100 && v >= 0 && v <= 100) {
+    const h = parseHue(hsvMatch[1], hsvMatch[2]);
+    const s = Number(hsvMatch[3]);
+    const v = Number(hsvMatch[4]);
+    if (s <= 100 && v <= 100) {
       return hsvToRgbExact(h, s, v);
     }
   }
@@ -405,8 +427,13 @@ export function getAllFormats(exact: RGB): ColorFormats {
   const rgb = roundRgb(exact);
 
   if (rgb.a !== undefined && rgb.a < 1) {
-    const alpha = Math.round(rgb.a * 100) / 100;
-    const alphaHex = Math.round(rgb.a * 255).toString(16).padStart(2, "0").toUpperCase();
+    const alphaByte = Math.round(rgb.a * 255);
+    const alphaHex = alphaByte.toString(16).padStart(2, "0").toUpperCase();
+    // Two decimals, or three when two would name a different 8-bit alpha than the hex
+    // (#FF000001 is 0.004, not 0; #FF0000FE is 0.996, not 1).
+    const twoDecimals = Math.round(rgb.a * 100) / 100;
+    const alpha =
+      Math.round(twoDecimals * 255) === alphaByte ? twoDecimals : Math.round(rgb.a * 1000) / 1000;
     return {
       hex: rgbToHex(rgb) + alphaHex,
       rgb: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`,

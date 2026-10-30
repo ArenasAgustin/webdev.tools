@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useId } from "react";
 import { useTranslation } from "react-i18next";
 import {
   generatePasswordWithStrength,
@@ -16,6 +16,7 @@ import { STORAGE_KEYS } from "@/services/storage";
 
 export function PasswordPlayground() {
   const { t } = useTranslation();
+  const lengthId = useId();
   const [storedOptions, setOptions] = usePersistedState<PasswordOptions>(
     STORAGE_KEYS.PASSWORD_OPTIONS,
     defaultPasswordOptions,
@@ -89,6 +90,7 @@ export function PasswordPlayground() {
             value={password}
             readOnly
             placeholder={t("password.placeholder")}
+            aria-label={t("password.outputLabel")}
             className="min-w-0 grow basis-full sm:basis-0 bg-white/10 border border-white/20 rounded-lg px-3 py-3 text-white font-mono text-lg focus:outline-none focus:ring-1 focus:ring-cyan-400"
           />
           <button
@@ -128,8 +130,11 @@ export function PasswordPlayground() {
 
         {/* Length Slider */}
         <div className="flex items-center gap-4">
-          <label className="text-gray-300 w-24">{t("password.length")}</label>
+          <label htmlFor={lengthId} className="text-gray-300 w-24">
+            {t("password.length")}
+          </label>
           <input
+            id={lengthId}
             type="range"
             min={PASSWORD_LENGTH_MIN}
             max={PASSWORD_LENGTH_MAX}

@@ -26,4 +26,4 @@ export type SqlWorkerRequest = WorkerRequest<SqlWorkerPayload>;
 export type SqlWorkerResponse =
   | WorkerResponse<JsonError>
   | { id: string; ok: true; action: "execute"; value: SqlExecuteResult }
-  | { id: string; ok: false; action: "execute"; error: JsonError };
+  | { id: string; ok: false; action: "execute"; error: JsonError; partial?: SqlExecuteResult };

@@ -65,7 +65,17 @@ const openDb = (): Promise<IDBDatabase> => {
         db.onclose = () => {
           dbPromise = null;
         };
+        // Another tab opens a newer version: close so its upgrade is not blocked;
+        // the next call here reopens (and gets the new version).
+        db.onversionchange = () => {
+          db.close();
+          dbPromise = null;
+        };
         resolve(db);
+      };
+      // An older tab still holds the database open; the open completes once it closes.
+      request.onblocked = () => {
+        console.warn("JSONPath history: waiting for another tab to close the database");
       };
       request.onerror = () => {
         dbPromise = null; // allow retry on next call
@@ -140,10 +150,43 @@ const migrateLocalStorage = async () => {
       return;
     }
 
+    // The store's expression index is unique: a list that repeats an expression would
+    // abort the whole migration, so repeats are merged (latest use, summed frequency).
+    const byExpression = new Map<string, JsonPathHistoryItem>();
+    for (const item of saved) {
+      const seen = byExpression.get(item.expression);
+      byExpression.set(
+        item.expression,
+        seen
+          ? {
+              ...(item.timestamp > seen.timestamp ? item : seen),
+              timestamp: Math.max(item.timestamp, seen.timestamp),
+              frequency: (seen.frequency || 1) + (item.frequency || 1),
+            }
+          : item,
+      );
+    }
+
     const db = await openDb();
     const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
-    saved.forEach((item) => store.put(item));
+    const expressionIndex = store.index("expression");
+    // An expression already in the database is merged into its entry for the same reason.
+    for (const item of byExpression.values()) {
+      const lookup = expressionIndex.get(item.expression);
+      lookup.onsuccess = () => {
+        const existing = lookup.result as JsonPathHistoryItem | undefined;
+        store.put(
+          existing
+            ? {
+                ...existing,
+                timestamp: Math.max(existing.timestamp, item.timestamp),
+                frequency: existing.frequency + (item.frequency || 1),
+              }
+            : item,
+        );
+      };
+    }
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => {

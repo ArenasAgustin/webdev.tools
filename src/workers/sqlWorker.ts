@@ -7,7 +7,7 @@
 import type { SqlWorkerRequest, SqlWorkerResponse } from "@/services/sql/worker.types";
 import { ROW_CAP } from "@/services/sql/worker.types";
 import { formatSql, validateSql, minifySql } from "@/services/sql/transform";
-import { roundElapsedMs, runStatements } from "@/services/sql/execute";
+import { roundElapsedMs, runStatements, SqlStatementError, type StatementsResult } from "@/services/sql/execute";
 import type { Database } from "sql.js";
 import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
@@ -73,7 +73,22 @@ ctx.onmessage = (event: MessageEvent<SqlWorkerRequest>) => {
         case "execute": {
           const db = await getDb();
           const start = performance.now();
-          const { resultSets, truncated, valuesTruncated } = runStatements(db, req.input, ROW_CAP);
+          let statements: StatementsResult;
+          try {
+            statements = runStatements(db, req.input, ROW_CAP);
+          } catch (err) {
+            if (!(err instanceof SqlStatementError) || err.partial.resultSets.length === 0) throw err;
+            // Keep the rows of the statements that ran before the failing one.
+            ctx.postMessage({
+              id: req.id,
+              ok: false,
+              action: "execute",
+              error: { message: err.message },
+              partial: { ...err.partial, elapsedMs: roundElapsedMs(performance.now() - start) },
+            });
+            return;
+          }
+          const { resultSets, truncated, valuesTruncated } = statements;
           ctx.postMessage({
             id: req.id,
             ok: true,

@@ -448,3 +448,42 @@ describe("colorConverter - alpha, named colors and 4/8-digit hex", () => {
     expect(convertColor("red")?.hex).toBe("#FF0000");
   });
 });
+
+describe("colorConverter - alpha agrees across formats", () => {
+  it.each(["#FF000001", "#FF0000FE", "#FF000080"])("keeps the 8-digit hex alpha of %s in rgba and hsla", (hex) => {
+    const formats = convertColor(hex);
+    const alphaOf = (value: string | undefined) => Number(/, ([\d.]+)\)$/.exec(value ?? "")?.[1]);
+    const byte = hex.slice(7).toUpperCase();
+    expect(formats?.hex).toBe(hex.toUpperCase());
+    for (const value of [formats?.rgb, formats?.hsl]) {
+      expect(Math.round(alphaOf(value) * 255).toString(16).padStart(2, "0").toUpperCase()).toBe(byte);
+    }
+  });
+
+  it("keeps two decimals when they already round-trip", () => {
+    expect(convertColor("#FF000080")?.rgb).toBe("rgba(255, 0, 0, 0.5)");
+    expect(convertColor("#FF000001")?.rgb).toBe("rgba(255, 0, 0, 0.004)");
+  });
+});
+
+describe("colorConverter - valid CSS channel syntax", () => {
+  it.each([
+    ["hsl(120.5, 50.5%, 40%)", { r: 50, g: 154, b: 51 }],
+    ["hsl(120deg, 100%, 50%)", { r: 0, g: 255, b: 0 }],
+    ["hsl(120deg 100% 50%)", { r: 0, g: 255, b: 0 }],
+    ["hsl(0.5turn, 100%, 50%)", { r: 0, g: 255, b: 255 }],
+    ["hsl(-120, 100%, 50%)", { r: 0, g: 0, b: 255 }],
+    ["hsl(480, 100%, 50%)", { r: 0, g: 255, b: 0 }],
+    ["rgb(255.5, 0, 0)", { r: 255, g: 0, b: 0 }],
+    ["hsv(120 100% 100%)", { r: 0, g: 255, b: 0 }],
+    ["hsv(120.5, 50.5%, 100%)", { r: 126, g: 255, b: 127 }],
+  ])("accepts %s", (input, expected) => {
+    expect(parseColor(input)).toEqual(expected);
+  });
+
+  it("still rejects out-of-range channels", () => {
+    expect(parseColor("rgb(256, 0, 0)")).toBeNull();
+    expect(parseColor("hsl(120, 101%, 50%)")).toBeNull();
+    expect(parseColor("hsv(120, 50%, 100.5%)")).toBeNull();
+  });
+});

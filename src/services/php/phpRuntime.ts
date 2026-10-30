@@ -7,6 +7,7 @@
 
 import type { Result } from "@/types/common";
 import { serviceMessage } from "@/services/serviceMessage";
+import { startsAsPhpFile } from "@/services/php/openTag";
 
 /** `output` holds what the script printed before a fatal error. */
 export type PhpExecResult = Result<string, { message: string; output?: string }>;
@@ -54,6 +55,22 @@ function stripInternalPaths(text: string): string {
 }
 
 /**
+ * The code php-wasm runs. Line numbers in errors must match the editor, so leading
+ * blank lines are never dropped: tagless code gets `<?php ` on its first line, and
+ * blank lines before an opening `<?php` / `<?=` move inside the tag (where they
+ * print nothing). Code that starts with inline HTML runs as written, minus the
+ * leading and trailing whitespace it would otherwise print.
+ */
+function toRunnablePhp(code: string): string {
+  const source = code.trimEnd();
+  if (!startsAsPhpFile(source)) return `<?php ${source}`;
+  const leading = /^\s*/.exec(source)?.[0] ?? "";
+  const body = source.slice(leading.length);
+  const tag = /^<\?(php\b|=)/i.exec(body)?.[0];
+  return tag ? `${tag}${leading}${body.slice(tag.length)}` : body;
+}
+
+/**
  * Execute PHP code client-side via php-wasm.
  *
  * Vite bundles the wasm as a same-origin hashed asset and sets the loader's
@@ -76,10 +93,7 @@ export async function executePhp(
     });
     const php = new PHP(runtimeId);
     await setPhpIniEntries(php, PHP_INI_ENTRIES);
-    const trimmed = code.trim();
-    // Code with an open tag anywhere (e.g. inline HTML first) runs as written.
-    // Tagless code gets one on its first line so error line numbers still match.
-    const phpCode = /<\?(php\b|=)/i.test(trimmed) ? trimmed : `<?php ${trimmed}`;
+    const phpCode = toRunnablePhp(code);
     options.onStarted?.();
     const response = await php.run({ code: phpCode });
     /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */

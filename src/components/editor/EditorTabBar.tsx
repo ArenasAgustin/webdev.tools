@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/cn";
 
 interface EditorTabBarProps {
@@ -11,9 +12,10 @@ interface EditorTabBarProps {
 export function EditorTabBar({
   activeTab,
   onTabChange,
-  inputLabel = "Input",
-  outputLabel = "Output",
+  inputLabel,
+  outputLabel,
 }: EditorTabBarProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLButtonElement>(null);
   const outputRef = useRef<HTMLButtonElement>(null);
 
@@ -40,7 +42,7 @@ export function EditorTabBar({
   return (
     <div
       role="tablist"
-      aria-label="Editor panels"
+      aria-label={t("editor.panelsLabel")}
       className="flex sm:hidden border-b border-white/10 mb-2"
     >
       <button
@@ -58,7 +60,7 @@ export function EditorTabBar({
             : "text-white/50 hover:text-white/70",
         )}
       >
-        {inputLabel}
+        {inputLabel ?? t("editor.input")}
       </button>
       <button
         ref={outputRef}
@@ -75,7 +77,7 @@ export function EditorTabBar({
             : "text-white/50 hover:text-white/70",
         )}
       >
-        {outputLabel}
+        {outputLabel ?? t("editor.output")}
       </button>
     </div>
   );

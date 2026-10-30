@@ -141,6 +141,21 @@ describe("sqlWorkerAdapter action round-trips", () => {
     expect((result as { error: { message: string } }).error.message).toBe("parse error");
   });
 
+  it.each([
+    ["formatSqlAsync", "Error al formatear SQL"],
+    ["validateSqlAsync", "Error al validar SQL"],
+    ["minifySqlAsync", "Error al minificar SQL"],
+    ["resetSqlAsync", "Error al reiniciar la base de datos"],
+  ] as const)("%s localizes the fallback when the worker sends no message", async (name, expected) => {
+    const facade = await import("@/services/sql/worker");
+    const pending = (facade[name] as (input: string) => Promise<{ ok: boolean; error?: string }>)("x");
+    const worker = MockWorker.instances[0];
+    const call = worker.postMessage.mock.calls[0]?.[0] as { id: string };
+    worker.emit({ id: call.id, ok: false, error: {} });
+
+    await expect(pending).resolves.toEqual({ ok: false, error: expected });
+  });
+
   it("EXECUTE timeout — cancels a runaway query, reports the reset and keeps format working", async () => {
     vi.useFakeTimers();
     try {
@@ -162,6 +177,7 @@ describe("sqlWorkerAdapter action round-trips", () => {
       const result = await pending;
       expect(result.ok).toBe(false);
       expect((result as { error: string }).error).toMatch(/segundos.*base de datos se reinició/);
+      expect(result).toMatchObject({ databaseReset: true });
       expect(stuck.terminate).toHaveBeenCalledOnce();
 
       const formatted = formatSqlAsync("select 1");
@@ -177,8 +193,8 @@ describe("sqlWorkerAdapter action round-trips", () => {
   it("cleanup — terminate() can be called without errors", async () => {
     const adapter = await getAdapter();
 
-    // Start a request
-    void adapter.run({ action: "minify", input: "SELECT 1" });
+    // Start a request; terminate() rejects it, which is expected here
+    adapter.run({ action: "minify", input: "SELECT 1" }).catch(() => undefined);
 
     // Terminate should not throw
     expect(() => adapter.terminate()).not.toThrow();

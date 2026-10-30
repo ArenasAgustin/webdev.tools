@@ -379,11 +379,40 @@ describe("HashPlayground branches", () => {
     expect(screen.queryByText(/no coincide/i)).not.toBeInTheDocument();
   });
 
-  it("compare guard: empty compareValue or no results — does nothing", () => {
+  it("compare with an empty value asks for a hash", () => {
     render(<HashPlayground />);
 
-    // No results generated yet, compareValue empty
     fireEvent.click(screen.getByRole("button", { name: /comparar/i }));
     expect(screen.queryByText(/coincide/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/ingres[aá] un hash para comparar/i);
+
+    fireEvent.change(screen.getByPlaceholderText(/hash para comparar/i), { target: { value: "aabbcc" } });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("compare before generating asks to generate the hashes first", async () => {
+    render(<HashPlayground />);
+
+    fireEvent.change(screen.getByPlaceholderText(/hash para comparar/i), { target: { value: "aabbcc" } });
+    fireEvent.click(screen.getByRole("button", { name: /comparar/i }));
+    expect(screen.queryByText(/coincide/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/gener[aá] los hashes primero/i);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+    expect(screen.queryByText(/gener[aá] los hashes primero/i)).not.toBeInTheDocument();
+  });
+
+  it("file mode: Generate without a file asks for one", async () => {
+    render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+
+    expect(generateAllHashesFromFileMock).not.toHaveBeenCalled();
+    expect(screen.getByRole("status")).toHaveTextContent(/seleccion[aá] un archivo/i);
   });
 });

@@ -27,6 +27,16 @@ export function detectUnixUnit(unix: number): UnixUnit {
   return Math.abs(unix) > UNIX_MS_THRESHOLD ? "milliseconds" : "seconds";
 }
 
+/** True when the browser knows `timezone` (a saved one may come from another browser). */
+export function isSupportedTimezone(timezone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Engines omit "UTC" from Intl.supportedValuesOf("timeZone"); make sure it can be picked. */
 export function withUtc(timezones: readonly string[]): string[] {
   return timezones.includes("UTC") ? [...timezones] : ["UTC", ...timezones];
@@ -93,9 +103,36 @@ function numericWallTime(value: string): WallTime | null {
     const [, a, b, c, hour, minute, second, ms] = slash;
     const clock = wallClock(hour, minute, second, ms);
     if (a.length === 4) return { year: Number(a), month: Number(b), day: Number(c), ...clock };
-    if (c.length === 4) return { year: Number(c), month: Number(a), day: Number(b), ...clock };
+    if (c.length === 4) {
+      // Day first only when the first number cannot be a month (15/01/2024);
+      // otherwise month first (01/15/2024). Ambiguous dates never get here.
+      return Number(a) > 12
+        ? { year: Number(c), month: Number(b), day: Number(a), ...clock }
+        : { year: Number(c), month: Number(a), day: Number(b), ...clock };
+    }
   }
   return null;
+}
+
+/**
+ * The two readings of a day/month date whose order cannot be told apart
+ * (01/02/2024: January 2 or February 1?), as YYYY-MM-DD; null for any other input,
+ * including dates where both numbers are equal (05/05/2024) or one exceeds 12.
+ */
+export function ambiguousDayMonth(value: string): { monthFirst: string; dayFirst: string } | null {
+  const slash = SLASH_OR_DOT.exec(value.trim());
+  if (!slash) return null;
+  const [, a, b, c] = slash;
+  const first = Number(a);
+  const second = Number(b);
+  if (c.length !== 4 || first === second || first < 1 || second < 1 || first > 12 || second > 12) {
+    return null;
+  }
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return {
+    monthFirst: `${c}-${pad(first)}-${pad(second)}`,
+    dayFirst: `${c}-${pad(second)}-${pad(first)}`,
+  };
 }
 
 /** True when the fields name a real calendar date and time (no 2024-02-30, no 25:00). */
@@ -174,6 +211,10 @@ export function parseInput(
     return { type: "unix", value: Number(trimmed) };
   }
 
+  // 01/02/2024 is January 2 in the US and February 1 elsewhere: refuse to guess
+  // (the UI asks for YYYY-MM-DD, see ambiguousDayMonth).
+  if (ambiguousDayMonth(trimmed)) return null;
+
   // Numeric dates are read field by field, so the engine can neither roll
   // 2024-02-30 over to March nor read a date-only ISO string as UTC.
   const wall = numericWallTime(trimmed);
@@ -202,14 +243,8 @@ export function parseInput(
     }
   }
 
-  // Then, try to parse as number (Unix timestamp).
-  // The seconds-vs-milliseconds disambiguation is handled downstream in unixToDate()
-  // via detectUnixUnit().
-  const num = Number(trimmed);
-  if (Number.isFinite(num)) {
-    return { type: "unix", value: num };
-  }
-
+  // Unix timestamps are only plain decimal numbers (checked above): Number() would
+  // also take number literals such as 0x10, 1e3 or 0b101 and show a wrong date.
   return null;
 }
 
@@ -237,7 +272,8 @@ function getRelativeTime(date: Date, lang = "es", now = Date.now()): string {
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
-  const months = Math.floor(days / 30);
+  // 30-day months reach 12 at 360 days, before a 365-day year; cap them at 11.
+  const months = Math.min(11, Math.floor(days / 30));
   const years = Math.floor(days / 365);
 
   // Determine value and unit first

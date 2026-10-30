@@ -7,6 +7,7 @@ import {
   getCurrentTimestamp,
   detectUnixUnit,
   withUtc,
+  ambiguousDayMonth,
 } from "./timestamp.utils";
 
 describe("timestamp.utils", () => {
@@ -101,6 +102,40 @@ describe("timestamp.utils", () => {
       },
     );
 
+    it.each([
+      ["15/01/2024", Date.UTC(2024, 0, 15)],
+      ["31.12.2023 23:59", Date.UTC(2023, 11, 31, 23, 59)],
+      ["05/05/2024", Date.UTC(2024, 4, 5)],
+    ])("reads the unambiguous day-first date %j", (value, expected) => {
+      expect((parseInput(value, "UTC")?.value as Date).getTime()).toBe(expected);
+    });
+
+    it.each(["01/02/2024", "03.04.2024 10:00"])(
+      "does not guess the order of the ambiguous date %j",
+      (value) => {
+        expect(parseInput(value, "UTC")).toBeNull();
+        expect(ambiguousDayMonth(value)).toEqual(
+          value.startsWith("01")
+            ? { monthFirst: "2024-01-02", dayFirst: "2024-02-01" }
+            : { monthFirst: "2024-03-04", dayFirst: "2024-04-03" },
+        );
+      },
+    );
+
+    it.each(["15/01/2024", "01/15/2024", "05/05/2024", "2024/01/02", "2024-01-02"])(
+      "does not flag %j as ambiguous",
+      (value) => {
+        expect(ambiguousDayMonth(value)).toBeNull();
+      },
+    );
+
+    it.each(["0x10", "1e3", "0b101", "0o17", "Infinity", "1_000"])(
+      "does not read the number literal %j as a Unix timestamp",
+      (value) => {
+        expect(parseInput(value, "UTC")).toBeNull();
+      },
+    );
+
     it.each(["not-a-valid-timestamp 3", "hello 5", "version 2"])(
       "rejects free text that the engine would read as a date: %j",
       (value) => {
@@ -175,6 +210,13 @@ describe("timestamp.utils", () => {
       expect(convertTimestamp("1712160000", "UTC", "es", now + 4600)?.relative).toBe(
         "hace 5 segundos",
       );
+    });
+
+    it.each([360, 362, 364])("says 11 months, not 12, for %i days", (days) => {
+      const now = 1712160000_000;
+      const past = String(1712160000 - days * 86400);
+      expect(convertTimestamp(past, "UTC", "es", now)?.relative).toBe("hace 11 meses");
+      expect(convertTimestamp(past, "UTC", "en", now)?.relative).toBe("11 months ago");
     });
   });
 

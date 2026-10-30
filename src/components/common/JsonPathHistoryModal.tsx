@@ -20,7 +20,9 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
   onDelete,
   onClearAll,
 }: JsonPathHistoryModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Dates follow the app language, not the browser locale
+  const locale = i18n.resolvedLanguage;
 
   const renderedHistory = useMemo(
     () =>
@@ -44,7 +46,7 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
                 {item.expression}
               </code>
               <div className="text-[10px] text-gray-500 flex items-center gap-2">
-                <span>{new Date(item.timestamp).toLocaleString()}</span>
+                <span>{new Date(item.timestamp).toLocaleString(locale)}</span>
                 <span className="text-gray-600">•</span>
                 <span>×{item.frequency}</span>
               </div>
@@ -72,7 +74,7 @@ export const JsonPathHistoryModal = memo(function JsonPathHistoryModal({
           </div>
         ))
       ),
-    [history, onReuse, onDelete, t],
+    [history, onReuse, onDelete, t, locale],
   );
 
   return (

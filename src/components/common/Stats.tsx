@@ -23,7 +23,7 @@ export const Stats = memo(function Stats({
   leadingSeparator = false,
   "data-testid": dataTestId = undefined,
 }: StatsProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const hasComparison = comparisonBytes !== undefined && comparisonBytes > 0;
 
   const percentage = hasComparison
@@ -42,11 +42,13 @@ export const Stats = memo(function Stats({
       {leadingSeparator ? "· " : ""}
       {t("stats.summary", {
         lines: t("stats.lines", { count: lines }),
-        characters: t("stats.characters", { count: characters, value: characters.toLocaleString() }),
+        characters: t("stats.characters", { count: characters, value: characters.toLocaleString(i18n.resolvedLanguage) }),
         bytes: formatBytes(bytes),
       })}
+      {/* A real space (not margin), so copied text and screen readers keep it */}
+      {hasComparison && " "}
       {hasComparison && (
-        <span className={`ml-1 ${percentageColor}`}>
+        <span className={percentageColor}>
           ({Math.abs(percentage)}% {percentageLabel})
         </span>
       )}

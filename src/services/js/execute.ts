@@ -48,6 +48,9 @@ export const MAX_OUTPUT_CHARS = 1_000_000;
 
 const IDLE_POLL_MS = 10;
 
+/** Parameters that shadow the globals the sandbox replaces, in this order. */
+const SANDBOX_NAMES = ["console", "setTimeout", "setInterval", "clearTimeout", "clearInterval"];
+
 type AsyncFunctionConstructor = new (...args: string[]) => (...args: unknown[]) => Promise<unknown>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function -- only its prototype is needed
@@ -181,8 +184,16 @@ export async function runJavaScript(
   };
 
   const runCallback = (callback: unknown, args: unknown[]) => {
-    if (typeof callback !== "function") return;
     try {
+      // Like the browser, a string is compiled and run as code (with this sandbox console
+      // and timers, so its output is collected too).
+      if (typeof callback === "string") {
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval -- setTimeout(string) semantics
+        const compiled = new Function(...SANDBOX_NAMES, callback) as (...sandbox: unknown[]) => unknown;
+        compiled(...sandboxValues());
+        return;
+      }
+      if (typeof callback !== "function") return;
       (callback as (...callbackArgs: unknown[]) => unknown)(...args);
     } catch (error) {
       recordAsyncError(error);
@@ -209,22 +220,19 @@ export async function runJavaScript(
     clearTimeout(id);
   };
 
+  function sandboxValues() {
+    return [sandboxConsole, sandboxSetTimeout, sandboxSetInterval, sandboxClearTimer, sandboxClearTimer];
+  }
+
   try {
+    // The code goes in a block, so it may declare its own `console` or `setTimeout`
+    // (a let/const would otherwise clash with the parameter). The block opens on the
+    // first user line, so line numbers do not move.
     const userFunction = new AsyncFunction(
-      "console",
-      "setTimeout",
-      "setInterval",
-      "clearTimeout",
-      "clearInterval",
-      await returnTrailingExpression(code),
+      ...SANDBOX_NAMES,
+      `{${await returnTrailingExpression(code)}\n}`,
     );
-    const result = await userFunction(
-      sandboxConsole,
-      sandboxSetTimeout,
-      sandboxSetInterval,
-      sandboxClearTimer,
-      sandboxClearTimer,
-    );
+    const result = await userFunction(...sandboxValues());
 
     while (pendingTimers.size > 0 && !hasAsyncError) {
       await new Promise((resolve) => setTimeout(resolve, IDLE_POLL_MS));

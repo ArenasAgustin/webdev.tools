@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll } from "vitest";
-import initSqlJs, { type Database } from "sql.js";
-import { roundElapsedMs, runStatements } from "@/services/sql/execute";
+import { describe, it, expect, beforeAll, vi } from "vitest";
+import initSqlJs, { type Database, type Statement } from "sql.js";
+import { roundElapsedMs, runStatements, SqlStatementError } from "@/services/sql/execute";
+import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
 describe("runStatements", () => {
   let db: Database;
@@ -115,6 +116,72 @@ describe("runStatements", () => {
 
   it("propagates SQL errors", () => {
     expect(() => runStatements(db, "SELECT * FROM missing_table;", 10)).toThrow(/no such table/);
+  });
+
+  function errorMessage(run: () => unknown): string {
+    try {
+      run();
+    } catch (err) {
+      return localizeServiceMessage(err instanceof Error ? err.message : String(err));
+    }
+    throw new Error("expected an error");
+  }
+
+  it("names the statement that failed to prepare", () => {
+    expect(errorMessage(() => runStatements(db, "SELECT 1; SELECT * FROM missing_table;", 10))).toBe(
+      "Sentencia 2: no such table: missing_table",
+    );
+  });
+
+  it("frees the statement whose step throws (the iterator has no return())", () => {
+    const yielded: Statement[] = [];
+    const iterate = db.iterateStatements.bind(db);
+    const spy = vi.spyOn(db, "iterateStatements").mockImplementation((sql: string) => {
+      const iterator = iterate(sql);
+      return {
+        [Symbol.iterator]() {
+          return this;
+        },
+        next() {
+          const step = iterator.next();
+          if (!step.done) yielded.push(step.value);
+          return step;
+        },
+        getRemainingSQL: () => iterator.getRemainingSQL(),
+      };
+    });
+    try {
+      expect(() => runStatements(db, "SELECT abs(-9223372036854775808);", 10)).toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+
+    expect(yielded).toHaveLength(1);
+    // A freed statement refuses to run again.
+    expect(() => yielded[0].step()).toThrow(/Statement closed/);
+  });
+
+  it("names the statement that failed while running", () => {
+    expect(
+      errorMessage(() => runStatements(db, "SELECT 1; SELECT 2; SELECT abs(-9223372036854775808);", 10)),
+    ).toBe("Sentencia 3: integer overflow");
+  });
+
+  it("keeps the result sets of the statements that ran before the failure", () => {
+    let caught: unknown;
+    try {
+      runStatements(db, "SELECT 1 AS a; SELECT 'b' AS b; SELECT * FROM missing_table;", 10);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(SqlStatementError);
+    expect((caught as SqlStatementError).partial).toEqual({
+      resultSets: [
+        { statement: 1, columns: ["a"], rows: [[1]], truncated: false },
+        { statement: 2, columns: ["b"], rows: [["b"]], truncated: false },
+      ],
+      truncated: false,
+    });
   });
 });
 

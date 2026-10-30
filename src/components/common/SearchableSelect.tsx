@@ -8,6 +8,8 @@ interface SearchableSelectProps {
   placeholder?: string;
   noResultsLabel?: string;
   className?: string;
+  /** id of the visible label; the trigger is then named "<label> <value>" */
+  labelId?: string;
 }
 
 /**
@@ -22,6 +24,7 @@ export function SearchableSelect({
   placeholder = "Search...",
   noResultsLabel = "No results",
   className,
+  labelId,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -31,6 +34,7 @@ export function SearchableSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const listboxId = useId();
+  const valueId = useId();
   const optionId = (index: number) => `${listboxId}-option-${index}`;
 
   const filtered = search
@@ -133,9 +137,12 @@ export function SearchableSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listboxId : undefined}
+        aria-labelledby={labelId ? `${labelId} ${valueId}` : undefined}
         className="bg-gray-900 border border-white/20 rounded-lg px-3 py-2 text-white text-sm flex items-center gap-2 min-w-[220px] focus:outline-none focus:ring-1 focus:ring-cyan-400 cursor-pointer"
       >
-        <span className="flex-1 text-left truncate">{value}</span>
+        <span id={valueId} className="flex-1 text-left truncate">
+          {value}
+        </span>
         <i
           className={cn("fas fa-chevron-down text-xs transition-transform duration-200", open && "rotate-180")}
           aria-hidden="true"

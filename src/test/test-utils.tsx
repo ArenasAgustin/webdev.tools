@@ -101,7 +101,7 @@ const newI18nKeys: Record<string, string | ((vars?: Record<string, unknown>) => 
   "json.filterTitle": "Filtro JSONPath",
   "json.filterHistory": "Historial de filtros",
   "json.filterTips": "Ver tips de filtros",
-  "json.filterExpression": "Expresion JSONPath",
+  "json.filterExpression": "Expresión JSONPath",
   "json.filterPlaceholder": "Ej: $.users[0].name",
   "json.applyFilter": "Aplicar filtro JSONPath",
   "json.tipsTitle": "Tips para Filtros JSONPath",

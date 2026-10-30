@@ -175,7 +175,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
 
         // Home
         "home.tagline": "Herramientas para desarrolladores web",
-        "home.headline": "Formatea, valida y transforma tu código al instante.",
+        "home.headline": "Formateá, validá y transformá tu código al instante.",
         "home.description": "Herramientas optimizadas para JSON, JavaScript, HTML y CSS. Sin instalación, 100% en el navegador.",
 
         // Error
@@ -253,7 +253,7 @@ if (!i18n.isInitialized) void i18n.use(initReactI18next).init({
         "json.filterTitle": "Filtro JSONPath",
         "json.filterHistory": "Historial de filtros",
         "json.filterTips": "Ver tips de filtros",
-        "json.filterExpression": "Expresion JSONPath",
+        "json.filterExpression": "Expresión JSONPath",
         "json.filterPlaceholder": "Ej: $.users[0].name",
         "json.applyFilter": "Aplicar filtro JSONPath",
         "json.tipsTitle": "Tips para Filtros JSONPath",

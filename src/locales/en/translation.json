@@ -25,7 +25,8 @@
     "playgrounds": "Playgrounds",
     "navigation": "Navigation panel",
     "closeSidebar": "Close panel",
-    "availablePlaygrounds": "Available playgrounds"
+    "availablePlaygrounds": "Available playgrounds",
+    "githubRepository": "GitHub repository"
   },
   "actions": {
     "clearInput": "Clear input",
@@ -70,7 +71,8 @@
     "viewShortcuts": "View shortcuts",
     "viewDifferences": "View differences",
     "editor": "Editor",
-    "toggleTabFocus": "Toggle Tab: indent / move focus out of the editor"
+    "toggleTabFocus": "Toggle Tab: indent / move focus out of the editor",
+    "backspaceKey": "Backspace"
   },
   "tips": {
     "quickExamples": "Quick Examples"
@@ -121,6 +123,7 @@
     "now": "Now",
     "placeholder": "Unix timestamp or date (ISO 8601, RFC 2822)...",
     "invalidInput": "Invalid input. Enter a valid timestamp or date.",
+    "ambiguousDate": "Ambiguous date: it could be {{monthFirst}} (month first) or {{dayFirst}} (day first). Write it as YYYY-MM-DD.",
     "futureDate": "This date is in the future",
     "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
@@ -135,7 +138,8 @@
       "rfc2822": "RFC 2822",
       "humanReadable": "Local",
       "relative": "Relative"
-    }
+    },
+    "inputLabel": "Timestamp or date"
   },
   "editor": {
     "lines": "lines",
@@ -163,7 +167,8 @@
     "loadError": "The editor could not be loaded. Check your connection and try again.",
     "retry": "Retry",
     "diffTitle": "Differences",
-    "expandedPlaceholder": "{{title}} content..."
+    "expandedPlaceholder": "{{title}} content...",
+    "panelsLabel": "Editor panels"
   },
   "password": {
     "aria": {
@@ -192,7 +197,8 @@
       "strong": "Strong"
     },
     "history": "History:",
-    "noCharset": "Select at least one character set to generate a password"
+    "noCharset": "Select at least one character set to generate a password",
+    "outputLabel": "Generated password"
   },
   "notifications": "Notifications",
   "close_notification": "Close notification",
@@ -242,14 +248,22 @@
     "matchSuccess": "Hash matches",
     "matchFail": "Hash does NOT match",
     "generateError": "Could not generate the hashes. The file may be unreadable or too large.",
-    "emptyInput": "Enter some text to generate its hashes"
+    "emptyInput": "Enter some text to generate its hashes",
+    "emptyFile": "Select a file to generate its hashes",
+    "compareEmpty": "Enter a hash to compare",
+    "compareNeedsHashes": "Generate the hashes first, then compare",
+    "inputLabel": "Text to hash",
+    "compareLabel": "Hash to compare"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
     "copy": "Copy {{format}}",
     "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
-    "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK."
+    "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK.",
+    "inputLabel": "Color value",
+    "saturationLabel": "Saturation and brightness",
+    "hueLabel": "Hue"
   },
   "html": {
     "previewLabel": "Preview",
@@ -419,6 +433,7 @@
     "noInputToDownload": "No {{language}} to download",
     "noOutputToDownload": "No output to download",
     "formatted": "{{language}} formatted successfully",
+    "alreadyFormatted": "The {{language}} code was already formatted: nothing changed",
     "formatError": "Error formatting {{language}}",
     "minified": "{{language}} minified successfully",
     "minifyError": "Error minifying {{language}}",
@@ -467,6 +482,20 @@
     "common": {
       "noCode": "No code to process"
     },
+    "syntax": {
+      "atPosition": "{{message}} (line {{line}}, column {{column}}){{frame}}",
+      "unclosedBlock": "Unclosed block: a “{” has no matching “}”",
+      "unclosedString": "Unclosed string: the closing quote is missing",
+      "unclosedBracket": "Unclosed bracket: a “(” or “[” is never closed",
+      "unclosedComment": "Unclosed comment: “*/” is missing",
+      "unexpectedBrace": "Unexpected “}”: there is no open block",
+      "unknownWord": "Unknown word (missing “:” or “;”?)",
+      "unexpectedToken": "Unexpected “{{token}}”",
+      "unexpectedTokenPlain": "Unexpected token",
+      "unexpectedEnd": "The code ends too early",
+      "unexpectedClosingTag": "Unexpected closing tag </{{tag}}>: it does not match the open element",
+      "invalidCss": "Invalid CSS syntax"
+    },
     "worker": {
       "error": "Worker error",
       "unavailable": "Worker not available",
@@ -480,6 +509,7 @@
       "tooDeep": "The JSON is nested too deeply to process",
       "cleanError": "Error cleaning JSON: {{message}}",
       "jsonPathEmpty": "The JSONPath expression is empty",
+      "jsonPathInvalid": "The JSONPath expression is incomplete: check for an unclosed bracket, parenthesis or quote, or a trailing dot",
       "jsonPathError": "JSONPath error: {{message}}"
     },
     "css": {
@@ -519,7 +549,11 @@
     "sql": {
       "noInput": "No SQL to process",
       "empty": "The SQL is empty",
-      "timeout": "The query exceeded {{seconds}} seconds and was cancelled. The database was reset."
+      "timeout": "The query exceeded {{seconds}} seconds and was cancelled. The database was reset.",
+      "statementError": "Statement {{statement}}: {{message}}",
+      "validateError": "Error validating SQL",
+      "executeError": "Error running SQL",
+      "resetError": "Error resetting the database"
     }
   }
 }

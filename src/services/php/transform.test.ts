@@ -524,6 +524,14 @@ describe("formatPhp multi-line strings", () => {
       value: "if (1) {\n  echo 1;\n}",
     });
   });
+
+  it("formats tagless code whose string holds an open tag as PHP", () => {
+    expect(formatPhp('if (1) {\necho "<?php";\n}')).toEqual({
+      ok: true,
+      value: 'if (1) {\n  echo "<?php";\n}',
+    });
+    expect(validatePhp('echo "<?php"\necho 2;').ok).toBe(false);
+  });
 });
 
 describe("formatPhp inline HTML", () => {

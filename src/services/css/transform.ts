@@ -1,6 +1,7 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { serviceMessage } from "@/services/serviceMessage";
+import { friendlySyntaxError } from "@/services/syntaxErrors";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 import { parse } from "css-tree";
 
@@ -57,7 +58,7 @@ export async function formatCss(
     return { ok: true, value: formatted };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message };
+    return { ok: false, error: friendlySyntaxError(error) ?? message };
   }
 }
 
@@ -72,6 +73,9 @@ async function findCssSyntaxError(input: string): Promise<string | null> {
     await formatWithPrettier(input, "css");
     return null;
   } catch (error) {
+    // The friendly message drops the code frame: the indicator and Minify show one line.
+    const friendly = friendlySyntaxError(error instanceof Error ? error.message.split("\n")[0] : error);
+    if (friendly) return friendly;
     const message = error instanceof Error ? error.message : String(error);
     return message.split("\n")[0].trim() || serviceMessage("services.css.minifyError");
   }

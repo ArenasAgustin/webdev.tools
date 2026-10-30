@@ -51,6 +51,23 @@ describe("runJavaScript", () => {
     );
   });
 
+  it("lets the code declare its own console or timer names, like a script does", async () => {
+    expect(await runJavaScript("let console = 1;\nconsole + 1")).toEqual({ ok: true, output: "2" });
+    expect(await runJavaScript("const setTimeout = 5; setTimeout")).toEqual({ ok: true, output: "5" });
+    expect(await runJavaScript("function f() {}\nconst x = 1;\nnull.foo")).toEqual({
+      ok: false,
+      output: "",
+      error: atLine("TypeError: Cannot read properties of null (reading 'foo')", 3),
+    });
+  });
+
+  it("runs a string passed to setTimeout as code, with the sandbox console", async () => {
+    expect(await runJavaScript("setTimeout('console.log(1 + 1)', 0);")).toEqual({
+      ok: true,
+      output: "2",
+    });
+  });
+
   it("prints nothing extra when the last statement is not an expression", async () => {
     expect(await runJavaScript("const a = 1;")).toEqual({ ok: true, output: "" });
     expect(await runJavaScript("console.log(5)")).toEqual({ ok: true, output: "5" });

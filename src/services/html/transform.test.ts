@@ -84,6 +84,20 @@ describe("formatHtml", () => {
       expect(result.value).toContain('console.log("x");');
     }
   });
+
+  it("leaves embedded script and style content byte for byte when their formatting is off", async () => {
+    const input = "<div><script>\nvar a=1;\n</script><style>\na{color:red}\n</style></div>";
+
+    const result = await formatHtml(input, 2, { formatCss: false, formatJs: false });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("<script>\nvar a=1;\n</script>");
+      expect(result.value).toContain("<style>\na{color:red}\n</style>");
+    }
+    const oneLine = await formatHtml("<script>var a=1;</script>", 2, { formatJs: false });
+    expect(oneLine).toEqual({ ok: true, value: "<script>var a=1;</script>" });
+  });
 });
 
 describe("minifyHtml", () => {
@@ -156,6 +170,29 @@ describe("minifyHtml", () => {
       expect(result.value).toContain("<!--[if IE]>keep<![endif]-->");
     }
   });
+
+  it.each([true, false])(
+    "keeps <!-- --> that is text inside textarea, title and script strings (minifyJs %s)",
+    async (minifyJs) => {
+      const input =
+        '<title>a <!-- b --></title><textarea><!-- typed --></textarea><script>var s = "<!-- x -->";</script><!-- gone -->';
+      const result = await minifyHtml(input, {
+        removeComments: true,
+        collapseWhitespace: false,
+        minifyCss: false,
+        minifyJs,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value).toContain("<title>a <!-- b --></title>");
+        expect(result.value).toContain("<textarea><!-- typed --></textarea>");
+        // Terser writes "<" and ">" in an inline script string as \x3c / \x3e (same string)
+        expect(result.value).toMatch(/var s ?= ?"(<|\\x3c)!-- x --(>|\\x3e)"/);
+        expect(result.value).not.toContain("gone");
+      }
+    },
+  );
 
   it("minifies inline css and javascript", async () => {
     const input = `

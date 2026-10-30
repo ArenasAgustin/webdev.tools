@@ -53,6 +53,8 @@ export function HashPlayground() {
   const [emptyAttempt, setEmptyAttempt] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [comparison, setComparison] = useState<Comparison | null>(null);
+  // Why the last Compare click did nothing; shown only while that still holds.
+  const [compareHint, setCompareHint] = useState<"emptyValue" | "noHashes" | null>(null);
   const { copy: copyToClipboard, error: clipboardError } = useClipboardCopy();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,6 +108,7 @@ export function HashPlayground() {
         setGenerated({ ...source, results: hashes });
       } else {
         setGenerated(null);
+        setEmptyAttempt(true);
       }
     } catch (error) {
       console.error("Hash generation error:", error);
@@ -131,7 +134,15 @@ export function HashPlayground() {
   const handleCompare = useCallback(() => {
     // Pasted hashes often carry stray whitespace or the other letter case
     const expected = compareValue.trim().toLowerCase();
-    if (!expected || !generated || results.length === 0) return;
+    if (!expected) {
+      setCompareHint("emptyValue");
+      return;
+    }
+    if (!generated || results.length === 0) {
+      setCompareHint("noHashes");
+      return;
+    }
+    setCompareHint(null);
 
     const match = results.find((r) => r.hash.toLowerCase() === expected);
     setComparison({ value: compareValue, source: generated, match: match !== undefined });
@@ -158,6 +169,7 @@ export function HashPlayground() {
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
             placeholder={t("hash.inputPlaceholder")}
+            aria-label={t("hash.inputLabel")}
             className="w-full h-32 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono resize-none focus:outline-none focus:ring-1 focus:ring-cyan-400"
             spellCheck={false}
           />
@@ -246,10 +258,10 @@ export function HashPlayground() {
         </div>
       </div>
 
-      {/* Shown after Generate on empty text, until something is typed */}
-      {emptyAttempt && inputMode === "text" && !textInput && (
+      {/* Shown after Generate on empty input, until text is typed or a file picked */}
+      {emptyAttempt && (inputMode === "text" ? !textInput : !fileInput) && (
         <p role="status" className="text-gray-400 text-sm">
-          {t("hash.emptyInput")}
+          {t(inputMode === "text" ? "hash.emptyInput" : "hash.emptyFile")}
         </p>
       )}
 
@@ -259,34 +271,36 @@ export function HashPlayground() {
         </p>
       )}
 
-      {/* Results */}
-      {results.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="text-white font-medium">{t("hash.results")}</h3>
-          {results.map((result) => (
-            <div
-              key={result.algorithm}
-              className="flex items-center justify-between gap-3 bg-white/5 rounded-lg px-4 py-3"
-            >
-              <span className="text-xs font-mono text-gray-400 uppercase w-16 shrink-0">
-                {result.algorithm}
-              </span>
-              <code className="text-sm text-white font-mono flex-1 min-w-0 break-all text-right select-all">
-                {result.hash}
-              </code>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(result.hash)}
-                className="shrink-0 text-gray-400 hover:text-white transition-colors"
-                title={t("hash.copyHash", { algorithm: result.algorithm })}
-                aria-label={t("hash.copyHash", { algorithm: result.algorithm })}
+      {/* Results — a live region that stays mounted, so new results are announced */}
+      <div aria-live="polite" className="empty:-mt-4">
+        {results.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <h3 className="text-white font-medium">{t("hash.results")}</h3>
+            {results.map((result) => (
+              <div
+                key={result.algorithm}
+                className="flex items-center justify-between gap-3 bg-white/5 rounded-lg px-4 py-3"
               >
-                <i className="fas fa-copy"></i>
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <span className="text-xs font-mono text-gray-400 uppercase w-16 shrink-0">
+                  {result.algorithm}
+                </span>
+                <code className="text-sm text-white font-mono flex-1 min-w-0 break-all text-right select-all">
+                  {result.hash}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(result.hash)}
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors"
+                  title={t("hash.copyHash", { algorithm: result.algorithm })}
+                  aria-label={t("hash.copyHash", { algorithm: result.algorithm })}
+                >
+                  <i className="fas fa-copy"></i>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Clipboard error feedback */}
       {clipboardError && <p className="text-red-400 text-sm">{t("hash.copyError")}</p>}
@@ -300,6 +314,7 @@ export function HashPlayground() {
             value={compareValue}
             onChange={(e) => setCompareValue(e.target.value)}
             placeholder={t("hash.comparePlaceholder")}
+            aria-label={t("hash.compareLabel")}
             className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400"
           />
           <button
@@ -310,8 +325,21 @@ export function HashPlayground() {
             {t("hash.compareAction")}
           </button>
         </div>
+        {compareHint === "emptyValue" && !compareValue.trim() && (
+          <p role="status" className="text-gray-400 text-sm">
+            {t("hash.compareEmpty")}
+          </p>
+        )}
+        {compareHint === "noHashes" && compareValue.trim() && results.length === 0 && (
+          <p role="status" className="text-gray-400 text-sm">
+            {t("hash.compareNeedsHashes")}
+          </p>
+        )}
         {compareResult !== null && (
-          <p className={`text-sm font-medium ${compareResult ? "text-green-400" : "text-red-400"}`}>
+          <p
+            role="status"
+            className={`text-sm font-medium ${compareResult ? "text-green-400" : "text-red-400"}`}
+          >
             {compareResult ? `✅ ${t("hash.matchSuccess")}` : `❌ ${t("hash.matchFail")}`}
           </p>
         )}

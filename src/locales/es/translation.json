@@ -25,7 +25,8 @@
     "playgrounds": "Playgrounds",
     "navigation": "Panel de navegación",
     "closeSidebar": "Cerrar panel",
-    "availablePlaygrounds": "Playgrounds disponibles"
+    "availablePlaygrounds": "Playgrounds disponibles",
+    "githubRepository": "Repositorio en GitHub"
   },
   "actions": {
     "clearInput": "Limpiar entrada",
@@ -70,7 +71,8 @@
     "viewShortcuts": "Ver atajos de teclado",
     "viewDifferences": "Ver diferencias",
     "editor": "Editor",
-    "toggleTabFocus": "Alternar Tab: indentar / mover el foco fuera del editor"
+    "toggleTabFocus": "Alternar Tab: indentar / mover el foco fuera del editor",
+    "backspaceKey": "Retroceso"
   },
   "tips": {
     "quickExamples": "Ejemplos Rápidos"
@@ -121,6 +123,7 @@
     "now": "Ahora",
     "placeholder": "Unix timestamp o fecha (ISO 8601, RFC 2822)...",
     "invalidInput": "Input inválido. Ingresá un timestamp o fecha válida.",
+    "ambiguousDate": "Fecha ambigua: puede ser {{monthFirst}} (mes primero) o {{dayFirst}} (día primero). Escribila como AAAA-MM-DD.",
     "futureDate": "Esta fecha es en el futuro",
     "copied": "Copiado al portapapeles",
     "copyError": "No se pudo copiar al portapapeles",
@@ -135,7 +138,8 @@
       "rfc2822": "RFC 2822",
       "humanReadable": "Local",
       "relative": "Relativo"
-    }
+    },
+    "inputLabel": "Timestamp o fecha"
   },
   "editor": {
     "lines": "líneas",
@@ -163,7 +167,8 @@
     "loadError": "No se pudo cargar el editor. Revisá tu conexión e intentá de nuevo.",
     "retry": "Reintentar",
     "diffTitle": "Diferencias",
-    "expandedPlaceholder": "Contenido de {{title}}..."
+    "expandedPlaceholder": "Contenido de {{title}}...",
+    "panelsLabel": "Paneles del editor"
   },
   "password": {
     "aria": {
@@ -192,7 +197,8 @@
       "strong": "Fuerte"
     },
     "history": "Historial:",
-    "noCharset": "Seleccioná al menos un tipo de caracteres para generar una contraseña"
+    "noCharset": "Seleccioná al menos un tipo de caracteres para generar una contraseña",
+    "outputLabel": "Contraseña generada"
   },
   "notifications": "Notificaciones",
   "close_notification": "Cerrar notificación",
@@ -209,7 +215,7 @@
   },
   "home": {
     "tagline": "Herramientas para desarrolladores web",
-    "headline": "Formatea, valida y transforma tu código al instante.",
+    "headline": "Formateá, validá y transformá tu código al instante.",
     "description": "Herramientas optimizadas para JSON, JavaScript, HTML y CSS. Sin instalación, 100% en el navegador.",
     "meta": {
       "description": "Suite de herramientas online para desarrolladores: formatear, minificar y filtrar JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador.",
@@ -242,14 +248,22 @@
     "matchSuccess": "El hash coincide",
     "matchFail": "El hash NO coincide",
     "generateError": "No se pudieron generar los hashes. El archivo puede ser ilegible o demasiado grande.",
-    "emptyInput": "Ingresá un texto para generar sus hashes"
+    "emptyInput": "Ingresá un texto para generar sus hashes",
+    "emptyFile": "Seleccioná un archivo para generar sus hashes",
+    "compareEmpty": "Ingresá un hash para comparar",
+    "compareNeedsHashes": "Generá los hashes primero y después compará",
+    "inputLabel": "Texto a hashear",
+    "compareLabel": "Hash a comparar"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
     "copy": "Copiar {{format}}",
     "copied": "Copiado al portapapeles",
     "copyError": "No se pudo copiar al portapapeles",
-    "invalidColor": "Color no válido. Usá HEX, RGB, HSL, HSV o CMYK."
+    "invalidColor": "Color no válido. Usá HEX, RGB, HSL, HSV o CMYK.",
+    "inputLabel": "Valor del color",
+    "saturationLabel": "Saturación y brillo",
+    "hueLabel": "Tono"
   },
   "html": {
     "previewLabel": "Vista previa",
@@ -273,7 +287,7 @@
     "filterTitle": "Filtro JSONPath",
     "filterHistory": "Historial de filtros",
     "filterTips": "Ver tips de filtros",
-    "filterExpression": "Expresion JSONPath",
+    "filterExpression": "Expresión JSONPath",
     "filterPlaceholder": "Ej: $.users[0].name",
     "applyFilter": "Aplicar filtro JSONPath",
     "tipsTitle": "Tips para Filtros JSONPath",
@@ -419,6 +433,7 @@
     "noInputToDownload": "No hay {{language}} para descargar",
     "noOutputToDownload": "No hay resultado para descargar",
     "formatted": "{{language}} formateado correctamente",
+    "alreadyFormatted": "El código {{language}} ya estaba formateado: no hubo cambios",
     "formatError": "Error al formatear {{language}}",
     "minified": "{{language}} minificado correctamente",
     "minifyError": "Error al minificar {{language}}",
@@ -430,7 +445,7 @@
     "formatCodeError": "Error al formatear código",
     "minifyCodeError": "Error al minificar código",
     "js": {
-      "languageName": "Código",
+      "languageName": "JavaScript",
       "executed": "Código ejecutado correctamente",
       "cleanEmpty": "El código estaba completamente vacío",
       "cleanError": "Error al limpiar código",
@@ -441,7 +456,7 @@
       "unknownError": "Error desconocido al ejecutar código"
     },
     "json": {
-      "jsonPathRequired": "Ingresa una expresión JSONPath",
+      "jsonPathRequired": "Ingresá una expresión JSONPath",
       "noResults": "El filtro no devolvió resultados",
       "jsonPathError": "Error al aplicar JSONPath",
       "precisionLoss": "Algunos números no se pueden representar con exactitud y cambiaron (enteros muy grandes o valores como 1e400).",
@@ -467,6 +482,20 @@
     "common": {
       "noCode": "No hay código para procesar"
     },
+    "syntax": {
+      "atPosition": "{{message}} (línea {{line}}, columna {{column}}){{frame}}",
+      "unclosedBlock": "Bloque sin cerrar: falta la “}” de una “{”",
+      "unclosedString": "Cadena sin cerrar: falta la comilla de cierre",
+      "unclosedBracket": "Paréntesis o corchete sin cerrar: falta el cierre de un “(” o “[”",
+      "unclosedComment": "Comentario sin cerrar: falta “*/”",
+      "unexpectedBrace": "“}” inesperada: no hay un bloque abierto",
+      "unknownWord": "Palabra desconocida (¿falta “:” o “;”?)",
+      "unexpectedToken": "“{{token}}” inesperado",
+      "unexpectedTokenPlain": "Símbolo inesperado",
+      "unexpectedEnd": "El código termina antes de tiempo",
+      "unexpectedClosingTag": "Etiqueta de cierre </{{tag}}> inesperada: no corresponde al elemento abierto",
+      "invalidCss": "Sintaxis CSS inválida"
+    },
     "worker": {
       "error": "Error en worker",
       "unavailable": "Worker no disponible",
@@ -480,6 +509,7 @@
       "tooDeep": "El JSON tiene demasiados niveles de anidación para procesarlo",
       "cleanError": "Error al limpiar JSON: {{message}}",
       "jsonPathEmpty": "La expresión JSONPath está vacía",
+      "jsonPathInvalid": "La expresión JSONPath está incompleta: revisá si falta cerrar un corchete, un paréntesis o una comilla, o si termina en punto",
       "jsonPathError": "Error en JSONPath: {{message}}"
     },
     "css": {
@@ -519,7 +549,11 @@
     "sql": {
       "noInput": "No hay SQL para procesar",
       "empty": "El SQL está vacío",
-      "timeout": "La consulta superó los {{seconds}} segundos y se canceló. La base de datos se reinició."
+      "timeout": "La consulta superó los {{seconds}} segundos y se canceló. La base de datos se reinició.",
+      "statementError": "Sentencia {{statement}}: {{message}}",
+      "validateError": "Error al validar SQL",
+      "executeError": "Error al ejecutar SQL",
+      "resetError": "Error al reiniciar la base de datos"
     }
   }
 }

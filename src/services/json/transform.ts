@@ -74,7 +74,7 @@ export function sortJsonKeys(value: JsonValue): JsonValue {
 }
 
 /** True when `error` is the engine's stack overflow (e.g. very deeply nested JSON). */
-function isStackOverflow(error: unknown): boolean {
+export function isStackOverflow(error: unknown): boolean {
   return error instanceof RangeError && /call stack/i.test(error.message);
 }
 
@@ -230,6 +230,9 @@ export function cleanJson(input: string, options: CleanOptions = {}): Result<str
 
     return { ok: true, value: result };
   } catch (error) {
+    if (isStackOverflow(error)) {
+      return { ok: false, error: { message: serviceMessage("services.json.tooDeep") } };
+    }
     const errorMessage = error instanceof Error ? error.message : String(error);
     return {
       ok: false,

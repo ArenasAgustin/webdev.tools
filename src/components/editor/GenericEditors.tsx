@@ -275,7 +275,8 @@ export const GenericEditors = memo(function GenericEditors({
         outputLabel={t("editor.output")}
       />
 
-      <main className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
+      {/* The page provides the main landmark */}
+      <div className="grid flex-1 min-h-0 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 min-w-0">
         <div
           id="panel-input"
           className={cn(activeTab !== "input" && "hidden", "sm:block", "h-full")}
@@ -334,7 +335,7 @@ export const GenericEditors = memo(function GenericEditors({
               })
             : defaultOutputPanel}
         </div>
-      </main>
+      </div>
     </>
   );
 });

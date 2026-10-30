@@ -311,7 +311,7 @@ describe("JsonPlayground branches", () => {
   it("updates jsonPath expression on input change", () => {
     render(<JsonPlayground />);
 
-    const input = screen.getByLabelText("Expresion JSONPath");
+    const input = screen.getByLabelText("Expresión JSONPath");
     fireEvent.change(input, { target: { value: "$.name" } });
 
     expect((input as HTMLInputElement).value).toBe("$.name");
@@ -321,7 +321,7 @@ describe("JsonPlayground branches", () => {
     storageMocks.loadLastJson.mockReturnValue('{"name":"John"}');
     render(<JsonPlayground />);
 
-    const input = screen.getByLabelText("Expresion JSONPath");
+    const input = screen.getByLabelText("Expresión JSONPath");
     fireEvent.change(input, { target: { value: "$.name" } });
     fireEvent.keyDown(input, { key: "Enter" });
     await act(async () => {
@@ -347,7 +347,7 @@ describe("JsonPlayground branches", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(100);
     });
-    expect(screen.getByLabelText("Expresion JSONPath")).toHaveValue("$.users");
+    expect(screen.getByLabelText("Expresión JSONPath")).toHaveValue("$.users");
   });
 
   it("reuses an expression from JsonPathHistoryModal and closes modal", async () => {
@@ -365,7 +365,7 @@ describe("JsonPlayground branches", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(100);
     });
-    expect(screen.getByLabelText("Expresion JSONPath")).toHaveValue("$.users");
+    expect(screen.getByLabelText("Expresión JSONPath")).toHaveValue("$.users");
   });
 
   it("guards operations when input exceeds max size", async () => {
