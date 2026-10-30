@@ -465,3 +465,25 @@ describe("colorConverter - alpha agrees across formats", () => {
     expect(convertColor("#FF000001")?.rgb).toBe("rgba(255, 0, 0, 0.004)");
   });
 });
+
+describe("colorConverter - valid CSS channel syntax", () => {
+  it.each([
+    ["hsl(120.5, 50.5%, 40%)", { r: 50, g: 154, b: 51 }],
+    ["hsl(120deg, 100%, 50%)", { r: 0, g: 255, b: 0 }],
+    ["hsl(120deg 100% 50%)", { r: 0, g: 255, b: 0 }],
+    ["hsl(0.5turn, 100%, 50%)", { r: 0, g: 255, b: 255 }],
+    ["hsl(-120, 100%, 50%)", { r: 0, g: 0, b: 255 }],
+    ["hsl(480, 100%, 50%)", { r: 0, g: 255, b: 0 }],
+    ["rgb(255.5, 0, 0)", { r: 255, g: 0, b: 0 }],
+    ["hsv(120 100% 100%)", { r: 0, g: 255, b: 0 }],
+    ["hsv(120.5, 50.5%, 100%)", { r: 126, g: 255, b: 127 }],
+  ])("accepts %s", (input, expected) => {
+    expect(parseColor(input)).toEqual(expected);
+  });
+
+  it("still rejects out-of-range channels", () => {
+    expect(parseColor("rgb(256, 0, 0)")).toBeNull();
+    expect(parseColor("hsl(120, 101%, 50%)")).toBeNull();
+    expect(parseColor("hsv(120, 50%, 100.5%)")).toBeNull();
+  });
+});
