@@ -64,9 +64,14 @@ export const minifySqlAsync = async (input: string): Promise<Result<string, stri
   }
 };
 
-export const executeSqlAsync = async (
-  input: string,
-): Promise<Result<SqlExecuteResult, string>> => {
+/**
+ * An execute outcome. `databaseReset` marks a failure that replaced the worker
+ * (timeout or crash): the in-memory database is gone and the next run has to
+ * load sql.js again.
+ */
+export type SqlExecuteOutcome = Result<SqlExecuteResult, string> & { databaseReset?: true };
+
+export const executeSqlAsync = async (input: string): Promise<SqlExecuteOutcome> => {
   try {
     // Load sql.js first, under the client's default timeout, so the wasm
     // download and compile do not count against the query.
@@ -91,13 +96,19 @@ export const executeSqlAsync = async (
     }
     return { ok: false, error: "Unexpected execute response" };
   } catch (err) {
+    // The adapter only throws when the worker itself failed and was dropped.
     if (err instanceof WorkerTimeoutError) {
       return {
         ok: false,
         error: translate("services.sql.timeout", { seconds: SQL_EXECUTION_TIMEOUT_MS / 1000 }),
+        databaseReset: true,
       };
     }
-    return { ok: false, error: localizeServiceMessage(err instanceof Error ? err.message : String(err)) };
+    return {
+      ok: false,
+      error: localizeServiceMessage(err instanceof Error ? err.message : String(err)),
+      databaseReset: true,
+    };
   }
 };
 

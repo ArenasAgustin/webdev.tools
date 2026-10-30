@@ -162,6 +162,7 @@ describe("sqlWorkerAdapter action round-trips", () => {
       const result = await pending;
       expect(result.ok).toBe(false);
       expect((result as { error: string }).error).toMatch(/segundos.*base de datos se reinició/);
+      expect(result).toMatchObject({ databaseReset: true });
       expect(stuck.terminate).toHaveBeenCalledOnce();
 
       const formatted = formatSqlAsync("select 1");

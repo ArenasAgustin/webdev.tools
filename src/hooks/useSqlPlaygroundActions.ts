@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { sqlFileSettings, sqlPlaygroundConfig } from "@/playgrounds/sql/sql.config";
 import {
   executeSqlAsync,
+  type SqlExecuteOutcome,
   resetSqlAsync,
   formatSqlAsync,
   minifySqlAsync,
@@ -13,7 +14,7 @@ import {
 import { compactTransformError } from "@/utils/transformError";
 import { translate } from "@/i18n/translate";
 import type { ToastApi } from "./usePlaygroundActions";
-import type { SqlFormatConfig, SqlMinifyConfig, SqlExecuteResult } from "@/types/sql";
+import type { SqlFormatConfig, SqlMinifyConfig } from "@/types/sql";
 
 const FILE_CONFIG: PlaygroundFileConfig = {
   ...sqlFileSettings,
@@ -125,10 +126,11 @@ export function useSqlPlaygroundActions({
     setError(null);
 
     void executeSqlAsync(inputSql)
-      .then((result: { ok: true; value: SqlExecuteResult } | { ok: false; error: string }) => {
+      .then((result: SqlExecuteOutcome) => {
         endProcessing();
         setIsExecuting(false);
-        setIsFirstRun(false);
+        // A replaced worker lost sql.js too, so the next run loads it again.
+        setIsFirstRun(result.databaseReset === true);
         if (result.ok) {
           setOutput(JSON.stringify(result.value, null, 2));
           toast?.success(translate("messages.sql.executed"));
