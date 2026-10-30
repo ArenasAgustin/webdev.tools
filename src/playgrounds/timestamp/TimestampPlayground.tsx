@@ -224,7 +224,7 @@ export function TimestampPlayground() {
               <button
                 type="button"
                 onClick={() => copyToClipboard(String(result[key]))}
-                className="ml-3 text-gray-400 hover:text-white transition-colors"
+                className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors"
                 title={t("common.copy")}
                 aria-label={`${t("common.copy")} ${label}`}
               >

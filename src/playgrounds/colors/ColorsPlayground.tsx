@@ -108,7 +108,7 @@ export function ColorsPlayground() {
               <button
                 type="button"
                 onClick={() => copyToClipboard(value)}
-                className="ml-3 text-gray-400 hover:text-white transition-colors"
+                className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors"
                 title={t("colors.copy", { format })}
                 aria-label={t("colors.copy", { format })}
               >

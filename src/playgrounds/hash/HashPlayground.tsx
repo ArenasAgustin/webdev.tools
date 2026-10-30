@@ -290,7 +290,7 @@ export function HashPlayground() {
                 <button
                   type="button"
                   onClick={() => copyToClipboard(result.hash)}
-                  className="shrink-0 text-gray-400 hover:text-white transition-colors"
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors"
                   title={t("hash.copyHash", { algorithm: result.algorithm })}
                   aria-label={t("hash.copyHash", { algorithm: result.algorithm })}
                 >
