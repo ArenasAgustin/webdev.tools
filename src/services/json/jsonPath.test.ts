@@ -158,3 +158,11 @@ describe("applyJsonPath", () => {
     }
   });
 });
+
+describe("applyJsonPath on very deep nesting", () => {
+  it("reports the translated too-deep error instead of the engine stack overflow", () => {
+    const input = "[".repeat(20000) + "]".repeat(20000);
+
+    expect(applyJsonPath(input, "$..*")).toEqual({ ok: false, error: { message: "services.json.tooDeep" } });
+  });
+});

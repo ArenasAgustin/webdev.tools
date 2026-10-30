@@ -122,6 +122,12 @@ describe("formatJson", () => {
 
     expect(result).toEqual({ ok: false, error: "services.json.tooDeep" });
   });
+
+  it("Clean reports the translated too-deep error instead of the engine's stack overflow", () => {
+    const input = "[".repeat(20000) + "]".repeat(20000);
+
+    expect(cleanJson(input)).toEqual({ ok: false, error: { message: "services.json.tooDeep" } });
+  });
 });
 
 describe("minifyJson", () => {

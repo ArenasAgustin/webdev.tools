@@ -1,5 +1,5 @@
 import { JSONPath } from "jsonpath-plus";
-import { JSON_ERROR_MESSAGES } from "./transform";
+import { JSON_ERROR_MESSAGES, isStackOverflow } from "./transform";
 import { serviceMessage } from "@/services/serviceMessage";
 import { type Result, type JsonValue, type JsonError } from "@/types/common";
 
@@ -48,6 +48,10 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
     const formatted = JSON.stringify(result, null, 2);
     return { ok: true, value: formatted };
   } catch (error) {
+    // Very deep nesting overflows the engine stack in JSON.parse or jsonpath-plus.
+    if (isStackOverflow(error)) {
+      return { ok: false, error: { message: serviceMessage("services.json.tooDeep") } };
+    }
     const errorMessage = error instanceof Error ? error.message : String(error);
     return {
       ok: false,
