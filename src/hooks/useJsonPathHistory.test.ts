@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { IDBFactory } from "fake-indexeddb";
 import { useJsonPathHistory, resetDbPromise } from "./useJsonPathHistory";
+import { STORAGE_KEYS, setItem } from "@/services/storage";
 
 describe("useJsonPathHistory", () => {
   beforeEach(() => {
@@ -190,6 +191,56 @@ describe("useJsonPathHistory", () => {
       expect(result.current.history.find((h) => h.expression === "$.field0")).toBeUndefined();
       // The newest should be there
       expect(result.current.history.find((h) => h.expression === "$.newField")).toBeDefined();
+    });
+  });
+
+  describe("legacy localStorage migration", () => {
+    it("keeps the history when the saved list repeats an expression", async () => {
+      const entries = new Map<string, string>();
+      Object.defineProperty(window, "localStorage", {
+        configurable: true,
+        value: {
+          getItem: (key: string) => entries.get(key) ?? null,
+          setItem: (key: string, value: string) => entries.set(key, value),
+          removeItem: (key: string) => entries.delete(key),
+          clear: () => entries.clear(),
+        },
+      });
+      setItem(STORAGE_KEYS.JSONPATH_HISTORY, [
+        { id: "1", expression: "$.a", timestamp: 1, frequency: 2 },
+        { id: "2", expression: "$.a", timestamp: 5, frequency: 1 },
+        { id: "3", expression: "$.b", timestamp: 3, frequency: 1 },
+      ]);
+      const { result } = renderHook(() => useJsonPathHistory());
+
+      await waitFor(() => {
+        expect(result.current.history).toHaveLength(2);
+      });
+      expect(result.current.history.map((h) => [h.expression, h.frequency, h.timestamp])).toEqual([
+        ["$.a", 3, 5],
+        ["$.b", 1, 3],
+      ]);
+      expect(entries.has(STORAGE_KEYS.JSONPATH_HISTORY)).toBe(false);
+      Reflect.deleteProperty(window, "localStorage");
+    });
+  });
+
+  describe("other tabs", () => {
+    it("closes its connection so another tab can upgrade the database", async () => {
+      const { result } = renderHook(() => useJsonPathHistory());
+      await act(async () => {
+        await result.current.addToHistory("$.name");
+      });
+
+      const upgraded = await new Promise<string>((resolve) => {
+        const request = indexedDB.open("webdev.tools", 99);
+        request.onsuccess = () => {
+          request.result.close();
+          resolve("upgraded");
+        };
+        setTimeout(() => resolve("blocked"), 1000);
+      });
+      expect(upgraded).toBe("upgraded");
     });
   });
 });
