@@ -68,13 +68,32 @@ export function usePhpPlaygroundActions({
 
   // Extensión: formatear código PHP con validación
   const handleFormat = useCallback(() => {
+    // Set when the formatter returned the input unchanged, so the toast can say so
+    // instead of claiming the code was formatted.
+    let unchanged = false;
     createTransformHandler({
-      runTransformAction: generic.runTransformAction,
+      runTransformAction: (options) =>
+        generic.runTransformAction({
+          ...options,
+          // The success toast is chosen here, once the result is known.
+          successMessage: "",
+          onSuccess: (value: string) => {
+            options.onSuccess?.(value);
+            if (unchanged) {
+              const message = translate("messages.alreadyFormatted", { language: FILE_CONFIG.language });
+              if (toast?.info) toast.info(message);
+              else toast?.success(message);
+            } else {
+              toast?.success(options.successMessage);
+            }
+          },
+        }),
       run: async () => {
         const result = await phpService.format(inputPhp, {
           indentSize: formatConfig.indentSize,
         });
         if (!result.ok) throw new Error(result.error ?? translate("messages.php.formatCodeError"));
+        unchanged = result.value === inputPhp;
         return result.value;
       },
       setOutput,
@@ -83,7 +102,7 @@ export function usePhpPlaygroundActions({
       successMessage: translate("messages.formatted", { language: FILE_CONFIG.language }),
       errorMessage: translate("messages.formatError", { language: FILE_CONFIG.language }),
     });
-  }, [generic.runTransformAction, inputPhp, formatConfig, setError, setOutput]);
+  }, [generic, inputPhp, formatConfig, setError, setOutput, toast]);
 
   // Extensión: ejecutar código PHP
   const handleExecute = useCallback(() => {

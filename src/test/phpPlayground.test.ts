@@ -106,3 +106,45 @@ describe("PHP example", () => {
     expect(phpPlaygroundConfig.example).not.toMatch(/\banos\b/);
   });
 });
+
+describe("usePhpPlaygroundActions format", () => {
+  const renderFormat = (inputPhp: string) => {
+    const setOutput = vi.fn();
+    const toast = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+    const { result } = renderHook(() =>
+      usePhpPlaygroundActions({
+        inputPhp,
+        setInputPhp: vi.fn(),
+        output: "",
+        setOutput,
+        setError: vi.fn(),
+        formatConfig: { indentSize: 2 } as never,
+        minifyConfig: {},
+        toast,
+      }),
+    );
+    act(() => {
+      result.current.handleFormat();
+    });
+    return { setOutput, toast };
+  };
+
+  it("says nothing changed when the code is already formatted", async () => {
+    const { setOutput, toast } = renderFormat("<?php\nif (1) {\n  echo 1;\n}");
+
+    await waitFor(() => {
+      expect(toast.info).toHaveBeenCalledWith("El código PHP ya estaba formateado: no hubo cambios");
+    });
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(setOutput).toHaveBeenLastCalledWith("<?php\nif (1) {\n  echo 1;\n}");
+  });
+
+  it("still reports success when formatting changed the code", async () => {
+    const { toast } = renderFormat("<?php\nif (1) {\necho 1;\n}");
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("PHP formateado correctamente");
+    });
+    expect(toast.info).not.toHaveBeenCalled();
+  });
+});

@@ -433,6 +433,7 @@
     "noInputToDownload": "No hay {{language}} para descargar",
     "noOutputToDownload": "No hay resultado para descargar",
     "formatted": "{{language}} formateado correctamente",
+    "alreadyFormatted": "El código {{language}} ya estaba formateado: no hubo cambios",
     "formatError": "Error al formatear {{language}}",
     "minified": "{{language}} minificado correctamente",
     "minifyError": "Error al minificar {{language}}",
