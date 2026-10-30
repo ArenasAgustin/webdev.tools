@@ -129,6 +129,13 @@ describe("timestamp.utils", () => {
       },
     );
 
+    it.each(["0x10", "1e3", "0b101", "0o17", "Infinity", "1_000"])(
+      "does not read the number literal %j as a Unix timestamp",
+      (value) => {
+        expect(parseInput(value, "UTC")).toBeNull();
+      },
+    );
+
     it.each(["not-a-valid-timestamp 3", "hello 5", "version 2"])(
       "rejects free text that the engine would read as a date: %j",
       (value) => {

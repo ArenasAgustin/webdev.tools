@@ -233,14 +233,8 @@ export function parseInput(
     }
   }
 
-  // Then, try to parse as number (Unix timestamp).
-  // The seconds-vs-milliseconds disambiguation is handled downstream in unixToDate()
-  // via detectUnixUnit().
-  const num = Number(trimmed);
-  if (Number.isFinite(num)) {
-    return { type: "unix", value: num };
-  }
-
+  // Unix timestamps are only plain decimal numbers (checked above): Number() would
+  // also take number literals such as 0x10, 1e3 or 0b101 and show a wrong date.
   return null;
 }
 
