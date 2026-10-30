@@ -7,6 +7,7 @@
 
 import type { Result } from "@/types/common";
 import { serviceMessage } from "@/services/serviceMessage";
+import { startsAsPhpFile } from "@/services/php/openTag";
 
 /** `output` holds what the script printed before a fatal error. */
 export type PhpExecResult = Result<string, { message: string; output?: string }>;
@@ -62,7 +63,7 @@ function stripInternalPaths(text: string): string {
  */
 function toRunnablePhp(code: string): string {
   const source = code.trimEnd();
-  if (!/<\?(php\b|=)/i.test(source)) return `<?php ${source}`;
+  if (!startsAsPhpFile(source)) return `<?php ${source}`;
   const leading = /^\s*/.exec(source)?.[0] ?? "";
   const body = source.slice(leading.length);
   const tag = /^<\?(php\b|=)/i.exec(body)?.[0];

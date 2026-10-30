@@ -6,6 +6,7 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { serviceMessage } from "@/services/serviceMessage";
+import { startsAsPhpFile } from "@/services/php/openTag";
 import PhpParser from "php-parser";
 import { PHP_VERSION } from "@/services/php/phpRuntime";
 
@@ -149,7 +150,7 @@ type PhpToken = string | [name: string, text: string, line: number];
  * the same way; `prefixLength` maps token offsets back to `input`.
  */
 function toPhpSource(input: string): { source: string; prefixLength: number } {
-  if (/<\?(php\b|=)/i.test(input)) return { source: input, prefixLength: 0 };
+  if (startsAsPhpFile(input)) return { source: input, prefixLength: 0 };
   const prefix = "<?php ";
   return { source: prefix + input, prefixLength: prefix.length };
 }

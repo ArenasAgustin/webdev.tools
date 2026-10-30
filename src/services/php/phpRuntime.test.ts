@@ -46,6 +46,14 @@ describe("executePhp", () => {
     expect(run).toHaveBeenCalledWith({ code: "<?php echo 1;\necho 2;" });
   });
 
+  it("runs tagless code whose string holds an open tag as PHP, not inline HTML", async () => {
+    run.mockResolvedValue(response("<?php"));
+
+    await executePhp('echo "<?php";');
+
+    expect(run).toHaveBeenCalledWith({ code: '<?php echo "<?php";' });
+  });
+
   it("keeps leading blank lines so error line numbers match the editor", async () => {
     run.mockResolvedValue(response("1"));
 
