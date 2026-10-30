@@ -122,6 +122,11 @@ describe("GenericEditors — features", () => {
     expect(screen.getAllByText("Resultado").length).toBeGreaterThan(0);
   });
 
+  it("leaves the main landmark to the page (no nested main)", () => {
+    render(<GenericEditors {...baseProps} />);
+    expect(screen.queryByRole("main")).not.toBeInTheDocument();
+  });
+
   it("renders footers in panels", () => {
     render(<GenericEditors {...baseProps} />);
 

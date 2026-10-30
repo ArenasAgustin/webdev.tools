@@ -102,13 +102,13 @@ export function PlaygroundPage() {
             </div>
           </header>
 
-          <div key={playgroundId} className="flex-1 min-h-0 flex flex-col gap-4 fade-in">
+          <main key={playgroundId} className="flex-1 min-h-0 flex flex-col gap-4 fade-in">
             <ErrorBoundary name={name ?? playground.id}>
               <Suspense fallback={<PlaygroundLoader name={name ?? playground.id} />}>
                 <PlaygroundComponent />
               </Suspense>
             </ErrorBoundary>
-          </div>
+          </main>
         </div>
       </div>
     </div>
