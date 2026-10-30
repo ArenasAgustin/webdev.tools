@@ -21,6 +21,20 @@ export interface StatementsResult {
   valuesTruncated?: true;
 }
 
+/**
+ * A statement of the script failed. `partial` holds the result sets of the
+ * statements that ran before it, so they can be shown next to the error.
+ */
+export class SqlStatementError extends Error {
+  readonly partial: StatementsResult;
+
+  constructor(message: string, partial: StatementsResult, options?: ErrorOptions) {
+    super(message, options);
+    this.name = "SqlStatementError";
+    this.partial = partial;
+  }
+}
+
 // sql.js reads integers as bigint with this option; @types/sql.js does not declare it.
 interface BigIntStatement {
   get(params: null, config: { useBigInt: true }): (RawValue | bigint)[];
@@ -83,7 +97,8 @@ export function roundElapsedMs(ms: number): number {
  * by `cellCap` (see toCell).
  *
  * A failing statement throws a `services.sql.statementError` message naming its
- * statement number, so the user can tell which part of the script broke.
+ * statement number, so the user can tell which part of the script broke, as a
+ * SqlStatementError carrying the result sets read before it.
  */
 export function runStatements(
   db: Database,
@@ -108,18 +123,23 @@ export function runStatements(
   } catch (err) {
     current?.free();
     // Without a current statement, the next one failed to prepare.
-    throw new Error(
+    throw new SqlStatementError(
       serviceMessage("services.sql.statementError", {
         statement: current ? statement : statement + 1,
         message: err instanceof Error ? err.message : String(err),
       }),
+      collect(),
       { cause: err },
     );
   }
 
-  const result: StatementsResult = { resultSets, truncated: resultSets.some((set) => set.truncated) };
-  if (resultSets.some((set) => set.valuesTruncated)) result.valuesTruncated = true;
-  return result;
+  return collect();
+
+  function collect(): StatementsResult {
+    const result: StatementsResult = { resultSets, truncated: resultSets.some((set) => set.truncated) };
+    if (resultSets.some((set) => set.valuesTruncated)) result.valuesTruncated = true;
+    return result;
+  }
 
   function readStatement(stmt: Statement): void {
     if (!stmt.step()) {

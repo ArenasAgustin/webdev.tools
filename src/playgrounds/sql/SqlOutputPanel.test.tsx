@@ -11,12 +11,12 @@ vi.mock("@/components/editor/LazyCodeEditor", () => ({
   ),
 }));
 
-function renderPanel(output: string) {
+function renderPanel(output: string, error: string | null = null) {
   return render(
     <SqlOutputPanel
       input=""
       output={output}
-      error={null}
+      error={error}
       isProcessing={false}
       outputStats={{ lines: 1, characters: output.length, bytes: output.length }}
       comparisonBytes={0}
@@ -40,5 +40,12 @@ describe("SqlOutputPanel", () => {
     renderPanel(JSON.stringify({ resultSets: [{ statement: 1, columns: ["a"], rows: [["x…"]], truncated: false, valuesTruncated: true }], elapsedMs: 1, truncated: false, valuesTruncated: true }));
     expect(screen.getByTestId("sql-values-truncated-banner")).toHaveTextContent("77");
     expect(screen.queryByTestId("sql-truncation-banner")).toBeNull();
+  });
+
+  it("shows the error together with the results of the statements that ran before it", () => {
+    const output = JSON.stringify({ resultSets: [{ statement: 1, columns: ["a"], rows: [[1]], truncated: false }], elapsedMs: 1, truncated: false });
+    renderPanel(output, "Sentencia 2: no such table: nope");
+    expect(screen.getByTestId("sql-error-banner")).toHaveTextContent("Sentencia 2: no such table: nope");
+    expect(screen.getByTestId("code-editor-json")).toHaveTextContent('"statement":1');
   });
 });

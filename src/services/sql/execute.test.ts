@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, vi } from "vitest";
 import initSqlJs, { type Database, type Statement } from "sql.js";
-import { roundElapsedMs, runStatements } from "@/services/sql/execute";
+import { roundElapsedMs, runStatements, SqlStatementError } from "@/services/sql/execute";
 import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
 describe("runStatements", () => {
@@ -165,6 +165,23 @@ describe("runStatements", () => {
     expect(
       errorMessage(() => runStatements(db, "SELECT 1; SELECT 2; SELECT abs(-9223372036854775808);", 10)),
     ).toBe("Sentencia 3: integer overflow");
+  });
+
+  it("keeps the result sets of the statements that ran before the failure", () => {
+    let caught: unknown;
+    try {
+      runStatements(db, "SELECT 1 AS a; SELECT 'b' AS b; SELECT * FROM missing_table;", 10);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(SqlStatementError);
+    expect((caught as SqlStatementError).partial).toEqual({
+      resultSets: [
+        { statement: 1, columns: ["a"], rows: [[1]], truncated: false },
+        { statement: 2, columns: ["b"], rows: [["b"]], truncated: false },
+      ],
+      truncated: false,
+    });
   });
 });
 

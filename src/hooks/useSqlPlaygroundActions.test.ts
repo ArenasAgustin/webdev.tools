@@ -7,7 +7,13 @@ const { executeSqlAsyncMock, resetSqlAsyncMock, formatSqlAsyncMock, minifySqlAsy
   vi.hoisted(() => ({
     downloadFileMock: vi.fn(),
     executeSqlAsyncMock: vi.fn<
-      (input: string) => Promise<{ ok: boolean; value?: SqlExecuteResult; error?: string; databaseReset?: true }>
+      (input: string) => Promise<{
+        ok: boolean;
+        value?: SqlExecuteResult;
+        error?: string;
+        databaseReset?: true;
+        partial?: SqlExecuteResult;
+      }>
     >(),
     resetSqlAsyncMock: vi.fn<() => Promise<{ ok: boolean; value?: string; error?: string }>>(),
     formatSqlAsyncMock: vi.fn<(input: string) => Promise<{ ok: boolean; value?: string; error?: string }>>(),
@@ -119,6 +125,24 @@ describe("useSqlPlaygroundActions", () => {
     expect(props.toast.error).toHaveBeenCalledWith("syntax error near SELEKT");
     // isFirstRun still becomes false
     expect(result.current.isFirstRun).toBe(false);
+  });
+
+  it("execute error keeps the result sets of the statements that ran before it", async () => {
+    executeSqlAsyncMock.mockResolvedValue({ ok: false, error: "Sentencia 2: no such table: nope", partial: mockResult });
+    const props = makeProps();
+    const { result } = renderHook(() => useSqlPlaygroundActions(props));
+
+    act(() => {
+      result.current.handleExecute();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isExecuting).toBe(false);
+    });
+
+    expect(props.setOutput).toHaveBeenLastCalledWith(JSON.stringify(mockResult, null, 2));
+    expect(props.setError).toHaveBeenLastCalledWith("Sentencia 2: no such table: nope");
+    expect(props.toast.error).toHaveBeenCalledWith("Sentencia 2: no such table: nope");
   });
 
   it("execute error toast shows a compact message, the panel keeps the details", async () => {

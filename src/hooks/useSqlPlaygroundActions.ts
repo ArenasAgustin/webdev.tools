@@ -135,8 +135,9 @@ export function useSqlPlaygroundActions({
           setOutput(JSON.stringify(result.value, null, 2));
           toast?.success(translate("messages.sql.executed"));
         } else {
-          // Drop the previous result so the error is not shown next to stale rows.
-          setOutput("");
+          // Drop the previous result so the error is not shown next to stale rows;
+          // rows of the statements that ran before the failing one are kept.
+          setOutput(result.partial ? JSON.stringify(result.partial, null, 2) : "");
           // The panel keeps the full parser message; the toast only gets its first line.
           setError(result.error);
           toast?.error(compactTransformError(result.error));

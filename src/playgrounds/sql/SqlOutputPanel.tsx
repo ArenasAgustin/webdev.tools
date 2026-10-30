@@ -21,7 +21,8 @@ export interface SqlOutputPanelProps extends OutputPanelProps {
  * - Loading: first run + executing → "Loading SQLite engine…"
  * - Error: error and no output → error banner
  * - Idle: no output, no error → placeholder hint
- * - Success: output present → Monaco read-only JSON viewer (with optional truncation banner)
+ * - Success: output present → Monaco read-only JSON viewer (with optional truncation banners,
+ *   and the error of a failing statement above the rows of the statements before it)
  */
 export function SqlOutputPanel(props: SqlOutputPanelProps) {
   const { t } = useTranslation();
@@ -153,6 +154,19 @@ export function SqlOutputPanel(props: SqlOutputPanelProps) {
         />
       }
     >
+      {error && (
+        // A later statement failed: its error is shown above the rows of the statements that ran before it.
+        <div
+          className="flex flex-col gap-1 rounded-md border border-red-400/30 bg-red-400/10 px-3 py-2"
+          data-testid="sql-error-banner"
+        >
+          <div className="flex items-center gap-2 text-sm font-medium text-red-400">
+            <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            <span>{t("sql.sqlError")}</span>
+          </div>
+          <pre className="whitespace-pre-wrap break-words text-sm text-red-300">{error}</pre>
+        </div>
+      )}
       {isTruncated && (
         <div
           className="flex items-center gap-2 rounded-md border border-yellow-400/30 bg-yellow-400/10 px-3 py-2 text-sm text-yellow-300"

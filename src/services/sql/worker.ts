@@ -76,9 +76,13 @@ export const minifySqlAsync = async (input: string): Promise<Result<string, stri
 /**
  * An execute outcome. `databaseReset` marks a failure that replaced the worker
  * (timeout or crash): the in-memory database is gone and the next run has to
- * load sql.js again.
+ * load sql.js again. `partial` holds the result sets of the statements that ran
+ * before a failing one, to show next to the error.
  */
-export type SqlExecuteOutcome = Result<SqlExecuteResult, string> & { databaseReset?: true };
+export type SqlExecuteOutcome = Result<SqlExecuteResult, string> & {
+  databaseReset?: true;
+  partial?: SqlExecuteResult;
+};
 
 export const executeSqlAsync = async (input: string): Promise<SqlExecuteOutcome> => {
   try {
@@ -99,7 +103,9 @@ export const executeSqlAsync = async (input: string): Promise<SqlExecuteOutcome>
       };
     }
     if (!response.ok) {
-      return { ok: false, error: workerErrorMessage(response, executeFallback) };
+      const error = workerErrorMessage(response, executeFallback);
+      const partial = "partial" in response ? response.partial : undefined;
+      return partial ? { ok: false, error, partial } : { ok: false, error };
     }
     return { ok: false, error: executeFallback() };
   } catch (err) {
