@@ -14,7 +14,7 @@ export function getJsonPathTips(): TipItem[] {
       categoryIcon: "bolt",
       categoryColor: "blue-400",
       items: [
-        { code: "$.propiedad", description: translate(`${TIP_KEYS}.items.fromRoot`) },
+        { code: "$.property", description: translate(`${TIP_KEYS}.items.fromRoot`) },
         { code: "$.users", description: translate(`${TIP_KEYS}.items.usersArray`) },
         { code: "$.metadata.total", description: translate(`${TIP_KEYS}.items.nestedProperty`) },
       ],
