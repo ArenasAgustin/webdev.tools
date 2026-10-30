@@ -93,9 +93,36 @@ function numericWallTime(value: string): WallTime | null {
     const [, a, b, c, hour, minute, second, ms] = slash;
     const clock = wallClock(hour, minute, second, ms);
     if (a.length === 4) return { year: Number(a), month: Number(b), day: Number(c), ...clock };
-    if (c.length === 4) return { year: Number(c), month: Number(a), day: Number(b), ...clock };
+    if (c.length === 4) {
+      // Day first only when the first number cannot be a month (15/01/2024);
+      // otherwise month first (01/15/2024). Ambiguous dates never get here.
+      return Number(a) > 12
+        ? { year: Number(c), month: Number(b), day: Number(a), ...clock }
+        : { year: Number(c), month: Number(a), day: Number(b), ...clock };
+    }
   }
   return null;
+}
+
+/**
+ * The two readings of a day/month date whose order cannot be told apart
+ * (01/02/2024: January 2 or February 1?), as YYYY-MM-DD; null for any other input,
+ * including dates where both numbers are equal (05/05/2024) or one exceeds 12.
+ */
+export function ambiguousDayMonth(value: string): { monthFirst: string; dayFirst: string } | null {
+  const slash = SLASH_OR_DOT.exec(value.trim());
+  if (!slash) return null;
+  const [, a, b, c] = slash;
+  const first = Number(a);
+  const second = Number(b);
+  if (c.length !== 4 || first === second || first < 1 || second < 1 || first > 12 || second > 12) {
+    return null;
+  }
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return {
+    monthFirst: `${c}-${pad(first)}-${pad(second)}`,
+    dayFirst: `${c}-${pad(second)}-${pad(first)}`,
+  };
 }
 
 /** True when the fields name a real calendar date and time (no 2024-02-30, no 25:00). */
@@ -173,6 +200,10 @@ export function parseInput(
   if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
     return { type: "unix", value: Number(trimmed) };
   }
+
+  // 01/02/2024 is January 2 in the US and February 1 elsewhere: refuse to guess
+  // (the UI asks for YYYY-MM-DD, see ambiguousDayMonth).
+  if (ambiguousDayMonth(trimmed)) return null;
 
   // Numeric dates are read field by field, so the engine can neither roll
   // 2024-02-30 over to March nor read a date-only ISO string as UTC.

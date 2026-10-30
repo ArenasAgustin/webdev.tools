@@ -123,6 +123,7 @@
     "now": "Now",
     "placeholder": "Unix timestamp or date (ISO 8601, RFC 2822)...",
     "invalidInput": "Invalid input. Enter a valid timestamp or date.",
+    "ambiguousDate": "Ambiguous date: it could be {{monthFirst}} (month first) or {{dayFirst}} (day first). Write it as YYYY-MM-DD.",
     "futureDate": "This date is in the future",
     "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",

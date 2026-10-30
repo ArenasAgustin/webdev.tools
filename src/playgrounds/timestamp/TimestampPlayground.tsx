@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { timestampConfig } from "./timestamp.config";
 import {
+  ambiguousDayMonth,
   convertTimestamp,
   getCurrentTimestamp,
   withUtc,
@@ -89,7 +90,8 @@ export function TimestampPlayground() {
       setNow(Date.now());
       setConvertedInput(input);
     } else {
-      setError(t("timestamp.invalidInput"));
+      const ambiguous = ambiguousDayMonth(input);
+      setError(ambiguous ? t("timestamp.ambiguousDate", ambiguous) : t("timestamp.invalidInput"));
       setConvertedInput(null);
     }
   }, [input, timezone, lang, t]);

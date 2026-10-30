@@ -7,6 +7,7 @@ import {
   getCurrentTimestamp,
   detectUnixUnit,
   withUtc,
+  ambiguousDayMonth,
 } from "./timestamp.utils";
 
 describe("timestamp.utils", () => {
@@ -98,6 +99,33 @@ describe("timestamp.utils", () => {
       (value) => {
         expect(parseInput(value, "UTC")).toBeNull();
         expect(convertTimestamp(value, "UTC", "en")).toBeNull();
+      },
+    );
+
+    it.each([
+      ["15/01/2024", Date.UTC(2024, 0, 15)],
+      ["31.12.2023 23:59", Date.UTC(2023, 11, 31, 23, 59)],
+      ["05/05/2024", Date.UTC(2024, 4, 5)],
+    ])("reads the unambiguous day-first date %j", (value, expected) => {
+      expect((parseInput(value, "UTC")?.value as Date).getTime()).toBe(expected);
+    });
+
+    it.each(["01/02/2024", "03.04.2024 10:00"])(
+      "does not guess the order of the ambiguous date %j",
+      (value) => {
+        expect(parseInput(value, "UTC")).toBeNull();
+        expect(ambiguousDayMonth(value)).toEqual(
+          value.startsWith("01")
+            ? { monthFirst: "2024-01-02", dayFirst: "2024-02-01" }
+            : { monthFirst: "2024-03-04", dayFirst: "2024-04-03" },
+        );
+      },
+    );
+
+    it.each(["15/01/2024", "01/15/2024", "05/05/2024", "2024/01/02", "2024-01-02"])(
+      "does not flag %j as ambiguous",
+      (value) => {
+        expect(ambiguousDayMonth(value)).toBeNull();
       },
     );
 

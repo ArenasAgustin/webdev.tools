@@ -142,6 +142,17 @@ describe("TimestampPlayground branches", () => {
     expect(screen.getByText("timestamp.invalidInput")).toBeInTheDocument();
   });
 
+  it("handleConvert: an ambiguous day/month date asks for an unambiguous format", () => {
+    render(<TimestampPlayground />);
+
+    const input = screen.getByPlaceholderText("timestamp.placeholder");
+    fireEvent.change(input, { target: { value: "01/02/2024" } });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
+
+    expect(screen.getByText("timestamp.ambiguousDate")).toBeInTheDocument();
+    expect(screen.queryByText("timestamp.invalidInput")).not.toBeInTheDocument();
+  });
+
   it("handleNow: populates input with current unix timestamp and converts", () => {
     render(<TimestampPlayground />);
 
