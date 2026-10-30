@@ -405,8 +405,13 @@ export function getAllFormats(exact: RGB): ColorFormats {
   const rgb = roundRgb(exact);
 
   if (rgb.a !== undefined && rgb.a < 1) {
-    const alpha = Math.round(rgb.a * 100) / 100;
-    const alphaHex = Math.round(rgb.a * 255).toString(16).padStart(2, "0").toUpperCase();
+    const alphaByte = Math.round(rgb.a * 255);
+    const alphaHex = alphaByte.toString(16).padStart(2, "0").toUpperCase();
+    // Two decimals, or three when two would name a different 8-bit alpha than the hex
+    // (#FF000001 is 0.004, not 0; #FF0000FE is 0.996, not 1).
+    const twoDecimals = Math.round(rgb.a * 100) / 100;
+    const alpha =
+      Math.round(twoDecimals * 255) === alphaByte ? twoDecimals : Math.round(rgb.a * 1000) / 1000;
     return {
       hex: rgbToHex(rgb) + alphaHex,
       rgb: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`,

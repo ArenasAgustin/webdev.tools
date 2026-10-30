@@ -448,3 +448,20 @@ describe("colorConverter - alpha, named colors and 4/8-digit hex", () => {
     expect(convertColor("red")?.hex).toBe("#FF0000");
   });
 });
+
+describe("colorConverter - alpha agrees across formats", () => {
+  it.each(["#FF000001", "#FF0000FE", "#FF000080"])("keeps the 8-digit hex alpha of %s in rgba and hsla", (hex) => {
+    const formats = convertColor(hex);
+    const alphaOf = (value: string | undefined) => Number(/, ([\d.]+)\)$/.exec(value ?? "")?.[1]);
+    const byte = hex.slice(7).toUpperCase();
+    expect(formats?.hex).toBe(hex.toUpperCase());
+    for (const value of [formats?.rgb, formats?.hsl]) {
+      expect(Math.round(alphaOf(value) * 255).toString(16).padStart(2, "0").toUpperCase()).toBe(byte);
+    }
+  });
+
+  it("keeps two decimals when they already round-trip", () => {
+    expect(convertColor("#FF000080")?.rgb).toBe("rgba(255, 0, 0, 0.5)");
+    expect(convertColor("#FF000001")?.rgb).toBe("rgba(255, 0, 0, 0.004)");
+  });
+});
