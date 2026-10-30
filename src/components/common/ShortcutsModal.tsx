@@ -76,7 +76,7 @@ export function ShortcutsModal({
             )}
             <ShortcutRow keys={["Ctrl/⌘", "Shift", "C"]} description={t("shortcuts.copyResult")} />
             <ShortcutRow
-              keys={["Ctrl/⌘", "Shift", "Supr"]}
+              keys={["Ctrl/⌘", "Shift", t("shortcuts.deleteKey")]}
               description={t("shortcuts.clearInput")}
             />
           </div>

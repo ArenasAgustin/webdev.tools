@@ -71,7 +71,8 @@
     "viewShortcuts": "View shortcuts",
     "viewDifferences": "View differences",
     "editor": "Editor",
-    "toggleTabFocus": "Toggle Tab: indent / move focus out of the editor"
+    "toggleTabFocus": "Toggle Tab: indent / move focus out of the editor",
+    "deleteKey": "Delete"
   },
   "tips": {
     "quickExamples": "Quick Examples"
