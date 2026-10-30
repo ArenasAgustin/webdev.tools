@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll } from "vitest";
-import initSqlJs, { type Database } from "sql.js";
+import { describe, it, expect, beforeAll, vi } from "vitest";
+import initSqlJs, { type Database, type Statement } from "sql.js";
 import { roundElapsedMs, runStatements } from "@/services/sql/execute";
 import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 
@@ -131,6 +131,34 @@ describe("runStatements", () => {
     expect(errorMessage(() => runStatements(db, "SELECT 1; SELECT * FROM missing_table;", 10))).toBe(
       "Sentencia 2: no such table: missing_table",
     );
+  });
+
+  it("frees the statement whose step throws (the iterator has no return())", () => {
+    const yielded: Statement[] = [];
+    const iterate = db.iterateStatements.bind(db);
+    const spy = vi.spyOn(db, "iterateStatements").mockImplementation((sql: string) => {
+      const iterator = iterate(sql);
+      return {
+        [Symbol.iterator]() {
+          return this;
+        },
+        next() {
+          const step = iterator.next();
+          if (!step.done) yielded.push(step.value);
+          return step;
+        },
+        getRemainingSQL: () => iterator.getRemainingSQL(),
+      };
+    });
+    try {
+      expect(() => runStatements(db, "SELECT abs(-9223372036854775808);", 10)).toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+
+    expect(yielded).toHaveLength(1);
+    // A freed statement refuses to run again.
+    expect(() => yielded[0].step()).toThrow(/Statement closed/);
   });
 
   it("names the statement that failed while running", () => {

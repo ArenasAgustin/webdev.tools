@@ -95,7 +95,8 @@ export function runStatements(
   let remaining = rowCap;
   let statement = 0;
 
-  // The statement being read, until the iterator advances (and frees it).
+  // The statement being read, until the iterator advances (and frees it). The
+  // iterator has no return(), so a statement whose step() throws is freed here.
   let current: Statement | null = null;
   try {
     for (const stmt of db.iterateStatements(sql)) {
@@ -105,6 +106,7 @@ export function runStatements(
       current = null;
     }
   } catch (err) {
+    current?.free();
     // Without a current statement, the next one failed to prepare.
     throw new Error(
       serviceMessage("services.sql.statementError", {
