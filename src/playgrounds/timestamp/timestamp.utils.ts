@@ -27,6 +27,16 @@ export function detectUnixUnit(unix: number): UnixUnit {
   return Math.abs(unix) > UNIX_MS_THRESHOLD ? "milliseconds" : "seconds";
 }
 
+/** True when the browser knows `timezone` (a saved one may come from another browser). */
+export function isSupportedTimezone(timezone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Engines omit "UTC" from Intl.supportedValuesOf("timeZone"); make sure it can be picked. */
 export function withUtc(timezones: readonly string[]): string[] {
   return timezones.includes("UTC") ? [...timezones] : ["UTC", ...timezones];

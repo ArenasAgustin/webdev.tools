@@ -5,6 +5,7 @@ import {
   ambiguousDayMonth,
   convertTimestamp,
   getCurrentTimestamp,
+  isSupportedTimezone,
   withUtc,
   type TimestampResult,
   type UnixUnit,
@@ -39,6 +40,8 @@ const UNIT_KEYS: Record<UnixUnit, string> = {
   milliseconds: "timestamp.unitMilliseconds",
 };
 
+const DEFAULT_TIMEZONE = "America/Argentina/Buenos_Aires";
+
 /** How often the relative time is refreshed while a result is shown, in ms. */
 const RELATIVE_TICK_MS = 1000;
 
@@ -58,10 +61,13 @@ export function TimestampPlayground() {
   // language change refreshes the shown formats without converting again.
   const [convertedInput, setConvertedInput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [timezone, setTimezone] = usePersistedState(
+  const [savedTimezone, setTimezone] = usePersistedState(
     STORAGE_KEYS.TIMESTAMP_TIMEZONE,
-    "America/Argentina/Buenos_Aires",
+    DEFAULT_TIMEZONE,
   );
+  // A saved zone this browser does not know (renamed, or saved by another engine)
+  // would make every conversion throw a RangeError; use the default instead.
+  const timezone = isSupportedTimezone(savedTimezone) ? savedTimezone : DEFAULT_TIMEZONE;
 
   // Reference clock for the relative time; refreshed every second while a result is
   // shown so "5 seconds ago" keeps moving instead of freezing at conversion time.

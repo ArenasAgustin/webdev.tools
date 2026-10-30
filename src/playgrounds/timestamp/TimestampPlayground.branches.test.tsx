@@ -280,6 +280,21 @@ describe("TimestampPlayground branches", () => {
     expect(screen.getByText("timestamp.formats.humanReadable")).toBeInTheDocument();
   });
 
+  it("falls back to the default timezone when the saved one is unknown to the browser", () => {
+    getItemMock.mockImplementation(
+      ((key: string) => (key === "timestampTimezone" ? "Mars/Olympus" : null)) as never,
+    );
+    render(<TimestampPlayground />);
+
+    fireEvent.change(screen.getByPlaceholderText("timestamp.placeholder"), {
+      target: { value: "1704067200" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
+
+    expect(screen.getByText("31/12/2023, 21:00:00")).toBeInTheDocument();
+    getItemMock.mockImplementation(() => null);
+  });
+
   it("timezone change refreshes the shown result without converting again", () => {
     render(<TimestampPlayground />);
 
