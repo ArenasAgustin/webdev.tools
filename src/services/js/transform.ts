@@ -35,6 +35,7 @@ type TerserSyncMinifyFn = (
       comments: boolean;
       beautify: boolean;
     };
+    parse?: { module: boolean };
   },
 ) => TerserSyncResult | null | undefined;
 
@@ -70,14 +71,27 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
 
     const minifySync = minifySyncUnknown as TerserSyncMinifyFn;
 
-    const result = minifySync(input, {
+    const minifyOptions = {
       compress: removeSpaces,
       mangle: removeSpaces,
       format: {
         comments: !removeComments,
         beautify: !removeSpaces,
       },
-    });
+    };
+    let result: ReturnType<TerserSyncMinifyFn>;
+    try {
+      // Parsed as a script first: module parsing is strict and rejects sloppy code.
+      result = minifySync(input, minifyOptions);
+    } catch (scriptError) {
+      // Top-level await (and import/export) only parse as a module. Only the
+      // parser is told so: top-level names are kept, as in script mode.
+      try {
+        result = minifySync(input, { ...minifyOptions, parse: { module: true } });
+      } catch {
+        throw scriptError;
+      }
+    }
 
     const code = typeof result?.code === "string" ? result.code : "";
     return { ok: true, value: code.trim() };
