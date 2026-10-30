@@ -121,6 +121,15 @@ describe("createWorkerClient timeout", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it("settles the requests still waiting when the client is terminated", async () => {
+    const run = createClient(0);
+
+    const waiting = run({ input: "x" });
+    run.terminate();
+
+    await expect(waiting).rejects.toThrow("Error en worker");
+  });
+
   it("replaces a worker that misses its deadline and replays the requests queued behind it", async () => {
     const run = createClient(1_000);
 

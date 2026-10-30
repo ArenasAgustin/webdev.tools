@@ -184,8 +184,15 @@ export function createWorkerClient<
 
     worker.terminate();
     worker = null;
-    pending.forEach(clearTimer);
+    // Reject the requests still waiting: their answers will never arrive, and a
+    // caller awaiting one must not hang forever.
+    const snapshot = [...pending.values()];
     pending.clear();
+    const error = new Error(translate("services.worker.error"));
+    snapshot.forEach((entry) => {
+      clearTimer(entry);
+      entry.reject(error);
+    });
   };
 
   return Object.assign(run, { preload, terminate });
