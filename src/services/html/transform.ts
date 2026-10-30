@@ -32,12 +32,15 @@ export async function formatHtml(
     let source = input;
     const preservedBlocks = new Map<string, string>();
 
+    // The placeholder is a comment, which Prettier keeps as is in both CSS and JS
+    // (a bare token would gain a ";" or blank lines); the restore then puts the
+    // original content back byte for byte, without the indentation Prettier added.
     if (!formatCss) {
-      source = preserveEmbeddedTagContent(source, "style", preservedBlocks);
+      source = preserveEmbeddedTagContent(source, "style", preservedBlocks, true);
     }
 
     if (!formatJs) {
-      source = preserveEmbeddedTagContent(source, "script", preservedBlocks);
+      source = preserveEmbeddedTagContent(source, "script", preservedBlocks, true);
     }
 
     const formatted = await formatWithPrettier(source, "html", indentSize);
@@ -274,12 +277,15 @@ function preserveEmbeddedTagContent(
   source: string,
   tagName: "style" | "script" | "pre" | "textarea",
   preservedBlocks: Map<string, string>,
+  /** Wrap the token in a CSS/JS comment that a formatter leaves alone. */
+  asComment = false,
 ): string {
   let index = 0;
   const pattern = new RegExp(`<${tagName}(\\b[^>]*)>([\\s\\S]*?)<\\/${tagName}>`, "gi");
 
   return source.replace(pattern, (_match: string, attrs: string, content: string) => {
-    const token = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
+    const name = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
+    const token = asComment ? `/*${name}*/` : name;
     index += 1;
     preservedBlocks.set(token, content);
     return `<${tagName}${attrs}>${token}</${tagName}>`;
@@ -293,7 +299,11 @@ function restorePreservedContent(source: string, preservedBlocks: Map<string, st
   // inside a textarea) are back in the output before their own turn comes.
   for (const [token, content] of [...preservedBlocks.entries()].reverse()) {
     // A replacer function keeps `    output = output.replace(new RegExp(escapeRegExp(token), "g"), content);`, `$` and friends in the content literal.
-    output = output.replace(new RegExp(escapeRegExp(token), "g"), () => content);
+    // A comment token also takes the whitespace a formatter put around it.
+    const pattern = token.startsWith("/*")
+      ? String.raw`\s*${escapeRegExp(token)}\s*`
+      : escapeRegExp(token);
+    output = output.replace(new RegExp(pattern, "g"), () => content);
   }
 
   return output;

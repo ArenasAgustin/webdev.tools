@@ -84,6 +84,20 @@ describe("formatHtml", () => {
       expect(result.value).toContain('console.log("x");');
     }
   });
+
+  it("leaves embedded script and style content byte for byte when their formatting is off", async () => {
+    const input = "<div><script>\nvar a=1;\n</script><style>\na{color:red}\n</style></div>";
+
+    const result = await formatHtml(input, 2, { formatCss: false, formatJs: false });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toContain("<script>\nvar a=1;\n</script>");
+      expect(result.value).toContain("<style>\na{color:red}\n</style>");
+    }
+    const oneLine = await formatHtml("<script>var a=1;</script>", 2, { formatJs: false });
+    expect(oneLine).toEqual({ ok: true, value: "<script>var a=1;</script>" });
+  });
 });
 
 describe("minifyHtml", () => {
