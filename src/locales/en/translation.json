@@ -519,7 +519,8 @@
     "sql": {
       "noInput": "No SQL to process",
       "empty": "The SQL is empty",
-      "timeout": "The query exceeded {{seconds}} seconds and was cancelled. The database was reset."
+      "timeout": "The query exceeded {{seconds}} seconds and was cancelled. The database was reset.",
+      "statementError": "Statement {{statement}}: {{message}}"
     }
   }
 }

@@ -519,7 +519,8 @@
     "sql": {
       "noInput": "No hay SQL para procesar",
       "empty": "El SQL está vacío",
-      "timeout": "La consulta superó los {{seconds}} segundos y se canceló. La base de datos se reinició."
+      "timeout": "La consulta superó los {{seconds}} segundos y se canceló. La base de datos se reinició.",
+      "statementError": "Sentencia {{statement}}: {{message}}"
     }
   }
 }
