@@ -1,6 +1,7 @@
 import type { Result } from "@/types/common";
 import type { IndentStyle } from "@/types/format";
 import { serviceMessage } from "@/services/serviceMessage";
+import { friendlySyntaxError } from "@/services/syntaxErrors";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 import { minify_sync as terserMinifySync } from "terser";
 import * as babelParser from "@babel/parser";
@@ -52,7 +53,10 @@ export async function formatJs(
     return { ok: true, value: formatted };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message || serviceMessage("services.js.formatError") };
+    return {
+      ok: false,
+      error: friendlySyntaxError(error) ?? (message || serviceMessage("services.js.formatError")),
+    };
   }
 }
 
@@ -97,7 +101,7 @@ export function minifyJs(input: string, options: JsMinifyOptions = {}): Result<s
     return { ok: true, value: code.trim() };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message };
+    return { ok: false, error: friendlySyntaxError(error) ?? message };
   }
 }
 

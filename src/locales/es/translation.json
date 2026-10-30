@@ -482,6 +482,20 @@
     "common": {
       "noCode": "No hay código para procesar"
     },
+    "syntax": {
+      "atPosition": "{{message}} (línea {{line}}, columna {{column}}){{frame}}",
+      "unclosedBlock": "Bloque sin cerrar: falta la “}” de una “{”",
+      "unclosedString": "Cadena sin cerrar: falta la comilla de cierre",
+      "unclosedBracket": "Paréntesis o corchete sin cerrar: falta el cierre de un “(” o “[”",
+      "unclosedComment": "Comentario sin cerrar: falta “*/”",
+      "unexpectedBrace": "“}” inesperada: no hay un bloque abierto",
+      "unknownWord": "Palabra desconocida (¿falta “:” o “;”?)",
+      "unexpectedToken": "“{{token}}” inesperado",
+      "unexpectedTokenPlain": "Símbolo inesperado",
+      "unexpectedEnd": "El código termina antes de tiempo",
+      "unexpectedClosingTag": "Etiqueta de cierre </{{tag}}> inesperada: no corresponde al elemento abierto",
+      "invalidCss": "Sintaxis CSS inválida"
+    },
     "worker": {
       "error": "Error en worker",
       "unavailable": "Worker no disponible",

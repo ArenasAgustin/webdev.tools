@@ -14,7 +14,16 @@ export function localizeServiceMessage(message: string): string {
     return message;
   }
 
-  return translate(parsed.key, parsed.params);
+  // A param may itself be a service message (a localized reason inside a wrapper).
+  const params = parsed.params
+    ? Object.fromEntries(
+        Object.entries(parsed.params).map(([name, value]) => [
+          name,
+          typeof value === "string" ? localizeServiceMessage(value) : value,
+        ]),
+      )
+    : undefined;
+  return translate(parsed.key, params);
 }
 
 function hasMessage(error: unknown): error is { message: string } {

@@ -482,6 +482,20 @@
     "common": {
       "noCode": "No code to process"
     },
+    "syntax": {
+      "atPosition": "{{message}} (line {{line}}, column {{column}}){{frame}}",
+      "unclosedBlock": "Unclosed block: a “{” has no matching “}”",
+      "unclosedString": "Unclosed string: the closing quote is missing",
+      "unclosedBracket": "Unclosed bracket: a “(” or “[” is never closed",
+      "unclosedComment": "Unclosed comment: “*/” is missing",
+      "unexpectedBrace": "Unexpected “}”: there is no open block",
+      "unknownWord": "Unknown word (missing “:” or “;”?)",
+      "unexpectedToken": "Unexpected “{{token}}”",
+      "unexpectedTokenPlain": "Unexpected token",
+      "unexpectedEnd": "The code ends too early",
+      "unexpectedClosingTag": "Unexpected closing tag </{{tag}}>: it does not match the open element",
+      "invalidCss": "Invalid CSS syntax"
+    },
     "worker": {
       "error": "Worker error",
       "unavailable": "Worker not available",

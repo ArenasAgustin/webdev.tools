@@ -107,10 +107,10 @@ describe("formatCss", () => {
 
 describe("minifyCss", () => {
   it.each([
-    ["an unclosed block", "a { color: red;", /Unclosed block/],
-    ["a stray closing brace", "a { color: red; } }", /Unexpected }/],
-    ["an unclosed string", 'a { content: "x; }', /Unclosed string/],
-    ["an unclosed bracket", "a { width: calc(1px + (2px); }", /Unclosed bracket/],
+    ["an unclosed block", "a { color: red;", /services.syntax.unclosedBlock/],
+    ["a stray closing brace", "a { color: red; } }", /services.syntax.unexpectedBrace/],
+    ["an unclosed string", 'a { content: "x; }', /services.syntax.unclosedString/],
+    ["an unclosed bracket", "a { width: calc(1px + (2px); }", /services.syntax.unclosedBracket/],
   ])("rejects CSS with %s instead of minifying it", async (_name, input, pattern) => {
     const result = await minifyCss(input);
 

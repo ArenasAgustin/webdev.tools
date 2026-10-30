@@ -5,6 +5,7 @@ import { minifyJs } from "@/services/js/transform";
 import type { HtmlMinifyConfig } from "@/types/html";
 import type { IndentStyle } from "@/types/format";
 import { serviceMessage } from "@/services/serviceMessage";
+import { friendlySyntaxError } from "@/services/syntaxErrors";
 import { findHtmlStructureError } from "@/services/html/structure";
 
 interface HtmlFormatOptions {
@@ -47,7 +48,7 @@ export async function formatHtml(
     return { ok: true, value: restorePreservedContent(formatted, preservedBlocks) };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: message };
+    return { ok: false, error: friendlySyntaxError(error) ?? message };
   }
 }
 
