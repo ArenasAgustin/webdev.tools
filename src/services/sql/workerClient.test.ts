@@ -193,8 +193,8 @@ describe("sqlWorkerAdapter action round-trips", () => {
   it("cleanup — terminate() can be called without errors", async () => {
     const adapter = await getAdapter();
 
-    // Start a request
-    void adapter.run({ action: "minify", input: "SELECT 1" });
+    // Start a request; terminate() rejects it, which is expected here
+    adapter.run({ action: "minify", input: "SELECT 1" }).catch(() => undefined);
 
     // Terminate should not throw
     expect(() => adapter.terminate()).not.toThrow();
