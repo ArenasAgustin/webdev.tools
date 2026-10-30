@@ -214,7 +214,7 @@
   },
   "home": {
     "tagline": "Herramientas para desarrolladores web",
-    "headline": "Formatea, valida y transforma tu código al instante.",
+    "headline": "Formateá, validá y transformá tu código al instante.",
     "description": "Herramientas optimizadas para JSON, JavaScript, HTML y CSS. Sin instalación, 100% en el navegador.",
     "meta": {
       "description": "Suite de herramientas online para desarrolladores: formatear, minificar y filtrar JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador.",
@@ -286,7 +286,7 @@
     "filterTitle": "Filtro JSONPath",
     "filterHistory": "Historial de filtros",
     "filterTips": "Ver tips de filtros",
-    "filterExpression": "Expresion JSONPath",
+    "filterExpression": "Expresión JSONPath",
     "filterPlaceholder": "Ej: $.users[0].name",
     "applyFilter": "Aplicar filtro JSONPath",
     "tipsTitle": "Tips para Filtros JSONPath",
@@ -443,7 +443,7 @@
     "formatCodeError": "Error al formatear código",
     "minifyCodeError": "Error al minificar código",
     "js": {
-      "languageName": "Código",
+      "languageName": "JavaScript",
       "executed": "Código ejecutado correctamente",
       "cleanEmpty": "El código estaba completamente vacío",
       "cleanError": "Error al limpiar código",
@@ -454,7 +454,7 @@
       "unknownError": "Error desconocido al ejecutar código"
     },
     "json": {
-      "jsonPathRequired": "Ingresa una expresión JSONPath",
+      "jsonPathRequired": "Ingresá una expresión JSONPath",
       "noResults": "El filtro no devolvió resultados",
       "jsonPathError": "Error al aplicar JSONPath",
       "precisionLoss": "Algunos números no se pueden representar con exactitud y cambiaron (enteros muy grandes o valores como 1e400).",

@@ -45,8 +45,10 @@ export const Stats = memo(function Stats({
         characters: t("stats.characters", { count: characters, value: characters.toLocaleString(i18n.resolvedLanguage) }),
         bytes: formatBytes(bytes),
       })}
+      {/* A real space (not margin), so copied text and screen readers keep it */}
+      {hasComparison && " "}
       {hasComparison && (
-        <span className={`ml-1 ${percentageColor}`}>
+        <span className={percentageColor}>
           ({Math.abs(percentage)}% {percentageLabel})
         </span>
       )}

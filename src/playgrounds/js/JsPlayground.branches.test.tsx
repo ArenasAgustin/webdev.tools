@@ -197,7 +197,7 @@ describe("JsPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "copy-output" }));
     fireEvent.click(screen.getByRole("button", { name: "download-output" }));
 
-    expect(toastMocks.error).toHaveBeenCalledWith("No hay Código para descargar");
+    expect(toastMocks.error).toHaveBeenCalledWith("No hay JavaScript para descargar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para copiar");
     expect(toastMocks.error).toHaveBeenCalledWith("No hay resultado para descargar");
 
@@ -243,7 +243,7 @@ describe("JsPlayground branches", () => {
       await vi.advanceTimersByTimeAsync(100);
     });
     expect(formatJsAsyncMock).toHaveBeenCalled();
-    expect(toastMocks.success).toHaveBeenCalledWith("Código formateado correctamente");
+    expect(toastMocks.success).toHaveBeenCalledWith("JavaScript formateado correctamente");
     expect(screen.getByTestId("output-code").textContent).toBe("const x = 1;");
 
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
@@ -251,7 +251,7 @@ describe("JsPlayground branches", () => {
       await vi.advanceTimersByTimeAsync(100);
     });
     expect(minifyJsAsyncMock).toHaveBeenCalled();
-    expect(toastMocks.success).toHaveBeenCalledWith("Código minificado correctamente");
+    expect(toastMocks.success).toHaveBeenCalledWith("JavaScript minificado correctamente");
     expect(screen.getByTestId("output-code").textContent).toBe("const x=1;");
 
     formatJsAsyncMock.mockResolvedValueOnce({ ok: false, error: { message: "format fail" } });
