@@ -23,6 +23,7 @@ const meta = {
   },
   args: {
     name: "options",
+    label: "Options",
     value: "option1",
     onChange: fn(),
     color: "blue",

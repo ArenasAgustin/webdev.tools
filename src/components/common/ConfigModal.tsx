@@ -473,9 +473,13 @@ export function ConfigModal(props: ConfigModalProps) {
                 </div>
               </div>
               <div>
-                <label className="block text-gray-300 mb-2">{t("config.outputFormat")}</label>
+                {/* Visual heading only: the group is named by its legend */}
+                <p className="block text-gray-300 mb-2" aria-hidden="true">
+                  {t("config.outputFormat")}
+                </p>
                 <RadioGroup
                   name="cleanOutputMode"
+                  label={t("config.outputFormat")}
                   value={jsonProps.cleanConfig.outputFormat}
                   options={[
                     { value: "format", label: t("config.format") },
