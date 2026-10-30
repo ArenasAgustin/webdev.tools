@@ -171,6 +171,29 @@ describe("minifyHtml", () => {
     }
   });
 
+  it.each([true, false])(
+    "keeps <!-- --> that is text inside textarea, title and script strings (minifyJs %s)",
+    async (minifyJs) => {
+      const input =
+        '<title>a <!-- b --></title><textarea><!-- typed --></textarea><script>var s = "<!-- x -->";</script><!-- gone -->';
+      const result = await minifyHtml(input, {
+        removeComments: true,
+        collapseWhitespace: false,
+        minifyCss: false,
+        minifyJs,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value).toContain("<title>a <!-- b --></title>");
+        expect(result.value).toContain("<textarea><!-- typed --></textarea>");
+        // Terser writes "<" and ">" in an inline script string as \x3c / \x3e (same string)
+        expect(result.value).toMatch(/var s ?= ?"(<|\\x3c)!-- x --(>|\\x3e)"/);
+        expect(result.value).not.toContain("gone");
+      }
+    },
+  );
+
   it("minifies inline css and javascript", async () => {
     const input = `
       <style>

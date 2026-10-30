@@ -98,9 +98,16 @@ export async function minifyHtml(
   }
 }
 
+/**
+ * Remove HTML comments, except conditional ones. Inside script, style, textarea
+ * and title, "<!--" is text (a JS string, typed content), not a comment, so those
+ * elements are matched first and kept whole.
+ */
 function removeHtmlComments(source: string): string {
-  return source.replace(/<!--[\s\S]*?-->/g, (comment) =>
-    isConditionalComment(comment) ? comment : "",
+  return source.replace(
+    /<(script|style|textarea|title)\b[^>]*>[\s\S]*?<\/\1\s*>|<!--[\s\S]*?-->/gi,
+    (match: string, rawTextTag: string | undefined) =>
+      rawTextTag || isConditionalComment(match) ? match : "",
   );
 }
 
