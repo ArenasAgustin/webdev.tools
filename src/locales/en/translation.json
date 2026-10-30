@@ -135,7 +135,8 @@
       "rfc2822": "RFC 2822",
       "humanReadable": "Local",
       "relative": "Relative"
-    }
+    },
+    "inputLabel": "Timestamp or date"
   },
   "editor": {
     "lines": "lines",
@@ -192,7 +193,8 @@
       "strong": "Strong"
     },
     "history": "History:",
-    "noCharset": "Select at least one character set to generate a password"
+    "noCharset": "Select at least one character set to generate a password",
+    "outputLabel": "Generated password"
   },
   "notifications": "Notifications",
   "close_notification": "Close notification",
@@ -245,14 +247,17 @@
     "emptyInput": "Enter some text to generate its hashes",
     "emptyFile": "Select a file to generate its hashes",
     "compareEmpty": "Enter a hash to compare",
-    "compareNeedsHashes": "Generate the hashes first, then compare"
+    "compareNeedsHashes": "Generate the hashes first, then compare",
+    "inputLabel": "Text to hash",
+    "compareLabel": "Hash to compare"
   },
   "colors": {
     "placeholder": "HEX, RGB, HSL, HSV, CMYK...",
     "copy": "Copy {{format}}",
     "copied": "Copied to clipboard",
     "copyError": "Could not copy to clipboard",
-    "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK."
+    "invalidColor": "Invalid color. Use HEX, RGB, HSL, HSV or CMYK.",
+    "inputLabel": "Color value"
   },
   "html": {
     "previewLabel": "Preview",

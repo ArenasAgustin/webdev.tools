@@ -76,6 +76,7 @@ export function ColorsPlayground() {
           onChange={(e) => handleInputChange(e.target.value)}
           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono text-center focus:outline-none focus:ring-1 focus:ring-cyan-400"
           placeholder={t("colors.placeholder")}
+          aria-label={t("colors.inputLabel")}
           spellCheck={false}
           aria-invalid={isInvalid}
           aria-describedby={isInvalid ? "colors-input-error" : undefined}

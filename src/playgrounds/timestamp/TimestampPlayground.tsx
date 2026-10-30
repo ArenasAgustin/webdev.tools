@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { timestampConfig } from "./timestamp.config";
 import {
@@ -43,6 +43,7 @@ const RELATIVE_TICK_MS = 1000;
 
 export function TimestampPlayground() {
   const { t, i18n } = useTranslation();
+  const timezoneLabelId = useId();
   // resolvedLanguage is the translation in use (en for en-US, and the English
   // fallback for fr-FR); the raw detected language would read those as Spanish.
   const lang = (i18n.resolvedLanguage ?? i18n.language) === "es" ? "es" : "en";
@@ -140,14 +141,18 @@ export function TimestampPlayground() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleConvert()}
           placeholder={t("timestamp.placeholder")}
+          aria-label={t("timestamp.inputLabel")}
           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-3 text-white font-mono focus:outline-none focus:ring-1 focus:ring-cyan-400"
           spellCheck={false}
         />
 
         {/* Timezone selector */}
         <div className="flex items-center gap-2">
-          <label className="text-gray-300 text-sm">{t("timestamp.timezoneLabel")}:</label>
+          <span id={timezoneLabelId} className="text-gray-300 text-sm">
+            {t("timestamp.timezoneLabel")}:
+          </span>
           <SearchableSelect
+            labelId={timezoneLabelId}
             value={timezone}
             onChange={setTimezone}
             options={ALL_TIMEZONES}
