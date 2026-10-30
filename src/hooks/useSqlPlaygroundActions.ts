@@ -162,7 +162,11 @@ export function useSqlPlaygroundActions({
 
   const handleReset = useCallback(() => {
     void resetSqlAsync()
-      .then(() => {
+      .then((result) => {
+        if (!result.ok) {
+          toast?.error(result.error);
+          return;
+        }
         setOutput("");
         setError(null);
         setIsFirstRun(true);

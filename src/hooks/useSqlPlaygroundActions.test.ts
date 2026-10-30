@@ -183,6 +183,22 @@ describe("useSqlPlaygroundActions", () => {
     expect(props.toast.success).toHaveBeenCalledWith("Base de datos reseteada");
   });
 
+  it("reset failure shows the error and keeps the output", async () => {
+    resetSqlAsyncMock.mockResolvedValue({ ok: false, error: "Reset failed" });
+    const props = makeProps({ output: "some output" });
+    const { result } = renderHook(() => useSqlPlaygroundActions(props));
+
+    act(() => {
+      result.current.handleReset();
+    });
+
+    await waitFor(() => {
+      expect(props.toast.error).toHaveBeenCalledWith("Reset failed");
+    });
+    expect(props.toast.success).not.toHaveBeenCalled();
+    expect(props.setOutput).not.toHaveBeenCalled();
+  });
+
   it("isProcessing is true while executing", async () => {
     let resolve: (v: { ok: true; value: SqlExecuteResult }) => void = () => {};
     executeSqlAsyncMock.mockImplementation(
