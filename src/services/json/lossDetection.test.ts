@@ -31,6 +31,19 @@ describe("detectJsonLoss", () => {
     expect(detectJsonLoss("[1.50000000000000000000]").precisionLoss).toBe(false);
   });
 
+  it("flags 17-digit numbers that JSON.stringify writes differently", () => {
+    expect(detectJsonLoss("[0.12345678901234567]").precisionLoss).toBe(true);
+    expect(detectJsonLoss("[0.10000000000000001]").precisionLoss).toBe(true);
+    expect(detectJsonLoss("[1.2345678901234567]").precisionLoss).toBe(false);
+    expect(detectJsonLoss("[1e3, 1.0, 2.50E-3]").precisionLoss).toBe(false);
+  });
+
+  it("flags negative zero, which JSON.stringify writes as 0", () => {
+    expect(detectJsonLoss('{"x": -0}').precisionLoss).toBe(true);
+    expect(detectJsonLoss("[-0.0e5]").precisionLoss).toBe(true);
+    expect(detectJsonLoss("[0, -1]").precisionLoss).toBe(false);
+  });
+
   it("ignores digits inside strings", () => {
     expect(detectJsonLoss('{"id": "12345678901234567890"}').precisionLoss).toBe(false);
   });
