@@ -8,6 +8,30 @@ import { type Result, type JsonValue, type JsonError } from "@/types/common";
 // with "cache[expr].concat is not a function". A prototype-less cache avoids that.
 JSONPath.cache = Object.create(null) as Record<string, unknown>;
 
+const CLOSING: Record<string, string> = { "[": "]", "(": ")" };
+
+/**
+ * True when the path is cut off or unbalanced: an unclosed bracket, parenthesis
+ * or quote, a stray closing one, or a trailing "." / "..". jsonpath-plus does
+ * not reject these: "$..[" quietly returns the whole document.
+ */
+function isBrokenJsonPath(path: string): boolean {
+  const open: string[] = [];
+  let quote: string | null = null;
+  for (let i = 0; i < path.length; i++) {
+    const char = path[i];
+    if (quote) {
+      if (char === "\\") i++;
+      else if (char === quote) quote = null;
+      continue;
+    }
+    if ((char === "'" || char === '"') && open.length > 0) quote = char;
+    else if (char === "[" || char === "(") open.push(CLOSING[char]);
+    else if ((char === "]" || char === ")") && open.pop() !== char) return true;
+  }
+  return quote !== null || open.length > 0 || path.trimEnd().endsWith(".");
+}
+
 /**
  * Apply JSONPath filter to JSON data
  * Pure function - no side effects
@@ -29,6 +53,10 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
         message: serviceMessage("services.json.jsonPathEmpty"),
       },
     };
+  }
+
+  if (isBrokenJsonPath(path)) {
+    return { ok: false, error: { message: serviceMessage("services.json.jsonPathInvalid") } };
   }
 
   try {

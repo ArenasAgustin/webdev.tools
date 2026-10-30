@@ -120,7 +120,7 @@ describe("applyJsonPath", () => {
   it("returns an empty array string for a non-matching path", () => {
     const input = '{"name": "John"}';
 
-    expect(applyJsonPath(input, "$[invalid")).toEqual({ ok: true, value: "[]" });
+    expect(applyJsonPath(input, "$[invalid]")).toEqual({ ok: true, value: "[]" });
     expect(applyJsonPath(input, "$.missing")).toEqual({ ok: true, value: "[]" });
   });
 
@@ -165,4 +165,25 @@ describe("applyJsonPath on very deep nesting", () => {
 
     expect(applyJsonPath(input, "$..*")).toEqual({ ok: false, error: { message: "services.json.tooDeep" } });
   });
+});
+
+describe("applyJsonPath with a broken expression", () => {
+  const input = '{"a": [1, {"b": 2}]}';
+
+  it.each(["$..[", "$.[", "$[", "$.a[", "$..", "$.a.", "$['a", "$.a]", "$[?(@.a > 1]"])(
+    "reports %j as invalid instead of returning a result",
+    (path) => {
+      expect(applyJsonPath(input, path)).toEqual({
+        ok: false,
+        error: { message: "services.json.jsonPathInvalid" },
+      });
+    },
+  );
+
+  it.each(["$..*", "$.a[0]", "$.a[*].b", "$['a']", "$[\"a\"][1]", "$.a[?(@.b > 1)]", "$['a]b']", "a"])(
+    "still runs the valid expression %j",
+    (path) => {
+      expect(applyJsonPath(input, path).ok).toBe(true);
+    },
+  );
 });

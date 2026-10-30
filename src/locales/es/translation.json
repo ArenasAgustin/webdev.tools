@@ -495,6 +495,7 @@
       "tooDeep": "El JSON tiene demasiados niveles de anidación para procesarlo",
       "cleanError": "Error al limpiar JSON: {{message}}",
       "jsonPathEmpty": "La expresión JSONPath está vacía",
+      "jsonPathInvalid": "La expresión JSONPath está incompleta: revisá si falta cerrar un corchete, un paréntesis o una comilla, o si termina en punto",
       "jsonPathError": "Error en JSONPath: {{message}}"
     },
     "css": {
