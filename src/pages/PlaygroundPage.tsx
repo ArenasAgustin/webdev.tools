@@ -6,7 +6,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { PlaygroundSidebar } from "@/components/layout/PlaygroundSidebar";
 import { getPlaygroundById } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
-import { SITE_URL } from "@/utils/constants/site";
+import { getMissingPlaygroundMeta, getPlaygroundMeta } from "@/utils/routeMeta";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
 import { getLocalizedString } from "@/types/playground";
 
@@ -26,33 +26,20 @@ export function PlaygroundPage() {
     { timeout: 1200 },
   );
 
-  useDocumentMeta({
-    title: name ?? t("page.playground"),
-    description: playground
-      ? t("page.meta.description", { description })
-      : t("page.meta.descriptionFallback"),
-    keywords:
-      playground?.keywords ??
-      (playground
-        ? t("page.meta.keywords", { name, description })
-        : t("page.meta.keywordsFallback")),
-    ogUrl: playground
-      ? `${SITE_URL}/playground/${playground.id}`
-      : `${SITE_URL}/`,
-    ogImage: playground ? `/og/${playground.id}.png` : undefined,
-    jsonLd: playground
-      ? {
-          "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          name: name,
-          description: description,
-          url: `${SITE_URL}/playground/${playground.id}`,
-          applicationCategory: "DeveloperApplication",
-          operatingSystem: "Web",
-          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        }
-      : undefined,
-  });
+  const translateMeta = (key: string, options?: Record<string, unknown>) => t(key, options);
+  useDocumentMeta(
+    playground
+      ? getPlaygroundMeta(
+          {
+            id: playground.id,
+            name: getLocalizedString(playground.name),
+            description: getLocalizedString(playground.description),
+            keywords: playground.keywords,
+          },
+          translateMeta,
+        )
+      : getMissingPlaygroundMeta(translateMeta),
+  );
 
   if (!playground) {
     return <Navigate to="/" replace />;

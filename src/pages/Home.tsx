@@ -8,18 +8,13 @@ import {
   preloadPlaygroundById,
 } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
-import { SITE_URL } from "@/utils/constants/site";
+import { getHomeMeta } from "@/utils/routeMeta";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
 
 export function Home() {
   const { t } = useTranslation();
 
-  useDocumentMeta({
-    title: "webdev.tools",
-    description: t("home.meta.description"),
-    keywords: t("home.meta.keywords"),
-    ogUrl: `${SITE_URL}/`,
-  });
+  useDocumentMeta(getHomeMeta((key, options) => t(key, options)));
 
   useIdleCallback(
     () => {
