@@ -133,9 +133,12 @@
           if (isStaleChunkError(r && (r.message || String(r)))) heal();
         });
 
-        // Normal-update path: pick up a fresh SW when it takes control.
+        // Normal-update path: pick up a fresh SW when it replaces an existing one.
+        // On a first visit there is no controller yet; the first SW claiming the
+        // page also fires controllerchange, and reloading then would wipe input.
+        var hadController = !!navigator.serviceWorker.controller;
         navigator.serviceWorker.addEventListener("controllerchange", function () {
-          window.location.reload();
+          if (hadController) window.location.reload();
         });
         navigator.serviceWorker.getRegistration().then(function (reg) {
           if (reg) reg.update();
