@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { translate } from "@/i18n/translate";
 import { SITE_URL } from "@/utils/constants/site";
+import { formatDocumentTitle, JSON_LD_SCRIPT_ID } from "@/utils/routeMeta";
 
 export interface DocumentMetaOptions {
   title: string;
@@ -15,7 +16,6 @@ export interface DocumentMetaOptions {
   jsonLd?: object;
 }
 
-const BASE_TITLE = "webdev.tools";
 const BASE_URL = SITE_URL;
 
 /**
@@ -38,7 +38,7 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
     } = options;
 
     // Update title
-    const fullTitle = title === BASE_TITLE ? title : `${title} - ${BASE_TITLE}`;
+    const fullTitle = formatDocumentTitle(title);
     document.title = fullTitle;
 
     // Update or create meta tags
@@ -88,18 +88,18 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
 
     // JSON-LD structured data
     if (jsonLd) {
-      let script = document.getElementById("json-ld-playground");
+      let script = document.getElementById(JSON_LD_SCRIPT_ID);
       if (!script) {
         script = document.createElement("script");
         script.setAttribute("type", "application/ld+json");
-        script.id = "json-ld-playground";
+        script.id = JSON_LD_SCRIPT_ID;
         document.head.appendChild(script);
       }
       script.textContent = JSON.stringify(jsonLd);
     }
 
     return () => {
-      const script = document.getElementById("json-ld-playground");
+      const script = document.getElementById(JSON_LD_SCRIPT_ID);
       if (script) {
         script.remove();
       }

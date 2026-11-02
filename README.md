@@ -16,7 +16,7 @@ Demo: https://arenas-webtools.vercel.app
 ## Scripts
 
 - `pnpm dev` → entorno local
-- `pnpm build` → build producción
+- `pnpm build` → build producción (incluye `scripts/og-images.mjs`, que genera `dist/og/*.png`, y `scripts/prerender.mjs`, que escribe `dist/playground/<id>/index.html` con la meta de cada ruta para crawlers)
 - `pnpm test` → tests
 - `pnpm test:coverage` → cobertura
 - `pnpm lint` / `pnpm lint:fix`

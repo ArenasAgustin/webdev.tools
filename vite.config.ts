@@ -85,6 +85,9 @@ export default defineConfig(({ mode }) => ({
       manifest: false,
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // Build-time social previews (scripts/og-images.mjs, scripts/prerender.mjs) are for
+        // crawlers only: keep the 13 OG PNGs and per-route HTML shells out of the precache.
+        globIgnores: ["**/node_modules/**", "og/**", "playground/**/index.html"],
         cleanupOutdatedCaches: true,
         // Auto-activate a new SW without waiting for a client SKIP_WAITING message.
         // Without this, a fresh SW can stay stuck in "waiting" while a stale SW keeps
