@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { translate } from "@/i18n/translate";
+import { SITE_URL } from "@/utils/constants/site";
 
 export interface DocumentMetaOptions {
   title: string;
@@ -15,7 +16,7 @@ export interface DocumentMetaOptions {
 }
 
 const BASE_TITLE = "webdev.tools";
-const BASE_URL = "https://webdev.tools";
+const BASE_URL = SITE_URL;
 
 /**
  * Hook para actualizar meta tags del documento de forma dinámica.

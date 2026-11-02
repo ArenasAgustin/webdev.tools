@@ -8,6 +8,7 @@ import {
   preloadPlaygroundById,
 } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { SITE_URL } from "@/utils/constants/site";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
 
 export function Home() {
@@ -17,7 +18,7 @@ export function Home() {
     title: "webdev.tools",
     description: t("home.meta.description"),
     keywords: t("home.meta.keywords"),
-    ogUrl: "https://webdev.tools/",
+    ogUrl: `${SITE_URL}/`,
   });
 
   useIdleCallback(

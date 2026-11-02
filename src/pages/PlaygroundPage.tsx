@@ -6,6 +6,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { PlaygroundSidebar } from "@/components/layout/PlaygroundSidebar";
 import { getPlaygroundById } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { SITE_URL } from "@/utils/constants/site";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
 import { getLocalizedString } from "@/types/playground";
 
@@ -36,8 +37,8 @@ export function PlaygroundPage() {
         ? t("page.meta.keywords", { name, description })
         : t("page.meta.keywordsFallback")),
     ogUrl: playground
-      ? `https://webdev.tools/playground/${playground.id}`
-      : "https://webdev.tools/",
+      ? `${SITE_URL}/playground/${playground.id}`
+      : `${SITE_URL}/`,
     ogImage: playground ? `/og/${playground.id}.png` : undefined,
     jsonLd: playground
       ? {
@@ -45,7 +46,7 @@ export function PlaygroundPage() {
           "@type": "SoftwareApplication",
           name: name,
           description: description,
-          url: `https://webdev.tools/playground/${playground.id}`,
+          url: `${SITE_URL}/playground/${playground.id}`,
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Web",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
