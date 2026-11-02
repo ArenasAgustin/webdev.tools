@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/og-images.mjs",
+    "build": "tsc -b && vite build && node scripts/og-images.mjs && node scripts/prerender.mjs",
     "typecheck": "tsc -b",
     "analyze": "tsc -b && vite build",
     "lint": "eslint .",

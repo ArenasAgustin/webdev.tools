@@ -2,4 +2,5 @@
 // the app's TypeScript helpers and playground registry with the "@/" alias.
 export * from "@/utils/routeMeta";
 export * from "@/utils/ogImage";
+export * from "@/utils/prerenderHtml";
 export { playgroundRegistry } from "@/playgrounds/registry";

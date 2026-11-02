@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { translate } from "@/i18n/translate";
 import { SITE_URL } from "@/utils/constants/site";
-import { formatDocumentTitle } from "@/utils/routeMeta";
+import { formatDocumentTitle, JSON_LD_SCRIPT_ID } from "@/utils/routeMeta";
 
 export interface DocumentMetaOptions {
   title: string;
@@ -88,18 +88,18 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
 
     // JSON-LD structured data
     if (jsonLd) {
-      let script = document.getElementById("json-ld-playground");
+      let script = document.getElementById(JSON_LD_SCRIPT_ID);
       if (!script) {
         script = document.createElement("script");
         script.setAttribute("type", "application/ld+json");
-        script.id = "json-ld-playground";
+        script.id = JSON_LD_SCRIPT_ID;
         document.head.appendChild(script);
       }
       script.textContent = JSON.stringify(jsonLd);
     }
 
     return () => {
-      const script = document.getElementById("json-ld-playground");
+      const script = document.getElementById(JSON_LD_SCRIPT_ID);
       if (script) {
         script.remove();
       }

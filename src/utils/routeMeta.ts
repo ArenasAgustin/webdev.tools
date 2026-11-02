@@ -14,6 +14,9 @@ export const BASE_TITLE = "webdev.tools";
 
 export const HOME_URL = `${SITE_URL}/`;
 
+/** Id of the JSON-LD <script> shared by useDocumentMeta and the prerendered HTML. */
+export const JSON_LD_SCRIPT_ID = "json-ld-playground";
+
 export interface RouteMeta {
   title: string;
   description: string;
