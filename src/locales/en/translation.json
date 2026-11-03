@@ -510,7 +510,13 @@
       "cleanError": "Error cleaning JSON: {{message}}",
       "jsonPathEmpty": "The JSONPath expression is empty",
       "jsonPathInvalid": "The JSONPath expression is incomplete: check for an unclosed bracket, parenthesis or quote, or a trailing dot",
-      "jsonPathError": "JSONPath error: {{message}}"
+      "jsonPathError": "JSONPath error: {{message}}",
+      "invalid": "Invalid JSON",
+      "unexpectedEnd": "The JSON ends too early",
+      "unexpectedChar": "Unexpected “{{char}}”",
+      "unterminatedString": "Unterminated string: the closing quote is missing",
+      "controlChar": "Line break or control character inside a string (write it as \\n)",
+      "invalidEscape": "Invalid escape sequence in a string"
     },
     "css": {
       "noInput": "No CSS to process",

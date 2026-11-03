@@ -510,7 +510,13 @@
       "cleanError": "Error al limpiar JSON: {{message}}",
       "jsonPathEmpty": "La expresión JSONPath está vacía",
       "jsonPathInvalid": "La expresión JSONPath está incompleta: revisá si falta cerrar un corchete, un paréntesis o una comilla, o si termina en punto",
-      "jsonPathError": "Error en JSONPath: {{message}}"
+      "jsonPathError": "Error en JSONPath: {{message}}",
+      "invalid": "JSON no válido",
+      "unexpectedEnd": "El JSON termina antes de tiempo",
+      "unexpectedChar": "“{{char}}” inesperado",
+      "unterminatedString": "Cadena sin cerrar: falta la comilla de cierre",
+      "controlChar": "Salto de línea o carácter de control dentro de una cadena (escríbelo como \\n)",
+      "invalidEscape": "Secuencia de escape no válida en una cadena"
     },
     "css": {
       "noInput": "No hay CSS para procesar",

@@ -4,6 +4,7 @@ import type { JsonCleanConfig } from "@/types/json";
 import type { TransformService } from "@/services/transform";
 import { formatWithPrettier } from "@/services/formatter/prettier";
 import { serviceMessage } from "@/services/serviceMessage";
+import { describeJsonSyntaxError } from "@/services/json/syntaxError";
 
 /**
  * Common error messages for JSON operations (`services.*` keys, see `serviceMessage`)
@@ -30,16 +31,10 @@ export function parseJson(input: string): Result<JsonValue, JsonError> {
     const parsed = JSON.parse(input) as JsonValue;
     return { ok: true, value: parsed };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const match = /position (\d+)/.exec(errorMessage);
-
-    return {
-      ok: false,
-      error: {
-        message: errorMessage,
-        line: match ? parseInt(match[1], 10) : undefined,
-      },
-    };
+    if (isStackOverflow(error)) {
+      return { ok: false, error: { message: serviceMessage("services.json.tooDeep") } };
+    }
+    return { ok: false, error: describeJsonSyntaxError(input) };
   }
 }
 
@@ -79,9 +74,17 @@ export function isStackOverflow(error: unknown): boolean {
 }
 
 /** Turn a caught format/minify error into a transportable message. */
-function toJsonErrorMessage(error: unknown, fallbackKey: `services.json.${string}`): string {
+function toJsonErrorMessage(
+  error: unknown,
+  input: string,
+  fallbackKey: `services.json.${string}`,
+): string {
   if (isStackOverflow(error)) {
     return serviceMessage("services.json.tooDeep");
+  }
+  // JSON.parse rejected the input: explain where, in the user's language.
+  if (error instanceof SyntaxError) {
+    return describeJsonSyntaxError(input).message;
   }
   const message = error instanceof Error ? error.message : String(error);
   return message || serviceMessage(fallbackKey);
@@ -114,7 +117,7 @@ export async function formatJson(
     const formatted = await formatWithPrettier(JSON.stringify(processed), "json-stringify", indent);
     return { ok: true, value: formatted };
   } catch (error) {
-    return { ok: false, error: toJsonErrorMessage(error, "services.json.formatError") };
+    return { ok: false, error: toJsonErrorMessage(error, input, "services.json.formatError") };
   }
 }
 
@@ -132,7 +135,7 @@ export function minifyJson(input: string, options: JsonMinifyOptions = {}): Resu
         : JSON.stringify(processed);
     return { ok: true, value: minified };
   } catch (error) {
-    return { ok: false, error: toJsonErrorMessage(error, "services.json.minifyError") };
+    return { ok: false, error: toJsonErrorMessage(error, input, "services.json.minifyError") };
   }
 }
 
