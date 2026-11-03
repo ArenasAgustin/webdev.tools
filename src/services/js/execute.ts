@@ -324,6 +324,13 @@ export function describeError(error: unknown): string {
 // Bounds that keep a huge or deeply nested value from flooding the output.
 const MAX_DEPTH = 20;
 const MAX_ITEMS = 100;
+// Shared references (a DAG, not a cycle) repeat whole subtrees, so rendering can grow
+// exponentially; past this many expanded objects the rest print collapsed.
+const MAX_EXPANDED_OBJECTS = 2000;
+
+interface RenderBudget {
+  expandable: number;
+}
 
 function describeFunction(fn: (...args: unknown[]) => unknown): string {
   if (Function.prototype.toString.call(fn).startsWith("class")) {
@@ -369,9 +376,15 @@ function moreItems(total: number, kind: "items" | "properties"): string[] {
  * console prints them. `ancestors` holds the objects being rendered around this one,
  * so a value that contains itself prints "[Circular]" instead of recursing forever.
  * Getters are read like the console does when expanding them; one that throws prints
- * "[Exception: …]".
+ * "[Exception: …]". `budget` caps the objects expanded in one rendering.
  */
-function serialize(value: unknown, space: string, indent: string, ancestors: object[]): string {
+function serialize(
+  value: unknown,
+  space: string,
+  indent: string,
+  ancestors: object[],
+  budget: RenderBudget,
+): string {
   if (value === null) return "null";
   switch (typeof value) {
     case "undefined":
@@ -394,12 +407,15 @@ function serialize(value: unknown, space: string, indent: string, ancestors: obj
   if (ancestors.includes(object)) return "[Circular]";
   const leaf = describeLeafObject(object);
   if (leaf !== undefined) return leaf;
-  if (ancestors.length >= MAX_DEPTH) return Array.isArray(object) ? "[Array]" : "[Object]";
+  if (ancestors.length >= MAX_DEPTH || budget.expandable <= 0) {
+    return Array.isArray(object) ? "[Array]" : "[Object]";
+  }
+  budget.expandable -= 1;
 
   const nested = [...ancestors, object];
-  const child = (item: unknown) => serialize(item, space, indent + space, nested);
+  const child = (item: unknown) => serialize(item, space, indent + space, nested, budget);
   // Collection entries stay on one line, like the console's collapsed preview.
-  const inline = (item: unknown) => serialize(item, "", "", nested);
+  const inline = (item: unknown) => serialize(item, "", "", nested, budget);
 
   if (object instanceof Map) {
     const entries = [...object]
@@ -445,7 +461,7 @@ function serialize(value: unknown, space: string, indent: string, ancestors: obj
 /** Single-line rendering: strings quoted, objects compact. */
 function formatInline(value: unknown): string {
   try {
-    return serialize(value, "", "", []);
+    return serialize(value, "", "", [], { expandable: MAX_EXPANDED_OBJECTS });
   } catch {
     return Object.prototype.toString.call(value);
   }
@@ -454,7 +470,7 @@ function formatInline(value: unknown): string {
 export function formatValue(value: unknown): string {
   if (typeof value === "string") return value;
   try {
-    return serialize(value, "  ", "", []);
+    return serialize(value, "  ", "", [], { expandable: MAX_EXPANDED_OBJECTS });
   } catch {
     return Object.prototype.toString.call(value);
   }
