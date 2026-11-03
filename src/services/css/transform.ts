@@ -269,11 +269,27 @@ function tokenizeCss(source: string): CssSegment[] {
   return segments;
 }
 
+// Characters that would merge into one token with the character after them.
+const TOKEN_CHAR = /[\w\-\\\u0080-￿]/;
+
 function stripComments(source: string): string {
-  return tokenizeCss(source)
-    .filter((segment) => segment.kind !== "comment")
-    .map((segment) => segment.text)
-    .join("");
+  const segments = tokenizeCss(source);
+  let output = "";
+
+  segments.forEach((segment, index) => {
+    if (segment.kind !== "comment") {
+      output += segment.text;
+      return;
+    }
+    // A comment separates tokens: `1px/**/2px` and `div/**/p` must not become
+    // `1px2px` and `divp`. It is not whitespace, so `a/**/:hover` stays compound.
+    const next = segments.slice(index + 1).find((item) => item.kind !== "comment");
+    if (TOKEN_CHAR.test(output.at(-1) ?? "") && TOKEN_CHAR.test(next?.text[0] ?? "")) {
+      output += " ";
+    }
+  });
+
+  return output;
 }
 
 function minifyCssString(source: string): string {
