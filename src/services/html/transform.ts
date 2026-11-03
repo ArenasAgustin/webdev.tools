@@ -364,6 +364,22 @@ const SELF_CLOSING_VOID_TAGS = [
 ];
 
 /**
+ * Elements that hold structure even when empty: removing an empty cell, row,
+ * list item or option shifts the rest of the table, list or select.
+ */
+const STRUCTURAL_EMPTY_TAGS = new Set(["td", "th", "tr", "li", "option", "video", "audio"]);
+
+/**
+ * An empty element is only removed when nothing can depend on it: attributes
+ * (`<i class="fa">` icons, `<div id="app">` mount points) and custom elements
+ * (`<my-widget>`, which render their own content) are kept, as are structural tags.
+ */
+function isRemovableEmptyElement(tagName: string, attributes: string): boolean {
+  const name = tagName.toLowerCase();
+  return !attributes.trim() && !name.includes("-") && !STRUCTURAL_EMPTY_TAGS.has(name);
+}
+
+/**
  * Clean empty HTML tags
  * Pure function - no side effects
  */
@@ -397,20 +413,24 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
         });
       }
 
-      // Remove empty tags: <tag></tag> or <tag />
-      // Match opening tag followed by optional whitespace and closing tag or self-closing
-      result = result.replace(/<(\w+)([^>]*?)\s*>\s*<\/\1>/g, "");
+      // Remove empty tags: <tag></tag>, with only whitespace inside
+      result = result.replace(
+        /<([a-zA-Z][\w-]*)([^>]*?)\s*>\s*<\/\1\s*>/g,
+        (match, tagName: string, attributes: string) =>
+          isRemovableEmptyElement(tagName, attributes) ? "" : match,
+      );
 
       // Remove self-closing tags EXCEPT void HTML tags (meta, link, br, etc.)
-      // These void tags have semantic meaning and should not be removed
+      // These void tags have semantic meaning and should not be removed.
+      // A tag with attributes is kept, which also covers `<a href=/>`: the slash
+      // ends an unquoted attribute value, so it is an ordinary opening tag.
       result = result.replace(
-        /<(\w+)([^>]*?)(\s*)\/\s*>/g,
-        (match, tagName: string, attributes: string, space: string) => {
-          // `<a href=/>`: the slash ends an unquoted attribute value, so the tag
-          // is an ordinary opening tag, not a self-closing one.
-          if (/=\s*[^\s"'<>`]*$/.test(attributes + space)) return match;
-          return SELF_CLOSING_VOID_TAGS.includes(tagName.toLowerCase()) ? match : "";
-        },
+        /<([a-zA-Z][\w-]*)([^>]*?)\s*\/\s*>/g,
+        (match, tagName: string, attributes: string) =>
+          isRemovableEmptyElement(tagName, attributes) &&
+          !SELF_CLOSING_VOID_TAGS.includes(tagName.toLowerCase())
+            ? ""
+            : match,
       );
 
       // Restore preserved blocks in reverse so tokens nested in a later block

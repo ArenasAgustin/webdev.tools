@@ -139,10 +139,37 @@ describe("cleanHtml - unquoted attribute values", () => {
     expect(clean(input)).toBe(input);
   });
 
-  it.each([['<div />'], ['<x a="1"/>'], ["<x a/>"], ["<x a=b />"]])(
+  it.each([['<div />'], ["<x/>"], ["<section />"]])(
     "still removes a real self-closing tag: %s",
     (input) => {
       expect(clean(`${input}<p>x</p>`)).toBe("<p>x</p>");
     },
   );
+});
+
+describe("cleanHtml - meaningful empty elements", () => {
+  const clean = (input: string) => {
+    const result = cleanHtml(input, { removeEmptyTags: true });
+    if (!result.ok) throw new Error(result.error);
+    return result.value;
+  };
+
+  it.each([
+    ["<table><tr><td></td><td>x</td></tr></table>"],
+    ["<table><tr><th></th></tr><tr></tr></table>"],
+    ["<ul><li></li></ul>"],
+    ["<select><option></option></select>"],
+    ['<i class="fa fa-home"></i>'],
+    ['<div id="app"></div>'],
+    ['<x a="1"/>'],
+    ["<my-widget></my-widget>"],
+    ["<my-el />"],
+    ["<video></video><audio></audio>"],
+  ])("keeps %s", (input) => {
+    expect(clean(input)).toBe(input);
+  });
+
+  it("still removes empty elements without attributes", () => {
+    expect(clean("<div></div><span> </span><b/><p>x</p>")).toBe("<p>x</p>");
+  });
 });
