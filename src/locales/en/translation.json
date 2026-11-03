@@ -419,6 +419,7 @@
     "inputTooLarge": "The content is too large to process.",
     "inputLarge": "Large input: some operations may be slow",
     "inputExceedsLimit": "The content exceeds {{limit}}. Some operations may be slow.",
+    "inputOverLimit": "The content exceeds {{limit}}. Reduce its size to process it.",
     "noOutputToUseAsInput": "No output to use as input",
     "outputLoadedAsInput": "Output loaded as input",
     "noInputToUseAsOutput": "No input to use as output",

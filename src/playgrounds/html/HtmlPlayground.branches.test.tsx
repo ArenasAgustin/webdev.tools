@@ -281,7 +281,7 @@ describe("HtmlPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: "Minificar" }));
 
     expect(toastMocks.error).toHaveBeenCalledWith(
-      "El contenido supera 2 MB. Reduce el tamano para procesarlo.",
+      "El contenido supera 2 MB. Reduce su tamaño para procesarlo.",
     );
     expect(formatHtmlMock.mock.calls.length).toBe(formatCallsBeforeGuard);
     expect(minifyHtmlMock.mock.calls.length).toBe(minifyCallsBeforeGuard);

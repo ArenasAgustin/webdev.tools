@@ -7,6 +7,7 @@ import { usePlaygroundShortcuts } from "@/hooks/usePlaygroundShortcuts";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
 import { useToolbarConfig } from "@/hooks/useToolbarConfig";
 import { MAX_INPUT_LABEL } from "@/utils/constants/limits";
+import { translate } from "@/i18n/translate";
 import type { PlaygroundConfig } from "@/types/playground";
 
 export interface PlaygroundSetupConfig<TFormat extends object, TMinify extends object> {
@@ -20,8 +21,6 @@ export interface PlaygroundSetupConfig<TFormat extends object, TMinify extends o
   /** If provided, the setup uses this modal state instead of creating its own */
   configModal?: ReturnType<typeof useModalState>;
 }
-
-const INPUT_TOO_LARGE_MESSAGE = `El contenido supera ${MAX_INPUT_LABEL}. Reduce el tamano para procesarlo.`;
 
 export function usePlaygroundSetup<TFormat extends object, TMinify extends object>({
   playgroundConfig,
@@ -77,7 +76,7 @@ export function usePlaygroundSetup<TFormat extends object, TMinify extends objec
     toast,
     debouncedInput,
     inputTooLarge,
-    inputTooLargeMessage: INPUT_TOO_LARGE_MESSAGE,
+    inputTooLargeMessage: translate("messages.inputOverLimit", { limit: MAX_INPUT_LABEL }),
     inputWarning,
   };
 }
