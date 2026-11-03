@@ -118,6 +118,19 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
+            // The sql.js and php-wasm binaries are large and only needed when SQL or PHP
+            // runs, so they are not precached: cache them on first use instead. Their
+            // file names carry a content hash, so a cached copy never goes stale. Their
+            // JS loaders are ordinary build chunks, already precached.
+            urlPattern: /\.wasm$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "wasm-runtimes",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
             urlPattern: /fonts\.googleapis\.com|fonts\.gstatic\.com/,
             handler: "StaleWhileRevalidate",
             options: {

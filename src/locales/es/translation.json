@@ -555,7 +555,8 @@
       "formatError": "Error al formatear código PHP",
       "minifyUnavailable": "Minify no está disponible para PHP",
       "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
-      "exitCode": "El script terminó con el código {{code}}"
+      "exitCode": "El script terminó con el código {{code}}",
+      "loadError": "No se pudo cargar el motor PHP. Revisa tu conexión y vuelve a ejecutar el código."
     },
     "sql": {
       "noInput": "No hay SQL para procesar",
