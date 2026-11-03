@@ -76,6 +76,8 @@ const TAG_NAME = /^[A-Za-z][^\s/>]*/;
 
 export function findHtmlStructureError(source: string): string | null {
   const open: string[] = [];
+  // Parallel to `open`: elements opened by `<name/>`, which may end implicitly.
+  const selfClosed: boolean[] = [];
   let i = 0;
 
   const lineAt = (index: number) => source.slice(0, index).split("\n").length;
@@ -122,7 +124,9 @@ export function findHtmlStructureError(source: string): string | null {
           });
         }
       } else {
-        const crossed = open.slice(index + 1).find((element) => !OPTIONAL_END_TAG.has(element));
+        const crossed = open
+          .slice(index + 1)
+          .find((element, offset) => !OPTIONAL_END_TAG.has(element) && !selfClosed[index + 1 + offset]);
         if (crossed) {
           return serviceMessage("services.html.misnestedClosingTag", {
             tag: name,
@@ -131,24 +135,33 @@ export function findHtmlStructureError(source: string): string | null {
           });
         }
         open.length = index;
+        selfClosed.length = index;
       }
       i = tagEnd + 1;
       continue;
     }
 
     i = tagEnd + 1;
+    if (VOID_ELEMENTS.has(name)) continue;
+
+    // In svg and math a trailing slash closes the element. Browsers ignore it on
+    // HTML elements, so `<div/>x</div>` is a div holding "x"; such an element is
+    // kept open but may also end implicitly (`<div><span/></div>`).
     const selfClosing = source[tagEnd - 1] === "/";
-    if (VOID_ELEMENTS.has(name) || selfClosing) continue;
+    const foreign = name === "svg" || name === "math" || open.includes("svg") || open.includes("math");
+    if (selfClosing && foreign) continue;
 
     if (RAW_TEXT_ELEMENTS.has(name)) {
       const closeTag = new RegExp(`</${name}[\\s/>]`, "i").exec(source.slice(i));
       // An unclosed raw text element swallows the rest of the document, as in browsers.
       i = closeTag ? i + closeTag.index : source.length;
       open.push(name);
+      selfClosed.push(false);
       continue;
     }
 
     open.push(name);
+    selfClosed.push(selfClosing);
   }
 
   return null;

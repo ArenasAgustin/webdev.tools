@@ -120,6 +120,23 @@ describe("minifyHtml", () => {
     if (!result.ok) expect(result.error).toMatch(pattern);
   });
 
+  it.each([
+    ["<div/>x</div>"],
+    ["<div><span/></div>"],
+    ["<my-el/>text</my-el>"],
+    ["<svg><path d='M0'/><g/></svg>"],
+  ])("accepts a self-closing slash on a non-void element: %s", async (input) => {
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("still rejects a stray closing tag after a self-closing foreign element", async () => {
+    const result = await minifyHtml("<svg><g/></g></svg>", minifyOptions);
+
+    expect(result.ok).toBe(false);
+  });
+
   it("reports the tag and line of a stray closing tag", async () => {
     const result = await minifyHtml("<div>\n</section>\n</div>", minifyOptions);
 
