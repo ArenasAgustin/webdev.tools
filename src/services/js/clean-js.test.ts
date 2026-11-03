@@ -166,6 +166,29 @@ describe("cleanJs - output stays valid and keeps non-empty code", () => {
     expect(clean('let a = "", b = [];\nconst d = 1;')).toBe("const d = 1;");
   });
 
+  it.each([
+    ["(", "let a = b\nfunction unused() {}\n(c)", "let a = b\n;\n(c)"],
+    ["[", "let a = b\nfunction unused() {}\n[1].forEach(log)", "let a = b\n;\n[1].forEach(log)"],
+    ["`", "let a = tag\nfunction unused() {}\n`x`", "let a = tag\n;\n`x`"],
+    ["+", "let a = b\nfunction unused() {}\n+c", "let a = b\n;\n+c"],
+    [
+      "( after a function expression",
+      "let f = function () { go(); }\nfunction unused() {}\n(c)",
+      "let f = function () { go(); }\n;\n(c)",
+    ],
+  ])(
+    "keeps a removed statement's separator before a line starting with %s",
+    (_, input, expected) => {
+      expect(clean(input)).toBe(expected);
+    },
+  );
+
+  it("adds no separator when the previous statement already ends", () => {
+    expect(clean("let a = b;\nfunction unused() {}\n(c)")).toBe("let a = b;\n\n(c)");
+    expect(clean("function unused() {}\n(c)")).toBe("(c)");
+    expect(clean("let a = b\nfunction unused() {}\nc()")).toBe("let a = b\n\nc()");
+  });
+
   it("never removes array elements: their indexes are data", () => {
     expect(clean('const arr = [1, "", [], {}, 2];')).toBe('const arr = [1, "", [], {}, 2];');
     expect(clean('const arr = [1, ""];')).toBe('const arr = [1, ""];');

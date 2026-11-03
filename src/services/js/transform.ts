@@ -412,9 +412,23 @@ function removeRanges(input: string, ranges: RangeToRemove[]): string {
   for (const range of ranges) {
     const before = result.slice(0, range.start);
     const after = result.slice(range.end);
-    result = before + after;
+    result = before + statementSeparator(before, after) + after;
   }
   return result;
+}
+
+// Characters that continue the previous line's expression when it has no `;`.
+const ASI_HAZARD_START = /^\s*[([`+\-/]/;
+// A `}` may end an expression (`let f = function () {}`), so it does not count.
+const STATEMENT_END = /[;{]\s*$/;
+
+/**
+ * `;` when removing code between `before` and `after` would let automatic
+ * semicolon insertion join them (`let a = b` + `(c)` reads as `b(c)`), else "".
+ */
+function statementSeparator(before: string, after: string): string {
+  if (!before.trim() || STATEMENT_END.test(before)) return "";
+  return ASI_HAZARD_START.test(after) ? ";" : "";
 }
 
 /**
