@@ -657,11 +657,28 @@ describe("validatePhp matches the runtime", () => {
     ["<?php $a?->b;"],
     ["<?php enum S { case A; }"],
     ["<?php f(a: 1);"],
+    ["<?php class A { function f(): static {} }"],
+    ["<?php class A { function f(): ?static {} }"],
+    ["<?php $f = fn(): static => 1;"],
+    ["<?php echo $a::class;"],
+    ["<?php echo (new A)::class;"],
   ])("rejects PHP 8 syntax the PHP 7.4 runtime cannot run: %s", (code) => {
     expect(validatePhp(code).ok).toBe(false);
   });
 
+  it("reports the line of PHP 8-only syntax found after parsing", () => {
+    const result = validatePhp("<?php\n\necho $a::class;");
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toMatch(/^services\.php\.syntaxErrorAtLine.*"line":3/);
+  });
+
   it("accepts PHP 7.4 syntax", () => {
     expect(validatePhp("<?php $f = fn($x) => $x; $a ??= 1;").ok).toBe(true);
+    expect(
+      validatePhp(
+        "<?php class A { function f(): self { return new static; } }\necho A::class, self::class, static::class;",
+      ).ok,
+    ).toBe(true);
   });
 });

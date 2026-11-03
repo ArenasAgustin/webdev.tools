@@ -45,6 +45,10 @@ export function parsePhp(input: string): Result<PhpAst, string> {
 
     // Parse what the runtime will run: tagless code gets the same open tag.
     const ast = createPhpParser().parseCode(toPhpSource(input).source);
+    const unsupported = findPhp8OnlySyntax(ast);
+    if (unsupported) {
+      return { ok: false, error: serviceMessage("services.php.syntaxErrorAtLine", unsupported) };
+    }
     return { ok: true, value: ast };
   } catch (error) {
     if (error instanceof SyntaxError) {
@@ -65,6 +69,55 @@ export function parsePhp(input: string): Result<PhpAst, string> {
     const message = error instanceof Error ? error.message : String(error);
     return { ok: false, error: message || serviceMessage("services.php.parseError") };
   }
+}
+
+interface PhpAstNode {
+  kind?: string;
+  name?: unknown;
+  loc?: { start: { line: number } } | null;
+  [key: string]: unknown;
+}
+
+// Classes `::class` may follow in PHP 7.4; any other expression needs PHP 8.
+const STATIC_CLASS_TARGETS = new Set(["name", "selfreference", "staticreference", "parentreference"]);
+
+/**
+ * php-parser accepts a few PHP 8 constructs even in 7.4 mode; report the first
+ * one with the message the PHP 7.4 runtime gives: a `static` type
+ * (`function f(): static`) and `::class` on an object (`$a::class`).
+ */
+function findPhp8OnlySyntax(ast: PhpAst): { line: number; message: string } | null {
+  const stack: unknown[] = [ast];
+  while (stack.length > 0) {
+    const value = stack.pop();
+    if (Array.isArray(value)) {
+      stack.push(...(value as unknown[]));
+      continue;
+    }
+    if (value === null || typeof value !== "object") continue;
+    const node = value as PhpAstNode;
+    const line = node.loc?.start.line ?? 1;
+
+    const type = node.type as PhpAstNode | null | undefined;
+    if (type?.kind === "typereference" && String(type.name).toLowerCase() === "static") {
+      return { line: type.loc?.start.line ?? line, message: "syntax error, unexpected 'static' (T_STATIC)" };
+    }
+    const offset = node.offset as PhpAstNode | undefined;
+    const what = node.what as PhpAstNode | undefined;
+    if (
+      node.kind === "staticlookup" &&
+      offset?.kind === "identifier" &&
+      String(offset.name).toLowerCase() === "class" &&
+      !STATIC_CLASS_TARGETS.has(what?.kind ?? "")
+    ) {
+      return { line, message: "Cannot use ::class with dynamic class name" };
+    }
+
+    for (const [key, child] of Object.entries(node)) {
+      if (key !== "loc" && child !== null && typeof child === "object") stack.push(child);
+    }
+  }
+  return null;
 }
 
 /**
