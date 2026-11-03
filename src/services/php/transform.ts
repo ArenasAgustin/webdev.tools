@@ -74,7 +74,7 @@ export function parsePhp(input: string): Result<PhpAst, string> {
  * heredocs and comments never affect indentation, and lines that start inside
  * a string are emitted verbatim (their whitespace is part of the value), as
  * are inline HTML lines and lines that start with an open tag. Continuation
- * lines (multi-line arrays, call arguments, method chains) keep their original
+ * lines (multi-line arrays, call arguments, method chains, comments) keep their original
  * indentation relative to the line they continue.
  */
 
@@ -297,6 +297,8 @@ function analyzePhpLines(input: string, lines: string[]): PhpLineLayout[] {
       else if (midToken && name === "T_CONSTANT_ENCAPSED_STRING") line.verbatim = true;
       // An open tag only starts a line after `?>`: whitespace before it is output.
       else if (!midToken && (name === "T_OPEN_TAG" || name === "T_OPEN_TAG_WITH_ECHO")) line.verbatim = true;
+      // Inside a multi-line comment, lines keep their alignment (` * ` in docblocks).
+      else if (midToken && (name === "T_COMMENT" || name === "T_DOC_COMMENT")) line.anchor = tokenLine;
       else if (name === "T_WHITESPACE") pendingLine = nextLine;
       else if (!midToken) line.anchor = anchorHere();
       if (!midToken) tokenLine = nextLine;

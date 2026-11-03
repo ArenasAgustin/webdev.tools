@@ -576,6 +576,20 @@ describe("formatPhp continuation lines", () => {
     });
   });
 
+  it("keeps docblock alignment", () => {
+    expect(formatPhp("<?php\n/**\n * Doc\n * @param int $a\n */\nfunction f($a) {\nreturn $a;\n}", 4)).toEqual({
+      ok: true,
+      value: "<?php\n/**\n * Doc\n * @param int $a\n */\nfunction f($a) {\n    return $a;\n}",
+    });
+  });
+
+  it("moves a multi-line comment as a whole, keeping its alignment", () => {
+    expect(formatPhp("<?php\nclass A {\n/**\n * Doc\n */\npublic $a;\n/* a\n   b */\n}", 4)).toEqual({
+      ok: true,
+      value: "<?php\nclass A {\n    /**\n     * Doc\n     */\n    public $a;\n    /* a\n       b */\n}",
+    });
+  });
+
   it("formats CRLF input", () => {
     expect(formatPhp("<?php\r\nif (1) {\r\necho 1;\r\n}\r\necho 2;", 4)).toEqual({
       ok: true,
