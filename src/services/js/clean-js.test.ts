@@ -166,10 +166,12 @@ describe("cleanJs - output stays valid and keeps non-empty code", () => {
     expect(clean('let a = "", b = [];\nconst d = 1;')).toBe("const d = 1;");
   });
 
-  it("removes empty array elements without leaving holes", () => {
-    expect(clean('const arr = [1, "", [], {}, 2];')).toBe("const arr = [1, 2];");
-    expect(clean('const arr = [1, ""];')).toBe("const arr = [1];");
-    expect(clean('const arr = ["", [], 3];')).toBe("const arr = [3];");
+  it("never removes array elements: their indexes are data", () => {
+    expect(clean('const arr = [1, "", [], {}, 2];')).toBe('const arr = [1, "", [], {}, 2];');
+    expect(clean('const arr = [1, ""];')).toBe('const arr = [1, ""];');
+    expect(clean("const handlers = [() => {}];")).toBe("const handlers = [() => {}];");
+    expect(clean("const grid = [[], 1];")).toBe("const grid = [[], 1];");
+    expect(clean("use([[], 1]);")).toBe("use([[], 1]);");
   });
 
   it("keeps call arguments untouched", () => {

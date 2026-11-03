@@ -226,10 +226,10 @@ function isUnusedBinding(
  * - Standalone expression statements in a statement list
  * - Assignment statements in a statement list to an identifier used nowhere
  *   else
- * - Array elements (removed together with their comma)
  * - Function declarations in a statement list that are never referenced
  * Exported declarations, return values, object property values, call
- * arguments, operands and the direct bodies of if/else/loops/labels are kept:
+ * arguments, array elements (their indexes are data), operands and the direct
+ * bodies of if/else/loops/labels are kept:
  * removing them would leave invalid syntax or change the meaning of the code.
  */
 function isRemovableValue(
@@ -253,8 +253,6 @@ function isRemovableValue(
       );
     case "ExpressionStatement":
       return isStatementList(grandparent);
-    case "ArrayExpression":
-      return true;
     case "AssignmentExpression":
       return (
         key === "right" &&
@@ -308,10 +306,6 @@ function removalRange(
     return allRemovable
       ? { start: grandparent.start ?? 0, end: grandparent.end ?? 0 }
       : listItemRange(grandparent.declarations, parent);
-  }
-
-  if (parent?.type === "ArrayExpression") {
-    return listItemRange(parent.elements, node);
   }
 
   // Assignment and expression statements go as a whole, parentheses included
