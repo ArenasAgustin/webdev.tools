@@ -363,6 +363,44 @@ const SELF_CLOSING_VOID_TAGS = [
   "wbr",
 ];
 
+// Foreign elements that may contain themselves (`<svg><svg>…</svg>…</svg>`).
+const NESTABLE_PRESERVED_TAGS = new Set(["svg", "math"]);
+
+/**
+ * Replace each outermost `<tagName>…</tagName>` block, counting nested elements
+ * of the same name so the block ends at its own closing tag. Self-closing
+ * (`<svg/>`) and unclosed blocks are left as they are.
+ */
+function replaceOutermostBlocks(
+  source: string,
+  tagName: string,
+  replace: (block: string) => string,
+): string {
+  const tagPattern = new RegExp(`<(/?)${tagName}(?=[\\s/>])[^>]*>`, "gi");
+  let output = "";
+  let last = 0;
+  let depth = 0;
+  let start = 0;
+
+  for (const match of source.matchAll(tagPattern)) {
+    const isEnd = match[1] === "/";
+    if (!isEnd) {
+      if (match[0].endsWith("/>")) continue;
+      if (depth === 0) start = match.index;
+      depth += 1;
+    } else if (depth > 0) {
+      depth -= 1;
+      if (depth === 0) {
+        const end = match.index + match[0].length;
+        output += source.slice(last, start) + replace(source.slice(start, end));
+        last = end;
+      }
+    }
+  }
+
+  return output + source.slice(last);
+}
+
 /**
  * Elements that hold structure even when empty: removing an empty cell, row,
  * list item or option shifts the rest of the table, list or select.
@@ -404,13 +442,18 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
       let index = 0;
 
       for (const tagName of PRESERVED_EMPTY_TAGS) {
-        const pattern = new RegExp(`<${tagName}((?=[\\s/>])[^>]*)>[\\s\\S]*?</${tagName}\\s*>`, "gi");
-        result = result.replace(pattern, (match) => {
+        const preserve = (match: string) => {
           const token = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
           index++;
           preservedBlocks.set(token, match);
           return token;
-        });
+        };
+        if (NESTABLE_PRESERVED_TAGS.has(tagName)) {
+          result = replaceOutermostBlocks(result, tagName, preserve);
+          continue;
+        }
+        const pattern = new RegExp(`<${tagName}((?=[\\s/>])[^>]*)>[\\s\\S]*?</${tagName}\\s*>`, "gi");
+        result = result.replace(pattern, preserve);
       }
 
       // Remove empty tags: <tag></tag>, with only whitespace inside

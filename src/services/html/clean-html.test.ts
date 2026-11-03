@@ -169,6 +169,14 @@ describe("cleanHtml - meaningful empty elements", () => {
     expect(clean(input)).toBe(input);
   });
 
+  it.each([
+    ["<svg><svg><rect/></svg><g/></svg>"],
+    ["<svg><svg></svg><g></g></svg><p>x</p>"],
+    ["<math><math><mi/></math><mo/></math>"],
+  ])("keeps every child of a nested svg or math block: %s", (input) => {
+    expect(clean(input)).toBe(input);
+  });
+
   it("still removes empty elements without attributes", () => {
     expect(clean("<div></div><span> </span><b/><p>x</p>")).toBe("<p>x</p>");
   });
