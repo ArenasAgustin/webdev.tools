@@ -400,10 +400,15 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
 
       // Remove self-closing tags EXCEPT void HTML tags (meta, link, br, etc.)
       // These void tags have semantic meaning and should not be removed
-      result = result.replace(/<(\w+)([^>]*?)\s*\/\s*>/g, (_match, tagName) => {
-        const name = tagName as string;
-        return SELF_CLOSING_VOID_TAGS.includes(name.toLowerCase()) ? _match : "";
-      });
+      result = result.replace(
+        /<(\w+)([^>]*?)(\s*)\/\s*>/g,
+        (match, tagName: string, attributes: string, space: string) => {
+          // `<a href=/>`: the slash ends an unquoted attribute value, so the tag
+          // is an ordinary opening tag, not a self-closing one.
+          if (/=\s*[^\s"'<>`]*$/.test(attributes + space)) return match;
+          return SELF_CLOSING_VOID_TAGS.includes(tagName.toLowerCase()) ? match : "";
+        },
+      );
 
       // Restore preserved blocks in reverse so tokens nested in a later block
       // (a style inside an svg) are restored after their container.
