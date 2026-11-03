@@ -559,7 +559,8 @@
       "statementError": "Sentencia {{statement}}: {{message}}",
       "validateError": "Error al validar SQL",
       "executeError": "Error al ejecutar SQL",
-      "resetError": "Error al reiniciar la base de datos"
+      "resetError": "Error al reiniciar la base de datos",
+      "loadError": "No se pudo cargar el motor SQL. Revisa tu conexión y vuelve a ejecutar la consulta."
     }
   }
 }

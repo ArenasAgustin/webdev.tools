@@ -559,7 +559,8 @@
       "statementError": "Statement {{statement}}: {{message}}",
       "validateError": "Error validating SQL",
       "executeError": "Error running SQL",
-      "resetError": "Error resetting the database"
+      "resetError": "Error resetting the database",
+      "loadError": "Could not load the SQL engine. Check your connection and run the query again."
     }
   }
 }
