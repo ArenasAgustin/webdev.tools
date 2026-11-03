@@ -306,6 +306,19 @@ describe("minifyHtml", () => {
     });
   });
 
+  it.each([
+    [
+      "<style-box>  a  </style-box><style>a { color : red }</style>",
+      "<style-box> a </style-box><style>a{color:red}</style>",
+    ],
+    ["<title-bar><!-- x --></title-bar><title>t</title>", "<title-bar></title-bar><title>t</title>"],
+    ["<script-tag>  x  </script-tag><script>var  a = 1</script>", "<script-tag> x </script-tag><script>var a=1</script>"],
+  ])("does not treat a custom element named like a raw-text tag as raw text: %s", async (input, expected) => {
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result).toEqual({ ok: true, value: expected });
+  });
+
   it("keeps whitespace inside pre and textarea verbatim", async () => {
     const input =
       "<div>\n  <pre>  line 1\n    line 2</pre>\n  <textarea>a\n\n  b</textarea>\n</div>";
