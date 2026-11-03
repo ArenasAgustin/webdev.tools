@@ -1,6 +1,7 @@
 // @vitest-environment node
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
+  browserTimezone,
   parseInput,
   unixToDate,
   convertTimestamp,
@@ -250,6 +251,19 @@ describe("parseInput with an explicit zone", () => {
     ])("honors the named zone %s", (zone, expected) => {
       const result = parseInput(`Mon, 15 Jan 2024 10:00:00 ${zone}`, "Asia/Tokyo");
       expect((result?.value as Date).toISOString()).toBe(expected);
+    });
+  });
+
+  describe("browserTimezone", () => {
+    it("falls back to UTC when the browser reports an unknown zone", () => {
+      const original = Intl.DateTimeFormat.prototype.resolvedOptions;
+      vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockImplementation(function (
+        this: Intl.DateTimeFormat,
+      ) {
+        return { ...original.call(this), timeZone: "Mars/Olympus" };
+      });
+      expect(browserTimezone()).toBe("UTC");
+      vi.restoreAllMocks();
     });
   });
 });

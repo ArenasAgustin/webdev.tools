@@ -37,6 +37,16 @@ export function isSupportedTimezone(timezone: string): boolean {
   }
 }
 
+/** The browser's own timezone, or UTC when it is missing or unknown to the engine. */
+export function browserTimezone(): string {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return timezone && isSupportedTimezone(timezone) ? timezone : "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 /** Engines omit "UTC" from Intl.supportedValuesOf("timeZone"); make sure it can be picked. */
 export function withUtc(timezones: readonly string[]): string[] {
   return timezones.includes("UTC") ? [...timezones] : ["UTC", ...timezones];
