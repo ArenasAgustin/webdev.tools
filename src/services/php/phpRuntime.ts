@@ -86,11 +86,17 @@ export async function executePhp(
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const { loadWebRuntime } = (await import("@php-wasm/web")) as any;
     const { PHP, setPhpIniEntries } = (await import("@php-wasm/universal")) as any;
-    const runtimeId = await loadWebRuntime(PHP_VERSION, {
-      emscriptenOptions: {
-        locateFile: (filePath: string) => filePath,
-      },
-    });
+    let runtimeId: unknown;
+    try {
+      runtimeId = await loadWebRuntime(PHP_VERSION, {
+        emscriptenOptions: {
+          locateFile: (filePath: string) => filePath,
+        },
+      });
+    } catch {
+      // Typically the wasm download failed (offline: a raw "NetworkError … XMLHttpRequest").
+      return { ok: false, error: { message: serviceMessage("services.php.loadError") } };
+    }
     const php = new PHP(runtimeId);
     await setPhpIniEntries(php, PHP_INI_ENTRIES);
     const phpCode = toRunnablePhp(code);

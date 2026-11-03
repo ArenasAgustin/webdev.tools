@@ -46,6 +46,16 @@ vi.mock("@/components/common/SearchableSelect", () => ({
 
 import { TimestampPlayground } from "./TimestampPlayground";
 
+function mockBrowserTimezone(timeZone: string) {
+  const original = Intl.DateTimeFormat.prototype.resolvedOptions;
+  vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockImplementation(function (
+    this: Intl.DateTimeFormat,
+  ) {
+    return { ...original.call(this), timeZone };
+  });
+}
+
+
 describe("TimestampPlayground persistence", () => {
   beforeEach(() => {
     Object.keys(storedValues).forEach((k) => delete storedValues[k]);
@@ -70,6 +80,16 @@ describe("TimestampPlayground persistence", () => {
 
     const timezoneSelect = screen.getByTestId("timezone-select");
     expect(timezoneSelect).toHaveValue("Europe/London");
+  });
+
+  it("defaults the timezone to the browser's own zone when none was saved", () => {
+    mockBrowserTimezone("Asia/Tokyo");
+    getItemMock.mockImplementation(() => null);
+
+    render(<TimestampPlayground />);
+
+    expect(screen.getByTestId("timezone-select")).toHaveValue("Asia/Tokyo");
+    vi.restoreAllMocks();
   });
 
   it("result and error are NOT read from storage — they start as null/empty", () => {

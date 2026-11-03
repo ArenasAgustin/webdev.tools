@@ -113,7 +113,7 @@ describe("applyJsonPath", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(parseServiceMessage(result.error.message)?.key).toBe("services.json.jsonPathError");
+      expect(parseServiceMessage(result.error.message)?.key).toBe("services.syntax.atPosition");
     }
   });
 

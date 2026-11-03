@@ -123,3 +123,26 @@ describe("cleanHtml - empty tags", () => {
     }
   });
 });
+
+describe("cleanHtml - unquoted attribute values", () => {
+  const clean = (input: string) => {
+    const result = cleanHtml(input, { removeEmptyTags: true });
+    if (!result.ok) throw new Error(result.error);
+    return result.value;
+  };
+
+  it.each([
+    ['<a href=/>Home</a>'],
+    ['<a href=/docs/>Docs</a>'],
+    ['<a class=x href= />Home</a>'],
+  ])("keeps a tag whose unquoted value ends in a slash: %s", (input) => {
+    expect(clean(input)).toBe(input);
+  });
+
+  it.each([['<div />'], ['<x a="1"/>'], ["<x a/>"], ["<x a=b />"]])(
+    "still removes a real self-closing tag: %s",
+    (input) => {
+      expect(clean(`${input}<p>x</p>`)).toBe("<p>x</p>");
+    },
+  );
+});

@@ -7,6 +7,7 @@ import {
   getCurrentTimestamp,
   isSupportedTimezone,
   withUtc,
+  browserTimezone,
   type TimestampResult,
   type UnixUnit,
 } from "./timestamp.utils";
@@ -40,7 +41,6 @@ const UNIT_KEYS: Record<UnixUnit, string> = {
   milliseconds: "timestamp.unitMilliseconds",
 };
 
-const DEFAULT_TIMEZONE = "America/Argentina/Buenos_Aires";
 
 /** How often the relative time is refreshed while a result is shown, in ms. */
 const RELATIVE_TICK_MS = 1000;
@@ -61,13 +61,20 @@ export function TimestampPlayground() {
   // language change refreshes the shown formats without converting again.
   const [convertedInput, setConvertedInput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Until the user picks one, the zone is the browser's own, so the LOCAL row matches them.
+  const [defaultTimezone] = useState(browserTimezone);
   const [savedTimezone, setTimezone] = usePersistedState(
     STORAGE_KEYS.TIMESTAMP_TIMEZONE,
-    DEFAULT_TIMEZONE,
+    defaultTimezone,
   );
   // A saved zone this browser does not know (renamed, or saved by another engine)
   // would make every conversion throw a RangeError; use the default instead.
-  const timezone = isSupportedTimezone(savedTimezone) ? savedTimezone : DEFAULT_TIMEZONE;
+  const timezone = isSupportedTimezone(savedTimezone) ? savedTimezone : defaultTimezone;
+  // The browser may report an alias missing from the canonical list; keep it pickable.
+  const timezoneOptions = useMemo(
+    () => (ALL_TIMEZONES.includes(timezone) ? ALL_TIMEZONES : [timezone, ...ALL_TIMEZONES]),
+    [timezone],
+  );
 
   // Reference clock for the relative time; refreshed every second while a result is
   // shown so "5 seconds ago" keeps moving instead of freezing at conversion time.
@@ -163,7 +170,7 @@ export function TimestampPlayground() {
             labelId={timezoneLabelId}
             value={timezone}
             onChange={setTimezone}
-            options={ALL_TIMEZONES}
+            options={timezoneOptions}
             placeholder={t("timestamp.searchTimezone")}
             noResultsLabel={t("timestamp.noResults")}
           />

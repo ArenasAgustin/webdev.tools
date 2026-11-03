@@ -1,14 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
-const { getItemMock, setItemMock } = vi.hoisted(() => ({
+const { getItemMock, setItemMock, removeItemMock } = vi.hoisted(() => ({
   getItemMock: vi.fn(),
   setItemMock: vi.fn(),
+  removeItemMock: vi.fn(),
 }));
 
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  removeItem: removeItemMock,
 }));
 
 import { usePersistedState } from "./usePersistedState";
@@ -148,5 +150,24 @@ describe("usePersistedState", () => {
     document.dispatchEvent(new Event("visibilitychange"));
     expect(setItemMock).toHaveBeenCalledWith("test-key", "typed before switching tabs");
     vi.restoreAllMocks();
+  });
+it("does not save a string longer than maxLength, drops its stale copy and flags it", () => {
+    getItemMock.mockReturnValue("old");
+    setItemMock.mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      usePersistedState("test-key", "default", { maxLength: 5 }),
+    );
+
+    act(() => {
+      result.current[1]("much too long");
+    });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(setItemMock).not.toHaveBeenCalledWith("test-key", "much too long");
+    expect(removeItemMock).toHaveBeenCalledWith("test-key");
+    expect(result.current[2]).toBe(true);
   });
 });

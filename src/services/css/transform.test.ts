@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
+import { localizeServiceMessage } from "@/services/localizeServiceMessage";
 import { formatCss, minifyCss, cleanCss, validateCss } from "./transform";
 
 vi.mock("css-tree", async (importOriginal) => {
@@ -64,6 +65,51 @@ describe("validateCss", () => {
       "@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }";
     const result = await validateCss(input);
     expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it.each([
+    [".a { .b {} }"],
+    [".a { color: red; .b { color: blue; } }"],
+    [".a{ div { color: red } }"],
+    [".a { > .b { color: red } }"],
+    [".a { + .b, ~ .c { color: red } }"],
+    [".a { .b & { color: red } }"],
+    [".a { .b { .c { color: red } } }"],
+    [".a { @media (min-width: 1px) { .b { color: red } } }"],
+    [".a { &:hover { color: red } }"],
+    ['.a { [data-x="{"] { color: red } }'],
+  ])("accepts valid CSS nesting: %s", async (input) => {
+    const result = await validateCss(input);
+    expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it("still rejects an invalid selector inside a nested rule", async () => {
+    const result = await validateCss(".a {\n  .b:(3) { color: red }\n}");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(localizeServiceMessage(result.error)).toContain("Sintaxis CSS inválida");
+      expect(localizeServiceMessage(result.error)).toContain("línea 2");
+    }
+  });
+
+  it("reports a missing colon with the localized PostCSS message and its line", async () => {
+    const result = await validateCss("b { color: blue }\na { color red }");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(localizeServiceMessage(result.error)).not.toContain("Colon is expected");
+      expect(localizeServiceMessage(result.error)).toContain("Palabra desconocida");
+      expect(localizeServiceMessage(result.error)).toContain("línea 2");
+    }
+  });
+
+  it("localizes css-tree errors with their line and column", async () => {
+    const result = await validateCss("a {}\n.foo:(3,3,43) { margin: 5px; }");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(localizeServiceMessage(result.error)).not.toContain("Identifier is expected");
+      expect(localizeServiceMessage(result.error)).toContain("Sintaxis CSS inválida");
+      expect(localizeServiceMessage(result.error)).toContain("línea 2, columna 6");
+    }
   });
 
   it("catches css-tree internal throw and returns ok:false", async () => {

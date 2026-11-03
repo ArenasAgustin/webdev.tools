@@ -1,7 +1,7 @@
 import { JSONPath } from "jsonpath-plus";
-import { JSON_ERROR_MESSAGES, isStackOverflow } from "./transform";
+import { JSON_ERROR_MESSAGES, isStackOverflow, parseJson } from "./transform";
 import { serviceMessage } from "@/services/serviceMessage";
-import { type Result, type JsonValue, type JsonError } from "@/types/common";
+import { type Result, type JsonError } from "@/types/common";
 
 // jsonpath-plus caches parsed paths in a plain object keyed by the path text, so a
 // path such as "constructor" or "toString" hits an Object.prototype member and fails
@@ -60,15 +60,19 @@ export function applyJsonPath(input: string, path: string): Result<string, JsonE
   }
 
   try {
-    // Parse input JSON
-    const parsed: unknown = JSON.parse(input) as unknown;
+    // Parse input JSON; an invalid document gets the same message as Format/Clean.
+    const parseResult = parseJson(input);
+    if (!parseResult.ok) {
+      return parseResult;
+    }
+    const parsed = parseResult.value;
 
     // Apply JSONPath filter. wrap:true always yields an array of matches, so the
     // output shape doesn't depend on the match count (no matches -> []).
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = JSONPath({
       path,
-      json: parsed as JsonValue,
+      json: parsed,
       wrap: true,
     });
 

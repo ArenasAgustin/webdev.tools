@@ -354,6 +354,11 @@
     "action": "Instalar",
     "dismiss": "Descartar"
   },
+  "update": {
+    "message": "Hay una nueva versión disponible",
+    "reload": "Recargar",
+    "dismiss": "Descartar"
+  },
   "base64": {
     "inputTypeGroupLabel": "Tipo de entrada",
     "modeGroupLabel": "Modo de conversión",
@@ -414,6 +419,7 @@
     "inputTooLarge": "El contenido es demasiado grande para procesarlo.",
     "inputLarge": "Entrada grande: algunas operaciones pueden ser lentas",
     "inputExceedsLimit": "El contenido supera {{limit}}. Algunas operaciones pueden ser lentas.",
+    "inputOverLimit": "El contenido supera {{limit}}. Reduce su tamaño para procesarlo.",
     "noOutputToUseAsInput": "No hay resultado para usar como entrada",
     "outputLoadedAsInput": "Resultado cargado como entrada",
     "noInputToUseAsOutput": "No hay entrada para usar como resultado",
@@ -510,7 +516,13 @@
       "cleanError": "Error al limpiar JSON: {{message}}",
       "jsonPathEmpty": "La expresión JSONPath está vacía",
       "jsonPathInvalid": "La expresión JSONPath está incompleta: revisá si falta cerrar un corchete, un paréntesis o una comilla, o si termina en punto",
-      "jsonPathError": "Error en JSONPath: {{message}}"
+      "jsonPathError": "Error en JSONPath: {{message}}",
+      "invalid": "JSON no válido",
+      "unexpectedEnd": "El JSON termina antes de tiempo",
+      "unexpectedChar": "“{{char}}” inesperado",
+      "unterminatedString": "Cadena sin cerrar: falta la comilla de cierre",
+      "controlChar": "Salto de línea o carácter de control dentro de una cadena (escríbelo como \\n)",
+      "invalidEscape": "Secuencia de escape no válida en una cadena"
     },
     "css": {
       "noInput": "No hay CSS para procesar",
@@ -544,7 +556,8 @@
       "formatError": "Error al formatear código PHP",
       "minifyUnavailable": "Minify no está disponible para PHP",
       "timeout": "La ejecución superó {{seconds}} segundos y fue cancelada",
-      "exitCode": "El script terminó con el código {{code}}"
+      "exitCode": "El script terminó con el código {{code}}",
+      "loadError": "No se pudo cargar el motor PHP. Revisa tu conexión y vuelve a ejecutar el código."
     },
     "sql": {
       "noInput": "No hay SQL para procesar",
@@ -553,7 +566,8 @@
       "statementError": "Sentencia {{statement}}: {{message}}",
       "validateError": "Error al validar SQL",
       "executeError": "Error al ejecutar SQL",
-      "resetError": "Error al reiniciar la base de datos"
+      "resetError": "Error al reiniciar la base de datos",
+      "loadError": "No se pudo cargar el motor SQL. Revisa tu conexión y vuelve a ejecutar la consulta."
     }
   }
 }

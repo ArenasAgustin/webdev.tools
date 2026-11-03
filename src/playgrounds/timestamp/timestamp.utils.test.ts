@@ -1,6 +1,7 @@
 // @vitest-environment node
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
+  browserTimezone,
   parseInput,
   unixToDate,
   convertTimestamp,
@@ -233,6 +234,36 @@ describe("timestamp.utils", () => {
       const result = getCurrentTimestamp();
       expect(result).toBeGreaterThanOrEqual(now - 1);
       expect(result).toBeLessThanOrEqual(now + 1);
+    });
+  });
+describe("parseInput with an explicit zone", () => {
+    it("honors an RFC 2822 numeric offset after a space", () => {
+      const result = parseInput("Mon, 15 Jan 2024 10:00:00 -0500", "Asia/Tokyo");
+      expect((result?.value as Date).toISOString()).toBe("2024-01-15T15:00:00.000Z");
+    });
+
+    it.each([
+      ["EST", "2024-01-15T15:00:00.000Z"],
+      ["EDT", "2024-01-15T14:00:00.000Z"],
+      ["CST", "2024-01-15T16:00:00.000Z"],
+      ["PDT", "2024-01-15T17:00:00.000Z"],
+      ["GMT", "2024-01-15T10:00:00.000Z"],
+    ])("honors the named zone %s", (zone, expected) => {
+      const result = parseInput(`Mon, 15 Jan 2024 10:00:00 ${zone}`, "Asia/Tokyo");
+      expect((result?.value as Date).toISOString()).toBe(expected);
+    });
+  });
+
+  describe("browserTimezone", () => {
+    it("falls back to UTC when the browser reports an unknown zone", () => {
+      const original = Intl.DateTimeFormat.prototype.resolvedOptions;
+      vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockImplementation(function (
+        this: Intl.DateTimeFormat,
+      ) {
+        return { ...original.call(this), timeZone: "Mars/Olympus" };
+      });
+      expect(browserTimezone()).toBe("UTC");
+      vi.restoreAllMocks();
     });
   });
 });

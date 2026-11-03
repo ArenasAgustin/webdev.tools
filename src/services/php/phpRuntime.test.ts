@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { run, setPhpIniEntries } = vi.hoisted(() => ({
+const { run, setPhpIniEntries, loadWebRuntime } = vi.hoisted(() => ({
   run: vi.fn(),
   setPhpIniEntries: vi.fn(),
+  loadWebRuntime: vi.fn(() => Promise.resolve(1)),
 }));
 
-vi.mock("@php-wasm/web", () => ({ loadWebRuntime: vi.fn(() => Promise.resolve(1)) }));
+vi.mock("@php-wasm/web", () => ({ loadWebRuntime }));
 vi.mock("@php-wasm/universal", () => ({
   PHP: class {
     run = run;
@@ -133,5 +134,16 @@ describe("executePhp", () => {
       ok: false,
       error: { message: serviceMessage("services.php.exitCode", { code: 3 }) },
     });
+  });
+
+  it("reports a failed runtime download (e.g. offline) as a friendly load error", async () => {
+    loadWebRuntime.mockRejectedValueOnce(
+      new Error("NetworkError: Failed to execute 'send' on 'XMLHttpRequest': Failed to load '/assets/php_7_4.wasm'."),
+    );
+
+    const result = await executePhp("<?php echo 1;");
+
+    expect(result).toEqual({ ok: false, error: { message: serviceMessage("services.php.loadError") } });
+    expect(run).not.toHaveBeenCalled();
   });
 });

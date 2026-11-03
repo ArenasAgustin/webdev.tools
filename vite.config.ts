@@ -107,12 +107,27 @@ export default defineConfig(({ mode }) => ({
             // Monaco is loaded at runtime from jsDelivr (@monaco-editor/loader). The URL is
             // pinned to a version, so its files never change: cache them for offline use.
             // They arrive as no-cors <script>/worker loads, hence the opaque status 0.
+            // Files loaded before this SW controlled the page (first visit) are added
+            // to the same cache by src/components/editor/monacoOfflineCache.ts.
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/npm\/monaco-editor@/,
             handler: "CacheFirst",
             options: {
               cacheName: "monaco-editor",
               expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // The sql.js and php-wasm binaries are large and only needed when SQL or PHP
+            // runs, so they are not precached: cache them on first use instead. Their
+            // file names carry a content hash, so a cached copy never goes stale. Their
+            // JS loaders are ordinary build chunks, already precached.
+            urlPattern: /\.wasm$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "wasm-runtimes",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {

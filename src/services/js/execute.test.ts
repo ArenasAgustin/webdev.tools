@@ -324,6 +324,25 @@ describe("formatValue", () => {
     expect(formatValue(Promise.resolve(1))).toBe("Promise {}");
   });
 
+  it("keeps shared-reference graphs bounded", () => {
+    // Each level points twice at the one below: a DAG whose full tree is 2^30 nodes.
+    let node: object = { v: 1 };
+    for (let i = 0; i < 30; i++) node = { a: node, b: node };
+
+    const text = formatValue(node);
+
+    expect(text.length).toBeLessThan(1_000_000);
+    expect(text).toContain("[Object]");
+    expect(text).not.toContain("[Circular]");
+  });
+
+  it("expands a shared reference that is not a cycle", () => {
+    const shared = { x: 1 };
+    expect(formatValue({ a: shared, b: shared })).toBe(
+      '{\n  "a": {\n    "x": 1\n  },\n  "b": {\n    "x": 1\n  }\n}',
+    );
+  });
+
   it("prints circular references as [Circular]", () => {
     const a: Record<string, unknown> = { x: 1 };
     a.self = a;

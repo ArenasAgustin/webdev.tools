@@ -354,6 +354,11 @@
     "action": "Install",
     "dismiss": "Dismiss"
   },
+  "update": {
+    "message": "A new version is available",
+    "reload": "Reload",
+    "dismiss": "Dismiss"
+  },
   "base64": {
     "inputTypeGroupLabel": "Input type",
     "modeGroupLabel": "Conversion mode",
@@ -414,6 +419,7 @@
     "inputTooLarge": "The content is too large to process.",
     "inputLarge": "Large input: some operations may be slow",
     "inputExceedsLimit": "The content exceeds {{limit}}. Some operations may be slow.",
+    "inputOverLimit": "The content exceeds {{limit}}. Reduce its size to process it.",
     "noOutputToUseAsInput": "No output to use as input",
     "outputLoadedAsInput": "Output loaded as input",
     "noInputToUseAsOutput": "No input to use as output",
@@ -510,7 +516,13 @@
       "cleanError": "Error cleaning JSON: {{message}}",
       "jsonPathEmpty": "The JSONPath expression is empty",
       "jsonPathInvalid": "The JSONPath expression is incomplete: check for an unclosed bracket, parenthesis or quote, or a trailing dot",
-      "jsonPathError": "JSONPath error: {{message}}"
+      "jsonPathError": "JSONPath error: {{message}}",
+      "invalid": "Invalid JSON",
+      "unexpectedEnd": "The JSON ends too early",
+      "unexpectedChar": "Unexpected “{{char}}”",
+      "unterminatedString": "Unterminated string: the closing quote is missing",
+      "controlChar": "Line break or control character inside a string (write it as \\n)",
+      "invalidEscape": "Invalid escape sequence in a string"
     },
     "css": {
       "noInput": "No CSS to process",
@@ -544,7 +556,8 @@
       "formatError": "Error formatting PHP code",
       "minifyUnavailable": "Minify is not available for PHP",
       "timeout": "Execution exceeded {{seconds}} seconds and was cancelled",
-      "exitCode": "The script exited with code {{code}}"
+      "exitCode": "The script exited with code {{code}}",
+      "loadError": "Could not load the PHP engine. Check your connection and run the code again."
     },
     "sql": {
       "noInput": "No SQL to process",
@@ -553,7 +566,8 @@
       "statementError": "Statement {{statement}}: {{message}}",
       "validateError": "Error validating SQL",
       "executeError": "Error running SQL",
-      "resetError": "Error resetting the database"
+      "resetError": "Error resetting the database",
+      "loadError": "Could not load the SQL engine. Check your connection and run the query again."
     }
   }
 }

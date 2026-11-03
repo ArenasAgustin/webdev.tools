@@ -67,6 +67,16 @@ vi.mock("@/components/common/SearchableSelect", () => ({
 
 import { TimestampPlayground } from "./TimestampPlayground";
 
+function mockBrowserTimezone(timeZone: string) {
+  const original = Intl.DateTimeFormat.prototype.resolvedOptions;
+  vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockImplementation(function (
+    this: Intl.DateTimeFormat,
+  ) {
+    return { ...original.call(this), timeZone };
+  });
+}
+
+
 describe("TimestampPlayground branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -280,7 +290,10 @@ describe("TimestampPlayground branches", () => {
     expect(screen.getByText("timestamp.formats.humanReadable")).toBeInTheDocument();
   });
 
-  it("falls back to the default timezone when the saved one is unknown to the browser", () => {
+  it("falls back to the browser's timezone when the saved one is unknown to the browser", () => {
+    // Fake timers also fake Intl, which would bypass the resolvedOptions spy.
+    vi.useRealTimers();
+    mockBrowserTimezone("America/Argentina/Buenos_Aires");
     getItemMock.mockImplementation(
       ((key: string) => (key === "timestampTimezone" ? "Mars/Olympus" : null)) as never,
     );

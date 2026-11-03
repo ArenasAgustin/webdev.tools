@@ -18,12 +18,21 @@ export interface CssCleanOptions {
 export async function validateCss(input: string): Promise<Result<string, string>> {
   if (!input.trim()) return { ok: true, value: "" };
 
-  let errorMessage: string | null = null;
+  // PostCSS (the parser Minify uses) runs first: it reports structural damage with
+  // a localized message and its line, and it accepts modern syntax such as nesting.
+  const structureError = await findCssSyntaxError(input);
+  if (structureError !== null) {
+    return { ok: false, error: structureError };
+  }
+
+  // css-tree is stricter about selectors and declarations than PostCSS.
+  const { source, inserts } = prefixRelativeNestedSelectors(input);
+  let errorOffset: number | null = null;
 
   try {
-    parse(input, {
-      onParseError(err: { message: string }) {
-        errorMessage = err.message;
+    parse(source, {
+      onParseError(err: { offset: number }) {
+        errorOffset ??= err.offset;
       },
     });
   } catch (err) {
@@ -31,18 +40,111 @@ export async function validateCss(input: string): Promise<Result<string, string>
     return { ok: false, error: message };
   }
 
-  if (errorMessage !== null) {
-    return { ok: false, error: errorMessage };
-  }
-
-  // css-tree recovers from unclosed blocks and strings; Minify refuses them,
-  // so the indicator must too.
-  const structureError = await findCssSyntaxError(input);
-  if (structureError !== null) {
-    return { ok: false, error: structureError };
+  if (errorOffset !== null) {
+    // css-tree words its errors in English; report a localized one at the same place.
+    const offset = toOriginalOffset(errorOffset, inserts);
+    const before = input.slice(0, offset);
+    return {
+      ok: false,
+      error: serviceMessage("services.syntax.atPosition", {
+        message: serviceMessage("services.syntax.invalidCss"),
+        line: before.split("\n").length,
+        column: offset - before.lastIndexOf("\n"),
+        frame: "",
+      }),
+    };
   }
 
   return { ok: true, value: input };
+}
+
+/**
+ * css-tree 3 only parses nested style rules whose selectors start with `&`, so valid
+ * relaxed nesting (`.a { .b {} }`, `.a { > p {} }`) would read as a parse error.
+ * Insert the implicit `& ` before every relative nested selector — the spec gives
+ * them that meaning — so css-tree still validates the selector itself.
+ */
+function prefixRelativeNestedSelectors(input: string): { source: string; inserts: number[] } {
+  // Blank out strings, url() bodies and comments so their braces and commas are inert.
+  const mask = tokenizeCss(input)
+    .map((segment) => (segment.kind === "code" ? segment.text : " ".repeat(segment.text.length)))
+    .join("");
+  const inserts: number[] = [];
+  // Per open block: does it hold declarations (a style rule body) or rules (sheet level)?
+  const holdsDeclarations: boolean[] = [];
+  let statementStart = 0;
+  let depth = 0;
+
+  for (let i = 0; i < mask.length; i++) {
+    const char = mask[i];
+    if (char === "\\") {
+      i += 1;
+    } else if (char === "(" || char === "[") {
+      depth += 1;
+    } else if (char === ")" || char === "]") {
+      depth = Math.max(0, depth - 1);
+    } else if (depth > 0) {
+      continue;
+    } else if (char === "{") {
+      const inStyleRule = holdsDeclarations.at(-1) ?? false;
+      const prelude = mask.slice(statementStart, i).trimStart();
+      const isAtRule = prelude.startsWith("@");
+      if (inStyleRule && !isAtRule && !prelude.startsWith("--")) {
+        inserts.push(...relativeSelectorStarts(mask, statementStart, i));
+      }
+      // An at-rule nested in a style rule (`@media`) keeps holding declarations.
+      holdsDeclarations.push(isAtRule ? inStyleRule : true);
+      statementStart = i + 1;
+    } else if (char === "}") {
+      holdsDeclarations.pop();
+      statementStart = i + 1;
+    } else if (char === ";") {
+      statementStart = i + 1;
+    }
+  }
+
+  let output = "";
+  let last = 0;
+  for (const offset of inserts) {
+    output += `${input.slice(last, offset)}& `;
+    last = offset;
+  }
+  return { source: output + input.slice(last), inserts };
+}
+
+/** Map an offset in the prefixed source back to `input` (each insert adds `& `). */
+function toOriginalOffset(offset: number, inserts: number[]): number {
+  let shift = 0;
+  for (const insert of inserts) {
+    if (insert + shift + 2 > offset) break;
+    shift += 2;
+  }
+  return Math.max(0, offset - shift);
+}
+
+/** Offsets of the selectors in a nested rule's prelude that do not start with `&`. */
+function relativeSelectorStarts(mask: string, start: number, end: number): number[] {
+  const starts: number[] = [];
+  let itemStart = start;
+  let depth = 0;
+
+  const flush = (itemEnd: number) => {
+    const first = mask.slice(itemStart, itemEnd).search(/\S/);
+    if (first !== -1 && mask[itemStart + first] !== "&") starts.push(itemStart + first);
+  };
+
+  for (let i = start; i < end; i++) {
+    const char = mask[i];
+    if (char === "\\") i += 1;
+    else if (char === "(" || char === "[") depth += 1;
+    else if (char === ")" || char === "]") depth = Math.max(0, depth - 1);
+    else if (char === "," && depth === 0) {
+      flush(i);
+      itemStart = i + 1;
+    }
+  }
+  flush(end);
+  return starts;
 }
 
 export async function formatCss(

@@ -226,10 +226,10 @@ function isUnusedBinding(
  * - Standalone expression statements in a statement list
  * - Assignment statements in a statement list to an identifier used nowhere
  *   else
- * - Array elements (removed together with their comma)
  * - Function declarations in a statement list that are never referenced
  * Exported declarations, return values, object property values, call
- * arguments, operands and the direct bodies of if/else/loops/labels are kept:
+ * arguments, array elements (their indexes are data), operands and the direct
+ * bodies of if/else/loops/labels are kept:
  * removing them would leave invalid syntax or change the meaning of the code.
  */
 function isRemovableValue(
@@ -253,8 +253,6 @@ function isRemovableValue(
       );
     case "ExpressionStatement":
       return isStatementList(grandparent);
-    case "ArrayExpression":
-      return true;
     case "AssignmentExpression":
       return (
         key === "right" &&
@@ -308,10 +306,6 @@ function removalRange(
     return allRemovable
       ? { start: grandparent.start ?? 0, end: grandparent.end ?? 0 }
       : listItemRange(grandparent.declarations, parent);
-  }
-
-  if (parent?.type === "ArrayExpression") {
-    return listItemRange(parent.elements, node);
   }
 
   // Assignment and expression statements go as a whole, parentheses included
@@ -418,9 +412,23 @@ function removeRanges(input: string, ranges: RangeToRemove[]): string {
   for (const range of ranges) {
     const before = result.slice(0, range.start);
     const after = result.slice(range.end);
-    result = before + after;
+    result = before + statementSeparator(before, after) + after;
   }
   return result;
+}
+
+// Characters that continue the previous line's expression when it has no `;`.
+const ASI_HAZARD_START = /^\s*[([`+\-/]/;
+// A `}` may end an expression (`let f = function () {}`), so it does not count.
+const STATEMENT_END = /[;{]\s*$/;
+
+/**
+ * `;` when removing code between `before` and `after` would let automatic
+ * semicolon insertion join them (`let a = b` + `(c)` reads as `b(c)`), else "".
+ */
+function statementSeparator(before: string, after: string): string {
+  if (!before.trim() || STATEMENT_END.test(before)) return "";
+  return ASI_HAZARD_START.test(after) ? ";" : "";
 }
 
 /**

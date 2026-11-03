@@ -37,6 +37,16 @@ export function isSupportedTimezone(timezone: string): boolean {
   }
 }
 
+/** The browser's own timezone, or UTC when it is missing or unknown to the engine. */
+export function browserTimezone(): string {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return timezone && isSupportedTimezone(timezone) ? timezone : "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 /** Engines omit "UTC" from Intl.supportedValuesOf("timeZone"); make sure it can be picked. */
 export function withUtc(timezones: readonly string[]): string[] {
   return timezones.includes("UTC") ? [...timezones] : ["UTC", ...timezones];
@@ -73,8 +83,11 @@ const ISO_LIKE =
 /** 2024/01/15, 2024.01.15 (year first) or 01/15/2024 (month first, as the engine reads it), optional time. */
 const SLASH_OR_DOT =
   /^(\d{1,4})[/.](\d{1,2})[/.](\d{1,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?$/;
-/** An explicit zone (Z, +02:00, -0500, GMT, UTC) makes a date string absolute. */
-const EXPLICIT_ZONE = /\d(?:Z|[+-]\d{2}:?\d{2})$|\b(?:GMT|UTC)\b/i;
+/**
+ * An explicit zone makes a date string absolute: Z, +02:00 or -0500 (also after a
+ * space, as RFC 2822 writes it), GMT, UTC, or a US zone the engine knows (EST, PDT…).
+ */
+const EXPLICIT_ZONE = /\d\s*(?:Z|[+-]\d{2}:?\d{2})$|\b(?:GMT|UTC?|[ECMP][SD]T)\b/i;
 
 function wallClock(hour?: string, minute?: string, second?: string, ms?: string) {
   return {

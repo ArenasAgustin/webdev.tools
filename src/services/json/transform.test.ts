@@ -533,7 +533,9 @@ describe("parseJson", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.message).toContain("JSON");
+      expect(result.error.message).toContain("services.syntax.atPosition");
+      expect(result.error.line).toBe(1);
+      expect(result.error.column).toBe(2);
     }
   });
 

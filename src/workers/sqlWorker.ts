@@ -9,6 +9,7 @@ import { ROW_CAP } from "@/services/sql/worker.types";
 import { formatSql, validateSql, minifySql } from "@/services/sql/transform";
 import { roundElapsedMs, runStatements, SqlStatementError, type StatementsResult } from "@/services/sql/execute";
 import type { Database } from "sql.js";
+import { serviceMessage } from "@/services/serviceMessage";
 import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
 const ctx = self as unknown as {
@@ -19,12 +20,26 @@ const ctx = self as unknown as {
 // Singleton: lazily initialized on first EXECUTE, reset by RESET action.
 let dbPromise: Promise<Database> | null = null;
 
-async function getDb(): Promise<Database> {
-  dbPromise ??= (async () => {
+async function loadDb(): Promise<Database> {
+  try {
     const initSqlJs = (await import("sql.js")).default;
     const SQL = await initSqlJs({ locateFile: () => sqlWasmUrl });
     return new SQL.Database();
-  })();
+  } catch {
+    // Typically a failed wasm download (offline): the library text is raw English.
+    throw new Error(serviceMessage("services.sql.loadError"));
+  }
+}
+
+async function getDb(): Promise<Database> {
+  if (!dbPromise) {
+    const loading = loadDb();
+    dbPromise = loading;
+    // Do not cache a failed load: the next Run tries again instead of failing until Reset.
+    loading.catch(() => {
+      if (dbPromise === loading) dbPromise = null;
+    });
+  }
   return dbPromise;
 }
 
