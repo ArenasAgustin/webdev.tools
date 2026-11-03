@@ -1,4 +1,5 @@
 import { loader } from "@monaco-editor/react";
+import { warmMonacoCache } from "./monacoOfflineCache";
 
 // Minimal structural view of the Monaco API the editor wrappers use. @monaco-editor/react
 // types its loader against `monaco-editor`, which is not a direct dependency of this
@@ -53,7 +54,14 @@ export interface MonacoLoad extends Promise<MonacoApi> {
 
 /** Loads Monaco (once, shared); `cancel()` makes a pending load reject with `{ type: "cancelation" }`. */
 export function loadMonaco(): MonacoLoad {
-  return loader.init();
+  const load = loader.init();
+  // Once Monaco is in, make sure its CDN files are cached for offline use (even when
+  // they loaded before the service worker controlled the page).
+  load.then(
+    () => void warmMonacoCache(),
+    () => undefined,
+  );
+  return load;
 }
 
 export function isCancelation(error: unknown): boolean {

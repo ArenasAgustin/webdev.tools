@@ -107,6 +107,8 @@ export default defineConfig(({ mode }) => ({
             // Monaco is loaded at runtime from jsDelivr (@monaco-editor/loader). The URL is
             // pinned to a version, so its files never change: cache them for offline use.
             // They arrive as no-cors <script>/worker loads, hence the opaque status 0.
+            // Files loaded before this SW controlled the page (first visit) are added
+            // to the same cache by src/components/editor/monacoOfflineCache.ts.
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/npm\/monaco-editor@/,
             handler: "CacheFirst",
             options: {
