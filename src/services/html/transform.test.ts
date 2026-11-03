@@ -319,6 +319,15 @@ describe("minifyHtml", () => {
     expect(result).toEqual({ ok: true, value: expected });
   });
 
+  it.each([
+    ["<p>a < b and c</p>", "<p>a < b and c</p>"],
+    ["<p>1 <  2</p>\n<p>x</p>", "<p>1 < 2</p><p>x</p>"],
+  ])("does not treat a bare < in text as a tag: %s", async (input, expected) => {
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result).toEqual({ ok: true, value: expected });
+  });
+
   it("keeps whitespace inside pre and textarea verbatim", async () => {
     const input =
       "<div>\n  <pre>  line 1\n    line 2</pre>\n  <textarea>a\n\n  b</textarea>\n</div>";

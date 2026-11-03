@@ -238,7 +238,9 @@ const BLOCK_LEVEL_TAGS = new Set([
   "ul",
 ]);
 
-const HTML_TAG_PATTERN = /<!--[\s\S]*?-->|<[^>]+>/g;
+// A tag starts with a name, `/name`, `!` or `?` right after `<`; a bare `<` in
+// text (`a < b`) is not a tag, as in the HTML tokenizer.
+const HTML_TAG_PATTERN = /<!--[\s\S]*?-->|<\/?[a-zA-Z!?][^>]*>/g;
 
 function isWhitespaceBoundary(tag: string | undefined): boolean {
   if (tag === undefined) return true;
