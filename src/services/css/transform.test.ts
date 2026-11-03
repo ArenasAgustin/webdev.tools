@@ -251,6 +251,17 @@ describe("minifyCss", () => {
     expect(result).toEqual({ ok: true, value: expected });
   });
 
+  it.each([
+    [".b\\  .c { x: y }", ".b\\  .c{x:y}"],
+    [".a\\:hover { color: red }", ".a\\:hover{color:red}"],
+    [".\\31 0  .c { x: y }", ".\\31 0 .c{x:y}"],
+    [".\\31   .c { x: y }", ".\\31  .c{x:y}"],
+  ])("keeps escaped characters and the combinator after them: %s", async (input, expected) => {
+    const result = await minifyCss(input);
+
+    expect(result).toEqual({ ok: true, value: expected });
+  });
+
   it("keeps comment-like text inside strings when spaces are not removed", async () => {
     const result = await minifyCss('.a { content: "/* x */"; } /* drop */', {
       removeSpaces: false,

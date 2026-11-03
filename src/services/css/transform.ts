@@ -292,17 +292,24 @@ function stripComments(source: string): string {
   return output;
 }
 
+// A CSS escape: up to six hex digits plus one optional whitespace, or any one character.
+const CSS_ESCAPE = /\\(?:[0-9a-fA-F]{1,6}(?:\r\n|[ \t\r\n\f])?|[\s\S])/g;
+
 function minifyCssString(source: string): string {
   const preserved: string[] = [];
 
   // Mask literals and kept comments with private-use placeholders so whitespace
   // rules can't touch them.
+  const mask = (text: string) => {
+    preserved.push(text);
+    return `\uE000${preserved.length - 1}\uE001`;
+  };
   const masked = tokenizeCss(source)
-    .map((segment) => {
-      if (segment.kind === "code") return segment.text;
-      preserved.push(segment.text);
-      return `\uE000${preserved.length - 1}\uE001`;
-    })
+    .map((segment) =>
+      // Escapes are masked too: an escaped space (`.b\ `) or the one whitespace
+      // that ends a hex escape (`\31 `) is part of the name, not a combinator.
+      segment.kind === "code" ? segment.text.replace(CSS_ESCAPE, mask) : mask(segment.text),
+    )
     .join("");
 
   const compact = masked
