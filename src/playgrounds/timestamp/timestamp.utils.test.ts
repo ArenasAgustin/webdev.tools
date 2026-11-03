@@ -235,4 +235,21 @@ describe("timestamp.utils", () => {
       expect(result).toBeLessThanOrEqual(now + 1);
     });
   });
+describe("parseInput with an explicit zone", () => {
+    it("honors an RFC 2822 numeric offset after a space", () => {
+      const result = parseInput("Mon, 15 Jan 2024 10:00:00 -0500", "Asia/Tokyo");
+      expect((result?.value as Date).toISOString()).toBe("2024-01-15T15:00:00.000Z");
+    });
+
+    it.each([
+      ["EST", "2024-01-15T15:00:00.000Z"],
+      ["EDT", "2024-01-15T14:00:00.000Z"],
+      ["CST", "2024-01-15T16:00:00.000Z"],
+      ["PDT", "2024-01-15T17:00:00.000Z"],
+      ["GMT", "2024-01-15T10:00:00.000Z"],
+    ])("honors the named zone %s", (zone, expected) => {
+      const result = parseInput(`Mon, 15 Jan 2024 10:00:00 ${zone}`, "Asia/Tokyo");
+      expect((result?.value as Date).toISOString()).toBe(expected);
+    });
+  });
 });
