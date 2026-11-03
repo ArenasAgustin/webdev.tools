@@ -16,6 +16,7 @@ import {
 } from "./base64.utils";
 import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
+import { MAX_INPUT_BYTES } from "@/utils/constants/limits";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS } from "@/services/storage";
 import { formatBytes } from "@/utils/formatBytes";
@@ -45,9 +46,12 @@ export function Base64Playground() {
     STORAGE_KEYS.BASE64_INPUT_MODE,
     "text",
   );
+  // Saved only up to the tools' input limit, so a huge text cannot fill the storage
+  // quota shared with every other tool.
   const [input, setInput, inputNotSaved] = usePersistedState(
     STORAGE_KEYS.BASE64_INPUT,
     base64Config.example,
+    { maxLength: MAX_INPUT_BYTES },
   );
   const [mode, setMode] = usePersistedState<Base64Mode>(STORAGE_KEYS.BASE64_MODE, "auto");
   const [storedOptions, setOptions] = usePersistedState<Base64Options>(

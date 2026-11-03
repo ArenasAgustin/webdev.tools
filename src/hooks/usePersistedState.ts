@@ -1,6 +1,21 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import { getItem, setItem } from "@/services/storage";
+import { getItem, removeItem, setItem } from "@/services/storage";
 import { useDebouncedValue } from "./useDebouncedValue";
+
+export interface PersistedStateOptions {
+  debounceMs?: number;
+  /** Longest string value that is saved; longer ones stay in memory only. */
+  maxLength?: number;
+}
+
+/** Write `value` under `key`, honoring `maxLength`; returns whether it was saved. */
+function persist<T>(key: string, value: T, maxLength: number | undefined): boolean {
+  if (maxLength !== undefined && typeof value === "string" && value.length > maxLength) {
+    removeItem(key);
+    return false;
+  }
+  return setItem(key, value);
+}
 
 /**
  * A generic hook that mirrors useState but persists the value to localStorage.
@@ -18,34 +33,42 @@ import { useDebouncedValue } from "./useDebouncedValue";
  * The third element is true while the latest debounced value could not be
  * saved (e.g. it exceeds the storage quota), so the caller can tell the user it
  * will not survive a reload.
+ *
+ * `maxLength` caps string values: a longer one is not written at all (so one
+ * tool cannot fill the quota shared with the others) and its previous, now
+ * outdated copy is removed so a reload does not bring it back.
  */
 export function usePersistedState<T>(
   key: string,
   defaultValue: T,
-  debounceMs = 300,
+  options: number | PersistedStateOptions = {},
 ): [T, Dispatch<SetStateAction<T>>, boolean] {
+  const { debounceMs = 300, maxLength } =
+    typeof options === "number" ? { debounceMs: options } : options;
   const [value, setValue] = useState<T>(() => getItem<T>(key) ?? defaultValue);
   const debouncedValue = useDebouncedValue(value, debounceMs);
   const [persistFailed, setPersistFailed] = useState(false);
 
   // Track the live value so the unmount-flush effect always sees the latest.
   const valueRef = useRef(value);
+  const maxLengthRef = useRef(maxLength);
   useEffect(() => {
     valueRef.current = value;
-  }, [value]);
+    maxLengthRef.current = maxLength;
+  }, [value, maxLength]);
 
   // Debounced write — normal operation path.
   useEffect(() => {
-    const saved = setItem(key, debouncedValue);
+    const saved = persist(key, debouncedValue, maxLength);
     // eslint-disable-next-line react-hooks/set-state-in-effect, @eslint-react/set-state-in-effect -- the outcome of the localStorage write is only known after it runs
     setPersistFailed(!saved);
-  }, [key, debouncedValue]);
+  }, [key, debouncedValue, maxLength]);
 
   // Closing or reloading the tab does not unmount React, so a value typed within
   // the debounce window would be lost: save it when the page is hidden or left.
   useEffect(() => {
     const flush = () => {
-      setItem(key, valueRef.current);
+      persist(key, valueRef.current, maxLengthRef.current);
     };
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") flush();
@@ -63,7 +86,7 @@ export function usePersistedState<T>(
   // the latest state, even within the debounce window.
   useEffect(() => {
     return () => {
-      setItem(key, valueRef.current);
+      persist(key, valueRef.current, maxLengthRef.current);
     };
   }, [key]);
 

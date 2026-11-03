@@ -102,7 +102,7 @@ describe("Storage Service", () => {
       expect(getItem("testKey")).toBeNull();
     });
 
-    it("drops the stored value when a write fails, so a stale one is not restored", () => {
+    it("keeps the stored value when a write fails (a full quota is not this key's fault)", () => {
       setItem("quotaKey", "old");
       const spy = vi.spyOn(localStorageMock, "setItem").mockImplementation(() => {
         throw new DOMException("quota", "QuotaExceededError");
@@ -112,7 +112,7 @@ describe("Storage Service", () => {
       expect(setItem("quotaKey", "new and huge")).toBe(false);
       spy.mockRestore();
 
-      expect(getItem("quotaKey")).toBeNull();
+      expect(getItem("quotaKey")).toBe("old");
     });
 
     it("should handle large data structures", () => {

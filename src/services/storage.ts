@@ -92,13 +92,10 @@ export function setItem<T>(key: string, value: T): boolean {
     return true;
   } catch (error) {
     console.error(`Error writing to localStorage (${key}):`, error);
-    // The write failed (typically QuotaExceededError on a large input): drop the
-    // previous value so a reload does not bring back an outdated one.
-    try {
-      getStorage()?.removeItem(key);
-    } catch {
-      // nothing more to do
-    }
+    // The write failed (typically QuotaExceededError). Keep the previous value: the
+    // quota is shared, so another tool's large input can make any key fail, and
+    // deleting this one would silently lose data the user never asked to drop.
+    // Callers report the failure (see usePersistedState) instead.
     return false;
   }
 }
