@@ -133,12 +133,16 @@
           if (isStaleChunkError(r && (r.message || String(r)))) heal();
         });
 
-        // Normal-update path: pick up a fresh SW when it replaces an existing one.
-        // On a first visit there is no controller yet; the first SW claiming the
-        // page also fires controllerchange, and reloading then would wipe input.
+        // Normal-update path: a fresh SW replaced an existing one (a new deploy).
+        // Never reload on our own, that would lose unsaved state (URL/hash text, the
+        // SQL database, run output): flag it so the app offers a Reload button
+        // (useServiceWorkerUpdate). On a first visit there is no controller yet and
+        // the first SW claiming the page also fires controllerchange: ignore that.
         var hadController = !!navigator.serviceWorker.controller;
         navigator.serviceWorker.addEventListener("controllerchange", function () {
-          if (hadController) window.location.reload();
+          if (!hadController) return;
+          window.__swUpdateReady = true;
+          window.dispatchEvent(new Event("sw-update-ready"));
         });
         navigator.serviceWorker.getRegistration().then(function (reg) {
           if (reg) reg.update();

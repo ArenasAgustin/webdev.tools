@@ -354,6 +354,11 @@
     "action": "Install",
     "dismiss": "Dismiss"
   },
+  "update": {
+    "message": "A new version is available",
+    "reload": "Reload",
+    "dismiss": "Dismiss"
+  },
   "base64": {
     "inputTypeGroupLabel": "Input type",
     "modeGroupLabel": "Conversion mode",

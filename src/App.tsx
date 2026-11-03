@@ -4,6 +4,7 @@ import { ToastContainer } from "@/components/common/ToastContainer";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { OfflineBanner } from "@/components/common/OfflineBanner";
 import { InstallPromptBanner } from "@/components/common/InstallPromptBanner";
+import { UpdatePromptBanner } from "@/components/common/UpdatePromptBanner";
 import { Home } from "@/pages/Home";
 import { PlaygroundPage } from "@/pages/PlaygroundPage";
 
@@ -24,6 +25,7 @@ function App() {
               </Routes>
             </BrowserRouter>
           </div>
+          <UpdatePromptBanner />
           <InstallPromptBanner />
         </div>
         <ToastContainer />
