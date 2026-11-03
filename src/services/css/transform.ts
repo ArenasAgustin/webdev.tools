@@ -21,7 +21,7 @@ export async function validateCss(input: string): Promise<Result<string, string>
   let errorMessage: string | null = null;
 
   try {
-    parse(input, {
+    parse(prefixRelativeNestedSelectors(input), {
       onParseError(err: { message: string }) {
         errorMessage = err.message;
       },
@@ -43,6 +43,85 @@ export async function validateCss(input: string): Promise<Result<string, string>
   }
 
   return { ok: true, value: input };
+}
+
+/**
+ * css-tree 3 only parses nested style rules whose selectors start with `&`, so valid
+ * relaxed nesting (`.a { .b {} }`, `.a { > p {} }`) would read as a parse error.
+ * Insert the implicit `& ` before every relative nested selector — the spec gives
+ * them that meaning — so css-tree still validates the selector itself.
+ */
+function prefixRelativeNestedSelectors(input: string): string {
+  // Blank out strings, url() bodies and comments so their braces and commas are inert.
+  const mask = tokenizeCss(input)
+    .map((segment) => (segment.kind === "code" ? segment.text : " ".repeat(segment.text.length)))
+    .join("");
+  const inserts: number[] = [];
+  // Per open block: does it hold declarations (a style rule body) or rules (sheet level)?
+  const holdsDeclarations: boolean[] = [];
+  let statementStart = 0;
+  let depth = 0;
+
+  for (let i = 0; i < mask.length; i++) {
+    const char = mask[i];
+    if (char === "\\") {
+      i += 1;
+    } else if (char === "(" || char === "[") {
+      depth += 1;
+    } else if (char === ")" || char === "]") {
+      depth = Math.max(0, depth - 1);
+    } else if (depth > 0) {
+      continue;
+    } else if (char === "{") {
+      const inStyleRule = holdsDeclarations.at(-1) ?? false;
+      const prelude = mask.slice(statementStart, i).trimStart();
+      const isAtRule = prelude.startsWith("@");
+      if (inStyleRule && !isAtRule && !prelude.startsWith("--")) {
+        inserts.push(...relativeSelectorStarts(mask, statementStart, i));
+      }
+      // An at-rule nested in a style rule (`@media`) keeps holding declarations.
+      holdsDeclarations.push(isAtRule ? inStyleRule : true);
+      statementStart = i + 1;
+    } else if (char === "}") {
+      holdsDeclarations.pop();
+      statementStart = i + 1;
+    } else if (char === ";") {
+      statementStart = i + 1;
+    }
+  }
+
+  let output = "";
+  let last = 0;
+  for (const offset of inserts) {
+    output += `${input.slice(last, offset)}& `;
+    last = offset;
+  }
+  return output + input.slice(last);
+}
+
+/** Offsets of the selectors in a nested rule's prelude that do not start with `&`. */
+function relativeSelectorStarts(mask: string, start: number, end: number): number[] {
+  const starts: number[] = [];
+  let itemStart = start;
+  let depth = 0;
+
+  const flush = (itemEnd: number) => {
+    const first = mask.slice(itemStart, itemEnd).search(/\S/);
+    if (first !== -1 && mask[itemStart + first] !== "&") starts.push(itemStart + first);
+  };
+
+  for (let i = start; i < end; i++) {
+    const char = mask[i];
+    if (char === "\\") i += 1;
+    else if (char === "(" || char === "[") depth += 1;
+    else if (char === ")" || char === "]") depth = Math.max(0, depth - 1);
+    else if (char === "," && depth === 0) {
+      flush(i);
+      itemStart = i + 1;
+    }
+  }
+  flush(end);
+  return starts;
 }
 
 export async function formatCss(

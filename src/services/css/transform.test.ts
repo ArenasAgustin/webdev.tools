@@ -66,6 +66,27 @@ describe("validateCss", () => {
     expect(result).toEqual({ ok: true, value: input });
   });
 
+  it.each([
+    [".a { .b {} }"],
+    [".a { color: red; .b { color: blue; } }"],
+    [".a{ div { color: red } }"],
+    [".a { > .b { color: red } }"],
+    [".a { + .b, ~ .c { color: red } }"],
+    [".a { .b & { color: red } }"],
+    [".a { .b { .c { color: red } } }"],
+    [".a { @media (min-width: 1px) { .b { color: red } } }"],
+    [".a { &:hover { color: red } }"],
+    ['.a { [data-x="{"] { color: red } }'],
+  ])("accepts valid CSS nesting: %s", async (input) => {
+    const result = await validateCss(input);
+    expect(result).toEqual({ ok: true, value: input });
+  });
+
+  it("still rejects an invalid selector inside a nested rule", async () => {
+    const result = await validateCss(".a {\n  .b:(3) { color: red }\n}");
+    expect(result.ok).toBe(false);
+  });
+
   it("catches css-tree internal throw and returns ok:false", async () => {
     const csstree = await import("css-tree");
     vi.mocked(csstree.parse).mockImplementationOnce(() => {
