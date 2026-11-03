@@ -316,18 +316,22 @@ echo "done";`;
     expect(result.ok).toBe(true);
   });
 
-  it("removes trailing empty lines", () => {
+  it("collapses trailing empty lines to the final newline", () => {
     const input = `<?php
 echo "test";
 
 `;
     const result = formatPhp(input);
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.value.endsWith("\n")).toBe(false);
-    }
+    expect(result).toEqual({ ok: true, value: '<?php\necho "test";\n' });
   });
+
+  it.each([['<?php\necho "test";\n'], ['<?php\necho "test";']])(
+    "returns already formatted code unchanged, keeping its final newline: %j",
+    (input) => {
+      expect(formatPhp(input)).toEqual({ ok: true, value: input });
+    },
+  );
 
   it("handles heredoc syntax correctly", () => {
     const input = `<?php

@@ -140,7 +140,9 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
       formatted.pop();
     }
 
-    return { ok: true, value: formatted.join("\n") };
+    // Keep the file's final newline, so formatted code ending in one stays unchanged.
+    const finalNewline = /\n\s*$/.test(input) ? "\n" : "";
+    return { ok: true, value: formatted.join("\n") + finalNewline };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return { ok: false, error: message || serviceMessage("services.php.formatError") };
