@@ -291,6 +291,21 @@ describe("minifyHtml", () => {
     expect(result).toEqual({ ok: true, value: expected });
   });
 
+  it("treats end tags with whitespace before > as the end of style and script", async () => {
+    const input =
+      "<style>a { color : red }</style ><p>Note : see , ok</p><style>b { color : blue }</style>" +
+      "<script>var  a = 1</script ><p>  x   y </p><script>var b = 2</script>";
+
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result).toEqual({
+      ok: true,
+      value:
+        "<style>a{color:red}</style><p>Note : see , ok</p><style>b{color:blue}</style>" +
+        "<script>var a=1</script><p>x y</p><script>var b=2</script>",
+    });
+  });
+
   it("keeps whitespace inside pre and textarea verbatim", async () => {
     const input =
       "<div>\n  <pre>  line 1\n    line 2</pre>\n  <textarea>a\n\n  b</textarea>\n</div>";

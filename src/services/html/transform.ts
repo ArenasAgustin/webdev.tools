@@ -120,7 +120,7 @@ async function minifyEmbeddedCss(
   source: string,
   options: { enabled: boolean; removeComments: boolean },
 ): Promise<string> {
-  const stylePattern = /<style(\b[^>]*)>([\s\S]*?)<\/style>/gi;
+  const stylePattern = /<style(\b[^>]*)>([\s\S]*?)<\/style\s*>/gi;
 
   let result = "";
   let lastIndex = 0;
@@ -154,7 +154,7 @@ function minifyEmbeddedJs(
   source: string,
   options: { enabled: boolean; removeComments: boolean },
 ): string {
-  const scriptPattern = /<script(\b[^>]*)>([\s\S]*?)<\/script>/gi;
+  const scriptPattern = /<script(\b[^>]*)>([\s\S]*?)<\/script\s*>/gi;
 
   return source.replace(scriptPattern, (fullMatch, attrs: string, content: string) => {
     if (!options.enabled) {
@@ -277,7 +277,7 @@ function collapseHtmlWhitespace(source: string): string {
 }
 
 function trimEmbeddedTagContent(source: string, tagName: "style" | "script"): string {
-  const pattern = new RegExp(`<${tagName}(\\b[^>]*)>([\\s\\S]*?)<\\/${tagName}>`, "gi");
+  const pattern = new RegExp(`<${tagName}(\\b[^>]*)>([\\s\\S]*?)<\\/${tagName}\\s*>`, "gi");
 
   return source.replace(pattern, (_match, attrs: string, content: string) => {
     return `<${tagName}${attrs}>${content.trim()}</${tagName}>`;
@@ -292,7 +292,7 @@ function preserveEmbeddedTagContent(
   asComment = false,
 ): string {
   let index = 0;
-  const pattern = new RegExp(`<${tagName}(\\b[^>]*)>([\\s\\S]*?)<\\/${tagName}>`, "gi");
+  const pattern = new RegExp(`<${tagName}(\\b[^>]*)>([\\s\\S]*?)<\\/${tagName}\\s*>`, "gi");
 
   return source.replace(pattern, (_match: string, attrs: string, content: string) => {
     const name = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
@@ -388,7 +388,7 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
       let index = 0;
 
       for (const tagName of PRESERVED_EMPTY_TAGS) {
-        const pattern = new RegExp(`<${tagName}(\\b[^>]*)>[\\s\\S]*?</${tagName}>`, "gi");
+        const pattern = new RegExp(`<${tagName}(\\b[^>]*)>[\\s\\S]*?</${tagName}\\s*>`, "gi");
         result = result.replace(pattern, (match) => {
           const token = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
           index++;
