@@ -72,7 +72,7 @@ export function parsePhp(input: string): Result<PhpAst, string> {
  * It works on php-parser's tokens, so braces and line breaks inside strings,
  * heredocs and comments never affect indentation, and lines that start inside
  * a string are emitted verbatim (their whitespace is part of the value), as
- * are inline HTML lines.
+ * are inline HTML lines and lines that start with an open tag.
  */
 
 export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<string, string> {
@@ -189,6 +189,10 @@ function analyzePhpLines(input: string, lines: string[]): PhpLineLayout[] {
       const midToken = lineStarts[nextLine] > start;
       if (midToken && name === "T_CONSTANT_ENCAPSED_STRING") layout[nextLine].verbatim = true;
       if (inString || name === "T_INLINE_HTML") layout[nextLine].verbatim = true;
+      // An open tag only starts a line after `?>`: whitespace before it is output.
+      if (!midToken && (name === "T_OPEN_TAG" || name === "T_OPEN_TAG_WITH_ECHO")) {
+        layout[nextLine].verbatim = true;
+      }
       if (!midToken) tokenLine = nextLine;
       nextLine++;
     }

@@ -542,6 +542,21 @@ describe("formatPhp inline HTML", () => {
     expect(formatPhp(input)).toEqual({ ok: true, value: input });
   });
 
+  it.each([
+    ["an open tag after a close tag", "<?php if (1) { ?>\n<?php echo 1; ?>\n<?php } ?>"],
+    ["an echo tag after a close tag", "<div>\n<?php if (1) { ?>\n<?= 'a' ?>\n<?php } ?>\n</div>"],
+    ["indented open tags", "  <?php if (1) { ?>\n    <?= 'a' ?>\n  <?php } ?>"],
+  ])("never changes the whitespace before %s (it is output)", (_, input) => {
+    expect(formatPhp(input, 4)).toEqual({ ok: true, value: input });
+  });
+
+  it("still indents code after a re-opening tag", () => {
+    expect(formatPhp("<?php\nif (1) {\n?>\n<?php\necho 1;\n}", 4)).toEqual({
+      ok: true,
+      value: "<?php\nif (1) {\n    ?>\n<?php\n    echo 1;\n}",
+    });
+  });
+
   it("ignores braces in inline HTML", () => {
     const input = "<div>\n<style>\na {\ncolor: red;\n</style>\n</div>\n<?php\nif (1) {\necho 1;\n}";
 
