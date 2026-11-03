@@ -534,6 +534,62 @@ describe("formatPhp multi-line strings", () => {
   });
 });
 
+describe("formatPhp continuation lines", () => {
+  it.each([
+    ["a multi-line array", "<?php\n$a = [\n    'x' => 1,\n    'y' => [\n        'z' => 2,\n    ],\n];"],
+    ["multi-line call arguments", "<?php\nfoo(\n    $a,\n    $b\n);"],
+    ["a method chain", "<?php\n$q->where('a')\n    ->orderBy('b')\n    ->get();"],
+    ["a multi-line signature", "<?php\nfunction f(\n    $a,\n    $b\n) {\n    return $a;\n}"],
+    ["a chain after a closure", "<?php\n$q->each(function ($x) {\n    return $x;\n})\n    ->get();"],
+  ])("keeps the relative indentation of %s", (_, input) => {
+    expect(formatPhp(input, 4)).toEqual({ ok: true, value: input });
+  });
+
+  it("moves continuation lines with the statement they continue", () => {
+    const input = "<?php\nif (1) {\n$a = [\n    'x' => function () {\nreturn 1;\n    },\n];\n}";
+
+    expect(formatPhp(input, 4)).toEqual({
+      ok: true,
+      value:
+        "<?php\nif (1) {\n    $a = [\n        'x' => function () {\n            return 1;\n        },\n    ];\n}",
+    });
+  });
+
+  it("indents the bodies of the alternative syntax", () => {
+    const input =
+      "<?php\nif ($a):\necho 1;\necho 2;\nelseif ($b):\necho 3;\nelse:\necho 4;\nendif;\nforeach ($x as $y):\necho $y;\nendforeach;\necho 5;";
+
+    expect(formatPhp(input, 4)).toEqual({
+      ok: true,
+      value:
+        "<?php\nif ($a):\n    echo 1;\n    echo 2;\nelseif ($b):\n    echo 3;\nelse:\n    echo 4;\nendif;\nforeach ($x as $y):\n    echo $y;\nendforeach;\necho 5;",
+    });
+  });
+
+  it("indents switch cases and their bodies", () => {
+    const input = "<?php\nswitch ($a) {\ncase 1:\necho 1;\nbreak;\ndefault:\necho 2;\n}\necho 3;";
+
+    expect(formatPhp(input, 4)).toEqual({
+      ok: true,
+      value:
+        "<?php\nswitch ($a) {\n    case 1:\n        echo 1;\n        break;\n    default:\n        echo 2;\n}\necho 3;",
+    });
+  });
+
+  it("formats CRLF input", () => {
+    expect(formatPhp("<?php\r\nif (1) {\r\necho 1;\r\n}\r\necho 2;", 4)).toEqual({
+      ok: true,
+      value: "<?php\nif (1) {\n    echo 1;\n}\necho 2;",
+    });
+  });
+
+  it("does not open a block for a ternary in an if body", () => {
+    const input = "<?php\nif ($a) $b = $c ? 1 : 2;\necho 1;";
+
+    expect(formatPhp(input, 4)).toEqual({ ok: true, value: input });
+  });
+});
+
 describe("formatPhp inline HTML", () => {
   it("keeps inline HTML verbatim and closes the block at its own level", () => {
     const input =

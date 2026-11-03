@@ -68,11 +68,14 @@ export function parsePhp(input: string): Result<PhpAst, string> {
 }
 
 /**
- * Heuristic PHP formatter: re-indents code lines by brace depth.
+ * Heuristic PHP formatter: re-indents statements by block depth (braces, the
+ * alternative `if (): … endif;` syntax and switch cases).
  * It works on php-parser's tokens, so braces and line breaks inside strings,
  * heredocs and comments never affect indentation, and lines that start inside
  * a string are emitted verbatim (their whitespace is part of the value), as
- * are inline HTML lines and lines that start with an open tag.
+ * are inline HTML lines and lines that start with an open tag. Continuation
+ * lines (multi-line arrays, call arguments, method chains) keep their original
+ * indentation relative to the line they continue.
  */
 
 export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<string, string> {
@@ -89,36 +92,47 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
 
     const indent = indentSize === "\t" ? "\t" : " ".repeat(indentSize);
 
-    const lines = input.split("\n");
-    const layout = analyzePhpLines(input, lines);
-    let indentLevel = 0;
+    const rawLines = input.split("\n");
+    // Token offsets count each line's `\r`, so the analysis gets the raw lines.
+    const layout = analyzePhpLines(input, rawLines);
+    const lines = rawLines.map((line) => line.replace(/\r$/, ""));
+    const originalIndents = lines.map((line) => /^[ \t]*/.exec(line)?.[0] ?? "");
+    const indents: string[] = [];
+    // Indentation of the line that opened each open block.
+    const openers: string[] = [];
     const formatted: string[] = [];
 
     lines.forEach((line, index) => {
-      const { verbatim, leadingClose, open, close } = layout[index];
+      const { verbatim, leadingCloses, blocks, anchor } = layout[index];
 
+      let closedOpener: string | undefined;
+      for (let i = 0; i < leadingCloses; i++) closedOpener = openers.pop();
+
+      let lineIndent = "";
       if (verbatim) {
-        formatted.push(line.replace(/\r$/, ""));
-        indentLevel = Math.max(0, indentLevel + open - close);
-        return;
-      }
-
-      const trimmed = line.trim();
-
-      // Skip empty lines but preserve them
-      if (trimmed === "") {
+        formatted.push(line);
+        lineIndent = originalIndents[index];
+      } else if (line.trim() === "") {
+        // Skip empty lines but preserve them
         formatted.push("");
-        return;
+      } else {
+        if (closedOpener !== undefined) {
+          // A closing line sits at the level of the line that opened the block
+          lineIndent = closedOpener;
+        } else if (anchor >= 0) {
+          lineIndent = relativeIndent(indents[anchor], originalIndents[anchor], originalIndents[index]);
+        } else if (openers.length > 0) {
+          lineIndent = openers[openers.length - 1] + indent;
+        }
+        formatted.push(lineIndent + line.trim());
       }
+      indents[index] = lineIndent;
 
-      // Decrease indent BEFORE for a leading closing brace
-      if (leadingClose && indentLevel > 0) indentLevel--;
-
-      formatted.push(indent.repeat(indentLevel) + trimmed);
-
-      // Then apply the line's other braces
-      const trailingClose = leadingClose ? close - 1 : close;
-      indentLevel = Math.max(0, indentLevel + open - trailingClose);
+      // Then apply the line's other block changes
+      for (const change of blocks) {
+        if (change > 0) openers.push(lineIndent);
+        else openers.pop();
+      }
     });
 
     // Remove trailing empty lines
@@ -133,17 +147,62 @@ export function formatPhp(input: string, indentSize: IndentStyle = 2): Result<st
   }
 }
 
+/**
+ * Indentation for a line that continues `anchor`: the anchor's new indentation
+ * plus whatever the line had beyond the anchor's original indentation.
+ */
+function relativeIndent(anchorIndent: string, anchorOriginal: string, original: string): string {
+  if (original.startsWith(anchorOriginal)) return anchorIndent + original.slice(anchorOriginal.length);
+  const width = (text: string) => text.replace(/\t/g, "    ").length;
+  return anchorIndent + " ".repeat(Math.max(0, width(original) - width(anchorOriginal)));
+}
+
 interface PhpLineLayout {
   /** The line starts inside a string or inline HTML, so it is emitted unchanged. */
   verbatim: boolean;
-  /** The line's first token (after any open tag) is a code `}`. */
-  leadingClose: boolean;
-  /** Code braces on the line (never ones inside strings or comments). */
-  open: number;
-  close: number;
+  /** Blocks closed by the line's first tokens (`}`, `endif;`, `else:`, `case 2:`). */
+  leadingCloses: number;
+  /** The line's other block opens (1) and closes (-1), in order. */
+  blocks: number[];
+  /** Line this one continues, keeping its indentation relative to it; -1 for none. */
+  anchor: number;
 }
 
 type PhpToken = string | [name: string, text: string, line: number];
+
+interface PhpFrame {
+  /** `(` and `[` hold continuation lines; blocks hold statements. */
+  kind: "bracket" | "brace" | "alt" | "case";
+  /** Line that opened the frame. */
+  line: number;
+  /** For a block: the line where its current statement started, or -1. */
+  statementStart: number;
+  /** A brace or alternative-syntax block that holds switch cases. */
+  switchBody?: boolean;
+  /** For a bracket: the control keyword whose condition it holds. */
+  condition?: string;
+}
+
+/** Keywords followed by a parenthesized condition, which may use the alternative syntax. */
+const CONDITION_KEYWORDS = new Set([
+  "T_IF",
+  "T_ELSEIF",
+  "T_WHILE",
+  "T_FOR",
+  "T_FOREACH",
+  "T_SWITCH",
+  "T_DECLARE",
+]);
+const ALT_END_KEYWORDS = new Set([
+  "T_ENDIF",
+  "T_ENDWHILE",
+  "T_ENDFOR",
+  "T_ENDFOREACH",
+  "T_ENDSWITCH",
+  "T_ENDDECLARE",
+]);
+const NON_CODE_TOKENS = new Set(["T_WHITESPACE", "T_COMMENT", "T_DOC_COMMENT"]);
+const TAG_TOKENS = new Set(["T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "T_CLOSE_TAG", "T_INLINE_HTML"]);
 
 /**
  * Tagless code runs as PHP (the runtime adds an open tag), so it is tokenized
@@ -155,15 +214,39 @@ function toPhpSource(input: string): { source: string; prefixLength: number } {
   return { source: prefix + input, prefixLength: prefix.length };
 }
 
+const tokenName = (token: PhpToken | undefined): string =>
+  token === undefined ? "" : typeof token === "string" ? token : token[0];
+
+/** Is the `else`/`elseif` at `index` a branch of the alternative syntax (`else:`)? */
+function isAltBranch(tokens: PhpToken[], index: number): boolean {
+  let i = index + 1;
+  const skip = () => {
+    while (NON_CODE_TOKENS.has(tokenName(tokens[i]))) i++;
+  };
+  skip();
+  if (tokenName(tokens[index]) === "T_ELSEIF") {
+    if (tokenName(tokens[i]) !== "(") return false;
+    let depth = 0;
+    for (; i < tokens.length; i++) {
+      const name = tokenName(tokens[i]);
+      if (name === "(") depth++;
+      else if (name === ")" && --depth === 0) break;
+    }
+    i++;
+    skip();
+  }
+  return tokenName(tokens[i]) === ":";
+}
+
 function analyzePhpLines(input: string, lines: string[]): PhpLineLayout[] {
   const { source, prefixLength } = toPhpSource(input);
-  const tokens = createPhpParser().tokenGetAll(source);
+  const tokens: PhpToken[] = createPhpParser().tokenGetAll(source);
 
   const layout: PhpLineLayout[] = lines.map(() => ({
     verbatim: false,
-    leadingClose: false,
-    open: 0,
-    close: 0,
+    leadingCloses: 0,
+    blocks: [],
+    anchor: -1,
   }));
   const lineStarts: number[] = [];
   let lineStart = prefixLength;
@@ -171,51 +254,136 @@ function analyzePhpLines(input: string, lines: string[]): PhpLineLayout[] {
     lineStarts.push(lineStart);
     lineStart += line.length + 1;
   }
+
+  const frames: PhpFrame[] = [{ kind: "brace", line: -1, statementStart: -1 }];
+  const top = () => frames[frames.length - 1];
+  // Lines that already hold code other than block closers.
+  const started = new Set<number>();
   let offset = 0;
   let nextLine = 0;
   let inString = false;
-  // Last line holding a token other than whitespace or an open tag.
-  let lastContentLine = -1;
-  for (const token of tokens) {
+  // The previous code token ended a statement (or nothing came before).
+  let terminated = true;
+  let previousCode = "";
+  let codeIndex = 0;
+  // Line whose first token is still to come (it starts with whitespace).
+  let pendingLine = -1;
+  let expectCondition: string | null = null;
+  let conditionEnd: { codeIndex: number; keyword: string } | null = null;
+  // Frame count at a `case`/`default` whose label is still open.
+  let pendingCase: number | null = null;
+
+  const anchorHere = (): number => {
+    const frame = top();
+    if (frame.kind === "bracket") return frame.line;
+    return terminated ? -1 : frame.statementStart;
+  };
+
+  tokens.forEach((token, index) => {
     const [name, text] = typeof token === "string" ? [token, token] : token;
     const start = offset;
     const end = start + text.length;
     offset = end;
 
-    // Lines starting at or inside this token are verbatim when inside a string
-    // or inline HTML (template markup keeps the author's own indentation).
     let tokenLine = nextLine - 1;
+    if (pendingLine !== -1 && name !== "T_WHITESPACE") {
+      layout[pendingLine].anchor = anchorHere();
+      pendingLine = -1;
+    }
     while (nextLine < lineStarts.length && lineStarts[nextLine] < end) {
       const midToken = lineStarts[nextLine] > start;
-      if (midToken && name === "T_CONSTANT_ENCAPSED_STRING") layout[nextLine].verbatim = true;
-      if (inString || name === "T_INLINE_HTML") layout[nextLine].verbatim = true;
+      const line = layout[nextLine];
+      if (inString || name === "T_INLINE_HTML") line.verbatim = true;
+      else if (midToken && name === "T_CONSTANT_ENCAPSED_STRING") line.verbatim = true;
       // An open tag only starts a line after `?>`: whitespace before it is output.
-      if (!midToken && (name === "T_OPEN_TAG" || name === "T_OPEN_TAG_WITH_ECHO")) {
-        layout[nextLine].verbatim = true;
-      }
+      else if (!midToken && (name === "T_OPEN_TAG" || name === "T_OPEN_TAG_WITH_ECHO")) line.verbatim = true;
+      else if (name === "T_WHITESPACE") pendingLine = nextLine;
+      else if (!midToken) line.anchor = anchorHere();
       if (!midToken) tokenLine = nextLine;
       nextLine++;
     }
 
-    const isContent = name !== "T_WHITESPACE" && name !== "T_OPEN_TAG";
-    const firstOnLine = isContent && tokenLine > lastContentLine;
-    if (isContent) lastContentLine = nextLine - 1;
-
-    if (name === '"' || name === "`") inString = !inString;
-    else if (name === "T_START_HEREDOC") inString = true;
-    else if (name === "T_END_HEREDOC") inString = false;
-    // Interpolation braces (`{$a}`, `${a}`) are part of the string.
-    else if (!inString && tokenLine >= 0 && (name === "{" || name === "}")) {
-      const line = layout[tokenLine];
-      if (name === "{") {
-        line.open++;
-      } else {
-        line.close++;
-        // `<?php } ?>` closes its block like a bare `}` line does.
-        if (firstOnLine) line.leadingClose = true;
-      }
+    if (NON_CODE_TOKENS.has(name) || tokenLine < 0) return;
+    if (TAG_TOKENS.has(name)) {
+      terminated = true;
+      return;
     }
-  }
+
+    const close = () => {
+      frames.pop();
+      if (started.has(tokenLine)) layout[tokenLine].blocks.push(-1);
+      else layout[tokenLine].leadingCloses++;
+    };
+    const open = (frame: Omit<PhpFrame, "line" | "statementStart">) => {
+      frames.push({ ...frame, line: tokenLine, statementStart: -1 });
+      if (frame.kind !== "bracket") layout[tokenLine].blocks.push(1);
+    };
+    const closeCases = () => {
+      while (top().kind === "case") close();
+    };
+
+    if (name === '"' || name === "`" || name === "T_START_HEREDOC" || name === "T_END_HEREDOC") {
+      inString = name === "T_START_HEREDOC" ? true : name === "T_END_HEREDOC" ? false : !inString;
+    }
+    // Interpolation braces (`{$a}`, `${a}`) are part of the string.
+    if (inString && name !== "T_START_HEREDOC" && name !== '"' && name !== "`") return;
+
+    if (terminated && top().kind !== "bracket") top().statementStart = tokenLine;
+    const condition = expectCondition;
+    expectCondition = null;
+    terminated = false;
+
+    if (name === "(" || name === "[") {
+      open({ kind: "bracket", condition: name === "(" ? (condition ?? undefined) : undefined });
+    } else if (name === ")" || name === "]") {
+      const frame = top();
+      if (frame.kind === "bracket") {
+        frames.pop();
+        if (frame.condition) conditionEnd = { codeIndex, keyword: frame.condition };
+      }
+    } else if (name === "{") {
+      const afterSwitch = conditionEnd?.codeIndex === codeIndex - 1 && conditionEnd.keyword === "T_SWITCH";
+      open({ kind: "brace", switchBody: afterSwitch });
+      terminated = true;
+    } else if (name === "}") {
+      closeCases();
+      if (frames.length > 1 && top().kind === "brace") close();
+      terminated = true;
+    } else if (name === ";" || name === ":") {
+      if (pendingCase === frames.length) {
+        open({ kind: "case" });
+        pendingCase = null;
+      } else if (
+        name === ":" &&
+        (previousCode === "T_ELSE" || conditionEnd?.codeIndex === codeIndex - 1)
+      ) {
+        const keyword = previousCode === "T_ELSE" ? "T_ELSE" : (conditionEnd?.keyword ?? "");
+        open({ kind: "alt", switchBody: keyword === "T_SWITCH" });
+      } else if (name === ":") {
+        // A ternary or a label: the statement goes on.
+        previousCode = name;
+        codeIndex++;
+        started.add(tokenLine);
+        return;
+      }
+      terminated = true;
+    } else if (name === "," && top().kind !== "bracket") {
+      terminated = true;
+    } else if (name === "T_CASE" || name === "T_DEFAULT") {
+      if (top().kind === "case") close();
+      if (top().switchBody) pendingCase = frames.length;
+    } else if (ALT_END_KEYWORDS.has(name)) {
+      closeCases();
+      if (top().kind === "alt") close();
+    } else if ((name === "T_ELSE" || name === "T_ELSEIF") && top().kind === "alt" && isAltBranch(tokens, index)) {
+      close();
+    }
+
+    if (CONDITION_KEYWORDS.has(name)) expectCondition = name;
+    previousCode = name;
+    codeIndex++;
+    started.add(tokenLine);
+  });
 
   return layout;
 }
