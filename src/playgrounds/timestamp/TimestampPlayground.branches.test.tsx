@@ -291,6 +291,8 @@ describe("TimestampPlayground branches", () => {
   });
 
   it("falls back to the browser's timezone when the saved one is unknown to the browser", () => {
+    // Fake timers also fake Intl, which would bypass the resolvedOptions spy.
+    vi.useRealTimers();
     mockBrowserTimezone("America/Argentina/Buenos_Aires");
     getItemMock.mockImplementation(
       ((key: string) => (key === "timestampTimezone" ? "Mars/Olympus" : null)) as never,
