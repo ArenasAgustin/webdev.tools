@@ -271,6 +271,26 @@ describe("minifyHtml", () => {
     });
   });
 
+  it.each([
+    ["a kept comment", "<p>a <!-- c --> b</p>", "<p>a <!-- c --> b</p>"],
+    ["a conditional comment", "<p>a <!--[if IE]>x<![endif]--> b</p>", "<p>a <!--[if IE]>x<![endif]--> b</p>"],
+    [
+      "a comment between inline elements",
+      "<span>a</span>\n  <!-- x -->\n  <span>b</span>",
+      "<span>a</span> <!-- x --> <span>b</span>",
+    ],
+    ["a comment between block elements", "<div>a</div>\n<!-- x -->\n<div>b</div>", "<div>a</div><!-- x --><div>b</div>"],
+  ])("does not glue words around %s", async (_name, input, expected) => {
+    const result = await minifyHtml(input, {
+      removeComments: false,
+      collapseWhitespace: true,
+      minifyCss: false,
+      minifyJs: false,
+    });
+
+    expect(result).toEqual({ ok: true, value: expected });
+  });
+
   it("keeps whitespace inside pre and textarea verbatim", async () => {
     const input =
       "<div>\n  <pre>  line 1\n    line 2</pre>\n  <textarea>a\n\n  b</textarea>\n</div>";

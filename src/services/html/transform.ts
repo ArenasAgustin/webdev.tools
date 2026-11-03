@@ -242,8 +242,11 @@ const HTML_TAG_PATTERN = /<!--[\s\S]*?-->|<[^>]+>/g;
 
 function isWhitespaceBoundary(tag: string | undefined): boolean {
   if (tag === undefined) return true;
+  // A comment renders nothing, so the whitespace around it still separates the
+  // words on either side; it keeps one collapsed space like inline content.
+  if (tag.startsWith("<!--")) return false;
   const name = /^<\/?([a-zA-Z][\w-]*)/.exec(tag)?.[1];
-  // Comments, doctypes and processing instructions also swallow whitespace.
+  // Doctypes and processing instructions swallow whitespace.
   return name === undefined || BLOCK_LEVEL_TAGS.has(name.toLowerCase());
 }
 
