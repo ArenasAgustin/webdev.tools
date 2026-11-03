@@ -18,12 +18,21 @@ export interface CssCleanOptions {
 export async function validateCss(input: string): Promise<Result<string, string>> {
   if (!input.trim()) return { ok: true, value: "" };
 
-  let errorMessage: string | null = null;
+  // PostCSS (the parser Minify uses) runs first: it reports structural damage with
+  // a localized message and its line, and it accepts modern syntax such as nesting.
+  const structureError = await findCssSyntaxError(input);
+  if (structureError !== null) {
+    return { ok: false, error: structureError };
+  }
+
+  // css-tree is stricter about selectors and declarations than PostCSS.
+  const { source, inserts } = prefixRelativeNestedSelectors(input);
+  let errorOffset: number | null = null;
 
   try {
-    parse(prefixRelativeNestedSelectors(input), {
-      onParseError(err: { message: string }) {
-        errorMessage = err.message;
+    parse(source, {
+      onParseError(err: { offset: number }) {
+        errorOffset ??= err.offset;
       },
     });
   } catch (err) {
@@ -31,15 +40,19 @@ export async function validateCss(input: string): Promise<Result<string, string>
     return { ok: false, error: message };
   }
 
-  if (errorMessage !== null) {
-    return { ok: false, error: errorMessage };
-  }
-
-  // css-tree recovers from unclosed blocks and strings; Minify refuses them,
-  // so the indicator must too.
-  const structureError = await findCssSyntaxError(input);
-  if (structureError !== null) {
-    return { ok: false, error: structureError };
+  if (errorOffset !== null) {
+    // css-tree words its errors in English; report a localized one at the same place.
+    const offset = toOriginalOffset(errorOffset, inserts);
+    const before = input.slice(0, offset);
+    return {
+      ok: false,
+      error: serviceMessage("services.syntax.atPosition", {
+        message: serviceMessage("services.syntax.invalidCss"),
+        line: before.split("\n").length,
+        column: offset - before.lastIndexOf("\n"),
+        frame: "",
+      }),
+    };
   }
 
   return { ok: true, value: input };
@@ -51,7 +64,7 @@ export async function validateCss(input: string): Promise<Result<string, string>
  * Insert the implicit `& ` before every relative nested selector — the spec gives
  * them that meaning — so css-tree still validates the selector itself.
  */
-function prefixRelativeNestedSelectors(input: string): string {
+function prefixRelativeNestedSelectors(input: string): { source: string; inserts: number[] } {
   // Blank out strings, url() bodies and comments so their braces and commas are inert.
   const mask = tokenizeCss(input)
     .map((segment) => (segment.kind === "code" ? segment.text : " ".repeat(segment.text.length)))
@@ -96,7 +109,17 @@ function prefixRelativeNestedSelectors(input: string): string {
     output += `${input.slice(last, offset)}& `;
     last = offset;
   }
-  return output + input.slice(last);
+  return { source: output + input.slice(last), inserts };
+}
+
+/** Map an offset in the prefixed source back to `input` (each insert adds `& `). */
+function toOriginalOffset(offset: number, inserts: number[]): number {
+  let shift = 0;
+  for (const insert of inserts) {
+    if (insert + shift + 2 > offset) break;
+    shift += 2;
+  }
+  return Math.max(0, offset - shift);
 }
 
 /** Offsets of the selectors in a nested rule's prelude that do not start with `&`. */
