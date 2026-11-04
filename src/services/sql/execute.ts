@@ -78,6 +78,11 @@ function toCell(value: RawValue, cellCap: number): { cell: Cell; cut: boolean } 
     const hex = blobToHex(cut ? value.subarray(0, maxBytes) : value);
     return { cell: cut ? `${hex}…` : hex, cut };
   }
+  // The result travels as JSON, which turns ±Infinity (and NaN) into null, read
+  // as SQL NULL: keep them as their names instead, like big integers are kept.
+  if (typeof value === "number" && !Number.isFinite(value)) {
+    return { cell: String(value), cut: false };
+  }
   return { cell: value, cut: false };
 }
 

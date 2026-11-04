@@ -114,6 +114,13 @@ describe("runStatements", () => {
     ]);
   });
 
+  it("keeps infinite REAL values readable after the result is serialized to JSON", () => {
+    const result = runStatements(db, "SELECT 1e999 AS inf, -1e999 AS ninf, 1.5 AS real;", 10);
+
+    // JSON.stringify would turn ±Infinity into null, which reads as SQL NULL.
+    expect(JSON.parse(JSON.stringify(result)).resultSets[0].rows[0]).toEqual(["Infinity", "-Infinity", 1.5]);
+  });
+
   it("propagates SQL errors", () => {
     expect(() => runStatements(db, "SELECT * FROM missing_table;", 10)).toThrow(/no such table/);
   });
