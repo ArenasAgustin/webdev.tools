@@ -68,6 +68,14 @@ describe("runJavaScript", () => {
     });
   });
 
+  it("lets a string passed to setTimeout see the code's top-level bindings", async () => {
+    expect(
+      await runJavaScript(
+        "const x = 5;\nlet y = 2;\nfunction f() { return 1; }\nsetTimeout('console.log(x + y + f())', 0);",
+      ),
+    ).toEqual({ ok: true, output: "8" });
+  });
+
   it("prints nothing extra when the last statement is not an expression", async () => {
     expect(await runJavaScript("const a = 1;")).toEqual({ ok: true, output: "" });
     expect(await runJavaScript("console.log(5)")).toEqual({ ok: true, output: "5" });
