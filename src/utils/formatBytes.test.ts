@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import i18n from "i18next";
 import { formatBytes } from "./formatBytes";
 
 describe("formatBytes", () => {
@@ -18,13 +19,13 @@ describe("formatBytes", () => {
   });
 
   it("strips trailing zeros and keeps up to 2 decimals", () => {
-    expect(formatBytes(1500)).toBe("1.5 KB");
-    expect(formatBytes(1536)).toBe("1.54 KB");
+    expect(formatBytes(1500, "en")).toBe("1.5 KB");
+    expect(formatBytes(1536, "en")).toBe("1.54 KB");
   });
 
   it("formats MB", () => {
     expect(formatBytes(2000000)).toBe("2 MB");
-    expect(formatBytes(1234567)).toBe("1.23 MB");
+    expect(formatBytes(1234567, "en")).toBe("1.23 MB");
   });
 
   it("formats GB and TB", () => {
@@ -35,5 +36,23 @@ describe("formatBytes", () => {
   it("treats negative or invalid input as 0 B", () => {
     expect(formatBytes(-5)).toBe("0 B");
     expect(formatBytes(Number.NaN)).toBe("0 B");
+  });
+});
+
+describe("formatBytes decimal separator", () => {
+  afterEach(async () => {
+    await i18n.changeLanguage("es");
+  });
+
+  it("follows the app language when no locale is given", async () => {
+    expect(formatBytes(1500)).toBe("1,5 KB");
+    expect(formatBytes(1234567)).toBe("1,23 MB");
+    await i18n.changeLanguage("en");
+    expect(formatBytes(1500)).toBe("1.5 KB");
+  });
+
+  it("never groups thousands", () => {
+    expect(formatBytes(5_000_000_000_000_000, "en")).toBe("5000 TB");
+    expect(formatBytes(5_000_000_000_000_000, "es")).toBe("5000 TB");
   });
 });
