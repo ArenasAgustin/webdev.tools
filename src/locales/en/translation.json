@@ -197,6 +197,7 @@
       "strong": "Strong"
     },
     "history": "History:",
+    "historyEntry": "Password {{position}} of {{count}}",
     "noCharset": "Select at least one character set to generate a password",
     "outputLabel": "Generated password"
   },

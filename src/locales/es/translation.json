@@ -197,6 +197,7 @@
       "strong": "Fuerte"
     },
     "history": "Historial:",
+    "historyEntry": "Contraseña {{position}} de {{count}}",
     "noCharset": "Seleccioná al menos un tipo de caracteres para generar una contraseña",
     "outputLabel": "Contraseña generada"
   },
