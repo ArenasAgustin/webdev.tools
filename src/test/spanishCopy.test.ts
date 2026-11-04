@@ -12,6 +12,11 @@ describe("Spanish copy", () => {
     expect(es.messages.json.jsonPathRequired).toBe("Ingresá una expresión JSONPath");
   });
 
+  it("translates the Base64 padding option and its error", () => {
+    expect(es.base64.padding).toBe("Relleno");
+    expect(es.base64.errorInvalidPadding).toBe("La entrada tiene un relleno Base64 inválido");
+  });
+
   it("names JavaScript, not a capitalized 'Código', inside messages", () => {
     // Used as {{language}} mid-sentence: "No hay {{language}} para ejecutar"
     expect(es.messages.js.languageName).toBe("JavaScript");
