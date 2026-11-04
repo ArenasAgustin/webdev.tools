@@ -63,7 +63,9 @@ describe("encodeUrl", () => {
   });
 
   it("auto detects URLSearchParams form output as encoded", () => {
-    expect(isLikelyUrlEncoded("a+b*c", "form")).toBe(true);
+    expect(isLikelyUrlEncoded("q=a+b*c", "form")).toBe(true);
+    const query = new URLSearchParams({ q: "a b", page: "2" }).toString();
+    expect(isLikelyUrlEncoded(query, "form")).toBe(true);
   });
 
   describe("strict", () => {
@@ -194,22 +196,33 @@ describe("isLikelyUrlEncoded", () => {
     ["100%", "component", false],
     ["", "component", false],
     ["a+b", "component", false],
-    ["a+b", "form", true],
-    ["a+b\n", "form", false],
-    ["hello+world", "form", true],
     ["a+b%2Bc", "form", true],
-    // "+" alone only signals form data when every other character could come out of
-    // the form encoder; "=", "&", "/" etc. would have been escaped
+    ["1+1=2%21", "form", true],
+    // Without escapes, "+" alone is no evidence: plain text such as "1+1" or
+    // "Hello+World!" stays plain. Only "+" inside the values of key=value pairs
+    // (a query string such as "q=hello+world&page=2") counts as form data.
+    ["a+b", "form", false],
+    ["1+1", "form", false],
+    ["Hello+World!", "form", false],
+    ["hello+world", "form", false],
+    ["a+b\n", "form", false],
+    ["q=hello+world", "form", true],
+    ["q=hello+world&page=2", "form", true],
+    ["page=2&q=a+b+c&empty=", "form", true],
+    ["q=hello", "form", false],
     ["1+1=2", "form", false],
+    ["a+b=c", "form", false],
+    ["q=a+b&", "form", false],
+    ["q=a+b c", "form", false],
     ["c++/notes", "form", false],
     ["a+b&c", "form", false],
-    ["1+1=2%21", "form", true],
     // a "+" that does not join two words would encode a leading, trailing or doubled
     // space, which real text rarely has; "C++" is plain text
     ["C++", "form", false],
     ["+1", "form", false],
     ["a++b", "form", false],
-    ["what+is+C", "form", true],
+    ["what+is+C", "form", false],
+    ["q=C++", "form", false],
   ] as [string, UrlVariant, boolean][])("%j (%s) -> %s", (input, variant, expected) => {
     expect(isLikelyUrlEncoded(input, variant)).toBe(expected);
   });

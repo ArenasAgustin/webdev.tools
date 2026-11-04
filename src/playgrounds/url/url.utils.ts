@@ -101,16 +101,27 @@ export function decodeUrl(input: string, variant: UrlVariant): string {
   }
 }
 
+/** Characters the form encoder leaves as they are. */
+const FORM_SAFE = "[A-Za-z0-9\\-_.!~*'()]";
+/**
+ * A form-encoded query string: key=value pairs joined by "&". Keys hold no "+", and
+ * every "+" in a value joins two words: a leading, trailing or doubled "+" ("C++")
+ * would be an encoded edge or double space, far less likely than plain text.
+ */
+const FORM_QUERY = new RegExp(
+  `^${FORM_SAFE}+=(?:${FORM_SAFE}+(?:\\+${FORM_SAFE}+)*)?(?:&${FORM_SAFE}+=(?:${FORM_SAFE}+(?:\\+${FORM_SAFE}+)*)?)*$`,
+);
+
 /**
  * Heuristic used by auto mode. Valid `%XX` escapes mean encoded. Raw whitespace never
  * comes out of an encoder, so input that holds whitespace (e.g. a half-decoded
  * "50%25 off") only counts as encoded when every `%` starts a valid escape; otherwise
  * it is plain text like "50% off". Literal text like "%41" is detected as encoded
  * (documented limitation; explicit modes override).
- * Without `%XX` escapes, a `+` only counts as form data when the whole input could be
- * form-encoder output (unreserved characters and `+`); text like "1+1=2" holds `=`,
- * which the encoder would have escaped, so it is plain text.
- * Each `+` must also join two words, so "C++" or "+1" stay plain text.
+ * Without `%XX` escapes, a `+` alone is no evidence: "1+1" or "Hello+World!" are far
+ * more often plain text than form data. It only counts in the values of a key=value
+ * query string ("q=hello+world&page=2", see FORM_QUERY); "1+1=2" has its `+` in the
+ * key, so it stays plain text.
  */
 export function isLikelyUrlEncoded(input: string, variant: UrlVariant): boolean {
   if (input === "") {
@@ -122,9 +133,7 @@ export function isLikelyUrlEncoded(input: string, variant: UrlVariant): boolean 
   if (/\s/.test(input)) {
     return false;
   }
-  // Every "+" must join two words: a leading, trailing or doubled "+" ("C++", "+1")
-  // would be an encoded edge or double space, which is far less likely than plain text.
-  return variant === "form" && /^[A-Za-z0-9\-_.!~*'()]+(?:\+[A-Za-z0-9\-_.!~*'()]+)+$/.test(input);
+  return variant === "form" && input.includes("+") && FORM_QUERY.test(input);
 }
 
 /** Resolve the effective encode/decode direction from mode + current input. */
