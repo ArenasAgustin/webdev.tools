@@ -122,7 +122,7 @@
     "convert": "Convertir",
     "now": "Ahora",
     "placeholder": "Unix timestamp o fecha (ISO 8601, RFC 2822)...",
-    "invalidInput": "Input inválido. Ingresá un timestamp o fecha válida.",
+    "invalidInput": "Entrada inválida. Ingresá un timestamp o fecha válida.",
     "ambiguousDate": "Fecha ambigua: puede ser {{monthFirst}} (mes primero) o {{dayFirst}} (día primero). Escribila como AAAA-MM-DD.",
     "futureDate": "Esta fecha es en el futuro",
     "copied": "Copiado al portapapeles",
