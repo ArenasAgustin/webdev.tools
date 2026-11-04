@@ -274,6 +274,26 @@ describe("runJavaScript console methods", () => {
     expect(await run('console.trace("here", 1)')).toBe("Trace: here 1");
   });
 
+  it("applies format specifiers in the first argument like the browser console", async () => {
+    expect(await run('console.log("%s is %d years", "Bob", 42.7)')).toBe("Bob is 42 years");
+    expect(await run('console.log("%i|%f|%o|%O", "12px", "1.5", { a: 1 }, [1])')).toBe(
+      '12|1.5|{"a":1}|[1]',
+    );
+    expect(await run('console.warn("%cstyled", "color: red")')).toBe("WARN: styled");
+    expect(await run('console.log("100%% %s", "done", "extra", { b: 2 })')).toBe(
+      '100% done extra {\n  "b": 2\n}',
+    );
+    expect(await run('console.log("%s and %s", "only")')).toBe("only and %s");
+    expect(await run('console.log("%d %s %d", 5n, Symbol("s"), Symbol("t"))')).toBe(
+      "5n Symbol(s) NaN",
+    );
+  });
+
+  it("leaves a lone string or a non-string first argument unformatted", async () => {
+    expect(await run('console.log("50%% %s")')).toBe("50%% %s");
+    expect(await run('console.log(1, "%s", 2)')).toBe("1 %s 2");
+  });
+
   it("drops earlier output on console.clear", async () => {
     expect(await run('console.log("old"); console.clear(); console.log("new")')).toBe("new");
   });

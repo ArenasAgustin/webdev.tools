@@ -120,7 +120,7 @@ export async function runJavaScript(
 
   const log = (prefix: string, args: unknown[]) => {
     if (truncated) return;
-    emit(prefix + args.map((arg) => formatValue(arg)).join(" "));
+    emit(prefix + applyFormat(args).map((arg) => formatValue(arg)).join(" "));
   };
 
   const elapsed = (label: string, start: number) =>
@@ -496,6 +496,41 @@ export function formatValue(value: unknown): string {
   } catch {
     return Object.prototype.toString.call(value);
   }
+}
+
+const FORMAT_SPECIFIER = /%[sdifoOc%]/g;
+
+/** Text of one format specifier's argument (`%s`, `%d`/`%i`, `%f`, `%o`/`%O`). */
+function formatSpecifier(specifier: string, arg: unknown): string {
+  if (specifier === "s") {
+    if (typeof arg === "object" && arg !== null) return formatInline(arg);
+    return typeof arg === "string" ? arg : formatValue(arg);
+  }
+  if (specifier === "o" || specifier === "O") return formatInline(arg);
+  if (typeof arg === "bigint") return `${arg}n`;
+  if (typeof arg === "symbol") return "NaN";
+  const text = String(arg);
+  return String(specifier === "f" ? Number.parseFloat(text) : Number.parseInt(text, 10));
+}
+
+/**
+ * Apply the format specifiers of a leading string argument, like the browser console:
+ * each one consumes the next argument (`%c` styling is dropped), `%%` prints "%", and
+ * specifiers without an argument stay as they are. Returns the arguments left to print:
+ * the formatted string followed by the unused ones. A lone argument is not formatted.
+ */
+function applyFormat(args: unknown[]): unknown[] {
+  const [first, ...rest] = args;
+  if (typeof first !== "string" || rest.length === 0) return args;
+  let next = 0;
+  const formatted = first.replace(FORMAT_SPECIFIER, (match) => {
+    const specifier = match[1];
+    if (specifier === "%") return "%";
+    if (next >= rest.length) return match;
+    const arg = rest[next++];
+    return specifier === "c" ? "" : formatSpecifier(specifier, arg);
+  });
+  return [formatted, ...rest.slice(next)];
 }
 
 /** Single-line rendering of a `console.table` cell. */
