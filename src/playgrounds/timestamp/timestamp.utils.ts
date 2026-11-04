@@ -175,6 +175,8 @@ function isValidWallTime(w: WallTime): boolean {
 }
 
 const DAY_MS = 86_400_000;
+/** One 400-year Gregorian cycle: 146097 days, after which the calendar repeats exactly. */
+const GREGORIAN_CYCLE_MS = 146_097 * DAY_MS;
 
 const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
 
@@ -265,13 +267,29 @@ export function parseInput(
   // Then, try to parse as date string. The engine's parser is lenient ("hello 5" becomes
   // a date in 2001), so only hand it strings with a recognizable date shape.
   if (looksLikeDate(trimmed)) {
-    const date = new Date(trimmed);
+    // The engine reads a year below 100 as 19xx (Jan 1 0050 becomes 1950): parse it
+    // 2000 years later and move the result back, a whole number of 400-year Gregorian
+    // cycles, so month, day and leap days line up.
+    const year = /\b\d{4}\b/.exec(trimmed);
+    const yearShift = year && Number(year[0]) < 100 ? 2000 : 0;
+    const date = new Date(
+      year && yearShift
+        ? trimmed.slice(0, year.index) +
+            String(Number(year[0]) + yearShift) +
+            trimmed.slice(year.index + 4)
+        : trimmed,
+    );
     if (!isNaN(date.getTime())) {
-      if (EXPLICIT_ZONE.test(trimmed)) return { type: "date", value: date };
+      if (EXPLICIT_ZONE.test(trimmed)) {
+        return {
+          type: "date",
+          value: new Date(date.getTime() - (yearShift / 400) * GREGORIAN_CYCLE_MS),
+        };
+      }
       // The engine read a zone-less string (Jan 15 2024) in the browser's zone:
       // keep its wall-clock fields and read them in the selected timezone instead.
       const wallTime: WallTime = {
-        year: date.getFullYear(),
+        year: date.getFullYear() - yearShift,
         month: date.getMonth() + 1,
         day: date.getDate(),
         hour: date.getHours(),

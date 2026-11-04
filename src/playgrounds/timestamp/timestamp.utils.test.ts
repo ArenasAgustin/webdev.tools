@@ -98,6 +98,18 @@ describe("timestamp.utils", () => {
       expect((parseInput(value, timezone)?.value as Date).getTime()).toBe(expected);
     });
 
+    it.each([
+      ["Jan 1 0050", "0050-01-01T00:00:00.000Z"],
+      ["Feb 29 0052 10:00", "0052-02-29T10:00:00.000Z"],
+      ["Jan 1 0050 10:00 GMT", "0050-01-01T10:00:00.000Z"],
+      ["Mon, 15 Jan 0099 10:00:00 -0500", "0099-01-15T15:00:00.000Z"],
+    ])(
+      "keeps the explicit year below 100 in %j instead of reading it as 19xx",
+      (value, expected) => {
+        expect((parseInput(value, "UTC")?.value as Date).toISOString()).toBe(expected);
+      },
+    );
+
     it("keeps an explicit offset or Z whatever the selected timezone", () => {
       expect(convertTimestamp("2024-01-15T10:00:00Z", "Asia/Tokyo", "en")?.unixMilliseconds).toBe(
         Date.UTC(2024, 0, 15, 10),
@@ -107,13 +119,23 @@ describe("timestamp.utils", () => {
       );
     });
 
-    it.each(["2024-02-30", "2023-02-29", "2024-13-01", "2024-04-31 10:00", "2024-01-15 25:00", "2024-01-15T10:60", "02/30/2024", "2024/02/30", "2024-02-30T10:00Z", "2024-02-30T10:00:00+02:00", "2024-02-30 10:00 -0500", "2024-04-31T10:00:00.000Z"])(
-      "rejects the impossible date %j instead of rolling it over",
-      (value) => {
-        expect(parseInput(value, "UTC")).toBeNull();
-        expect(convertTimestamp(value, "UTC", "en")).toBeNull();
-      },
-    );
+    it.each([
+      "2024-02-30",
+      "2023-02-29",
+      "2024-13-01",
+      "2024-04-31 10:00",
+      "2024-01-15 25:00",
+      "2024-01-15T10:60",
+      "02/30/2024",
+      "2024/02/30",
+      "2024-02-30T10:00Z",
+      "2024-02-30T10:00:00+02:00",
+      "2024-02-30 10:00 -0500",
+      "2024-04-31T10:00:00.000Z",
+    ])("rejects the impossible date %j instead of rolling it over", (value) => {
+      expect(parseInput(value, "UTC")).toBeNull();
+      expect(convertTimestamp(value, "UTC", "en")).toBeNull();
+    });
 
     it.each([
       ["15/01/2024", Date.UTC(2024, 0, 15)],
@@ -256,7 +278,7 @@ describe("timestamp.utils", () => {
       expect(result).toBeLessThanOrEqual(now + 1);
     });
   });
-describe("parseInput with an explicit zone", () => {
+  describe("parseInput with an explicit zone", () => {
     it("honors an RFC 2822 numeric offset after a space", () => {
       const result = parseInput("Mon, 15 Jan 2024 10:00:00 -0500", "Asia/Tokyo");
       expect((result?.value as Date).toISOString()).toBe("2024-01-15T15:00:00.000Z");
