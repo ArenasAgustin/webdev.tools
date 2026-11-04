@@ -63,6 +63,23 @@ describe("useJsonPathHistory", () => {
         expect(result.current.history[0].frequency).toBe(2);
       });
     });
+
+    it("stores the trimmed expression, so a spaced variant is the same entry", async () => {
+      const { result } = renderHook(() => useJsonPathHistory());
+
+      await act(async () => {
+        await result.current.addToHistory("$.name");
+      });
+      await act(async () => {
+        await result.current.addToHistory("  $.name \n");
+      });
+
+      await waitFor(() => {
+        expect(result.current.history).toHaveLength(1);
+        expect(result.current.history[0].expression).toBe("$.name");
+        expect(result.current.history[0].frequency).toBe(2);
+      });
+    });
   });
 
   describe("removeFromHistory", () => {

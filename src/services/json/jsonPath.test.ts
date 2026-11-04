@@ -186,4 +186,14 @@ describe("applyJsonPath with a broken expression", () => {
       expect(applyJsonPath(input, path).ok).toBe(true);
     },
   );
+
+
+});
+
+describe("applyJsonPath expression whitespace", () => {
+  it("ignores whitespace around the expression", () => {
+    const input = '{"a": [1, 2]}';
+    expect(applyJsonPath(input, " $.a[0] \n")).toEqual(applyJsonPath(input, "$.a[0]"));
+    expect(applyJsonPath(input, "$.a[0]")).toEqual({ ok: true, value: "[\n  1\n]" });
+  });
 });

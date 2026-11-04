@@ -231,8 +231,10 @@ export function useJsonPathHistory(): JsonPathHistoryHook {
     };
   }, []);
 
-  const addToHistory = useCallback(async (expression: string) => {
-    if (!expression.trim()) return;
+  const addToHistory = useCallback(async (rawExpression: string) => {
+    // Surrounding whitespace does not change the path: "$.a " and "$.a" are one entry.
+    const expression = rawExpression.trim();
+    if (!expression) return;
 
     try {
       const db = await openDb();

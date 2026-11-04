@@ -36,7 +36,10 @@ function isBrokenJsonPath(path: string): boolean {
  * Apply JSONPath filter to JSON data
  * Pure function - no side effects
  */
-export function applyJsonPath(input: string, path: string): Result<string, JsonError> {
+export function applyJsonPath(input: string, rawPath: string): Result<string, JsonError> {
+  // jsonpath-plus treats surrounding whitespace as part of the path (" $.a" matches nothing).
+  const path = rawPath.trim();
+
   if (!input.trim()) {
     return {
       ok: false,
