@@ -161,6 +161,45 @@ describe("runStatements", () => {
     expect(() => yielded[0].step()).toThrow(/Statement closed/);
   });
 
+  it("drives the iterator to the end when a step throws, so it frees its copy of the script", () => {
+    const iterate = db.iterateStatements.bind(db);
+    let iterator: ReturnType<Database["iterateStatements"]> | undefined;
+    const spy = vi.spyOn(db, "iterateStatements").mockImplementation((sql: string) => {
+      iterator = iterate(sql);
+      return iterator;
+    });
+    try {
+      expect(() => runStatements(db, "SELECT abs(-9223372036854775808); SELECT 2; SELECT 3;", 10)).toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+
+    // A finished iterator has released its SQL copy and yields nothing more.
+    expect(iterator?.next()).toEqual({ done: true });
+  });
+
+  it("does not leak memory across repeated failing runs", async () => {
+    // A fresh module, so the allocator state is not shared with other tests.
+    const SQL = (await initSqlJs()) as unknown as {
+      Database: new () => Database;
+      _malloc(size: number): number;
+      _free(ptr: number): void;
+    };
+    const fresh = new SQL.Database();
+    const script = `SELECT abs(-9223372036854775808); -- ${"x".repeat(1_000_000)}`;
+    const addresses: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      expect(() => runStatements(fresh, script, 10)).toThrow();
+      // A leaked script copy keeps its block, so the next big block lands elsewhere.
+      const ptr = SQL._malloc(1_000_000);
+      addresses.push(ptr);
+      SQL._free(ptr);
+    }
+    fresh.close();
+
+    expect(new Set(addresses).size).toBe(1);
+  });
+
   it("names the statement that failed while running", () => {
     expect(
       errorMessage(() => runStatements(db, "SELECT 1; SELECT 2; SELECT abs(-9223372036854775808);", 10)),

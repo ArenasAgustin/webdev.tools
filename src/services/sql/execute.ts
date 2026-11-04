@@ -81,6 +81,23 @@ function toCell(value: RawValue, cellCap: number): { cell: Cell; cut: boolean } 
   return { cell: value, cut: false };
 }
 
+/**
+ * Free an iterator left mid-script by a failing step. sql.js keeps a copy of the
+ * script until the iterator reaches its end, and its finalize() is not part of
+ * the public (minified) API, so drive it to the end: each next() only prepares
+ * the following statement (nothing runs) and frees the previous one. A prepare
+ * error also frees the copy, so it is ignored here.
+ */
+function release(statements: Iterator<Statement>): void {
+  try {
+    while (!statements.next().done) {
+      // Keep advancing until the iterator frees its copy of the script.
+    }
+  } catch {
+    // The iterator frees its copy before rethrowing a prepare error.
+  }
+}
+
 /** Round a performance.now() delta to one decimal, so the result shows 3.3 instead of 3.2999999999999545. */
 export function roundElapsedMs(ms: number): number {
   return Math.round(ms * 10) / 10;
@@ -113,8 +130,9 @@ export function runStatements(
   // The statement being read, until the iterator advances (and frees it). The
   // iterator has no return(), so a statement whose step() throws is freed here.
   let current: Statement | null = null;
+  const statements = db.iterateStatements(sql);
   try {
-    for (const stmt of db.iterateStatements(sql)) {
+    for (const stmt of statements) {
       current = stmt;
       statement++;
       readStatement(stmt);
@@ -131,6 +149,9 @@ export function runStatements(
       collect(),
       { cause: err },
     );
+  } finally {
+    // A no-op once the script ran to its end.
+    release(statements);
   }
 
   return collect();
