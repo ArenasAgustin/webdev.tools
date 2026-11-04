@@ -149,7 +149,7 @@ describe("TimestampPlayground branches", () => {
     fireEvent.change(input, { target: { value: "not-a-date-or-timestamp" } });
     fireEvent.click(screen.getByRole("button", { name: /timestamp\.convert/i }));
 
-    expect(screen.getByText("timestamp.invalidInput")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("timestamp.invalidInput");
   });
 
   it("handleConvert: an ambiguous day/month date asks for an unambiguous format", () => {
