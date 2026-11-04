@@ -68,6 +68,24 @@ describe("colorConverter - parseColor", () => {
     expect(result!.b).toBe(219);
   });
 
+  it.each(["cmyk(0%, 50.5%, 100%, 0%)", "cmyk(0 50.5 100 0)", "cmyk(0% 50.5% 100% 0%)", "cmyk(0, 50.5, 100, 0)"])(
+    "parses CMYK with decimals and space-separated syntax: %j",
+    (input) => {
+      const result = parseColor(input);
+      expect(result?.r).toBe(255);
+      // 255 × (1 − 0.505) = 126.225; reading 50.5 as 50 would give 128
+      expect(result?.g).toBe(126);
+      expect(result?.b).toBe(0);
+    },
+  );
+
+  it.each(["cmyk(0%, 101%, 0%, 0%)", "cmyk(0 50 100)", "cmyk(-1%, 0%, 0%, 0%)"])(
+    "rejects the invalid CMYK %j",
+    (input) => {
+      expect(parseColor(input)).toBeNull();
+    },
+  );
+
   it("parses CMYK format", () => {
     const result = parseColor("cmyk(76%, 31%, 0%, 14%)");
     expect(result).not.toBeNull();

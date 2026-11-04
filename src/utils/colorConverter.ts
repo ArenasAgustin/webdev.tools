@@ -59,6 +59,12 @@ const HSV_PATTERN = new RegExp(
   String.raw`^hsv\s*\(\s*${HUE}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}\s*\)$`,
 );
 
+// cmyk() takes four decimal channels, comma- or space-separated, each optionally with %.
+const CMYK_PATTERN = new RegExp(
+  String.raw`^cmyk\s*\(\s*${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}\s*\)$`,
+  "i",
+);
+
 const DEGREES_PER_UNIT: Record<string, number> = { deg: 1, grad: 0.9, rad: 180 / Math.PI, turn: 360 };
 
 /** Parse a hue ("120", "-90", "0.5turn") to degrees in 0..360. */
@@ -168,15 +174,10 @@ function parseColorExact(input: string): RGB | null {
   }
 
   // CMYK format
-  const cmykMatch = /^cmyk\s*\(\s*(\d+)%?\s*,\s*(\d+)%?\s*,\s*(\d+)%?\s*,\s*(\d+)%?\s*\)$/i.exec(
-    cleanInput,
-  );
+  const cmykMatch = CMYK_PATTERN.exec(cleanInput);
   if (cmykMatch) {
-    const c = parseInt(cmykMatch[1], 10);
-    const m = parseInt(cmykMatch[2], 10);
-    const y = parseInt(cmykMatch[3], 10);
-    const k = parseInt(cmykMatch[4], 10);
-    if (c >= 0 && c <= 100 && m >= 0 && m <= 100 && y >= 0 && y <= 100 && k >= 0 && k <= 100) {
+    const [c, m, y, k] = cmykMatch.slice(1, 5).map(Number);
+    if (c <= 100 && m <= 100 && y <= 100 && k <= 100) {
       return cmykToRgbExact(c, m, y, k);
     }
   }
