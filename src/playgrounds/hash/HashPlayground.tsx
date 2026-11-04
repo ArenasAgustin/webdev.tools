@@ -311,7 +311,11 @@ export function HashPlayground() {
       </div>
 
       {/* Clipboard error feedback */}
-      {clipboardError && <p className="text-red-400 text-sm">{t("hash.copyError")}</p>}
+      {clipboardError && (
+        <p role="alert" className="text-red-400 text-sm">
+          {t("hash.copyError")}
+        </p>
+      )}
 
       {/* Compare Section */}
       <div className="flex flex-col gap-2 mt-4 p-4 bg-white/5 rounded-lg">

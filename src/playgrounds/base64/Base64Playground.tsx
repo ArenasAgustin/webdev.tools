@@ -377,7 +377,11 @@ export function Base64Playground() {
         />
       </div>
 
-      {clipboardError && <p className="text-red-400 text-sm">{t("base64.copyError")}</p>}
+      {clipboardError && (
+        <p role="alert" className="text-red-400 text-sm">
+          {t("base64.copyError")}
+        </p>
+      )}
     </div>
   );
 }

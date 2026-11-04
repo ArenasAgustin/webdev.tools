@@ -207,7 +207,8 @@ describe("Base64Playground branches (text mode)", () => {
     await act(async () => {
       fireEvent.click(copyBtn);
     });
-    expect(screen.getByText("No se pudo copiar al portapapeles")).toBeInTheDocument();
+    // Announced to screen readers, not only drawn in red.
+    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo copiar al portapapeles");
 
     await act(async () => {
       vi.advanceTimersByTime(2001);

@@ -283,7 +283,8 @@ describe("HashPlayground branches", () => {
       fireEvent.click(copyButtons[0]);
     });
 
-    expect(screen.getByText(/no se pudo copiar/i)).toBeInTheDocument();
+    // Announced to screen readers, not only drawn in red.
+    expect(screen.getByRole("alert")).toHaveTextContent(/no se pudo copiar/i);
 
     // Error message disappears after 2000ms
     await act(async () => {
