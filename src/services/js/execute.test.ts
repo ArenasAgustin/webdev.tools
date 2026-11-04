@@ -195,6 +195,15 @@ describe("runJavaScript output limits", () => {
     expect(result.output).not.toContain("b");
   });
 
+  it("prints a console.table with more rows than the line limit without crashing", async () => {
+    const result = await runJavaScript(
+      "console.table(Array.from({ length: 600000 }, (_, i) => ({ i })))",
+    );
+    expect(result.ok).toBe(true);
+    expect(result.truncated).toBe(true);
+    expect(result.output.split("\n")).toHaveLength(MAX_OUTPUT_LINES);
+  });
+
   it("does not let console.clear reset the limit", async () => {
     const streamed: string[] = [];
     await runJavaScript(

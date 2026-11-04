@@ -495,7 +495,8 @@ function formatCell(value: unknown): string {
 function formatTable(data: unknown): string[] {
   if (typeof data !== "object" || data === null) return [formatValue(data)];
 
-  const rows = Object.entries(data as Record<string, unknown>);
+  // Rows past the line limit would be dropped anyway; one extra row still trips it.
+  const rows = Object.entries(data as Record<string, unknown>).slice(0, MAX_OUTPUT_LINES);
   const columns: string[] = [];
   let hasValues = false;
   for (const [, row] of rows) {
@@ -519,6 +520,9 @@ function formatTable(data: unknown): string[] {
       }),
     ]),
   ];
-  const widths = table[0].map((_, i) => Math.max(...table.map((cells) => cells[i].length)));
+  // A loop, not Math.max(...lengths): one spread argument per row overflows the stack.
+  const widths = table[0].map((_, i) =>
+    table.reduce((max, cells) => Math.max(max, cells[i].length), 0),
+  );
   return table.map((cells) => cells.map((cell, i) => cell.padEnd(widths[i])).join(" | "));
 }
