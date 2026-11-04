@@ -8,6 +8,11 @@ import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { useToast } from "@/hooks/useToast";
 import { STORAGE_KEYS } from "@/services/storage";
 
+// Every format row with no value, shown while the text input holds no valid color.
+const EMPTY_FORMATS = Object.fromEntries(
+  Object.keys(getAllFormats({ r: 0, g: 0, b: 0 })).map((format) => [format, ""]),
+) as unknown as ColorFormats;
+
 export function ColorsPlayground() {
   const { t } = useTranslation();
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -58,11 +63,11 @@ export function ColorsPlayground() {
     [setStoredInput],
   );
 
-  // While the text input is invalid, keep showing the last valid color (hex, possibly with alpha).
+  // Invalid or empty text shows no values, so a stale color cannot be copied by
+  // mistake; the picker and swatch keep the last valid color to edit from.
   const inputFormats = convertColor(input);
   const isInvalid = input.trim() !== "" && inputFormats === null;
-  const displayFormats: ColorFormats =
-    inputFormats ?? convertColor(color) ?? getAllFormats({ r: 0, g: 0, b: 0 });
+  const displayFormats: ColorFormats = inputFormats ?? EMPTY_FORMATS;
 
   const { copy } = useClipboardCopy();
   const toast = useToast();
@@ -117,12 +122,13 @@ export function ColorsPlayground() {
             >
               <span className="text-xs font-mono text-gray-400 uppercase w-14">{format}</span>
               <code className="text-sm text-white font-mono flex-1 text-right select-all">
-                {value}
+                {value || "—"}
               </code>
               <button
                 type="button"
                 onClick={() => copyToClipboard(value)}
-                className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors"
+                disabled={!value}
+                className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:text-white transition-colors disabled:opacity-40 disabled:pointer-events-none"
                 title={t("colors.copy", { format })}
                 aria-label={t("colors.copy", { format })}
               >
