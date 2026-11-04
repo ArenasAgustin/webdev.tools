@@ -86,6 +86,18 @@ describe("timestamp.utils", () => {
       expect(convertTimestamp(value, timezone, "en")?.unixMilliseconds).toBe(expected);
     });
 
+    it.each([
+      // Wall times skipped by a spring-forward gap move forward by the gap, west or east of UTC
+      ["2024-03-10 02:30", "America/New_York", Date.UTC(2024, 2, 10, 7, 30)],
+      ["2024-03-10 02:30", "America/Los_Angeles", Date.UTC(2024, 2, 10, 10, 30)],
+      ["2024-03-31 02:30", "Europe/Berlin", Date.UTC(2024, 2, 31, 1, 30)],
+      // A repeated (fall-back) wall time reads as its first occurrence
+      ["2024-11-03 01:30", "America/New_York", Date.UTC(2024, 10, 3, 5, 30)],
+      ["2024-10-27 02:30", "Europe/Berlin", Date.UTC(2024, 9, 27, 0, 30)],
+    ])("reads %j next to a DST change in %s consistently", (value, timezone, expected) => {
+      expect((parseInput(value, timezone)?.value as Date).getTime()).toBe(expected);
+    });
+
     it("keeps an explicit offset or Z whatever the selected timezone", () => {
       expect(convertTimestamp("2024-01-15T10:00:00Z", "Asia/Tokyo", "en")?.unixMilliseconds).toBe(
         Date.UTC(2024, 0, 15, 10),

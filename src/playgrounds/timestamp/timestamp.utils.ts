@@ -174,6 +174,8 @@ function isValidWallTime(w: WallTime): boolean {
   );
 }
 
+const DAY_MS = 86_400_000;
+
 const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
 
 /** Offset of `timezone` from UTC at the instant `epochMs`, in ms (whole seconds). */
@@ -211,9 +213,17 @@ function wallTimeToDate(w: WallTime, timezone: string): Date {
   date.setUTCFullYear(w.year, w.month - 1, w.day);
   date.setUTCHours(w.hour, w.minute, w.second, w.ms);
   const guess = date.getTime();
-  // A second pass settles the offset next to a DST change.
-  const first = guess - timezoneOffsetMs(guess, timezone);
-  return new Date(guess - timezoneOffsetMs(first, timezone));
+  // The offsets a day before and after differ only next to a DST change. A reading
+  // is right when the zone really has that offset at the resulting instant.
+  const before = timezoneOffsetMs(guess - DAY_MS, timezone);
+  const after = timezoneOffsetMs(guess + DAY_MS, timezone);
+  const readings = [guess - before, guess - after].filter(
+    (instant) => instant + timezoneOffsetMs(instant, timezone) === guess,
+  );
+  // A repeated wall time (fall back) takes its first occurrence; one skipped by a
+  // gap (spring forward) reads with the offset before the change, which moves it
+  // forward by the gap, west and east of UTC alike.
+  return new Date(readings.length > 0 ? Math.min(...readings) : guess - before);
 }
 
 /**
