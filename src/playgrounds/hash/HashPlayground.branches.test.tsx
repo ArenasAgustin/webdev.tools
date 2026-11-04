@@ -143,6 +143,31 @@ describe("HashPlayground branches", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(/no se pudieron generar los hashes/i);
   });
 
+  it("drops the generate error once the file or mode it was about changes", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    generateAllHashesFromFileMock.mockRejectedValue(new DOMException("NotReadableError"));
+    const { container } = render(<HashPlayground />);
+    fireEvent.click(screen.getByRole("button", { name: /archivo/i }));
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+    fireEvent.change(input, { target: { files: [new File(["x"], "a.txt")] } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    // Another file: the error was about the previous one.
+    fireEvent.change(input, { target: { files: [new File(["y"], "b.txt")] } });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    // Back to text mode with the same file still picked: the error stays gone.
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /generar/i }));
+    });
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^texto$/i }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("empty text guard returns early without calling generateAllHashes", async () => {
     render(<HashPlayground />);
 
