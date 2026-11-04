@@ -10,6 +10,7 @@ const { getItemMock, setItemMock, clipboardWriteTextMock } = vi.hoisted(() => ({
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  isAvailable: () => true,
   STORAGE_KEYS: {
     BASE64_INPUT_MODE: "base64InputMode",
     BASE64_INPUT: "base64Input",

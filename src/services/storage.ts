@@ -132,8 +132,17 @@ export function clearAll(): boolean {
   }
 }
 
+/** Whether `error` is the browser refusing a write because the storage quota is full. */
+function isQuotaExceeded(error: unknown): boolean {
+  return (
+    error instanceof DOMException &&
+    (error.name === "QuotaExceededError" || error.name === "NS_ERROR_DOM_QUOTA_REACHED")
+  );
+}
+
 /**
- * Check if localStorage is available
+ * Check if localStorage is available. A full storage still counts as available:
+ * it exists and works, it just cannot take more data right now.
  */
 export function isAvailable(): boolean {
   try {
@@ -144,8 +153,8 @@ export function isAvailable(): boolean {
     storage.setItem(testKey, "test");
     storage.removeItem(testKey);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    return isQuotaExceeded(error);
   }
 }
 

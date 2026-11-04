@@ -3,7 +3,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 const storedValues: Record<string, unknown> = {};
 
-const { getItemMock, setItemMock } = vi.hoisted(() => ({
+const { getItemMock, setItemMock, isAvailableMock } = vi.hoisted(() => ({
+  isAvailableMock: vi.fn(() => true),
   getItemMock: vi.fn((key: string) => storedValues[key] ?? null),
   setItemMock: vi.fn((key: string, value: unknown) => {
     storedValues[key] = value;
@@ -14,6 +15,7 @@ const { getItemMock, setItemMock } = vi.hoisted(() => ({
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  isAvailable: isAvailableMock,
   STORAGE_KEYS: {
     BASE64_INPUT_MODE: "base64InputMode",
     BASE64_INPUT: "base64Input",
@@ -70,6 +72,7 @@ describe("Base64Playground persistence", () => {
     Object.keys(storedValues).forEach((k) => delete storedValues[k]);
     getItemMock.mockClear();
     setItemMock.mockClear();
+    isAvailableMock.mockReturnValue(true);
     getItemMock.mockImplementation((key: string) => storedValues[key] ?? null);
     setItemMock.mockImplementation((key: string, value: unknown) => {
       storedValues[key] = value;
@@ -107,6 +110,17 @@ describe("Base64Playground persistence", () => {
     fireEvent.change(screen.getByLabelText("Entrada"), { target: { value: "too long to store" } });
 
     expect(screen.getByRole("status")).toHaveTextContent("base64.inputNotSaved");
+  });
+
+  it("does not claim the input is too large when storage is unavailable", () => {
+    // Storage blocked or missing (e.g. disabled site data): every write fails.
+    isAvailableMock.mockReturnValue(false);
+    setItemMock.mockReturnValue(false);
+
+    render(<Base64Playground />);
+    fireEvent.change(screen.getByLabelText("Entrada"), { target: { value: "short text" } });
+
+    expect(screen.queryByText("base64.inputNotSaved")).not.toBeInTheDocument();
   });
 
   it("inputMode='file' restored → drop zone is shown instead of the textarea", () => {
