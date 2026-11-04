@@ -211,7 +211,8 @@ export function cleanJson(input: string, options: CleanOptions = {}): Result<str
     const parsed = parseResult.value;
     const cleaned = removeEmpty(parsed, options);
 
-    if (cleaned === undefined || cleaned === "") {
+    // Nothing left. A kept top-level "" (remove-empty-strings off) is still printed.
+    if (cleaned === undefined) {
       return {
         ok: true,
         value: "",
