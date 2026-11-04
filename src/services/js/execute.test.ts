@@ -186,6 +186,15 @@ describe("runJavaScript output limits", () => {
     expect(returned.output).toHaveLength(MAX_OUTPUT_CHARS);
   });
 
+  it("drops a line that comes after a line which already reached the character cap", async () => {
+    const result = await runJavaScript(
+      `console.log("a".repeat(${MAX_OUTPUT_CHARS})); console.log("b".repeat(500000));`,
+    );
+    expect(result.truncated).toBe(true);
+    expect(result.output).toHaveLength(MAX_OUTPUT_CHARS);
+    expect(result.output).not.toContain("b");
+  });
+
   it("does not let console.clear reset the limit", async () => {
     const streamed: string[] = [];
     await runJavaScript(

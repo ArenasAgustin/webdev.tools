@@ -97,6 +97,11 @@ export async function runJavaScript(
           .join("\n")
       : line;
     const remaining = MAX_OUTPUT_CHARS - emittedChars;
+    // A previous line may already have used the whole budget (its newline included).
+    if (remaining <= 0) {
+      truncate();
+      return;
+    }
     const kept = indented.length > remaining ? indented.slice(0, remaining) : indented;
     emittedLines++;
     // One more character for the newline that joins this line to the next.
