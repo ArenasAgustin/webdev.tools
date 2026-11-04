@@ -70,7 +70,11 @@ function blobToHex(bytes: Uint8Array): string {
  */
 function toCell(value: RawValue, cellCap: number): { cell: Cell; cut: boolean } {
   if (typeof value === "string" && value.length > cellCap) {
-    return { cell: `${value.slice(0, cellCap)}…`, cut: true };
+    // Cut before a pair's first half rather than between its halves, which
+    // would leave a lone surrogate (shown as a replacement character).
+    const lastCode = value.charCodeAt(cellCap - 1);
+    const end = lastCode >= 0xd800 && lastCode <= 0xdbff ? cellCap - 1 : cellCap;
+    return { cell: `${value.slice(0, end)}…`, cut: true };
   }
   if (value instanceof Uint8Array) {
     const maxBytes = Math.floor(cellCap / 2);

@@ -85,6 +85,13 @@ describe("runStatements", () => {
     expect(result.resultSets[0].valuesTruncated).toBe(true);
   });
 
+  it("does not split a surrogate pair when cutting long text", () => {
+    // 'a' then emoji (two UTF-16 units each): a 10-unit cut lands inside the fifth one.
+    const result = runStatements(db, "SELECT 'a' || replace(hex(zeroblob(20)), '00', '😀') AS e;", 10, 10);
+
+    expect(result.resultSets[0].rows[0][0]).toBe("a😀😀😀😀…");
+  });
+
   it("does not flag value truncation for values within the cap", () => {
     const result = runStatements(db, "SELECT printf('%.100c', 'x') AS s;", 10, 100);
 
