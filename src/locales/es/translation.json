@@ -347,6 +347,11 @@
       "defaultDescription": "Suite de herramientas online para desarrolladores: formatear JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador."
     }
   },
+  "notFound": {
+    "title": "Página no encontrada",
+    "message": "Esta herramienta no existe o cambió de dirección.",
+    "backHome": "Volver a todas las herramientas"
+  },
   "offline": {
     "message": "Sin conexión — las herramientas siguen funcionando localmente"
   },

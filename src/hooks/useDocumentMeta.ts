@@ -14,6 +14,8 @@ export interface DocumentMetaOptions {
   twitterTitle?: string;
   twitterDescription?: string;
   jsonLd?: object;
+  /** Keep the page out of search results and drop its canonical (not-found pages). */
+  noindex?: boolean;
 }
 
 const BASE_URL = SITE_URL;
@@ -35,6 +37,7 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
       twitterTitle,
       twitterDescription,
       jsonLd,
+      noindex = false,
     } = options;
 
     // Update title
@@ -77,14 +80,22 @@ export function useDocumentMeta(options: DocumentMetaOptions) {
       updateMetaTag('meta[name="twitter:image"]', ogImage);
     }
 
-    // Canonical URL
+    // Robots. Every route is served the same index.html (index, follow), so a
+    // not-found page must say noindex itself or it is indexed as a soft 404.
+    updateMetaTag('meta[name="robots"]', noindex ? "noindex" : "index, follow");
+
+    // Canonical URL; a not-found page has none (pointing at home would claim it is home).
     let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.setAttribute("rel", "canonical");
-      document.head.appendChild(canonical);
+    if (noindex) {
+      canonical?.remove();
+    } else {
+      if (!canonical) {
+        canonical = document.createElement("link");
+        canonical.setAttribute("rel", "canonical");
+        document.head.appendChild(canonical);
+      }
+      canonical.setAttribute("href", ogUrl ?? BASE_URL);
     }
-    canonical.setAttribute("href", ogUrl ?? BASE_URL);
 
     // JSON-LD structured data
     if (jsonLd) {

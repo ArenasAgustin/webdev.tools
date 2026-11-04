@@ -347,6 +347,11 @@
       "defaultDescription": "Online tool suite for developers: format JSON, run JavaScript, and more. No installation, 100% in the browser."
     }
   },
+  "notFound": {
+    "title": "Page not found",
+    "message": "This tool does not exist or has moved.",
+    "backHome": "Back to all tools"
+  },
   "offline": {
     "message": "No connection — tools continue working locally"
   },

@@ -1,23 +1,36 @@
 import { Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Navigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { PlaygroundLoader } from "@/components/common/PlaygroundLoader";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { PlaygroundSidebar } from "@/components/layout/PlaygroundSidebar";
-import { getPlaygroundById } from "@/playgrounds/registry";
+import { getPlaygroundById, type PlaygroundRegistryItem } from "@/playgrounds/registry";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
-import { getMissingPlaygroundMeta, getPlaygroundMeta } from "@/utils/routeMeta";
+import { getPlaygroundMeta } from "@/utils/routeMeta";
 import { useIdleCallback } from "@/hooks/useIdleCallback";
 import { getLocalizedString } from "@/types/playground";
+import { NotFound } from "@/pages/NotFound";
 
 export function PlaygroundPage() {
-  const { t } = useTranslation();
   const { playgroundId } = useParams();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const playground = getPlaygroundById(playgroundId ?? "");
 
-  const name = playground ? getLocalizedString(playground.name) : undefined;
-  const description = playground ? getLocalizedString(playground.description) : undefined;
+  // An unknown id gets a real not-found page (noindex) rather than a redirect home,
+  // so crawlers do not index the URL as a copy of the home page.
+  if (!playground) {
+    return <NotFound />;
+  }
+
+  return <PlaygroundView playground={playground} />;
+}
+
+function PlaygroundView({ playground }: { playground: PlaygroundRegistryItem }) {
+  const { t } = useTranslation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const playgroundId = playground.id;
+
+  const name = getLocalizedString(playground.name);
+  const description = getLocalizedString(playground.description);
 
   useIdleCallback(
     () => {
@@ -28,22 +41,16 @@ export function PlaygroundPage() {
 
   const translateMeta = (key: string, options?: Record<string, unknown>) => t(key, options);
   useDocumentMeta(
-    playground
-      ? getPlaygroundMeta(
-          {
-            id: playground.id,
-            name: getLocalizedString(playground.name),
-            description: getLocalizedString(playground.description),
-            keywords: playground.keywords,
-          },
-          translateMeta,
-        )
-      : getMissingPlaygroundMeta(translateMeta),
+    getPlaygroundMeta(
+      {
+        id: playground.id,
+        name,
+        description,
+        keywords: playground.keywords,
+      },
+      translateMeta,
+    ),
   );
-
-  if (!playground) {
-    return <Navigate to="/" replace />;
-  }
 
   const PlaygroundComponent = playground.component;
 

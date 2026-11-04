@@ -3,4 +3,5 @@
 export * from "@/utils/routeMeta";
 export * from "@/utils/ogImage";
 export * from "@/utils/prerenderHtml";
+export * from "@/utils/sitemap";
 export { playgroundRegistry } from "@/playgrounds/registry";
