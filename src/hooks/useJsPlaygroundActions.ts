@@ -173,6 +173,21 @@ function toExecutionError(result: JsRunResult): JsExecutionError {
   );
 }
 
+function isExecResponse(data: unknown): data is JsExecResponse {
+  if (typeof data !== "object" || data === null) return false;
+  const message = data as Record<string, unknown>;
+  if (message.type === "log") return typeof message.line === "string";
+  if (message.type === "truncated") return true;
+  if (message.type !== "done") return false;
+  const result = message.result as Record<string, unknown> | null | undefined;
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    typeof result.ok === "boolean" &&
+    typeof result.output === "string"
+  );
+}
+
 async function executeJavaScript(code: string, timeoutMs: number): Promise<string> {
   // Without a Worker the code would run on the page itself: no timeout could stop an
   // endless loop and it would reach the page's storage. Refuse instead.
@@ -203,8 +218,11 @@ async function executeJavaScript(code: string, timeoutMs: number): Promise<strin
         ),
       );
     }, timeoutMs);
-    worker.onmessage = (event: MessageEvent<JsExecResponse>) => {
+    worker.onmessage = (event: MessageEvent<unknown>) => {
+      // User code runs in the worker and can call its postMessage: ignore anything
+      // that is not a well-formed runner message, so the real result still arrives.
       const message = event.data;
+      if (!isExecResponse(message)) return;
       if (message.type === "log") {
         logs.push(message.line);
         return;

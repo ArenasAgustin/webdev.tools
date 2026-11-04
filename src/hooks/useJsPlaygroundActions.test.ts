@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useJsPlaygroundActions } from "./useJsPlaygroundActions";
 import { MAX_OUTPUT_CHARS, MAX_OUTPUT_LINES } from "@/services/js/execute";
-import { stubJsExecWorker } from "@/test/inProcessJsExecWorker";
+import type { JsExecRequest, JsExecResponse } from "@/services/js/execute";
+import { InProcessJsExecWorker, stubJsExecWorker } from "@/test/inProcessJsExecWorker";
 import { translate } from "@/i18n/translate";
 
 describe("useJsPlaygroundActions execute output limit", () => {
@@ -61,5 +62,30 @@ describe("useJsPlaygroundActions execute output limit", () => {
 
     await waitFor(() => expect(toast.success).toHaveBeenCalled());
     expect(setOutput).toHaveBeenLastCalledWith("1");
+  });
+
+  it("ignores a malformed message user code posts and finishes with the real result", async () => {
+    // User code can call the worker's own postMessage, e.g. postMessage({ type: "done" }).
+    class SpoofingWorker extends InProcessJsExecWorker {
+      postMessage(request: JsExecRequest) {
+        for (const data of [{ type: "done" }, null, { type: "log", line: 1 }]) {
+          try {
+            this.onmessage?.({ data } as MessageEvent<JsExecResponse>);
+          } catch {
+            // A throwing handler is only reported by the browser; the worker keeps going.
+          }
+        }
+        super.postMessage(request);
+      }
+    }
+    vi.stubGlobal("Worker", SpoofingWorker);
+    const { result, setOutput, toast } = renderExecute('console.log("real")');
+
+    act(() => {
+      result.current.handleExecute();
+    });
+
+    await waitFor(() => expect(toast.success).toHaveBeenCalled());
+    expect(setOutput).toHaveBeenLastCalledWith("real");
   });
 });
