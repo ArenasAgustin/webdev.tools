@@ -426,8 +426,10 @@ export function getAllFormats(exact: RGB): ColorFormats {
   const cmyk = rgbToCmyk(exact);
   const rgb = roundRgb(exact);
 
-  if (rgb.a !== undefined && rgb.a < 1) {
-    const alphaByte = Math.round(rgb.a * 255);
+  // Alpha is rounded to the 8-bit hex byte first: one that rounds to FF (0.999) is
+  // opaque in every format, not opaque in hex but translucent in rgba().
+  const alphaByte = rgb.a === undefined ? 255 : Math.round(rgb.a * 255);
+  if (rgb.a !== undefined && alphaByte < 255) {
     const alphaHex = alphaByte.toString(16).padStart(2, "0").toUpperCase();
     // Two decimals, or three when two would name a different 8-bit alpha than the hex
     // (#FF000001 is 0.004, not 0; #FF0000FE is 0.996, not 1).

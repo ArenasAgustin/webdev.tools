@@ -460,6 +460,13 @@ describe("colorConverter - alpha agrees across formats", () => {
     }
   });
 
+  it.each(["rgba(255, 0, 0, 0.999)", "rgba(255, 0, 0, 0.9999)", "hsla(0, 100%, 50%, 0.999)"])(
+    "treats %s, whose alpha rounds to the opaque byte FF, as opaque in every format",
+    (input) => {
+      expect(convertColor(input)).toEqual(convertColor("rgb(255, 0, 0)"));
+    },
+  );
+
   it("keeps two decimals when they already round-trip", () => {
     expect(convertColor("#FF000080")?.rgb).toBe("rgba(255, 0, 0, 0.5)");
     expect(convertColor("#FF000001")?.rgb).toBe("rgba(255, 0, 0, 0.004)");
