@@ -20,10 +20,13 @@ export function ColorsPlayground() {
     hue?.setAttribute("aria-label", t("colors.hueLabel"));
   }, [t]);
   // Only valid colors are persisted; the text box itself may hold an invalid draft.
-  const [storedInput, setStoredInput] = usePersistedState(
+  const [savedInput, setStoredInput] = usePersistedState<unknown>(
     STORAGE_KEYS.COLORS_INPUT,
     colorsConfig.example,
   );
+  // Storage is user-editable: a non-string value (hand-edited, or written by another
+  // version) would crash on .trim() and loop the ErrorBoundary, so use the default.
+  const storedInput = typeof savedInput === "string" ? savedInput : colorsConfig.example;
   const [input, setInput] = useState(storedInput);
   // Derive initial color from the stored input (already loaded by usePersistedState above).
   // React guarantees sequential useState execution, so it is populated before
