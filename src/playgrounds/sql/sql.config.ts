@@ -1,4 +1,4 @@
-import type { PlaygroundConfig } from "@/types/playground";
+import { getLocalizedString, type PlaygroundConfig } from "@/types/playground";
 
 /**
  * File names, mime type and import filter shared by the SQL engine and its actions hook.
@@ -11,24 +11,9 @@ export const sqlFileSettings = {
   acceptExtensions: ".sql",
 } as const;
 
-export const sqlPlaygroundConfig: PlaygroundConfig = {
-  id: "sql",
-  name: "SQL tools",
-  icon: "fas fa-database",
-  description: {
-    es: "Formatear, minificar y ejecutar consultas SQL en el navegador",
-    en: "Format, minify and run SQL queries in the browser",
-  },
-  language: "sql",
-  keywords: [
-    "SQL formatter",
-    "SQL beautifier",
-    "SQL minifier",
-    "online SQL executor",
-    "SQLite WASM",
-    "SQL playground",
-  ],
-  example: `-- Crear una tabla de ejemplo
+/** The built-in example, per UI language. */
+const SQL_EXAMPLE = {
+  es: `-- Crear una tabla de ejemplo
 CREATE TABLE users (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
@@ -53,4 +38,52 @@ WHERE
   name LIKE 'A%'
 ORDER BY
   name ASC;`,
+  en: `-- Create a sample table
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert data
+INSERT INTO users (name, email) VALUES
+  ('Alice', 'alice@example.com'),
+  ('Bob', 'bob@example.com'),
+  ('Charlie', 'charlie@example.com');
+
+-- Query data
+SELECT
+  id,
+  name,
+  email
+FROM
+  users
+WHERE
+  name LIKE 'A%'
+ORDER BY
+  name ASC;`,
+};
+
+export const sqlPlaygroundConfig: PlaygroundConfig = {
+  id: "sql",
+  name: "SQL tools",
+  icon: "fas fa-database",
+  description: {
+    es: "Formatear, minificar y ejecutar consultas SQL en el navegador",
+    en: "Format, minify and run SQL queries in the browser",
+  },
+  language: "sql",
+  keywords: [
+    "SQL formatter",
+    "SQL beautifier",
+    "SQL minifier",
+    "online SQL executor",
+    "SQLite WASM",
+    "SQL playground",
+  ],
+  // A getter, so every read (Load example, a first visit) follows the UI language.
+  get example() {
+    return getLocalizedString(SQL_EXAMPLE);
+  },
 };

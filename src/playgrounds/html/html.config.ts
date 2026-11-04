@@ -1,16 +1,8 @@
-import type { PlaygroundConfig } from "@/types/playground";
+import { getLocalizedString, type PlaygroundConfig } from "@/types/playground";
 
-export const htmlPlaygroundConfig: PlaygroundConfig = {
-  id: "html",
-  name: "HTML tools",
-  icon: "fab fa-html5",
-  description: {
-    es: "Formatear y minificar HTML",
-    en: "Format and minify HTML",
-  },
-  language: "html",
-  keywords: ["HTML formatter", "HTML minifier", "HTML beautifier", "online HTML tool"],
-  example: `<!doctype html>
+/** The built-in example, per UI language. */
+const HTML_EXAMPLE = {
+  es: `<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -26,8 +18,8 @@ export const htmlPlaygroundConfig: PlaygroundConfig = {
       <h1>Hola, webdev.tools</h1>
       <p>Este es un ejemplo inicial para formatear y minificar HTML.</p>
       <button id="actionBtn" type="button">Haz click</button>
-      
-      <!-- Empty tags to clean -->
+
+      <!-- Etiquetas vacías para limpiar -->
       <div></div>
       <span />
     </main>
@@ -41,4 +33,51 @@ export const htmlPlaygroundConfig: PlaygroundConfig = {
     </script>
   </body>
 </html>`,
+  en: `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo HTML Playground</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; }
+      .card { border: 1px solid #ddd; border-radius: 12px; padding: 1rem; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Hello, webdev.tools</h1>
+      <p>This is a starter example to format and minify HTML.</p>
+      <button id="actionBtn" type="button">Click me</button>
+
+      <!-- Empty tags to clean -->
+      <div></div>
+      <span />
+    </main>
+
+    <script>
+      const button = document.getElementById("actionBtn");
+
+      button?.addEventListener("click", () => {
+        button.textContent = "Done!";
+      });
+    </script>
+  </body>
+</html>`,
+};
+
+export const htmlPlaygroundConfig: PlaygroundConfig = {
+  id: "html",
+  name: "HTML tools",
+  icon: "fab fa-html5",
+  description: {
+    es: "Formatear y minificar HTML",
+    en: "Format and minify HTML",
+  },
+  language: "html",
+  keywords: ["HTML formatter", "HTML minifier", "HTML beautifier", "online HTML tool"],
+  // A getter, so every read (Load example, a first visit) follows the UI language.
+  get example() {
+    return getLocalizedString(HTML_EXAMPLE);
+  },
 };
