@@ -88,6 +88,8 @@ const SLASH_OR_DOT =
  * space, as RFC 2822 writes it), GMT, UTC, or a US zone the engine knows (EST, PDT…).
  */
 const EXPLICIT_ZONE = /\d\s*(?:Z|[+-]\d{2}:?\d{2})$|\b(?:GMT|UTC?|[ECMP][SD]T)\b/i;
+/** A zone written at the end of a date string, with the space before it. */
+const TRAILING_ZONE = /\s*(?:Z|[+-]\d{2}:?\d{2}|GMT|UTC?|[ECMP][SD]T)$/i;
 
 function wallClock(hour?: string, minute?: string, second?: string, ms?: string) {
   return {
@@ -234,6 +236,11 @@ export function parseInput(
   if (wall) {
     return isValidWallTime(wall) ? { type: "date", value: wallTimeToDate(wall, timezone) } : null;
   }
+
+  // A numeric date with a zone (2024-02-30T10:00Z) is left to the engine, which would
+  // roll an impossible one over to March: check its fields first.
+  const zonedWall = numericWallTime(trimmed.replace(TRAILING_ZONE, ""));
+  if (zonedWall && !isValidWallTime(zonedWall)) return null;
 
   // Then, try to parse as date string. The engine's parser is lenient ("hello 5" becomes
   // a date in 2001), so only hand it strings with a recognizable date shape.
