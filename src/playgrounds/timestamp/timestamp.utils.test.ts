@@ -123,7 +123,15 @@ describe("timestamp.utils", () => {
       },
     );
 
-    it.each(["15/01/2024", "01/15/2024", "05/05/2024", "2024/01/02", "2024-01-02"])(
+    it.each([
+      ["01/02/24", { monthFirst: "2024-01-02", dayFirst: "2024-02-01" }],
+      ["03.04.75", { monthFirst: "1975-03-04", dayFirst: "1975-04-03" }],
+    ])("does not guess the order of the ambiguous 2-digit-year date %j", (value, readings) => {
+      expect(parseInput(value, "UTC")).toBeNull();
+      expect(ambiguousDayMonth(value)).toEqual(readings);
+    });
+
+    it.each(["15/01/2024", "01/15/2024", "05/05/2024", "2024/01/02", "2024-01-02", "05/05/24"])(
       "does not flag %j as ambiguous",
       (value) => {
         expect(ambiguousDayMonth(value)).toBeNull();

@@ -140,13 +140,23 @@ export function ambiguousDayMonth(value: string): { monthFirst: string; dayFirst
   const [, a, b, c] = slash;
   const first = Number(a);
   const second = Number(b);
-  if (c.length !== 4 || first === second || first < 1 || second < 1 || first > 12 || second > 12) {
+  if (
+    (c.length !== 4 && c.length !== 2) ||
+    first === second ||
+    first < 1 ||
+    second < 1 ||
+    first > 12 ||
+    second > 12
+  ) {
     return null;
   }
+  // A 2-digit year (01/02/24) is just as ambiguous; name it as the engine reads it
+  // (00-49 → 20xx, 50-99 → 19xx).
+  const year = c.length === 2 ? String(Number(c) + (Number(c) < 50 ? 2000 : 1900)) : c;
   const pad = (n: number) => String(n).padStart(2, "0");
   return {
-    monthFirst: `${c}-${pad(first)}-${pad(second)}`,
-    dayFirst: `${c}-${pad(second)}-${pad(first)}`,
+    monthFirst: `${year}-${pad(first)}-${pad(second)}`,
+    dayFirst: `${year}-${pad(second)}-${pad(first)}`,
   };
 }
 
