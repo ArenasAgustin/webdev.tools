@@ -18,6 +18,9 @@ const CLOSING: Record<string, string> = { "[": "]", "(": ")" };
 function isBrokenJsonPath(path: string): boolean {
   const open: string[] = [];
   let quote: string | null = null;
+  // Inside a regular expression literal of a filter, and inside its [...] class there.
+  let regex = false;
+  let regexClass = false;
   for (let i = 0; i < path.length; i++) {
     const char = path[i];
     if (quote) {
@@ -25,11 +28,29 @@ function isBrokenJsonPath(path: string): boolean {
       else if (char === quote) quote = null;
       continue;
     }
-    if ((char === "'" || char === '"') && open.length > 0) quote = char;
+    if (regex) {
+      if (char === "\\") i++;
+      else if (regexClass) regexClass = char !== "]";
+      else if (char === "[") regexClass = true;
+      else if (char === "/") regex = false;
+      continue;
+    }
+    if (char === "/" && open.includes(")") && startsRegex(path, i)) regex = true;
+    else if ((char === "'" || char === '"') && open.length > 0) quote = char;
     else if (char === "[" || char === "(") open.push(CLOSING[char]);
     else if ((char === "]" || char === ")") && open.pop() !== char) return true;
   }
-  return quote !== null || open.length > 0 || path.trimEnd().endsWith(".");
+  return quote !== null || regex || open.length > 0 || path.trimEnd().endsWith(".");
+}
+
+/**
+ * True when the "/" at `index` (inside a filter expression) opens a regular expression
+ * literal rather than dividing: like in JavaScript, it follows an operator or an opening
+ * bracket, not a value.
+ */
+function startsRegex(path: string, index: number): boolean {
+  const before = path.slice(0, index).trimEnd();
+  return "([,=!&|?:~+-*%<>{};".includes(before[before.length - 1]);
 }
 
 /**
