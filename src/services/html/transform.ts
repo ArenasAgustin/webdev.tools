@@ -106,7 +106,7 @@ export async function minifyHtml(
  */
 function removeHtmlComments(source: string): string {
   return source.replace(
-    /<(script|style|textarea|title)\b[^>]*>[\s\S]*?<\/\1\s*>|<!--[\s\S]*?-->/gi,
+    /<(script|style|textarea|title)(?=[\s/>])[^>]*>[\s\S]*?<\/\1\s*>|<!--[\s\S]*?-->/gi,
     (match: string, rawTextTag: string | undefined) =>
       rawTextTag || isConditionalComment(match) ? match : "",
   );
@@ -120,7 +120,7 @@ async function minifyEmbeddedCss(
   source: string,
   options: { enabled: boolean; removeComments: boolean },
 ): Promise<string> {
-  const stylePattern = /<style(\b[^>]*)>([\s\S]*?)<\/style>/gi;
+  const stylePattern = /<style((?=[\s/>])[^>]*)>([\s\S]*?)<\/style\s*>/gi;
 
   let result = "";
   let lastIndex = 0;
@@ -154,7 +154,7 @@ function minifyEmbeddedJs(
   source: string,
   options: { enabled: boolean; removeComments: boolean },
 ): string {
-  const scriptPattern = /<script(\b[^>]*)>([\s\S]*?)<\/script>/gi;
+  const scriptPattern = /<script((?=[\s/>])[^>]*)>([\s\S]*?)<\/script\s*>/gi;
 
   return source.replace(scriptPattern, (fullMatch, attrs: string, content: string) => {
     if (!options.enabled) {
@@ -238,12 +238,17 @@ const BLOCK_LEVEL_TAGS = new Set([
   "ul",
 ]);
 
-const HTML_TAG_PATTERN = /<!--[\s\S]*?-->|<[^>]+>/g;
+// A tag starts with a name, `/name`, `!` or `?` right after `<`; a bare `<` in
+// text (`a < b`) is not a tag, as in the HTML tokenizer.
+const HTML_TAG_PATTERN = /<!--[\s\S]*?-->|<\/?[a-zA-Z!?][^>]*>/g;
 
 function isWhitespaceBoundary(tag: string | undefined): boolean {
   if (tag === undefined) return true;
+  // A comment renders nothing, so the whitespace around it still separates the
+  // words on either side; it keeps one collapsed space like inline content.
+  if (tag.startsWith("<!--")) return false;
   const name = /^<\/?([a-zA-Z][\w-]*)/.exec(tag)?.[1];
-  // Comments, doctypes and processing instructions also swallow whitespace.
+  // Doctypes and processing instructions swallow whitespace.
   return name === undefined || BLOCK_LEVEL_TAGS.has(name.toLowerCase());
 }
 
@@ -274,7 +279,7 @@ function collapseHtmlWhitespace(source: string): string {
 }
 
 function trimEmbeddedTagContent(source: string, tagName: "style" | "script"): string {
-  const pattern = new RegExp(`<${tagName}(\\b[^>]*)>([\\s\\S]*?)<\\/${tagName}>`, "gi");
+  const pattern = new RegExp(`<${tagName}((?=[\\s/>])[^>]*)>([\\s\\S]*?)<\\/${tagName}\\s*>`, "gi");
 
   return source.replace(pattern, (_match, attrs: string, content: string) => {
     return `<${tagName}${attrs}>${content.trim()}</${tagName}>`;
@@ -289,7 +294,7 @@ function preserveEmbeddedTagContent(
   asComment = false,
 ): string {
   let index = 0;
-  const pattern = new RegExp(`<${tagName}(\\b[^>]*)>([\\s\\S]*?)<\\/${tagName}>`, "gi");
+  const pattern = new RegExp(`<${tagName}((?=[\\s/>])[^>]*)>([\\s\\S]*?)<\\/${tagName}\\s*>`, "gi");
 
   return source.replace(pattern, (_match: string, attrs: string, content: string) => {
     const name = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
@@ -360,6 +365,60 @@ const SELF_CLOSING_VOID_TAGS = [
   "wbr",
 ];
 
+// Foreign elements that may contain themselves (`<svg><svg>…</svg>…</svg>`).
+const NESTABLE_PRESERVED_TAGS = new Set(["svg", "math"]);
+
+/**
+ * Replace each outermost `<tagName>…</tagName>` block, counting nested elements
+ * of the same name so the block ends at its own closing tag. Self-closing
+ * (`<svg/>`) and unclosed blocks are left as they are.
+ */
+function replaceOutermostBlocks(
+  source: string,
+  tagName: string,
+  replace: (block: string) => string,
+): string {
+  const tagPattern = new RegExp(`<(/?)${tagName}(?=[\\s/>])[^>]*>`, "gi");
+  let output = "";
+  let last = 0;
+  let depth = 0;
+  let start = 0;
+
+  for (const match of source.matchAll(tagPattern)) {
+    const isEnd = match[1] === "/";
+    if (!isEnd) {
+      if (match[0].endsWith("/>")) continue;
+      if (depth === 0) start = match.index;
+      depth += 1;
+    } else if (depth > 0) {
+      depth -= 1;
+      if (depth === 0) {
+        const end = match.index + match[0].length;
+        output += source.slice(last, start) + replace(source.slice(start, end));
+        last = end;
+      }
+    }
+  }
+
+  return output + source.slice(last);
+}
+
+/**
+ * Elements that hold structure even when empty: removing an empty cell, row,
+ * list item or option shifts the rest of the table, list or select.
+ */
+const STRUCTURAL_EMPTY_TAGS = new Set(["td", "th", "tr", "li", "option", "video", "audio"]);
+
+/**
+ * An empty element is only removed when nothing can depend on it: attributes
+ * (`<i class="fa">` icons, `<div id="app">` mount points) and custom elements
+ * (`<my-widget>`, which render their own content) are kept, as are structural tags.
+ */
+function isRemovableEmptyElement(tagName: string, attributes: string): boolean {
+  const name = tagName.toLowerCase();
+  return !attributes.trim() && !name.includes("-") && !STRUCTURAL_EMPTY_TAGS.has(name);
+}
+
 /**
  * Clean empty HTML tags
  * Pure function - no side effects
@@ -385,29 +444,38 @@ export function cleanHtml(input: string, options: HtmlCleanOptions = {}): Result
       let index = 0;
 
       for (const tagName of PRESERVED_EMPTY_TAGS) {
-        const pattern = new RegExp(`<${tagName}(\\b[^>]*)>[\\s\\S]*?</${tagName}>`, "gi");
-        result = result.replace(pattern, (match) => {
+        const preserve = (match: string) => {
           const token = `__WEBDEVTOOLS_PRESERVE_${tagName.toUpperCase()}_${index}__`;
           index++;
           preservedBlocks.set(token, match);
           return token;
-        });
+        };
+        if (NESTABLE_PRESERVED_TAGS.has(tagName)) {
+          result = replaceOutermostBlocks(result, tagName, preserve);
+          continue;
+        }
+        const pattern = new RegExp(`<${tagName}((?=[\\s/>])[^>]*)>[\\s\\S]*?</${tagName}\\s*>`, "gi");
+        result = result.replace(pattern, preserve);
       }
 
-      // Remove empty tags: <tag></tag> or <tag />
-      // Match opening tag followed by optional whitespace and closing tag or self-closing
-      result = result.replace(/<(\w+)([^>]*?)\s*>\s*<\/\1>/g, "");
+      // Remove empty tags: <tag></tag>, with only whitespace inside
+      result = result.replace(
+        /<([a-zA-Z][\w-]*)([^>]*?)\s*>\s*<\/\1\s*>/g,
+        (match, tagName: string, attributes: string) =>
+          isRemovableEmptyElement(tagName, attributes) ? "" : match,
+      );
 
       // Remove self-closing tags EXCEPT void HTML tags (meta, link, br, etc.)
-      // These void tags have semantic meaning and should not be removed
+      // These void tags have semantic meaning and should not be removed.
+      // A tag with attributes is kept, which also covers `<a href=/>`: the slash
+      // ends an unquoted attribute value, so it is an ordinary opening tag.
       result = result.replace(
-        /<(\w+)([^>]*?)(\s*)\/\s*>/g,
-        (match, tagName: string, attributes: string, space: string) => {
-          // `<a href=/>`: the slash ends an unquoted attribute value, so the tag
-          // is an ordinary opening tag, not a self-closing one.
-          if (/=\s*[^\s"'<>`]*$/.test(attributes + space)) return match;
-          return SELF_CLOSING_VOID_TAGS.includes(tagName.toLowerCase()) ? match : "";
-        },
+        /<([a-zA-Z][\w-]*)([^>]*?)\s*\/\s*>/g,
+        (match, tagName: string, attributes: string) =>
+          isRemovableEmptyElement(tagName, attributes) &&
+          !SELF_CLOSING_VOID_TAGS.includes(tagName.toLowerCase())
+            ? ""
+            : match,
       );
 
       // Restore preserved blocks in reverse so tokens nested in a later block

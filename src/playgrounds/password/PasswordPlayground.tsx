@@ -219,11 +219,17 @@ export function PasswordPlayground() {
         <div className="flex flex-col gap-2">
           <h3 className="text-gray-300 text-sm">{t("password.history")}</h3>
           <div className="flex flex-wrap gap-2">
-            {history.map((entry) => (
+            {history.map((entry, index) => (
               <button
                 key={entry.id}
                 type="button"
                 onClick={() => handleHistoryClick(entry.value)}
+                // Masked chips all read "••••••••...": name them by position instead
+                aria-label={
+                  showPassword
+                    ? undefined
+                    : t("password.historyEntry", { position: index + 1, count: history.length })
+                }
                 className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 text-sm font-mono rounded-lg transition-colors truncate max-w-32"
                 // The full value only goes in the tooltip while the password is shown
                 title={showPassword ? entry.value : undefined}

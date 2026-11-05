@@ -57,9 +57,15 @@ export function usePersistedState<T>(
     maxLengthRef.current = maxLength;
   }, [value, maxLength]);
 
+  // The value this hook last wrote (or loaded). The flushes below only write when
+  // the live value differs, so an idle tab never overwrites a newer value that
+  // another tab saved under the same key.
+  const writtenRef = useRef(value);
+
   // Debounced write — normal operation path.
   useEffect(() => {
     const saved = persist(key, debouncedValue, maxLength);
+    writtenRef.current = debouncedValue;
     // eslint-disable-next-line react-hooks/set-state-in-effect, @eslint-react/set-state-in-effect -- the outcome of the localStorage write is only known after it runs
     setPersistFailed(!saved);
   }, [key, debouncedValue, maxLength]);
@@ -68,7 +74,9 @@ export function usePersistedState<T>(
   // the debounce window would be lost: save it when the page is hidden or left.
   useEffect(() => {
     const flush = () => {
+      if (Object.is(valueRef.current, writtenRef.current)) return;
       persist(key, valueRef.current, maxLengthRef.current);
+      writtenRef.current = valueRef.current;
     };
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") flush();
@@ -86,7 +94,9 @@ export function usePersistedState<T>(
   // the latest state, even within the debounce window.
   useEffect(() => {
     return () => {
+      if (Object.is(valueRef.current, writtenRef.current)) return;
       persist(key, valueRef.current, maxLengthRef.current);
+      writtenRef.current = valueRef.current;
     };
   }, [key]);
 

@@ -68,6 +68,24 @@ describe("colorConverter - parseColor", () => {
     expect(result!.b).toBe(219);
   });
 
+  it.each(["cmyk(0%, 50.5%, 100%, 0%)", "cmyk(0 50.5 100 0)", "cmyk(0% 50.5% 100% 0%)", "cmyk(0, 50.5, 100, 0)"])(
+    "parses CMYK with decimals and space-separated syntax: %j",
+    (input) => {
+      const result = parseColor(input);
+      expect(result?.r).toBe(255);
+      // 255 × (1 − 0.505) = 126.225; reading 50.5 as 50 would give 128
+      expect(result?.g).toBe(126);
+      expect(result?.b).toBe(0);
+    },
+  );
+
+  it.each(["cmyk(0%, 101%, 0%, 0%)", "cmyk(0 50 100)", "cmyk(-1%, 0%, 0%, 0%)"])(
+    "rejects the invalid CMYK %j",
+    (input) => {
+      expect(parseColor(input)).toBeNull();
+    },
+  );
+
   it("parses CMYK format", () => {
     const result = parseColor("cmyk(76%, 31%, 0%, 14%)");
     expect(result).not.toBeNull();
@@ -459,6 +477,13 @@ describe("colorConverter - alpha agrees across formats", () => {
       expect(Math.round(alphaOf(value) * 255).toString(16).padStart(2, "0").toUpperCase()).toBe(byte);
     }
   });
+
+  it.each(["rgba(255, 0, 0, 0.999)", "rgba(255, 0, 0, 0.9999)", "hsla(0, 100%, 50%, 0.999)"])(
+    "treats %s, whose alpha rounds to the opaque byte FF, as opaque in every format",
+    (input) => {
+      expect(convertColor(input)).toEqual(convertColor("rgb(255, 0, 0)"));
+    },
+  );
 
   it("keeps two decimals when they already round-trip", () => {
     expect(convertColor("#FF000080")?.rgb).toBe("rgba(255, 0, 0, 0.5)");

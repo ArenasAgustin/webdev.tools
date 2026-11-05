@@ -422,6 +422,15 @@ describe("cleanJson edge cases", () => {
     if (result.ok) expect(result.value).toBe("");
   });
 
+  it("keeps a top-level empty string when empty strings are not removed", () => {
+    expect(cleanJson('""', { removeEmptyString: false })).toEqual({ ok: true, value: '""' });
+    expect(cleanJson('""', { removeEmptyString: false, outputFormat: "minify" })).toEqual({
+      ok: true,
+      value: '""',
+    });
+    expect(cleanJson('""')).toEqual({ ok: true, value: "" });
+  });
+
   it("keeps a __proto__ key when sorting and cleaning", async () => {
     const input = '{"b":1,"__proto__":{"x":1}}';
     expect(minifyJson(input, { sortKeys: true })).toEqual({

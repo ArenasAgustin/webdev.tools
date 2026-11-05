@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { IDBFactory } from "fake-indexeddb";
 import { useJsonPathHistory, resetDbPromise } from "./useJsonPathHistory";
@@ -60,6 +60,23 @@ describe("useJsonPathHistory", () => {
 
       await waitFor(() => {
         expect(result.current.history).toHaveLength(1);
+        expect(result.current.history[0].frequency).toBe(2);
+      });
+    });
+
+    it("stores the trimmed expression, so a spaced variant is the same entry", async () => {
+      const { result } = renderHook(() => useJsonPathHistory());
+
+      await act(async () => {
+        await result.current.addToHistory("$.name");
+      });
+      await act(async () => {
+        await result.current.addToHistory("  $.name \n");
+      });
+
+      await waitFor(() => {
+        expect(result.current.history).toHaveLength(1);
+        expect(result.current.history[0].expression).toBe("$.name");
         expect(result.current.history[0].frequency).toBe(2);
       });
     });
@@ -221,6 +238,36 @@ describe("useJsonPathHistory", () => {
         ["$.b", 1, 3],
       ]);
       expect(entries.has(STORAGE_KEYS.JSONPATH_HISTORY)).toBe(false);
+      Reflect.deleteProperty(window, "localStorage");
+    });
+
+    it("keeps the saved list for a later visit when IndexedDB cannot be opened", async () => {
+      const entries = new Map<string, string>();
+      Object.defineProperty(window, "localStorage", {
+        configurable: true,
+        value: {
+          getItem: (key: string) => entries.get(key) ?? null,
+          setItem: (key: string, value: string) => entries.set(key, value),
+          removeItem: (key: string) => entries.delete(key),
+          clear: () => entries.clear(),
+        },
+      });
+      setItem(STORAGE_KEYS.JSONPATH_HISTORY, [
+        { id: "1", expression: "$.a", timestamp: 1, frequency: 1 },
+      ]);
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+      // Like a private window or a browser with site data blocked: open() throws.
+      globalThis.indexedDB = {
+        open: () => {
+          throw new DOMException("The operation is insecure.", "SecurityError");
+        },
+      } as unknown as IDBFactory;
+
+      renderHook(() => useJsonPathHistory());
+
+      await waitFor(() => expect(consoleError).toHaveBeenCalled());
+      expect(entries.has(STORAGE_KEYS.JSONPATH_HISTORY)).toBe(true);
+      consoleError.mockRestore();
       Reflect.deleteProperty(window, "localStorage");
     });
   });

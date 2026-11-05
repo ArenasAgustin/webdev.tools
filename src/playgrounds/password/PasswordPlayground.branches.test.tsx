@@ -36,17 +36,22 @@ const esTranslations: Record<string, string> = {
   "password.strengthLevels.weak": "Débil",
   "password.strengthLevels.strong": "Fuerte",
   "password.history": "Historial:",
+  "password.historyEntry": "Contraseña {{position}} de {{count}}",
   // password.aria.* intentionally omitted — tests query checkboxes by key literal
   // (mock falls back to key, so t("password.aria.uppercase") === "password.aria.uppercase")
 };
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (k: string) => esTranslations[k] ?? k,
+    t: (k: string, params?: Record<string, unknown>) =>
+      (esTranslations[k] ?? k).replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(params?.[name])),
   }),
 }));
 
 import { PasswordPlayground } from "./PasswordPlayground";
+
+// A masked history chip is named by its position, since its text is only dots.
+const MASKED_CHIP = /^Contraseña \d+ de \d+$/;
 
 describe("PasswordPlayground branches", () => {
   beforeEach(() => {
@@ -75,7 +80,7 @@ describe("PasswordPlayground branches", () => {
     expect((passwordInput as HTMLInputElement).value).not.toBe("");
 
     // History should show one entry
-    expect(screen.getByRole("button", { name: /\.\.\./i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: MASKED_CHIP })).toBeInTheDocument();
   });
 
   it("showPassword toggle changes input type between password and text", () => {
@@ -132,8 +137,24 @@ describe("PasswordPlayground branches", () => {
     }
 
     // Only 5 history entries should be shown
-    const historyButtons = screen.getAllByRole("button", { name: /\.\.\./i });
+    const historyButtons = screen.getAllByRole("button", { name: MASKED_CHIP });
     expect(historyButtons).toHaveLength(5);
+  });
+
+  it("masked history chips get distinct accessible names, by position", () => {
+    render(<PasswordPlayground />);
+    const generateBtn = screen.getByRole("button", { name: /generar/i });
+    for (let i = 0; i < 3; i++) fireEvent.click(generateBtn);
+
+    expect(screen.getAllByRole("button", { name: MASKED_CHIP }).map((chip) => chip.getAttribute("aria-label"))).toEqual([
+      "Contraseña 1 de 3",
+      "Contraseña 2 de 3",
+      "Contraseña 3 de 3",
+    ]);
+
+    // Once shown, the visible prefix names the chip.
+    fireEvent.click(screen.getByRole("button", { name: /mostrar contraseña/i }));
+    expect(screen.queryAllByRole("button", { name: MASKED_CHIP })).toHaveLength(0);
   });
 
   it("handleHistoryClick restores password from history", () => {
@@ -149,7 +170,7 @@ describe("PasswordPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: /generar/i }));
 
     // History should now have 2 entries; the second item is firstPassword
-    const historyBtns = screen.getAllByRole("button", { name: /\.\.\./i });
+    const historyBtns = screen.getAllByRole("button", { name: MASKED_CHIP });
     expect(historyBtns.length).toBeGreaterThanOrEqual(2);
 
     // The second history entry (index 1) corresponds to firstPassword (its text shows once unmasked)
@@ -169,7 +190,7 @@ describe("PasswordPlayground branches", () => {
     fireEvent.click(screen.getByRole("button", { name: /generar/i }));
     const passwordInput = screen.getByPlaceholderText(/contraseña aparecerá aquí/i);
     const password = (passwordInput as HTMLInputElement).value;
-    const historyBtn = screen.getByRole("button", { name: /\.\.\./i });
+    const historyBtn = screen.getByRole("button", { name: MASKED_CHIP });
 
     expect(historyBtn).not.toHaveAttribute("title");
 
@@ -183,7 +204,7 @@ describe("PasswordPlayground branches", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /generar/i }));
     const password = screen.getByPlaceholderText<HTMLInputElement>(/contraseña aparecerá aquí/i).value;
-    const historyBtn = screen.getByRole("button", { name: /\.\.\./i });
+    const historyBtn = screen.getByRole("button", { name: MASKED_CHIP });
 
     expect(historyBtn).not.toHaveTextContent(password.slice(0, 8));
     expect(historyBtn).toHaveTextContent("••••••••...");

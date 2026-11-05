@@ -87,7 +87,8 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
         // Build-time social previews (scripts/og-images.mjs, scripts/prerender.mjs) are for
         // crawlers only: keep the 13 OG PNGs and per-route HTML shells out of the precache.
-        globIgnores: ["**/node_modules/**", "og/**", "playground/**/index.html"],
+        // stats.html is the on-demand bundle report (see visualizer below).
+        globIgnores: ["**/node_modules/**", "og/**", "playground/**/index.html", "stats.html"],
         cleanupOutdatedCaches: true,
         // Auto-activate a new SW without waiting for a client SKIP_WAITING message.
         // Without this, a fresh SW can stay stuck in "waiting" while a stale SW keeps
@@ -143,12 +144,18 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/(api|_)/],
       },
     }),
-    visualizer({
-      open: process.env.npm_lifecycle_event === "analyze",
-      gzipSize: true,
-      brotliSize: true,
-      filename: "dist/stats.html",
-    }) as never,
+    // Bundle report only on demand (`pnpm analyze` or ANALYZE=true): a normal build must
+    // not ship it, since it is public and would be precached for every user.
+    ...(process.env.ANALYZE === "true" || process.env.npm_lifecycle_event === "analyze"
+      ? [
+          visualizer({
+            open: process.env.npm_lifecycle_event === "analyze",
+            gzipSize: true,
+            brotliSize: true,
+            filename: "dist/stats.html",
+          }) as never,
+        ]
+      : []),
   ],
   server: {
     headers: CROSS_ORIGIN_ISOLATION_HEADERS,

@@ -29,6 +29,20 @@ describe("sqlPlaygroundConfig", () => {
     expect(sqlPlaygroundConfig.example).toContain("SELECT");
   });
 
+  it("example comments follow the UI language", async () => {
+    const i18n = (await import("i18next")).default;
+    expect(sqlPlaygroundConfig.example).toContain("-- Crear una tabla de ejemplo");
+    try {
+      await i18n.changeLanguage("en");
+      const example = sqlPlaygroundConfig.example;
+      expect(example).toContain("-- Create a sample table");
+      expect(example).not.toMatch(/Crear|Insertar|Consultar/);
+      expect(example).toContain("SELECT");
+    } finally {
+      await i18n.changeLanguage("es");
+    }
+  });
+
   it("has keywords for SEO", () => {
     expect(sqlPlaygroundConfig.keywords).toBeDefined();
     expect(Array.isArray(sqlPlaygroundConfig.keywords)).toBe(true);

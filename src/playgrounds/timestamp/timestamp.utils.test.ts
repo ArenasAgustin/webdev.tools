@@ -86,6 +86,30 @@ describe("timestamp.utils", () => {
       expect(convertTimestamp(value, timezone, "en")?.unixMilliseconds).toBe(expected);
     });
 
+    it.each([
+      // Wall times skipped by a spring-forward gap move forward by the gap, west or east of UTC
+      ["2024-03-10 02:30", "America/New_York", Date.UTC(2024, 2, 10, 7, 30)],
+      ["2024-03-10 02:30", "America/Los_Angeles", Date.UTC(2024, 2, 10, 10, 30)],
+      ["2024-03-31 02:30", "Europe/Berlin", Date.UTC(2024, 2, 31, 1, 30)],
+      // A repeated (fall-back) wall time reads as its first occurrence
+      ["2024-11-03 01:30", "America/New_York", Date.UTC(2024, 10, 3, 5, 30)],
+      ["2024-10-27 02:30", "Europe/Berlin", Date.UTC(2024, 9, 27, 0, 30)],
+    ])("reads %j next to a DST change in %s consistently", (value, timezone, expected) => {
+      expect((parseInput(value, timezone)?.value as Date).getTime()).toBe(expected);
+    });
+
+    it.each([
+      ["Jan 1 0050", "0050-01-01T00:00:00.000Z"],
+      ["Feb 29 0052 10:00", "0052-02-29T10:00:00.000Z"],
+      ["Jan 1 0050 10:00 GMT", "0050-01-01T10:00:00.000Z"],
+      ["Mon, 15 Jan 0099 10:00:00 -0500", "0099-01-15T15:00:00.000Z"],
+    ])(
+      "keeps the explicit year below 100 in %j instead of reading it as 19xx",
+      (value, expected) => {
+        expect((parseInput(value, "UTC")?.value as Date).toISOString()).toBe(expected);
+      },
+    );
+
     it("keeps an explicit offset or Z whatever the selected timezone", () => {
       expect(convertTimestamp("2024-01-15T10:00:00Z", "Asia/Tokyo", "en")?.unixMilliseconds).toBe(
         Date.UTC(2024, 0, 15, 10),
@@ -95,13 +119,23 @@ describe("timestamp.utils", () => {
       );
     });
 
-    it.each(["2024-02-30", "2023-02-29", "2024-13-01", "2024-04-31 10:00", "2024-01-15 25:00", "2024-01-15T10:60", "02/30/2024", "2024/02/30"])(
-      "rejects the impossible date %j instead of rolling it over",
-      (value) => {
-        expect(parseInput(value, "UTC")).toBeNull();
-        expect(convertTimestamp(value, "UTC", "en")).toBeNull();
-      },
-    );
+    it.each([
+      "2024-02-30",
+      "2023-02-29",
+      "2024-13-01",
+      "2024-04-31 10:00",
+      "2024-01-15 25:00",
+      "2024-01-15T10:60",
+      "02/30/2024",
+      "2024/02/30",
+      "2024-02-30T10:00Z",
+      "2024-02-30T10:00:00+02:00",
+      "2024-02-30 10:00 -0500",
+      "2024-04-31T10:00:00.000Z",
+    ])("rejects the impossible date %j instead of rolling it over", (value) => {
+      expect(parseInput(value, "UTC")).toBeNull();
+      expect(convertTimestamp(value, "UTC", "en")).toBeNull();
+    });
 
     it.each([
       ["15/01/2024", Date.UTC(2024, 0, 15)],
@@ -123,7 +157,15 @@ describe("timestamp.utils", () => {
       },
     );
 
-    it.each(["15/01/2024", "01/15/2024", "05/05/2024", "2024/01/02", "2024-01-02"])(
+    it.each([
+      ["01/02/24", { monthFirst: "2024-01-02", dayFirst: "2024-02-01" }],
+      ["03.04.75", { monthFirst: "1975-03-04", dayFirst: "1975-04-03" }],
+    ])("does not guess the order of the ambiguous 2-digit-year date %j", (value, readings) => {
+      expect(parseInput(value, "UTC")).toBeNull();
+      expect(ambiguousDayMonth(value)).toEqual(readings);
+    });
+
+    it.each(["15/01/2024", "01/15/2024", "05/05/2024", "2024/01/02", "2024-01-02", "05/05/24"])(
       "does not flag %j as ambiguous",
       (value) => {
         expect(ambiguousDayMonth(value)).toBeNull();
@@ -236,7 +278,7 @@ describe("timestamp.utils", () => {
       expect(result).toBeLessThanOrEqual(now + 1);
     });
   });
-describe("parseInput with an explicit zone", () => {
+  describe("parseInput with an explicit zone", () => {
     it("honors an RFC 2822 numeric offset after a space", () => {
       const result = parseInput("Mon, 15 Jan 2024 10:00:00 -0500", "Asia/Tokyo");
       expect((result?.value as Date).toISOString()).toBe("2024-01-15T15:00:00.000Z");

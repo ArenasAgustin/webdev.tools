@@ -51,6 +51,13 @@ const IDLE_POLL_MS = 10;
 /** Parameters that shadow the globals the sandbox replaces, in this order. */
 const SANDBOX_NAMES = ["console", "setTimeout", "setInterval", "clearTimeout", "clearInterval"];
 
+/**
+ * Extra parameter of the user function: it receives an evaluator created inside the
+ * user code's block, so string timer handlers see the code's top-level bindings, as
+ * they see a classic script's globals in the browser. The name avoids user names.
+ */
+const SCOPE_HOOK = "__webdevToolsScopedEval";
+
 type AsyncFunctionConstructor = new (...args: string[]) => (...args: unknown[]) => Promise<unknown>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function -- only its prototype is needed
@@ -97,6 +104,11 @@ export async function runJavaScript(
           .join("\n")
       : line;
     const remaining = MAX_OUTPUT_CHARS - emittedChars;
+    // A previous line may already have used the whole budget (its newline included).
+    if (remaining <= 0) {
+      truncate();
+      return;
+    }
     const kept = indented.length > remaining ? indented.slice(0, remaining) : indented;
     emittedLines++;
     // One more character for the newline that joins this line to the next.
@@ -108,7 +120,7 @@ export async function runJavaScript(
 
   const log = (prefix: string, args: unknown[]) => {
     if (truncated) return;
-    emit(prefix + args.map((arg) => formatValue(arg)).join(" "));
+    emit(prefix + applyFormat(args).map((arg) => formatValue(arg)).join(" "));
   };
 
   const elapsed = (label: string, start: number) =>
@@ -183,14 +195,15 @@ export async function runJavaScript(
     asyncError = error;
   };
 
+  // Evaluates code in the scope of the user code; set by the user function on entry.
+  let scopedEval: ((source: string) => unknown) | undefined;
+
   const runCallback = (callback: unknown, args: unknown[]) => {
     try {
-      // Like the browser, a string is compiled and run as code (with this sandbox console
-      // and timers, so its output is collected too).
+      // Like the browser, a string is run as code, here in the user code's scope (with
+      // this sandbox console and timers, so its output is collected too).
       if (typeof callback === "string") {
-        // eslint-disable-next-line @typescript-eslint/no-implied-eval -- setTimeout(string) semantics
-        const compiled = new Function(...SANDBOX_NAMES, callback) as (...sandbox: unknown[]) => unknown;
-        compiled(...sandboxValues());
+        scopedEval?.(callback);
         return;
       }
       if (typeof callback !== "function") return;
@@ -220,19 +233,28 @@ export async function runJavaScript(
     clearTimeout(id);
   };
 
-  function sandboxValues() {
-    return [sandboxConsole, sandboxSetTimeout, sandboxSetInterval, sandboxClearTimer, sandboxClearTimer];
-  }
+  const setScopedEval = (evaluate: (source: string) => unknown) => {
+    scopedEval = evaluate;
+  };
 
   try {
     // The code goes in a block, so it may declare its own `console` or `setTimeout`
     // (a let/const would otherwise clash with the parameter). The block opens on the
-    // first user line, so line numbers do not move.
+    // first user line, so line numbers do not move. The direct eval in the hook sees
+    // the block's bindings once they are initialized.
     const userFunction = new AsyncFunction(
       ...SANDBOX_NAMES,
-      `{${await returnTrailingExpression(code)}\n}`,
+      SCOPE_HOOK,
+      `{${SCOPE_HOOK}((source) => eval(source));${await returnTrailingExpression(code)}\n}`,
     );
-    const result = await userFunction(...sandboxValues());
+    const result = await userFunction(
+      sandboxConsole,
+      sandboxSetTimeout,
+      sandboxSetInterval,
+      sandboxClearTimer,
+      sandboxClearTimer,
+      setScopedEval,
+    );
 
     while (pendingTimers.size > 0 && !hasAsyncError) {
       await new Promise((resolve) => setTimeout(resolve, IDLE_POLL_MS));
@@ -476,6 +498,41 @@ export function formatValue(value: unknown): string {
   }
 }
 
+const FORMAT_SPECIFIER = /%[sdifoOc%]/g;
+
+/** Text of one format specifier's argument (`%s`, `%d`/`%i`, `%f`, `%o`/`%O`). */
+function formatSpecifier(specifier: string, arg: unknown): string {
+  if (specifier === "s") {
+    if (typeof arg === "object" && arg !== null) return formatInline(arg);
+    return typeof arg === "string" ? arg : formatValue(arg);
+  }
+  if (specifier === "o" || specifier === "O") return formatInline(arg);
+  if (typeof arg === "bigint") return `${arg}n`;
+  if (typeof arg === "symbol") return "NaN";
+  const text = String(arg);
+  return String(specifier === "f" ? Number.parseFloat(text) : Number.parseInt(text, 10));
+}
+
+/**
+ * Apply the format specifiers of a leading string argument, like the browser console:
+ * each one consumes the next argument (`%c` styling is dropped), `%%` prints "%", and
+ * specifiers without an argument stay as they are. Returns the arguments left to print:
+ * the formatted string followed by the unused ones. A lone argument is not formatted.
+ */
+function applyFormat(args: unknown[]): unknown[] {
+  const [first, ...rest] = args;
+  if (typeof first !== "string" || rest.length === 0) return args;
+  let next = 0;
+  const formatted = first.replace(FORMAT_SPECIFIER, (match) => {
+    const specifier = match[1];
+    if (specifier === "%") return "%";
+    if (next >= rest.length) return match;
+    const arg = rest[next++];
+    return specifier === "c" ? "" : formatSpecifier(specifier, arg);
+  });
+  return [formatted, ...rest.slice(next)];
+}
+
 /** Single-line rendering of a `console.table` cell. */
 function formatCell(value: unknown): string {
   if (typeof value === "object" && value !== null) return formatInline(value);
@@ -490,7 +547,8 @@ function formatCell(value: unknown): string {
 function formatTable(data: unknown): string[] {
   if (typeof data !== "object" || data === null) return [formatValue(data)];
 
-  const rows = Object.entries(data as Record<string, unknown>);
+  // Rows past the line limit would be dropped anyway; one extra row still trips it.
+  const rows = Object.entries(data as Record<string, unknown>).slice(0, MAX_OUTPUT_LINES);
   const columns: string[] = [];
   let hasValues = false;
   for (const [, row] of rows) {
@@ -514,6 +572,9 @@ function formatTable(data: unknown): string[] {
       }),
     ]),
   ];
-  const widths = table[0].map((_, i) => Math.max(...table.map((cells) => cells[i].length)));
+  // A loop, not Math.max(...lengths): one spread argument per row overflows the stack.
+  const widths = table[0].map((_, i) =>
+    table.reduce((max, cells) => Math.max(max, cells[i].length), 0),
+  );
   return table.map((cells) => cells.map((cell, i) => cell.padEnd(widths[i])).join(" | "));
 }

@@ -68,6 +68,14 @@ describe("runJavaScript", () => {
     });
   });
 
+  it("lets a string passed to setTimeout see the code's top-level bindings", async () => {
+    expect(
+      await runJavaScript(
+        "const x = 5;\nlet y = 2;\nfunction f() { return 1; }\nsetTimeout('console.log(x + y + f())', 0);",
+      ),
+    ).toEqual({ ok: true, output: "8" });
+  });
+
   it("prints nothing extra when the last statement is not an expression", async () => {
     expect(await runJavaScript("const a = 1;")).toEqual({ ok: true, output: "" });
     expect(await runJavaScript("console.log(5)")).toEqual({ ok: true, output: "5" });
@@ -186,6 +194,24 @@ describe("runJavaScript output limits", () => {
     expect(returned.output).toHaveLength(MAX_OUTPUT_CHARS);
   });
 
+  it("drops a line that comes after a line which already reached the character cap", async () => {
+    const result = await runJavaScript(
+      `console.log("a".repeat(${MAX_OUTPUT_CHARS})); console.log("b".repeat(500000));`,
+    );
+    expect(result.truncated).toBe(true);
+    expect(result.output).toHaveLength(MAX_OUTPUT_CHARS);
+    expect(result.output).not.toContain("b");
+  });
+
+  it("prints a console.table with more rows than the line limit without crashing", async () => {
+    const result = await runJavaScript(
+      "console.table(Array.from({ length: 600000 }, (_, i) => ({ i })))",
+    );
+    expect(result.ok).toBe(true);
+    expect(result.truncated).toBe(true);
+    expect(result.output.split("\n")).toHaveLength(MAX_OUTPUT_LINES);
+  });
+
   it("does not let console.clear reset the limit", async () => {
     const streamed: string[] = [];
     await runJavaScript(
@@ -246,6 +272,26 @@ describe("runJavaScript console methods", () => {
 
   it("prints console.trace with its message", async () => {
     expect(await run('console.trace("here", 1)')).toBe("Trace: here 1");
+  });
+
+  it("applies format specifiers in the first argument like the browser console", async () => {
+    expect(await run('console.log("%s is %d years", "Bob", 42.7)')).toBe("Bob is 42 years");
+    expect(await run('console.log("%i|%f|%o|%O", "12px", "1.5", { a: 1 }, [1])')).toBe(
+      '12|1.5|{"a":1}|[1]',
+    );
+    expect(await run('console.warn("%cstyled", "color: red")')).toBe("WARN: styled");
+    expect(await run('console.log("100%% %s", "done", "extra", { b: 2 })')).toBe(
+      '100% done extra {\n  "b": 2\n}',
+    );
+    expect(await run('console.log("%s and %s", "only")')).toBe("only and %s");
+    expect(await run('console.log("%d %s %d", 5n, Symbol("s"), Symbol("t"))')).toBe(
+      "5n Symbol(s) NaN",
+    );
+  });
+
+  it("leaves a lone string or a non-string first argument unformatted", async () => {
+    expect(await run('console.log("50%% %s")')).toBe("50%% %s");
+    expect(await run('console.log(1, "%s", 2)')).toBe("1 %s 2");
   });
 
   it("drops earlier output on console.clear", async () => {

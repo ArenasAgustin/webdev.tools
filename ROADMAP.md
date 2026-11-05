@@ -22,6 +22,7 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 - [X] Arreglar error para abrir/cerrar toolbar (no funciona si abris desde el medio y cerras con boton)
 - [x] Migración de linting a `@eslint-react/eslint-plugin` + ESLint 10 — reglas type-aware para React 19 (reemplaza `eslint-plugin-react`); cascada typescript-eslint 8.61 y react-hooks 7.1
 - [x] Previews sociales por ruta — imágenes Open Graph 1200×630 generadas en build (satori + resvg) y HTML prerenderizado por playground con title, description, canonical, OG/Twitter y JSON-LD
+- [x] SEO básico — `robots.txt` y `sitemap.xml` generados en build; rutas desconocidas muestran una página 404 con `noindex` en lugar de redirigir al inicio
 
 ### Playgrounds
 

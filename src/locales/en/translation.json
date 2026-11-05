@@ -154,8 +154,8 @@
     "outputIdleFormat": "Format to see a result",
     "inputPlaceholder": "Write your {{language}} here...",
     "waitingLabel": "Waiting for {{language}}...",
-    "validLabel": "{{language}} valid",
-    "invalidLabel": "{{language}} invalid",
+    "validLabel": "Valid {{language}}",
+    "invalidLabel": "Invalid {{language}}",
     "outputPlaceholder": "The result will appear here...",
     "closeDiff": "Close",
     "expandedTitle": "Result",
@@ -197,6 +197,7 @@
       "strong": "Strong"
     },
     "history": "History:",
+    "historyEntry": "Password {{position}} of {{count}}",
     "noCharset": "Select at least one character set to generate a password",
     "outputLabel": "Generated password"
   },
@@ -345,6 +346,11 @@
       "keywordsFallback": "web developer tools",
       "defaultDescription": "Online tool suite for developers: format JSON, run JavaScript, and more. No installation, 100% in the browser."
     }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "This tool does not exist or has moved.",
+    "backHome": "Back to all tools"
   },
   "offline": {
     "message": "No connection — tools continue working locally"

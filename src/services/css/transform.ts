@@ -269,24 +269,47 @@ function tokenizeCss(source: string): CssSegment[] {
   return segments;
 }
 
+// Characters that would merge into one token with the character after them.
+const TOKEN_CHAR = /[\w\-\\\u0080-￿]/;
+
 function stripComments(source: string): string {
-  return tokenizeCss(source)
-    .filter((segment) => segment.kind !== "comment")
-    .map((segment) => segment.text)
-    .join("");
+  const segments = tokenizeCss(source);
+  let output = "";
+
+  segments.forEach((segment, index) => {
+    if (segment.kind !== "comment") {
+      output += segment.text;
+      return;
+    }
+    // A comment separates tokens: `1px/**/2px` and `div/**/p` must not become
+    // `1px2px` and `divp`. It is not whitespace, so `a/**/:hover` stays compound.
+    const next = segments.slice(index + 1).find((item) => item.kind !== "comment");
+    if (TOKEN_CHAR.test(output.at(-1) ?? "") && TOKEN_CHAR.test(next?.text[0] ?? "")) {
+      output += " ";
+    }
+  });
+
+  return output;
 }
+
+// A CSS escape: up to six hex digits plus one optional whitespace, or any one character.
+const CSS_ESCAPE = /\\(?:[0-9a-fA-F]{1,6}(?:\r\n|[ \t\r\n\f])?|[\s\S])/g;
 
 function minifyCssString(source: string): string {
   const preserved: string[] = [];
 
   // Mask literals and kept comments with private-use placeholders so whitespace
   // rules can't touch them.
+  const mask = (text: string) => {
+    preserved.push(text);
+    return `\uE000${preserved.length - 1}\uE001`;
+  };
   const masked = tokenizeCss(source)
-    .map((segment) => {
-      if (segment.kind === "code") return segment.text;
-      preserved.push(segment.text);
-      return `\uE000${preserved.length - 1}\uE001`;
-    })
+    .map((segment) =>
+      // Escapes are masked too: an escaped space (`.b\ `) or the one whitespace
+      // that ends a hex escape (`\31 `) is part of the name, not a combinator.
+      segment.kind === "code" ? segment.text.replace(CSS_ESCAPE, mask) : mask(segment.text),
+    )
     .join("");
 
   const compact = masked

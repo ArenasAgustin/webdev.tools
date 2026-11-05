@@ -189,7 +189,7 @@ export function useJsonPlaygroundActions({
         if (!jsonPathExpression.trim()) {
           throw new Error(translate("messages.json.jsonPathRequired"));
         }
-        const result = await applyJsonPathAsync(inputJson, jsonPathExpression);
+        const result = await applyJsonPathAsync(inputJson, jsonPathExpression.trim());
         if (!result.ok) throw new Error(result.error.message);
         return result.value;
       },

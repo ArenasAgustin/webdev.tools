@@ -74,6 +74,18 @@ describe("ColorsPlayground persistence", () => {
     expect(picker.dataset.color).toBe("#3498db");
   });
 
+  it.each([42, { hex: "#ff0000" }, ["#ff0000"], true])(
+    "non-string stored input (%j) falls back to the default example without crashing",
+    (stored) => {
+      storedValues.colorsInput = stored;
+
+      expect(() => render(<ColorsPlayground />)).not.toThrow();
+
+      expect(screen.getByRole("textbox")).toHaveValue("#3498db");
+      expect(screen.getByTestId("color-picker").dataset.color?.toLowerCase()).toBe("#3498db");
+    },
+  );
+
   it("persists only valid input, never the invalid text being typed", () => {
     render(<ColorsPlayground />);
 

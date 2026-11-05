@@ -43,7 +43,7 @@ export const Stats = memo(function Stats({
       {t("stats.summary", {
         lines: t("stats.lines", { count: lines }),
         characters: t("stats.characters", { count: characters, value: characters.toLocaleString(i18n.resolvedLanguage) }),
-        bytes: formatBytes(bytes),
+        bytes: formatBytes(bytes, i18n.resolvedLanguage),
       })}
       {/* A real space (not margin), so copied text and screen readers keep it */}
       {hasComparison && " "}

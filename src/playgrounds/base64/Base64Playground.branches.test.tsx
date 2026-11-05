@@ -10,6 +10,7 @@ const { getItemMock, setItemMock, clipboardWriteTextMock } = vi.hoisted(() => ({
 vi.mock("@/services/storage", () => ({
   getItem: getItemMock,
   setItem: setItemMock,
+  isAvailable: () => true,
   STORAGE_KEYS: {
     BASE64_INPUT_MODE: "base64InputMode",
     BASE64_INPUT: "base64Input",
@@ -38,14 +39,14 @@ const esTranslations: Record<string, string> = {
   "base64.dropFileHere": "Arrastrá un archivo o hacé clic aquí",
   "base64.changeFile": "Cambiar archivo",
   "base64.urlSafe": "URL-safe",
-  "base64.padding": "Padding",
+  "base64.padding": "Relleno",
   "base64.copy": "Copiar",
   "base64.copyError": "No se pudo copiar al portapapeles",
   "base64.swap": "Intercambiar",
   "base64.clear": "Limpiar",
   "base64.errorInvalidCharacter": "La entrada contiene un carácter fuera del alfabeto Base64",
   "base64.errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
-  "base64.errorInvalidPadding": "La entrada tiene un padding Base64 inválido",
+  "base64.errorInvalidPadding": "La entrada tiene un relleno Base64 inválido",
   "base64.errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido",
   "base64.errorFileTooLarge": "El archivo supera el máximo de {{max}} MB",
   "base64.errorFileUnreadable": "No se pudo leer el archivo",
@@ -148,7 +149,7 @@ describe("Base64Playground branches (text mode)", () => {
     fireEvent.change(input, { target: { value: "\xfb\xff\xbf" } });
 
     const urlSafeCheckbox = screen.getByRole("checkbox", { name: "URL-safe" });
-    const paddingCheckbox = screen.getByRole("checkbox", { name: "Padding" });
+    const paddingCheckbox = screen.getByRole("checkbox", { name: "Relleno" });
 
     const before = output.value;
     fireEvent.click(urlSafeCheckbox);
@@ -162,7 +163,7 @@ describe("Base64Playground branches (text mode)", () => {
   it("urlSafe and padding are disabled while decoding, since decode accepts both alphabets", () => {
     render(<Base64Playground />);
     const urlSafeCheckbox = screen.getByRole("checkbox", { name: "URL-safe" });
-    const paddingCheckbox = screen.getByRole("checkbox", { name: "Padding" });
+    const paddingCheckbox = screen.getByRole("checkbox", { name: "Relleno" });
     expect(urlSafeCheckbox).toBeEnabled();
 
     fireEvent.click(screen.getByRole("button", { name: /^decodificar$/i }));
@@ -207,7 +208,8 @@ describe("Base64Playground branches (text mode)", () => {
     await act(async () => {
       fireEvent.click(copyBtn);
     });
-    expect(screen.getByText("No se pudo copiar al portapapeles")).toBeInTheDocument();
+    // Announced to screen readers, not only drawn in red.
+    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo copiar al portapapeles");
 
     await act(async () => {
       vi.advanceTimersByTime(2001);

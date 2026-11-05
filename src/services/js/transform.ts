@@ -345,21 +345,14 @@ function mergeRanges(ranges: RangeToRemove[]): RangeToRemove[] {
 function findEmptyConstructs(input: string, options: JsCleanOptions): RangeToRemove[] {
   const ranges: RangeToRemove[] = [];
 
-  let ast: babelParser.ParseResult | null;
-  try {
-    ast = babelParser.parse(input, {
-      sourceType: "module",
-      plugins: ["jsx", "typescript"],
-      errorRecovery: true,
-    });
-  } catch {
-    // If parsing fails, return empty array (fallback to original input)
-    return ranges;
-  }
-
-  if (!ast) {
-    return ranges;
-  }
+  // A syntax error the parser cannot recover from is thrown to the caller, which
+  // reports it. Recovered errors (strict-mode-only rules such as `with` or legacy
+  // octal literals, which sloppy scripts may use) do not stop the clean.
+  const ast = babelParser.parse(input, {
+    sourceType: "module",
+    plugins: ["jsx", "typescript"],
+    errorRecovery: true,
+  });
 
   const identifierCounts = countIdentifiers(ast.program);
 
@@ -465,6 +458,9 @@ export function cleanJs(input: string, options: JsCleanOptions = {}): Result<str
     return { ok: true, value: result };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, error: serviceMessage("services.js.cleanError", { message }) };
+    return {
+      ok: false,
+      error: friendlySyntaxError(error) ?? serviceMessage("services.js.cleanError", { message }),
+    };
   }
 }

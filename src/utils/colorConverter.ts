@@ -59,6 +59,12 @@ const HSV_PATTERN = new RegExp(
   String.raw`^hsv\s*\(\s*${HUE}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}\s*\)$`,
 );
 
+// cmyk() takes four decimal channels, comma- or space-separated, each optionally with %.
+const CMYK_PATTERN = new RegExp(
+  String.raw`^cmyk\s*\(\s*${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}${CHANNEL_SEP}${PERCENT_CHANNEL}\s*\)$`,
+  "i",
+);
+
 const DEGREES_PER_UNIT: Record<string, number> = { deg: 1, grad: 0.9, rad: 180 / Math.PI, turn: 360 };
 
 /** Parse a hue ("120", "-90", "0.5turn") to degrees in 0..360. */
@@ -168,15 +174,10 @@ function parseColorExact(input: string): RGB | null {
   }
 
   // CMYK format
-  const cmykMatch = /^cmyk\s*\(\s*(\d+)%?\s*,\s*(\d+)%?\s*,\s*(\d+)%?\s*,\s*(\d+)%?\s*\)$/i.exec(
-    cleanInput,
-  );
+  const cmykMatch = CMYK_PATTERN.exec(cleanInput);
   if (cmykMatch) {
-    const c = parseInt(cmykMatch[1], 10);
-    const m = parseInt(cmykMatch[2], 10);
-    const y = parseInt(cmykMatch[3], 10);
-    const k = parseInt(cmykMatch[4], 10);
-    if (c >= 0 && c <= 100 && m >= 0 && m <= 100 && y >= 0 && y <= 100 && k >= 0 && k <= 100) {
+    const [c, m, y, k] = cmykMatch.slice(1, 5).map(Number);
+    if (c <= 100 && m <= 100 && y <= 100 && k <= 100) {
       return cmykToRgbExact(c, m, y, k);
     }
   }
@@ -426,8 +427,10 @@ export function getAllFormats(exact: RGB): ColorFormats {
   const cmyk = rgbToCmyk(exact);
   const rgb = roundRgb(exact);
 
-  if (rgb.a !== undefined && rgb.a < 1) {
-    const alphaByte = Math.round(rgb.a * 255);
+  // Alpha is rounded to the 8-bit hex byte first: one that rounds to FF (0.999) is
+  // opaque in every format, not opaque in hex but translucent in rgba().
+  const alphaByte = rgb.a === undefined ? 255 : Math.round(rgb.a * 255);
+  if (rgb.a !== undefined && alphaByte < 255) {
     const alphaHex = alphaByte.toString(16).padStart(2, "0").toUpperCase();
     // Two decimals, or three when two would name a different 8-bit alpha than the hex
     // (#FF000001 is 0.004, not 0; #FF0000FE is 0.996, not 1).

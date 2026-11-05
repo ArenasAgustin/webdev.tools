@@ -207,7 +207,10 @@ export function TimestampPlayground() {
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+        <div
+          role="alert"
+          className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300"
+        >
           {error}
         </div>
       )}

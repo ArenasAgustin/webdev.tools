@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
 import { cleanJs } from "./transform";
+import { serviceMessage } from "@/services/serviceMessage";
 
 describe("cleanJs - empty property values", () => {
   it("should NOT remove empty string from object property value", () => {
@@ -271,5 +272,27 @@ describe("cleanJs - keeps program semantics", () => {
     expect(clean("const other = { unused: 1 };\nconst unused = [];")).toBe(
       "const other = { unused: 1 };",
     );
+  });
+});
+
+describe("cleanJs - code that does not parse", () => {
+  it("reports the syntax error at its position instead of returning the code unchanged", () => {
+    const result = cleanJs("const a = [];\nfoo(");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain(serviceMessage("services.syntax.unexpectedTokenPlain"));
+      expect(result.error).toContain('"line":2');
+    }
+  });
+
+  it("reports other parser errors with their text", () => {
+    expect(cleanJs("const s = 'open;")).toEqual({
+      ok: false,
+      error: serviceMessage("services.js.cleanError", { message: "Unterminated string constant. (1:10)" }),
+    });
+  });
+
+  it("still cleans sloppy-mode code the module parser only flags", () => {
+    expect(cleanJs("var a = [];\nvar n = 010;")).toEqual({ ok: true, value: "var n = 010;" });
   });
 });

@@ -14,10 +14,13 @@ import { useClipboardCopy } from "@/hooks/useClipboardCopy";
 import { STORAGE_KEYS, removeItem } from "@/services/storage";
 import { formatBytes } from "@/utils/formatBytes";
 
-interface GeneratedHashes {
+interface HashSource {
   mode: InputMode;
   text: string;
   file: File | null;
+}
+
+interface GeneratedHashes extends HashSource {
   results: HashResult[];
 }
 
@@ -49,7 +52,8 @@ export function HashPlayground() {
   );
   const [generated, setGenerated] = useState<GeneratedHashes | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [hashError, setHashError] = useState(false);
+  // The input that failed to hash; the error is only shown while it is still the input.
+  const [failedSource, setFailedSource] = useState<HashSource | null>(null);
   const [emptyAttempt, setEmptyAttempt] = useState(false);
   const [compareValue, setCompareValue] = useState("");
   const [comparison, setComparison] = useState<Comparison | null>(null);
@@ -80,6 +84,10 @@ export function HashPlayground() {
         : NO_RESULTS,
     [isCurrent, generated, outputCase],
   );
+  const hashError =
+    failedSource !== null &&
+    failedSource.mode === inputMode &&
+    (inputMode === "text" ? failedSource.text === textInput : failedSource.file === fileInput);
   const compareResult =
     comparison !== null &&
     isCurrent &&
@@ -90,7 +98,7 @@ export function HashPlayground() {
 
   const processInput = useCallback(async () => {
     setIsProcessing(true);
-    setHashError(false);
+    setFailedSource(null);
     setEmptyAttempt(false);
     const source = { mode: inputMode, text: textInput, file: fileInput };
 
@@ -113,7 +121,7 @@ export function HashPlayground() {
     } catch (error) {
       console.error("Hash generation error:", error);
       setGenerated(null);
-      setHashError(true);
+      setFailedSource(source);
     } finally {
       setIsProcessing(false);
     }
@@ -303,7 +311,11 @@ export function HashPlayground() {
       </div>
 
       {/* Clipboard error feedback */}
-      {clipboardError && <p className="text-red-400 text-sm">{t("hash.copyError")}</p>}
+      {clipboardError && (
+        <p role="alert" className="text-red-400 text-sm">
+          {t("hash.copyError")}
+        </p>
+      )}
 
       {/* Compare Section */}
       <div className="flex flex-col gap-2 mt-4 p-4 bg-white/5 rounded-lg">

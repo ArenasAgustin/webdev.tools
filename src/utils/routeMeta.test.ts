@@ -85,13 +85,14 @@ describe("getPlaygroundMeta", () => {
 });
 
 describe("getMissingPlaygroundMeta", () => {
-  it("uses the fallback copy and points at the home page", () => {
+  it("is a not-found page kept out of the index (no home canonical)", () => {
     expect(getMissingPlaygroundMeta(t)).toEqual({
-      title: "page.playground",
+      title: "notFound.title",
       description: "page.meta.descriptionFallback",
       keywords: "page.meta.keywordsFallback",
       ogUrl: `${SITE_URL}/`,
       ogImage: `${SITE_URL}/og/home.png`,
+      noindex: true,
     });
   });
 });

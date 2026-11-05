@@ -85,6 +85,13 @@ describe("runStatements", () => {
     expect(result.resultSets[0].valuesTruncated).toBe(true);
   });
 
+  it("does not split a surrogate pair when cutting long text", () => {
+    // 'a' then emoji (two UTF-16 units each): a 10-unit cut lands inside the fifth one.
+    const result = runStatements(db, "SELECT 'a' || replace(hex(zeroblob(20)), '00', '😀') AS e;", 10, 10);
+
+    expect(result.resultSets[0].rows[0][0]).toBe("a😀😀😀😀…");
+  });
+
   it("does not flag value truncation for values within the cap", () => {
     const result = runStatements(db, "SELECT printf('%.100c', 'x') AS s;", 10, 100);
 
@@ -112,6 +119,13 @@ describe("runStatements", () => {
       9007199254740991,
       1.5,
     ]);
+  });
+
+  it("keeps infinite REAL values readable after the result is serialized to JSON", () => {
+    const result = runStatements(db, "SELECT 1e999 AS inf, -1e999 AS ninf, 1.5 AS real;", 10);
+
+    // JSON.stringify would turn ±Infinity into null, which reads as SQL NULL.
+    expect(JSON.parse(JSON.stringify(result)).resultSets[0].rows[0]).toEqual(["Infinity", "-Infinity", 1.5]);
   });
 
   it("propagates SQL errors", () => {
@@ -159,6 +173,45 @@ describe("runStatements", () => {
     expect(yielded).toHaveLength(1);
     // A freed statement refuses to run again.
     expect(() => yielded[0].step()).toThrow(/Statement closed/);
+  });
+
+  it("drives the iterator to the end when a step throws, so it frees its copy of the script", () => {
+    const iterate = db.iterateStatements.bind(db);
+    let iterator: ReturnType<Database["iterateStatements"]> | undefined;
+    const spy = vi.spyOn(db, "iterateStatements").mockImplementation((sql: string) => {
+      iterator = iterate(sql);
+      return iterator;
+    });
+    try {
+      expect(() => runStatements(db, "SELECT abs(-9223372036854775808); SELECT 2; SELECT 3;", 10)).toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+
+    // A finished iterator has released its SQL copy and yields nothing more.
+    expect(iterator?.next()).toEqual({ done: true });
+  });
+
+  it("does not leak memory across repeated failing runs", async () => {
+    // A fresh module, so the allocator state is not shared with other tests.
+    const SQL = (await initSqlJs()) as unknown as {
+      Database: new () => Database;
+      _malloc(size: number): number;
+      _free(ptr: number): void;
+    };
+    const fresh = new SQL.Database();
+    const script = `SELECT abs(-9223372036854775808); -- ${"x".repeat(1_000_000)}`;
+    const addresses: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      expect(() => runStatements(fresh, script, 10)).toThrow();
+      // A leaked script copy keeps its block, so the next big block lands elsewhere.
+      const ptr = SQL._malloc(1_000_000);
+      addresses.push(ptr);
+      SQL._free(ptr);
+    }
+    fresh.close();
+
+    expect(new Set(addresses).size).toBe(1);
   });
 
   it("names the statement that failed while running", () => {

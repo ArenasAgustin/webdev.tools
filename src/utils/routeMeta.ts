@@ -24,6 +24,8 @@ export interface RouteMeta {
   ogUrl: string;
   ogImage: string;
   jsonLd?: object;
+  /** Keep the route out of search results (and drop its canonical). */
+  noindex?: boolean;
 }
 
 export interface PlaygroundMetaSource {
@@ -81,13 +83,17 @@ export function getPlaygroundMeta(playground: PlaygroundMetaSource, t: Translate
   };
 }
 
-/** Meta for an unknown playground id (the page redirects home right after). */
+/**
+ * Meta for the not-found page shown for an unknown playground id: noindex, so the
+ * 200 SPA response is not indexed as a duplicate of the home page (soft 404).
+ */
 export function getMissingPlaygroundMeta(t: TranslateFn): RouteMeta {
   return {
-    title: t("page.playground"),
+    title: t("notFound.title"),
     description: t("page.meta.descriptionFallback"),
     keywords: t("page.meta.keywordsFallback"),
     ogUrl: HOME_URL,
     ogImage: ogImageUrl("home"),
+    noindex: true,
   };
 }

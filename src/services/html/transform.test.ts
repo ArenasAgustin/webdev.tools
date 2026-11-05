@@ -120,6 +120,23 @@ describe("minifyHtml", () => {
     if (!result.ok) expect(result.error).toMatch(pattern);
   });
 
+  it.each([
+    ["<div/>x</div>"],
+    ["<div><span/></div>"],
+    ["<my-el/>text</my-el>"],
+    ["<svg><path d='M0'/><g/></svg>"],
+  ])("accepts a self-closing slash on a non-void element: %s", async (input) => {
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("still rejects a stray closing tag after a self-closing foreign element", async () => {
+    const result = await minifyHtml("<svg><g/></g></svg>", minifyOptions);
+
+    expect(result.ok).toBe(false);
+  });
+
   it("reports the tag and line of a stray closing tag", async () => {
     const result = await minifyHtml("<div>\n</section>\n</div>", minifyOptions);
 
@@ -269,6 +286,63 @@ describe("minifyHtml", () => {
       ok: true,
       value: "<p>Hello <b>bold</b> <i>italic</i> world <a href='#'>link</a>.</p>",
     });
+  });
+
+  it.each([
+    ["a kept comment", "<p>a <!-- c --> b</p>", "<p>a <!-- c --> b</p>"],
+    ["a conditional comment", "<p>a <!--[if IE]>x<![endif]--> b</p>", "<p>a <!--[if IE]>x<![endif]--> b</p>"],
+    [
+      "a comment between inline elements",
+      "<span>a</span>\n  <!-- x -->\n  <span>b</span>",
+      "<span>a</span> <!-- x --> <span>b</span>",
+    ],
+    ["a comment between block elements", "<div>a</div>\n<!-- x -->\n<div>b</div>", "<div>a</div><!-- x --><div>b</div>"],
+  ])("does not glue words around %s", async (_name, input, expected) => {
+    const result = await minifyHtml(input, {
+      removeComments: false,
+      collapseWhitespace: true,
+      minifyCss: false,
+      minifyJs: false,
+    });
+
+    expect(result).toEqual({ ok: true, value: expected });
+  });
+
+  it("treats end tags with whitespace before > as the end of style and script", async () => {
+    const input =
+      "<style>a { color : red }</style ><p>Note : see , ok</p><style>b { color : blue }</style>" +
+      "<script>var  a = 1</script ><p>  x   y </p><script>var b = 2</script>";
+
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result).toEqual({
+      ok: true,
+      value:
+        "<style>a{color:red}</style><p>Note : see , ok</p><style>b{color:blue}</style>" +
+        "<script>var a=1</script><p>x y</p><script>var b=2</script>",
+    });
+  });
+
+  it.each([
+    [
+      "<style-box>  a  </style-box><style>a { color : red }</style>",
+      "<style-box> a </style-box><style>a{color:red}</style>",
+    ],
+    ["<title-bar><!-- x --></title-bar><title>t</title>", "<title-bar></title-bar><title>t</title>"],
+    ["<script-tag>  x  </script-tag><script>var  a = 1</script>", "<script-tag> x </script-tag><script>var a=1</script>"],
+  ])("does not treat a custom element named like a raw-text tag as raw text: %s", async (input, expected) => {
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result).toEqual({ ok: true, value: expected });
+  });
+
+  it.each([
+    ["<p>a < b and c</p>", "<p>a < b and c</p>"],
+    ["<p>1 <  2</p>\n<p>x</p>", "<p>1 < 2</p><p>x</p>"],
+  ])("does not treat a bare < in text as a tag: %s", async (input, expected) => {
+    const result = await minifyHtml(input, minifyOptions);
+
+    expect(result).toEqual({ ok: true, value: expected });
   });
 
   it("keeps whitespace inside pre and textarea verbatim", async () => {

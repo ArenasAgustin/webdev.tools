@@ -186,4 +186,31 @@ describe("applyJsonPath with a broken expression", () => {
       expect(applyJsonPath(input, path).ok).toBe(true);
     },
   );
+
+  it("treats a regular expression literal in a filter as opaque text", () => {
+    const strings = '{"a": [{"b": "x(y"}, {"b": "z]"}, {"b": 4}]}';
+    expect(applyJsonPath(strings, "$.a[?(@.b && @.b.match && @.b.match(/[(]/))]")).toEqual({
+      ok: true,
+      value: '[\n  {\n    "b": "x(y"\n  }\n]',
+    });
+    expect(applyJsonPath(strings, "$.a[?(@.b.match && @.b.match(/]/))]").ok).toBe(true);
+    // A division is not a regular expression: the bracket after it still counts.
+    expect(applyJsonPath(strings, "$.a[?(@.b / 2 > 1)]").ok).toBe(true);
+    expect(applyJsonPath(strings, "$.a[?(@.b / 2 > [1)]")).toEqual({
+      ok: false,
+      error: { message: "services.json.jsonPathInvalid" },
+    });
+    expect(applyJsonPath(strings, "$.a[?(@.b.match(/[(]")).toEqual({
+      ok: false,
+      error: { message: "services.json.jsonPathInvalid" },
+    });
+  });
+});
+
+describe("applyJsonPath expression whitespace", () => {
+  it("ignores whitespace around the expression", () => {
+    const input = '{"a": [1, 2]}';
+    expect(applyJsonPath(input, " $.a[0] \n")).toEqual(applyJsonPath(input, "$.a[0]"));
+    expect(applyJsonPath(input, "$.a[0]")).toEqual({ ok: true, value: "[\n  1\n]" });
+  });
 });

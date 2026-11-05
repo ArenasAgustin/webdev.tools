@@ -59,7 +59,8 @@ function stripInternalPaths(text: string): string {
  * blank lines are never dropped: tagless code gets `<?php ` on its first line, and
  * blank lines before an opening `<?php` / `<?=` move inside the tag (where they
  * print nothing). Code that starts with inline HTML runs as written, minus the
- * leading and trailing whitespace it would otherwise print.
+ * trailing whitespace it would otherwise print; its leading whitespace goes into
+ * an empty PHP block, so it prints nothing but still counts for line numbers.
  */
 function toRunnablePhp(code: string): string {
   const source = code.trimEnd();
@@ -67,7 +68,8 @@ function toRunnablePhp(code: string): string {
   const leading = /^\s*/.exec(source)?.[0] ?? "";
   const body = source.slice(leading.length);
   const tag = /^<\?(php\b|=)/i.exec(body)?.[0];
-  return tag ? `${tag}${leading}${body.slice(tag.length)}` : body;
+  if (tag) return `${tag}${leading}${body.slice(tag.length)}`;
+  return leading ? `<?php${leading}?>${body}` : body;
 }
 
 /**

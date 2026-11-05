@@ -483,6 +483,20 @@ describe("Storage Service", () => {
     });
   });
 
+  it("isAvailable counts a full storage as available", () => {
+    const fullStorage = {
+      getItem: () => null,
+      setItem: () => {
+        throw new DOMException("The quota has been exceeded.", "QuotaExceededError");
+      },
+      removeItem: () => {},
+      clear: () => {},
+    };
+    Object.defineProperty(window, "localStorage", { value: fullStorage });
+    expect(isAvailable()).toBe(true);
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+  });
+
   describe("removeJsonToolsConfig / removeJsToolsConfig", () => {
     it("removeJsonToolsConfig removes the saved config", () => {
       saveJsonToolsConfig({ format: { indentSize: 2, sortKeys: false, autoCopy: false } });

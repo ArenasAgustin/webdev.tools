@@ -66,6 +66,15 @@ describe("executePhp", () => {
     expect(run).toHaveBeenLastCalledWith({ code: "<?php\n\n echo 1;" });
   });
 
+  it("keeps leading blank lines before inline HTML without printing them", async () => {
+    run.mockResolvedValue(response("<b>x</b>\n1"));
+
+    await executePhp("\n\n<b>x</b>\n<?php echo 1;");
+
+    // The blank lines sit in an empty PHP block, so <b> stays on line 3.
+    expect(run).toHaveBeenLastCalledWith({ code: "<?php\n\n?><b>x</b>\n<?php echo 1;" });
+  });
+
   it("reports warnings as plain text, in order with the output", async () => {
     run.mockResolvedValue(
       response("a\nNotice: Undefined variable: undef in /internal/eval.php on line 2\nb"),

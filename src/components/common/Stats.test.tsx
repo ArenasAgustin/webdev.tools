@@ -9,7 +9,8 @@ describe("Stats", () => {
     const text = container.textContent ?? "";
     expect(text).toContain("2 líneas");
     expect(text).toContain("caracteres");
-    expect(text).toContain("1.5 KB");
+    // Decimal comma: the tests run in Spanish
+    expect(text).toContain("1,5 KB");
     expect(text).not.toContain("bytes");
   });
 

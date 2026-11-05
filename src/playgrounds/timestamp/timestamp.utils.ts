@@ -88,6 +88,8 @@ const SLASH_OR_DOT =
  * space, as RFC 2822 writes it), GMT, UTC, or a US zone the engine knows (EST, PDT…).
  */
 const EXPLICIT_ZONE = /\d\s*(?:Z|[+-]\d{2}:?\d{2})$|\b(?:GMT|UTC?|[ECMP][SD]T)\b/i;
+/** A zone written at the end of a date string, with the space before it. */
+const TRAILING_ZONE = /\s*(?:Z|[+-]\d{2}:?\d{2}|GMT|UTC?|[ECMP][SD]T)$/i;
 
 function wallClock(hour?: string, minute?: string, second?: string, ms?: string) {
   return {
@@ -138,13 +140,23 @@ export function ambiguousDayMonth(value: string): { monthFirst: string; dayFirst
   const [, a, b, c] = slash;
   const first = Number(a);
   const second = Number(b);
-  if (c.length !== 4 || first === second || first < 1 || second < 1 || first > 12 || second > 12) {
+  if (
+    (c.length !== 4 && c.length !== 2) ||
+    first === second ||
+    first < 1 ||
+    second < 1 ||
+    first > 12 ||
+    second > 12
+  ) {
     return null;
   }
+  // A 2-digit year (01/02/24) is just as ambiguous; name it as the engine reads it
+  // (00-49 → 20xx, 50-99 → 19xx).
+  const year = c.length === 2 ? String(Number(c) + (Number(c) < 50 ? 2000 : 1900)) : c;
   const pad = (n: number) => String(n).padStart(2, "0");
   return {
-    monthFirst: `${c}-${pad(first)}-${pad(second)}`,
-    dayFirst: `${c}-${pad(second)}-${pad(first)}`,
+    monthFirst: `${year}-${pad(first)}-${pad(second)}`,
+    dayFirst: `${year}-${pad(second)}-${pad(first)}`,
   };
 }
 
@@ -161,6 +173,10 @@ function isValidWallTime(w: WallTime): boolean {
     w.second <= 59
   );
 }
+
+const DAY_MS = 86_400_000;
+/** One 400-year Gregorian cycle: 146097 days, after which the calendar repeats exactly. */
+const GREGORIAN_CYCLE_MS = 146_097 * DAY_MS;
 
 const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
 
@@ -199,9 +215,17 @@ function wallTimeToDate(w: WallTime, timezone: string): Date {
   date.setUTCFullYear(w.year, w.month - 1, w.day);
   date.setUTCHours(w.hour, w.minute, w.second, w.ms);
   const guess = date.getTime();
-  // A second pass settles the offset next to a DST change.
-  const first = guess - timezoneOffsetMs(guess, timezone);
-  return new Date(guess - timezoneOffsetMs(first, timezone));
+  // The offsets a day before and after differ only next to a DST change. A reading
+  // is right when the zone really has that offset at the resulting instant.
+  const before = timezoneOffsetMs(guess - DAY_MS, timezone);
+  const after = timezoneOffsetMs(guess + DAY_MS, timezone);
+  const readings = [guess - before, guess - after].filter(
+    (instant) => instant + timezoneOffsetMs(instant, timezone) === guess,
+  );
+  // A repeated wall time (fall back) takes its first occurrence; one skipped by a
+  // gap (spring forward) reads with the offset before the change, which moves it
+  // forward by the gap, west and east of UTC alike.
+  return new Date(readings.length > 0 ? Math.min(...readings) : guess - before);
 }
 
 /**
@@ -235,16 +259,37 @@ export function parseInput(
     return isValidWallTime(wall) ? { type: "date", value: wallTimeToDate(wall, timezone) } : null;
   }
 
+  // A numeric date with a zone (2024-02-30T10:00Z) is left to the engine, which would
+  // roll an impossible one over to March: check its fields first.
+  const zonedWall = numericWallTime(trimmed.replace(TRAILING_ZONE, ""));
+  if (zonedWall && !isValidWallTime(zonedWall)) return null;
+
   // Then, try to parse as date string. The engine's parser is lenient ("hello 5" becomes
   // a date in 2001), so only hand it strings with a recognizable date shape.
   if (looksLikeDate(trimmed)) {
-    const date = new Date(trimmed);
+    // The engine reads a year below 100 as 19xx (Jan 1 0050 becomes 1950): parse it
+    // 2000 years later and move the result back, a whole number of 400-year Gregorian
+    // cycles, so month, day and leap days line up.
+    const year = /\b\d{4}\b/.exec(trimmed);
+    const yearShift = year && Number(year[0]) < 100 ? 2000 : 0;
+    const date = new Date(
+      year && yearShift
+        ? trimmed.slice(0, year.index) +
+            String(Number(year[0]) + yearShift) +
+            trimmed.slice(year.index + 4)
+        : trimmed,
+    );
     if (!isNaN(date.getTime())) {
-      if (EXPLICIT_ZONE.test(trimmed)) return { type: "date", value: date };
+      if (EXPLICIT_ZONE.test(trimmed)) {
+        return {
+          type: "date",
+          value: new Date(date.getTime() - (yearShift / 400) * GREGORIAN_CYCLE_MS),
+        };
+      }
       // The engine read a zone-less string (Jan 15 2024) in the browser's zone:
       // keep its wall-clock fields and read them in the selected timezone instead.
       const wallTime: WallTime = {
-        year: date.getFullYear(),
+        year: date.getFullYear() - yearShift,
         month: date.getMonth() + 1,
         day: date.getDate(),
         hour: date.getHours(),

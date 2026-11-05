@@ -131,6 +131,33 @@ describe("usePersistedState", () => {
     expect(result.current[2]).toBe(false);
   });
 
+  it("does not rewrite an unchanged value when the page is hidden, unloaded or unmounted", () => {
+    // Another tab may have saved a newer value meanwhile; rewriting this tab's
+    // unchanged copy would silently overwrite it.
+    getItemMock.mockReturnValue("loaded");
+    setItemMock.mockReturnValue(true);
+    const { result, unmount } = renderHook(() => usePersistedState("test-key", "a"));
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    act(() => {
+      result.current[1]("edited");
+    });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(setItemMock).toHaveBeenLastCalledWith("test-key", "edited");
+    setItemMock.mockClear();
+
+    vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+    document.dispatchEvent(new Event("visibilitychange"));
+    window.dispatchEvent(new Event("pagehide"));
+    unmount();
+
+    expect(setItemMock).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
   it("saves a pending value when the page is hidden or unloaded, before the debounce fires", () => {
     getItemMock.mockReturnValue(null);
     const { result } = renderHook(() => usePersistedState("test-key", "a"));

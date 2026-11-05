@@ -122,7 +122,7 @@
     "convert": "Convertir",
     "now": "Ahora",
     "placeholder": "Unix timestamp o fecha (ISO 8601, RFC 2822)...",
-    "invalidInput": "Input inválido. Ingresá un timestamp o fecha válida.",
+    "invalidInput": "Entrada inválida. Ingresá un timestamp o fecha válida.",
     "ambiguousDate": "Fecha ambigua: puede ser {{monthFirst}} (mes primero) o {{dayFirst}} (día primero). Escribila como AAAA-MM-DD.",
     "futureDate": "Esta fecha es en el futuro",
     "copied": "Copiado al portapapeles",
@@ -197,6 +197,7 @@
       "strong": "Fuerte"
     },
     "history": "Historial:",
+    "historyEntry": "Contraseña {{position}} de {{count}}",
     "noCharset": "Seleccioná al menos un tipo de caracteres para generar una contraseña",
     "outputLabel": "Contraseña generada"
   },
@@ -346,6 +347,11 @@
       "defaultDescription": "Suite de herramientas online para desarrolladores: formatear JSON, ejecutar JavaScript, y más. Sin instalación, 100% en el navegador."
     }
   },
+  "notFound": {
+    "title": "Página no encontrada",
+    "message": "Esta herramienta no existe o cambió de dirección.",
+    "backHome": "Volver a todas las herramientas"
+  },
   "offline": {
     "message": "Sin conexión — las herramientas siguen funcionando localmente"
   },
@@ -378,14 +384,14 @@
     "dropFileHere": "Arrastrá un archivo o hacé clic aquí",
     "changeFile": "Cambiar archivo",
     "urlSafe": "URL-safe",
-    "padding": "Padding",
+    "padding": "Relleno",
     "copy": "Copiar",
     "copyError": "No se pudo copiar al portapapeles",
     "swap": "Intercambiar",
     "clear": "Limpiar",
     "errorInvalidCharacter": "La entrada contiene un carácter fuera del alfabeto Base64",
     "errorInvalidLength": "La longitud de la entrada no es una longitud Base64 válida",
-    "errorInvalidPadding": "La entrada tiene un padding Base64 inválido",
+    "errorInvalidPadding": "La entrada tiene un relleno Base64 inválido",
     "errorInvalidUtf8": "Los bytes decodificados no son texto UTF-8 válido",
     "errorFileTooLarge": "El archivo supera el máximo de {{max}} MB",
     "errorFileUnreadable": "No se pudo leer el archivo"

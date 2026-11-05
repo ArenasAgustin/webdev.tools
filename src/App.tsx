@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastProvider } from "@/context/ToastContext";
 import { ToastContainer } from "@/components/common/ToastContainer";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
@@ -6,6 +6,7 @@ import { OfflineBanner } from "@/components/common/OfflineBanner";
 import { InstallPromptBanner } from "@/components/common/InstallPromptBanner";
 import { UpdatePromptBanner } from "@/components/common/UpdatePromptBanner";
 import { Home } from "@/pages/Home";
+import { NotFound } from "@/pages/NotFound";
 import { PlaygroundPage } from "@/pages/PlaygroundPage";
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/playground/:playgroundId" element={<PlaygroundPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           </div>

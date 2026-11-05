@@ -18,7 +18,7 @@ import { ToggleButtonGroup } from "@/components/common/ToggleButtonGroup";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { MAX_INPUT_BYTES } from "@/utils/constants/limits";
 import { useClipboardCopy } from "@/hooks/useClipboardCopy";
-import { STORAGE_KEYS } from "@/services/storage";
+import { STORAGE_KEYS, isAvailable as isStorageAvailable } from "@/services/storage";
 import { formatBytes } from "@/utils/formatBytes";
 
 type FileState = { file: File; bytes: Uint8Array } | null;
@@ -53,6 +53,9 @@ export function Base64Playground() {
     base64Config.example,
     { maxLength: MAX_INPUT_BYTES },
   );
+  // With storage blocked or missing nothing is ever saved, so "too large to be saved"
+  // would be wrong; that note is only for inputs the storage itself rejects.
+  const [storageAvailable] = useState(isStorageAvailable);
   const [mode, setMode] = usePersistedState<Base64Mode>(STORAGE_KEYS.BASE64_MODE, "auto");
   const [storedOptions, setOptions] = usePersistedState<Base64Options>(
     STORAGE_KEYS.BASE64_OPTIONS,
@@ -263,7 +266,7 @@ export function Base64Playground() {
             className="w-full h-32 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white font-mono resize-none focus:outline-none focus:ring-1 focus:ring-cyan-400"
             spellCheck={false}
           />
-          {inputNotSaved && (
+          {inputNotSaved && storageAvailable && (
             <p role="status" className="text-yellow-300 text-sm">
               {t("base64.inputNotSaved")}
             </p>
@@ -377,7 +380,11 @@ export function Base64Playground() {
         />
       </div>
 
-      {clipboardError && <p className="text-red-400 text-sm">{t("base64.copyError")}</p>}
+      {clipboardError && (
+        <p role="alert" className="text-red-400 text-sm">
+          {t("base64.copyError")}
+        </p>
+      )}
     </div>
   );
 }
