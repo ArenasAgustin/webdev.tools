@@ -169,7 +169,7 @@ export default defineConfig(({ mode }) => ({
       // pnpm strict mode doesn't hoist transitive deps — alias to .pnpm path directly
       "@php-wasm/universal": path.resolve(
         __dirname,
-        "./node_modules/.pnpm/@php-wasm+universal@3.1.36/node_modules/@php-wasm/universal"
+        "./node_modules/.pnpm/@php-wasm+universal@3.1.66/node_modules/@php-wasm/universal"
       ),
       "@": path.resolve(__dirname, "./src"),
       "@/components": path.resolve(__dirname, "./src/components"),
