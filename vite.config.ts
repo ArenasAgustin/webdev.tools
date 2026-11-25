@@ -107,15 +107,21 @@ export default defineConfig(({ mode }) => ({
           {
             // Monaco is loaded at runtime from jsDelivr (@monaco-editor/loader). The URL is
             // pinned to a version, so its files never change: cache them for offline use.
-            // They arrive as no-cors <script>/worker loads, hence the opaque status 0.
             // Files loaded before this SW controlled the page (first visit) are added
             // to the same cache by src/components/editor/monacoOfflineCache.ts.
+            //
+            // The page loads them as no-cors <script>s, which would be stored as opaque
+            // responses. Under COEP the SW cannot read those back (Cache.match throws),
+            // so the request fails and the editor never loads. Fetch them in cors mode
+            // instead (jsDelivr sends Access-Control-Allow-Origin: *) and only keep 200s.
+            // The cache name is versioned so the old, opaque-poisoned cache is never read.
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/npm\/monaco-editor@/,
             handler: "CacheFirst",
             options: {
-              cacheName: "monaco-editor",
+              cacheName: "monaco-editor-v2",
               expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
+              fetchOptions: { mode: "cors", credentials: "omit" },
             },
           },
           {
@@ -132,11 +138,15 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
+            // The stylesheet comes from a CSS @import (no-cors): same opaque-response
+            // problem as Monaco above, same fix. Google Fonts sends CORS headers.
             urlPattern: /fonts\.googleapis\.com|fonts\.gstatic\.com/,
             handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "google-fonts",
+              cacheName: "google-fonts-v2",
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [200] },
+              fetchOptions: { mode: "cors", credentials: "omit" },
             },
           },
         ],
