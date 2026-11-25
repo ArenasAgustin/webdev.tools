@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { HashPlayground } from "@/playgrounds/hash/HashPlayground";
 import { PasswordPlayground } from "@/playgrounds/password/PasswordPlayground";
 import { ColorsPlayground } from "@/playgrounds/colors/ColorsPlayground";
@@ -25,7 +25,10 @@ describe("form fields have accessible names", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /generar/i }));
     });
-    expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent(/sha256/i);
+    // Hashing goes through crypto.subtle, which can take more than one tick to settle.
+    await waitFor(() =>
+      expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent(/sha256/i),
+    );
 
     fireEvent.change(screen.getByRole("textbox", { name: "Hash a comparar" }), {
       target: { value: "nope" },
