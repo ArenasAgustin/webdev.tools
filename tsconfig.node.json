@@ -30,7 +30,6 @@
   },
   "include": [
     "vite.config.ts",
-    "vitest.config.ts",
-    ".storybook/**/*"
+    "vitest.config.ts"
   ]
 }

@@ -15,7 +15,7 @@ PWA de herramientas para desarrolladores web. React 19 + Vite 6 + TypeScript 5.9
 - [x] i18n — español (default) e inglés con i18next
 - [x] Monaco Editor — lazy loaded, chunk separado
 - [x] React Router DOM 7 — routing por playground
-- [x] Storybook 10 — con addon-vitest y addon-a11y
+- [x] ~~Storybook 10~~ — removido (2026-11-25): no se usaba ni corría en CI
 - [x] Testing matrix estricta — verify-architecture.js valida 12 archivos requeridos por playground
 - [x] Coverage threshold — lines 88%, functions 79%, branches 86%
 - [x] CI hardening + E2E gap fill for colors/hash/password/timestamp playgrounds

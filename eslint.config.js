@@ -1,6 +1,3 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
-
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
@@ -15,10 +12,9 @@ import { defineConfig, globalIgnores } from "eslint/config";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig([
-  globalIgnores(["dist", "storybook-static", "node_modules", "coverage", "coverage2", ".playwright-mcp", "src/test-utils/**/*", "src/test/**/*"]),
+  globalIgnores(["dist", "node_modules", "coverage", "coverage2", ".playwright-mcp", "src/test-utils/**/*", "src/test/**/*"]),
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: [".storybook/**"],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked,
@@ -35,25 +31,6 @@ export default defineConfig([
           allowDefaultProject: ["tsconfig.json", "tsconfig.app.json", "tsconfig.node.json", "tsconfig.vitest.json"],
         },
         tsconfigRootDir: __dirname,
-      },
-    },
-  },
-  {
-    files: [".storybook/**/*.{ts,tsx}"],
-    extends: [
-      js.configs.recommended,
-      ...tseslint.configs.recommended,
-      // recommended-typescript (not type-checked): .storybook block has no projectService — type-checked preset would crash
-      eslintReact.configs["recommended-typescript"],
-      reactHooks.configs.flat.recommended,
-    ],
-    languageOptions: {
-      ecmaVersion: 2022,
-      globals: globals.browser,
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
       },
     },
   },
@@ -113,5 +90,4 @@ export default defineConfig([
     },
   },
   prettierConfig,
-  ...storybook.configs["flat/recommended"],
 ]);
