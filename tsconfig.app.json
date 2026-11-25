@@ -36,7 +36,7 @@
       "@/playgrounds/*": ["./src/playgrounds/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.setup.ts", "vitest.shims.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.setup.ts"],
   "exclude": [
     "**/*.test.ts",
     "**/*.test.tsx",

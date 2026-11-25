@@ -20,7 +20,6 @@ Demo: https://arenas-webtools.vercel.app
 - `pnpm test` → tests
 - `pnpm test:coverage` → cobertura
 - `pnpm lint` / `pnpm lint:fix`
-- `pnpm storybook` / `pnpm build-storybook`
 
 ## Arquitectura (resumen)
 

@@ -13,7 +13,6 @@ minimumReleaseAgeExclude:
   - vite@6.4.1
   - elliptic@6.6.2
   - vite@6.0.13
-  - storybook@10.2.10
   - serialize-javascript@7.0.3
   - happy-dom@20.8.9
   - dompurify@3.3.2
