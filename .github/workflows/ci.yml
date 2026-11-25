@@ -9,7 +9,7 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       NODE_OPTIONS: "--max-old-space-size=4096"
 
@@ -55,3 +55,8 @@ jobs:
 
       - name: Verify architecture
         run: pnpm verify:arch
+
+      # Catches build-only breakage (e.g. the hardcoded @php-wasm/universal path
+      # in vite.config.ts and tsconfig.app.json after a dependency bump).
+      - name: Build
+        run: pnpm build
