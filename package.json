@@ -94,7 +94,7 @@
     "vite-plugin-pwa": "1.2.0",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.6.0",
-    "vitest": "3.2.7"
+    "vitest": "4.1.11"
   },
   "nano-staged": {
     "*.{ts,tsx,js,jsx}": "eslint --fix",
