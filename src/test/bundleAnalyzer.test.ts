@@ -1,13 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import path from "node:path";
-
-const root = path.resolve(__dirname, "../..");
-
 type PluginLike = { name?: string } | PluginLike[] | false | null | undefined;
 
 async function pluginNames(): Promise<string[]> {
   // A variable specifier keeps vite.config.ts out of the app's type-checked program.
-  const specifier = path.join(root, "vite.config.ts");
+  // Relative to this file: Vitest 4's module runner does not resolve an absolute
+  // Windows path ("D:/...") passed to a dynamic import.
+  const specifier = "../../vite.config.ts";
   const mod = (await import(/* @vite-ignore */ specifier)) as {
     default: (env: { mode: string; command: string }) => { plugins?: PluginLike[] };
   };
